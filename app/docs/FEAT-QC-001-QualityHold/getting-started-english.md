@@ -7,8 +7,10 @@ to fetch it, pack it or pick from it until you have decided what happens to it.
 Holding a pallet holds everything on it, and every hold is kept for ever: who stopped the goods, why,
 who let them go again, and what was decided.
 
-> **Read this before you start.** Quality hold stops goods being *used*. It does not change what you
-> own: scrapping a pallet here does not write it off in your inventory. Do that the way you do today.
+> **Read this before you start.** Quality hold stops goods being *used*. It can also write scrapped
+> goods off your inventory, and out of the box it does not — see *Decide what scrapping should do*.
+> Until you set that, scrapping a pallet marks it as finished with here and leaves your inventory
+> figures alone.
 
 ## Turn quality hold on
 
@@ -31,6 +33,31 @@ Handling units must be on as well — a hold is placed on a pallet, cage or cart
    be picked is not on hold.
 4. **Decide before releasing** — leave this on, so goods cannot go back into stock until somebody has
    said what happens to them.
+
+## Decide what scrapping should do
+
+This is the setting that decides whether scrapping goods takes them off your inventory, and it is
+worth agreeing with whoever owns your stock figures before you change it.
+
+On **Quality hold setup**, under **Writing off scrapped goods**, choose one of three under **Write
+scrapped goods off by**. **What that does** underneath spells out what you have chosen, in full,
+before you save it.
+
+- **Do not post** — what a new installation starts on. Scrapping marks the pallet as finished with and
+  leaves your inventory alone. Choose this if somebody else writes goods off, or while you are still
+  getting used to the feature.
+- **Put the lines in an item journal** — scrapping writes the goods into an item journal batch you
+  choose and stops there. Somebody opens that journal, checks it, and posts it.
+- **Post to the item ledger** — scrapping takes the goods off your inventory there and then.
+
+If you choose the journal option, fill in **Item journal template name** and **Item journal batch
+name** as well; releasing a scrap will refuse if there is nowhere to put the lines.
+
+**Posting reason code** is optional and worth setting: it marks every write-off a quality decision
+raises, so you can tell them apart from every other correction in your ledger.
+
+Only **Scrap** writes anything off. Releasing goods back into stock and sending them for rework never
+touch your inventory.
 
 ## Stop some goods
 
@@ -60,8 +87,8 @@ already held.
    it:
    - **Release back into stock** — the goods are fine. The unit goes back to exactly what it was.
    - **Rework** — the goods can be put right. The unit is opened so its contents can be worked on.
-   - **Scrap** — the goods are written off. The unit is marked as scrapped and never comes back into
-     use.
+   - **Scrap** — the goods are finished with. The unit is marked as scrapped and never comes back into
+     use, and your inventory figures change if you have set them to.
 
 You can change your mind as often as you like while the hold is on.
 
@@ -71,6 +98,15 @@ Choose **Release** on the hold.
 
 The decision is carried out — on this unit and on everything that was held with it — and the hold
 records who lifted it and when.
+
+If the decision was **Scrap** and you have set scrapping to write goods off, that happens now. Under
+**What was written off** the hold tells you what it did: **Posted** is ticked only when your inventory
+has actually changed, **Posted quantity** is how much went, and **Posting document no.** is the
+reference to look up. Each unit that was held writes off its own contents under its own document, so a
+pallet and the carton on it appear separately.
+
+If something stops the write-off being made — a blocked item, a closed period, a missing permission —
+**the hold is not released**. Fix what it complains about and release it again.
 
 **A hold with no decision cannot be released.** That is deliberate: a hold lifted without anybody
 deciding anything puts the goods straight back into stock, which is what you were trying to prevent.
@@ -88,7 +124,10 @@ Holds cannot be deleted, ever. That is the point of them.
 
 ## What quality hold does not do yet
 
-- **It does not write anything off.** Scrapping marks the unit and leaves your inventory figures alone.
+- **A release cannot be undone.** Once a hold is lifted it stays lifted, and a write-off made by
+  mistake is corrected in Business Central rather than here.
+- **Rework is not accounted for.** Goods sent for rework are not written off, and nothing notices if
+  less comes back than went in.
 - **You can only hold a handling unit** — not an item, not a lot, not a bin. To quarantine every pallet
   of a bad lot you have to hold each one.
 - **You cannot put goods on hold from the handheld.** The person who finds the damage has to ask

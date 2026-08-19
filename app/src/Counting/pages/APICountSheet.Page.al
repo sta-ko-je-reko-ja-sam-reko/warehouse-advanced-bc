@@ -56,6 +56,10 @@ page 50504 "WHA API Count Sheet"
                 {
                     Caption = 'Assigned to user ID';
                 }
+                field(postingDate; Rec."Posting Date")
+                {
+                    Caption = 'Posting date';
+                }
                 field(status; Rec.Status)
                 {
                     Caption = 'Status';
@@ -94,6 +98,21 @@ page 50504 "WHA API Count Sheet"
                 field(closedDateTime; Rec."Closed At")
                 {
                     Caption = 'Closed date time';
+                    Editable = false;
+                }
+                field(posted; Rec.Posted)
+                {
+                    Caption = 'Posted';
+                    Editable = false;
+                }
+                field(postingDocumentNumber; Rec."Posting Document No.")
+                {
+                    Caption = 'Posting document number';
+                    Editable = false;
+                }
+                field(postedDateTime; Rec."Posted At")
+                {
+                    Caption = 'Posted date time';
                     Editable = false;
                 }
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
@@ -142,7 +161,8 @@ page 50504 "WHA API Count Sheet"
     end;
 
     /// <summary>
-    /// Closes the sheet, once every difference beyond the tolerance has been approved.
+    /// Closes the sheet, once every difference beyond the tolerance has been approved, and hands its
+    /// differences to the posting method set up for counting.
     /// </summary>
     /// <param name="ActionContext">The web service action context supplied by the platform.</param>
     [ServiceEnabled]

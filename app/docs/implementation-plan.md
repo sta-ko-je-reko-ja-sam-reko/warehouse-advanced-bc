@@ -31,15 +31,16 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-LBL-001` segment 1 — label codes: GS1 SSCC with its check digit, or a sequential licence plate. Closes the gap `FEAT-HU-001` left open |
 | Delivered | `FEAT-PACK-001` segment 1 — the packing bench: open a carton, fill it, check it, close it. The carton is a handling unit |
 | Delivered | `FEAT-REPL-001` segment 1 — replenishment rules: min/max per pick bin, two ways of measuring the bin, and a run that raises the work to top it up |
-| Delivered | `FEAT-CNT-001` segment 1 — count sheets: blind counting, a tolerance, and an approval before a difference is accepted. **Adjusts nothing yet** |
-| Delivered | `FEAT-QC-001` segment 1 — quality hold: stopping a handling unit and everything on it, three dispositions, and an audit trail that cannot be deleted. **Posts nothing** |
+| Delivered | `FEAT-CNT-001` segment 1 — count sheets: blind counting, a tolerance, and an approval before a difference is accepted |
+| Delivered | `FEAT-QC-001` segment 1 — quality hold: stopping a handling unit and everything on it, three dispositions, and an audit trail that cannot be deleted |
 | Delivered | `FEAT-LAB-001` segment 1 — labour management: standards, finished work turned into measured time, and the hours nobody spent on a job. The first feature that only *reads* what the app already recorded |
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | `FEAT-CNT-001` and `FEAT-QC-001` segment 2 — **posting**: a shared engine, chosen per feature, that turns a counted difference into an adjustment and a scrapped pallet into a write-off. Built once, in a module that is deliberately **not a feature** — see [inventory-posting.md](inventory-posting.md). **No ledger entry has ever been written by it** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
-| Not started | Nothing in §4. **Every feature in the catalogue now has a first segment.** What is unbuilt is the second segment of most of them, and posting |
+| Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, and the two that stopped short of the ledger no longer do. What is unbuilt is the second segment of the other twelve |
 
 **What is delivered was built from §4, not from a capability register.** Every shipped feature
 carries that caveat in its own technical documentation. Phase 0 can still invalidate them, and
@@ -200,8 +201,8 @@ Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
           FEAT-LBL-001     labelling                 ← segment 1 delivered
 
 Wave D    FEAT-REPL-001    replenishment             ← segment 1 delivered
-          FEAT-CNT-001     counting                  ← segment 1 delivered; posts no adjustment
-          FEAT-QC-001      quality hold              ← segment 1 delivered; posts no write-off
+          FEAT-CNT-001     counting                  ← segment 2 delivered; adjusts on close
+          FEAT-QC-001      quality hold              ← segment 2 delivered; writes off on scrap
 
 Wave E    FEAT-SLOT-001    slotting                  ← segment 1 delivered
           FEAT-LAB-001     labour management         ← segment 1 delivered
@@ -219,11 +220,31 @@ add **no new warehouse operation at all** — they read what the app has already
 directed work shipped, and both are worth exactly as much as that history is long. On a customer who
 has not run the app yet, both produce empty screens and are correct to.
 
-Two features stop deliberately short of the ledger: counting records differences without adjusting
-stock, and quality hold takes goods out of use without writing them off. Both need the item journal,
-dimensions and a W1 container, and both are the same decision taken twice. **Posting is now the
-largest single piece of unbuilt work in the app**, and it is worth planning as one piece rather than
-twice.
+~~Two features stop deliberately short of the ledger.~~ **Both now reach it, and they reach it through
+the same code.** Segment 2 of counting and segment 2 of quality hold shipped together, because they
+were never two problems: a closed count sheet raising an adjustment and a scrapped pallet raising a
+write-off are the same posting with a different sign and a different document.
+
+What was built is a shared module, `app/src/Posting/`, and the argument for how it is shaped is in
+[inventory-posting.md](inventory-posting.md). Three things in it are worth carrying forward:
+
+- **It is not a feature, and saying so out loud saved the obligation set.** No toggle, no wizard step,
+  no application area, no demo data, no RapidStart package — because a warehouse turns *counting* on
+  and then decides what closing a sheet does, and a second switch would only create states nobody can
+  explain. This is the first module in the app that is honestly a library, and the documentation says
+  so rather than leaving the next reader to infer it from a missing setup page.
+- **Not posting is a configured choice, not a missing feature**, and it is the value a fresh install
+  and every upgrade lands on. Between "record it" and "post it" sits "put it in a journal and let
+  somebody look at it", which is what a cautious warehouse actually asks for. The `WritesToLedger()`
+  question exists so a sheet closed that way is honest about not being posted.
+- **The gap between what is tested and what is proven got wider, not narrower.** Every decision either
+  feature makes about posting is unit-tested against a recorder bound to its own enum value. Whether
+  `Item Jnl.-Post Line` accepts the resulting line is tested nowhere, needs items and an open period,
+  and needs the W1 container this project still does not have. Directed put-away and pick locations
+  almost certainly do not work.
+
+**With posting delivered, the largest unbuilt piece is no longer a piece of code.** It is step 1 of §8:
+none of this has ever run.
 
 Wave F closed the loop the app has been building towards since directed work: analytics measures
 **nothing but what the app itself recorded**, so every figure it produces is a statement about how
@@ -266,9 +287,13 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 237 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 249 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
+
+   This got sharper with segment 2. The app now contains code whose entire purpose is to change what
+   Business Central believes is in stock, and it has never changed anything. A test run is no longer
+   just overdue housekeeping.
 
    What is actually in the way, checked rather than assumed:
 

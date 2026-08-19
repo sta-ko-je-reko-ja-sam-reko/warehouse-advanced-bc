@@ -38,4 +38,13 @@ codeunit 50555 "WHA Disp. Pending" implements "WHA IHoldDisposition"
     begin
         exit(false);
     end;
+
+    /// <summary>
+    /// Answers whether this decision takes the goods out of stock for good.
+    /// </summary>
+    /// <returns>False. Nothing has been decided, so nothing is written off.</returns>
+    procedure WritesOffStock(): Boolean
+    begin
+        exit(false);
+    end;
 }

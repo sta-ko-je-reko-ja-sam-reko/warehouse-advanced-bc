@@ -4,9 +4,10 @@ Counting a slice of the warehouse while the rest of it keeps working, instead of
 once a year. You say what to count, somebody counts it without seeing what was expected, and anything
 that comes out wrong by more than you allow has to be looked at before the count is closed.
 
-> **Read this before you start.** Counting records what was found. It does **not** yet correct your
-> inventory — closing a sheet does not change what Business Central believes you have. Use it to
-> measure and to see where your stock records are drifting; correct the figures the way you do today.
+> **Read this before you start.** Counting can now correct your inventory, and out of the box it does
+> not. Closing a count sheet changes what Business Central believes you have **only if you tell it
+> to** — see *Decide what closing a sheet should do*. Until you do, counting measures and reports, and
+> you correct the figures the way you do today.
 
 ## Turn counting on
 
@@ -35,6 +36,32 @@ You only need to do this once, and you need administrator rights.
 5. **Approve differences above tolerance** — leave this on so a sheet cannot be closed with a
    difference nobody has looked at.
 
+## Decide what closing a sheet should do
+
+This is the setting that decides whether counting corrects your stock, and it is worth agreeing with
+whoever owns your inventory figures before you change it.
+
+On **Counting setup**, under **Posting**, choose one of three under **Post differences by**. **What
+that does** underneath spells out what you have chosen, in full, before you save it.
+
+- **Do not post** — what a new installation starts on. Closing a sheet records the difference and
+  changes nothing else. Choose this if your finance team will not have the warehouse writing to the
+  ledger, or while you are still getting used to counting.
+- **Put the lines in an item journal** — closing a sheet writes the differences into an item journal
+  batch you choose and stops there. Somebody opens that journal, looks at what the warehouse found,
+  and posts it. This is the middle ground, and it is the one most warehouses want first.
+- **Post to the item ledger** — closing a sheet corrects your stock there and then. Nothing is left
+  for anyone to check afterwards.
+
+If you choose the journal option, fill in **Item journal template name** and **Item journal batch
+name** as well; closing a sheet will refuse if there is nowhere to put the lines.
+
+**Posting reason code** is optional and worth setting: it marks every adjustment a count raises, so
+you can tell counting differences apart from every other correction in your ledger.
+
+Whoever closes count sheets needs permission to post item journals. If they do not have it, closing
+fails and nothing is changed.
+
 ## Count something
 
 ### 1. Make a sheet
@@ -43,9 +70,12 @@ You only need to do this once, and you need administrator rights.
 2. Choose **New**. The **No.** fills in automatically.
 3. Fill in **Description** — what this count covers, such as *Aisle A, Tuesday*.
 4. Choose the **Location code**.
-5. Choose a **Selection** if this sheet should gather something different from your default. **What it
+5. Check the **Posting date**. This is the date any correction the sheet raises is dated — the date
+   the count applies to, which is not necessarily the day you get round to closing it. It starts as
+   your working date and you can change it until the sheet is closed.
+6. Choose a **Selection** if this sheet should gather something different from your default. **What it
    gathers** tells you what that means before you use it.
-6. Choose **Fill**. You are told how many lines were put on the sheet.
+7. Choose **Fill**. You are told how many lines were put on the sheet.
 
 Add or remove lines by hand while the sheet is open, if you want to count something narrower.
 
@@ -88,6 +118,15 @@ Lines marked **Out of tolerance** need a decision. Look at each one, and either:
 Then choose **Close**. A sheet with a difference nobody has approved refuses to close and tells you how
 many are waiting.
 
+**Closing is what corrects the stock**, if you have set it to. Under **What was adjusted** the sheet
+tells you what happened: **Posted** is ticked only when your stock has actually changed, **Posting
+document no.** is the sheet's own number so you can find the entries, and each line shows the
+**Posting quantity** it corrected by.
+
+If something stops the correction being made — a blocked item, a closed period, a missing permission —
+**the sheet does not close**. That is deliberate: a closed sheet that corrected nothing is exactly the
+confusion this avoids. Fix what it complains about and close it again.
+
 ## Withdraw a sheet
 
 Choose **Cancel**. Whatever was counted stays as a record.
@@ -98,8 +137,9 @@ so what was found survives.
 
 ## What counting does not do yet
 
-- **It does not correct your inventory.** Closing a sheet records the difference; it does not adjust
-  anything. Correct the figures however you do today.
+- **It cannot correct a lot- or serial-tracked item counted by bin.** A correction to tracked goods
+  has to name the lot, and counting by bin cannot know which one — bins hold several. Count tracked
+  goods with the **Handling units** selection, which takes the lot from the pallet.
 - **It does not choose what to count.** Nothing works out which aisle is due; you decide the slice and
   the sheet gathers it.
 - **You cannot count on the handheld.** Counts are entered on the sheet.

@@ -8,7 +8,7 @@ codeunit 50552 "WHA QC Feature Setup" implements "WHA IFeatureSetup"
 
     var
         StepNameLbl: Label 'Quality hold';
-        StepDescriptionLbl: Label 'Stop goods from being used while somebody decides what to do with them. Holding a pallet holds what is inside it, no work can be planned for it, and the decision to release, rework or scrap is recorded against the person who made it.';
+        StepDescriptionLbl: Label 'Stop goods from being used while somebody decides what to do with them. Holding a pallet holds what is inside it, no work can be planned for it, and scrapping it writes the stock off the way you choose to.';
         McpConfigNameTok: Label 'Warehouse Advanced - Quality Hold', Locked = true;
         McpConfigDescLbl: Label 'Quality hold tools. Read the Warehouse Advanced Quality Hold agent instructions before use.';
         DemoMcpConfigNameTok: Label 'Warehouse Advanced - Demo Quality Hold', Locked = true;

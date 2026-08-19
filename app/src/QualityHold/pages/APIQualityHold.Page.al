@@ -85,6 +85,26 @@ page 50553 "WHA API Quality Hold"
                 {
                     Caption = 'Previous unit status';
                 }
+                field(posted; Rec.Posted)
+                {
+                    Caption = 'Posted';
+                    Editable = false;
+                }
+                field(postedQuantity; Rec."Posted Quantity")
+                {
+                    Caption = 'Posted quantity';
+                    Editable = false;
+                }
+                field(postingDocumentNumber; Rec."Posting Document No.")
+                {
+                    Caption = 'Posting document number';
+                    Editable = false;
+                }
+                field(postedDateTime; Rec."Posted At")
+                {
+                    Caption = 'Posted date time';
+                    Editable = false;
+                }
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
                 {
                     Caption = 'Last modified date time';

@@ -65,6 +65,17 @@ table 50501 "WHA Count Sheet"
             ToolTip = 'Specifies who is doing the count.';
             TableRelation = User."User Name";
         }
+        field(32; "Posting Date"; Date)
+        {
+            Caption = 'Posting date';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the date any adjustment the sheet raises is posted under. A count is a statement about a moment, so this is set when the sheet is created and can be corrected until the sheet is closed.';
+
+            trigger OnValidate()
+            begin
+                Logic().Validate_PostingDate(Rec, xRec);
+            end;
+        }
         field(40; "Started At"; DateTime)
         {
             Caption = 'Started at';
@@ -84,6 +95,27 @@ table 50501 "WHA Count Sheet"
             Caption = 'Closed at';
             DataClassification = CustomerContent;
             ToolTip = 'Specifies when the sheet was closed.';
+            Editable = false;
+        }
+        field(43; Posted; Boolean)
+        {
+            Caption = 'Posted';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether the differences on this sheet reached the item ledger. A sheet whose lines were left in an item journal for somebody to look at is closed but not posted.';
+            Editable = false;
+        }
+        field(44; "Posting Document No."; Code[20])
+        {
+            Caption = 'Posting document no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the document number the adjustments were raised under. It is the sheet''s own number, so a ledger entry can always be traced back to the count that caused it.';
+            Editable = false;
+        }
+        field(45; "Posted At"; DateTime)
+        {
+            Caption = 'Posted at';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies when the sheet was closed and its differences handed to the posting method.';
             Editable = false;
         }
         field(50; "Line Count"; Integer)

@@ -62,6 +62,8 @@ codeunit 50551 "WHA Quality Hold Mgt."
 
     /// <summary>
     /// Lifts the hold and carries out the decision, on the unit and on everything that was held with it.
+    /// Goods a decision takes out of stock for good are written off by the posting method chosen in the
+    /// quality hold setup, each unit under its own document, because each unit carries its own hold.
     /// </summary>
     /// <param name="QualityHold">The hold to release.</param>
     procedure Release(var QualityHold: Record "WHA Quality Hold")
@@ -75,8 +77,7 @@ codeunit 50551 "WHA Quality Hold Mgt."
 
         Disposition := DispositionToApply(QualityHold);
 
-        ApplyTo(QualityHold, Disposition);
-        CloseHold(QualityHold, Disposition);
+        ApplyAndClose(QualityHold, Disposition);
         ReleaseCascaded(QualityHold, Disposition);
     end;
 
@@ -164,9 +165,17 @@ codeunit 50551 "WHA Quality Hold Mgt."
             exit;
 
         repeat
-            ApplyTo(CascadedHold, Disposition);
-            CloseHold(CascadedHold, Disposition);
+            ApplyAndClose(CascadedHold, Disposition);
         until CascadedHold.Next() = 0;
+    end;
+
+    local procedure ApplyAndClose(var QualityHold: Record "WHA Quality Hold"; Disposition: Enum "WHA Hold Disposition")
+    var
+        QCPosting: Codeunit "WHA QC Posting";
+    begin
+        ApplyTo(QualityHold, Disposition);
+        QCPosting.PostWriteOff(QualityHold, Disposition);
+        CloseHold(QualityHold, Disposition);
     end;
 
     local procedure ApplyTo(var QualityHold: Record "WHA Quality Hold"; Disposition: Enum "WHA Hold Disposition")

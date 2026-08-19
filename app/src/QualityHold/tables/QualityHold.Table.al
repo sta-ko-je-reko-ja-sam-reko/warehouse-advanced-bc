@@ -122,6 +122,35 @@ table 50551 "WHA Quality Hold"
             ToolTip = 'Specifies what the handling unit was before it was stopped. Releasing the goods back into stock puts it back to this.';
             Editable = false;
         }
+        field(70; Posted; Boolean)
+        {
+            Caption = 'Posted';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether the goods this hold covers were written off in the item ledger. A write-off left in an item journal for somebody to look at has not been posted.';
+            Editable = false;
+        }
+        field(71; "Posting Document No."; Code[20])
+        {
+            Caption = 'Posting document no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the document number the write-off was raised under, so a ledger entry can be traced back to the hold that caused it.';
+            Editable = false;
+        }
+        field(72; "Posted At"; DateTime)
+        {
+            Caption = 'Posted at';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies when the write-off was handed to the posting method.';
+            Editable = false;
+        }
+        field(73; "Posted Quantity"; Decimal)
+        {
+            Caption = 'Posted quantity';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies how much stock the write-off covered, summed over everything the handling unit was holding when the hold was lifted.';
+            DecimalPlaces = 0 : 5;
+            Editable = false;
+        }
     }
 
     keys

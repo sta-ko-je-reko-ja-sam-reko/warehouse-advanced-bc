@@ -19,6 +19,8 @@ codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
         CancelNotAllowedErr: Label 'Count sheet %1 is already %2, so it cannot be cancelled.', Comment = '%1 = the count sheet number, %2 = the current status';
         DeleteNotAllowedErr: Label 'Count sheet %1 cannot be deleted while its status is %2. Cancel it instead, so the record of what was counted is kept.', Comment = '%1 = the count sheet number, %2 = the current status';
         CountedLinesErr: Label 'Count sheet %1 has lines that have been counted, so it cannot be deleted. What somebody found is a record.', Comment = '%1 = the count sheet number';
+        PostingDateLockedErr: Label 'Count sheet %1 is %2, so the date its differences were posted under can no longer be changed.', Comment = '%1 = the count sheet number, %2 = the current status';
+        LineMissingErr: Label 'Count sheet %1 has no line %2.', Comment = '%1 = the count sheet number, %2 = the line number';
 
     /// <summary>
     /// Assigns the number from the foundation series and the defaults a new count sheet needs.
@@ -30,6 +32,8 @@ codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
     begin
         if CountSheet."No." = '' then
             CountSheet."No." := NextSheetNo();
+        if CountSheet."Posting Date" = 0D then
+            CountSheet."Posting Date" := WorkDate();
 
         Setup.SetLoadFields("Default Selection", "Blind Counting");
         if not Setup.Get() then
@@ -61,6 +65,45 @@ codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
 
         CountSheetLine.SetRange(Counted);
         CountSheetLine.DeleteAll(false);
+    end;
+
+    /// <summary>
+    /// Refuses to move the posting date of a sheet that has already been closed.
+    /// </summary>
+    /// <param name="CountSheet">The count sheet being changed.</param>
+    /// <param name="xCountSheet">The count sheet as it was before the change.</param>
+    procedure Validate_PostingDate(var CountSheet: Record "WHA Count Sheet"; xCountSheet: Record "WHA Count Sheet")
+    begin
+        if CountSheet."Posting Date" = xCountSheet."Posting Date" then
+            exit;
+        if CountSheet.Status in [CountSheet.Status::WHAClosed, CountSheet.Status::WHACancelled] then
+            Error(PostingDateLockedErr, CountSheet."No.", CountSheet.Status);
+    end;
+
+    /// <summary>
+    /// Puts on a line the things the selection knows and the caller of AddLine cannot pass: what the goods
+    /// are called, and which lot or serial number they carry.
+    /// </summary>
+    /// <param name="CountSheet">The sheet the line is on.</param>
+    /// <param name="LineNo">The line to complete.</param>
+    /// <param name="LineDescription">What the goods are, or blank to leave it alone.</param>
+    /// <param name="LotNo">The lot the goods belong to, or blank.</param>
+    /// <param name="SerialNo">The serial number of the goods, or blank.</param>
+    procedure SetLineDetails(var CountSheet: Record "WHA Count Sheet"; LineNo: Integer; LineDescription: Text[100]; LotNo: Code[50]; SerialNo: Code[50])
+    var
+        CountSheetLine: Record "WHA Count Sheet Line";
+    begin
+        CheckOpen(CountSheet);
+
+        CountSheetLine.SetLoadFields(Description, "Lot No.", "Serial No.");
+        if not CountSheetLine.Get(CountSheet."No.", LineNo) then
+            Error(LineMissingErr, CountSheet."No.", LineNo);
+
+        if LineDescription <> '' then
+            CountSheetLine.Description := LineDescription;
+        CountSheetLine."Lot No." := LotNo;
+        CountSheetLine."Serial No." := SerialNo;
+        CountSheetLine.Modify(true);
     end;
 
     /// <summary>
@@ -165,11 +208,13 @@ codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
     end;
 
     /// <summary>
-    /// Closes a counted sheet, once every difference beyond tolerance has been approved.
+    /// Closes a counted sheet, once every difference beyond tolerance has been approved, and hands its
+    /// differences to the posting method chosen in the counting setup.
     /// </summary>
     /// <param name="CountSheet">The sheet to close.</param>
     procedure Close(var CountSheet: Record "WHA Count Sheet")
     var
+        CountPosting: Codeunit "WHA Count Posting";
         Waiting: Integer;
     begin
         if CountSheet.Status <> CountSheet.Status::WHACounted then
@@ -180,6 +225,8 @@ codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
             if Waiting > 0 then
                 Error(UnapprovedErr, CountSheet."No.", Waiting);
         end;
+
+        CountPosting.PostDifferences(CountSheet);
 
         CountSheet.Status := CountSheet.Status::WHAClosed;
         CountSheet."Closed At" := CurrentDateTime;

@@ -42,4 +42,13 @@ codeunit 50556 "WHA Disp. Release" implements "WHA IHoldDisposition"
     begin
         exit(true);
     end;
+
+    /// <summary>
+    /// Answers whether this decision takes the goods out of stock for good.
+    /// </summary>
+    /// <returns>False. The goods go back into stock, where they already are.</returns>
+    procedure WritesOffStock(): Boolean
+    begin
+        exit(false);
+    end;
 }

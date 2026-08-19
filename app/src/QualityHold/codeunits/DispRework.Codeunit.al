@@ -38,4 +38,13 @@ codeunit 50557 "WHA Disp. Rework" implements "WHA IHoldDisposition"
     begin
         exit(true);
     end;
+
+    /// <summary>
+    /// Answers whether this decision takes the goods out of stock for good.
+    /// </summary>
+    /// <returns>False. The goods are still there; they need work doing to them.</returns>
+    procedure WritesOffStock(): Boolean
+    begin
+        exit(false);
+    end;
 }

@@ -86,6 +86,23 @@ page 50552 "WHA Quality Hold Card"
                 {
                 }
             }
+            group(WriteOff)
+            {
+                Caption = 'What was written off';
+
+                field(Posted; Rec.Posted)
+                {
+                }
+                field("Posted Quantity"; Rec."Posted Quantity")
+                {
+                }
+                field("Posting Document No."; Rec."Posting Document No.")
+                {
+                }
+                field("Posted At"; Rec."Posted At")
+                {
+                }
+            }
         }
     }
 
@@ -96,7 +113,7 @@ page 50552 "WHA Quality Hold Card"
             action(ReleaseHold)
             {
                 Caption = 'Release';
-                ToolTip = 'Specifies the action that lifts the hold and carries out the decision, on this unit and on everything that was held with it.';
+                ToolTip = 'Specifies the action that lifts the hold and carries out the decision, on this unit and on everything that was held with it. Scrapped goods are written off the way the quality hold setup says they should be.';
                 Image = ReleaseDoc;
 
                 trigger OnAction()

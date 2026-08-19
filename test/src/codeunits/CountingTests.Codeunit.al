@@ -338,6 +338,197 @@ codeunit 51008 "WHA Counting Tests"
         Assert.AreEqual(CountAfterFirstRun, CountSheet.Count(), 'A second import should not create more sheets.');
     end;
 
+    [Test]
+    procedure ClosingASheetHandsEveryDifferenceToThePostingMethod()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        TempPostingRequest: Record "WHA Posting Request" temporary;
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+        PostingType: Enum "WHA Posting Type";
+    begin
+        // [SCENARIO] Closing a sheet is the moment a difference stops being an observation and becomes an
+        // adjustment. What the sheet hands over has to be exactly the difference it found, no more.
+        ConfigureCounting(0, 0);
+        ConfigurePosting();
+        Recorder.Forget();
+        CreateCountingSheet(CountSheet, 'CNT-POST-1', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 7);
+        CountLineLogic.Approve(CountSheetLine);
+        CountSheetLogic.Complete(CountSheet);
+
+        CountSheetLogic.Close(CountSheet);
+
+        Assert.AreEqual(1, Recorder.Recorded(TempPostingRequest), 'The one line that differed should have been handed over.');
+        TempPostingRequest.FindFirst();
+        Assert.AreEqual(PostingType::WHANegativeAdjustment, TempPostingRequest."Posting Type", 'Finding less than expected takes stock away.');
+        Assert.AreEqual(3, TempPostingRequest.Quantity, 'The adjustment is the size of the difference, as a positive number.');
+        Assert.AreEqual(CountSheet."No.", TempPostingRequest."Document No.", 'The sheet number is what ties the ledger entry back to the count.');
+        Assert.AreEqual(CopyStr(LocationTok, 1, 10), TempPostingRequest."Location Code", 'The adjustment belongs at the location the sheet counted.');
+    end;
+
+    [Test]
+    procedure FindingMoreThanExpectedPutsStockOn()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        TempPostingRequest: Record "WHA Posting Request" temporary;
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+        PostingType: Enum "WHA Posting Type";
+    begin
+        // [SCENARIO] The other direction. A surplus is as much a difference as a shortage, and it has to
+        // go the other way.
+        ConfigureCounting(0, 0);
+        ConfigurePosting();
+        Recorder.Forget();
+        CreateCountingSheet(CountSheet, 'CNT-POST-2', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 14);
+        CountLineLogic.Approve(CountSheetLine);
+        CountSheetLogic.Complete(CountSheet);
+
+        CountSheetLogic.Close(CountSheet);
+
+        Recorder.Recorded(TempPostingRequest);
+        TempPostingRequest.FindFirst();
+        Assert.AreEqual(PostingType::WHAPositiveAdjustment, TempPostingRequest."Posting Type", 'Finding more than expected puts stock on.');
+        Assert.AreEqual(4, TempPostingRequest.Quantity, 'The adjustment is the size of the difference.');
+    end;
+
+    [Test]
+    procedure ASheetThatFoundNoDifferenceAdjustsNothing()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        TempPostingRequest: Record "WHA Posting Request" temporary;
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+    begin
+        // [SCENARIO] A count that agrees with the system is the ordinary outcome, and it must not raise a
+        // zero adjustment for the sake of having posted something.
+        ConfigureCounting(0, 0);
+        ConfigurePosting();
+        Recorder.Forget();
+        CreateCountingSheet(CountSheet, 'CNT-POST-3', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 10);
+        CountSheetLogic.Complete(CountSheet);
+
+        CountSheetLogic.Close(CountSheet);
+
+        Assert.AreEqual(0, Recorder.Recorded(TempPostingRequest), 'Nothing differed, so nothing should have been handed over.');
+        Assert.IsFalse(CountSheet.Posted, 'A sheet that adjusted nothing is not a posted sheet.');
+        Assert.AreEqual('', CountSheet."Posting Document No.", 'Nothing was posted, so there is no document to name.');
+    end;
+
+    [Test]
+    procedure APostedSheetKeepsWhatEachLineAdjusted()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+    begin
+        // [SCENARIO] The difference shown on a line today is whatever was counted last. What was adjusted
+        // is a separate fact, and the line has to keep it.
+        ConfigureCounting(0, 0);
+        ConfigurePosting();
+        Recorder.Forget();
+        CreateCountingSheet(CountSheet, 'CNT-POST-4', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 6);
+        CountLineLogic.Approve(CountSheetLine);
+        CountSheetLogic.Complete(CountSheet);
+
+        CountSheetLogic.Close(CountSheet);
+
+        Assert.IsTrue(CountSheet.Posted, 'The posting method wrote to the ledger, so the sheet is posted.');
+        Assert.AreEqual(CountSheet."No.", CountSheet."Posting Document No.", 'The sheet posts under its own number.');
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        Assert.AreEqual(-4, CountSheetLine."Posting Quantity", 'The line should keep the adjustment it handed over, signed.');
+        Assert.IsTrue(CountSheetLine.Posted, 'The line reached the ledger.');
+    end;
+
+    [Test]
+    procedure ASheetSetToPostNothingStillCloses()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Status: Enum "WHA Count Status";
+    begin
+        // [SCENARIO] Not posting is a choice, not a missing feature. A warehouse that will not let the app
+        // touch its ledger still gets the whole counting process, and the sheet says plainly that nothing
+        // was posted.
+        ConfigureCounting(0, 0);
+        ConfigureNoPosting();
+        CreateCountingSheet(CountSheet, 'CNT-POST-5', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 2);
+        CountLineLogic.Approve(CountSheetLine);
+        CountSheetLogic.Complete(CountSheet);
+
+        CountSheetLogic.Close(CountSheet);
+
+        Assert.AreEqual(Status::WHAClosed, CountSheet.Status, 'The sheet still closes.');
+        Assert.IsFalse(CountSheet.Posted, 'Nothing reached the ledger.');
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        Assert.IsFalse(CountSheetLine.Posted, 'The line did not reach the ledger either.');
+    end;
+
+    [Test]
+    procedure FillingFromHandlingUnitsCarriesTheLotOntoTheLine()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Selection: Enum "WHA Count Selection";
+    begin
+        // [SCENARIO] A difference on a lot-tracked item cannot be adjusted at all unless the sheet knows
+        // which lot was counted. The unit knows; the line has to be told.
+        ConfigureCounting(0, 0);
+        StockOnUnitWithLot('WHA-CNT-U9', 'LOT-9', 5);
+        CreateSheet(CountSheet, 'CNT-LOT', Selection::WHAHandlingUnits, false);
+
+        CountSheetLogic.Fill(CountSheet);
+
+        CountSheetLine.SetRange("Sheet No.", 'CNT-LOT');
+        CountSheetLine.SetRange("Handling Unit No.", 'WHA-CNT-U9');
+        CountSheetLine.FindFirst();
+        Assert.AreEqual('LOT-9', CountSheetLine."Lot No.", 'The line should carry the lot the unit says it holds.');
+    end;
+
+    [Test]
+    procedure TheDateAnAdjustmentPostedUnderCannotBeMovedAfterwards()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [SCENARIO] The date a difference was posted under is part of what was posted. Moving it after
+        // the fact would describe a posting that never happened.
+        ConfigureCounting(0, 0);
+        ConfigureNoPosting();
+        CreateCountingSheet(CountSheet, 'CNT-POSTDATE', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 10);
+        CountSheetLogic.Complete(CountSheet);
+        CountSheetLogic.Close(CountSheet);
+
+        asserterror CountSheet.Validate("Posting Date", CalcDate('<+1D>', WorkDate()));
+
+        Assert.ExpectedError('can no longer be changed');
+    end;
+
     local procedure ConfigureCounting(ToleranceQuantity: Decimal; TolerancePercent: Decimal)
     var
         Setup: Record "WHA Count Setup";
@@ -425,5 +616,44 @@ codeunit 51008 "WHA Counting Tests"
         Item.Init();
         Item."No." := CopyStr(ItemTok, 1, 20);
         Item.Insert(true);
+    end;
+
+    local procedure ConfigurePosting()
+    var
+        Setup: Record "WHA Count Setup";
+        Method: Enum "WHA Posting Method";
+    begin
+        Setup.Get();
+        Setup.Validate("Posting Method", Method::WHATestRecorder);
+        Setup.Modify(true);
+    end;
+
+    local procedure ConfigureNoPosting()
+    var
+        Setup: Record "WHA Count Setup";
+        Method: Enum "WHA Posting Method";
+    begin
+        Setup.Get();
+        Setup.Validate("Posting Method", Method::WHANone);
+        Setup.Modify(true);
+    end;
+
+    local procedure StockOnUnitWithLot(UnitNo: Code[20]; LotNo: Code[50]; Quantity: Decimal)
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        HandlingUnit.Init();
+        HandlingUnit."No." := UnitNo;
+        HandlingUnit."Location Code" := CopyStr(LocationTok, 1, 10);
+        HandlingUnit."Bin Code" := CopyStr(BinTok, 1, 20);
+        HandlingUnit.Insert(true);
+
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := UnitNo;
+        HandlingUnitLine."Item No." := CopyStr(ItemTok, 1, 20);
+        HandlingUnitLine."Lot No." := LotNo;
+        HandlingUnitLine.Quantity := Quantity;
+        HandlingUnitLine.Insert(true);
     end;
 }

@@ -67,6 +67,18 @@ table 50502 "WHA Count Sheet Line"
             ToolTip = 'Specifies the handling unit whose contents this line covers, when the sheet counts units rather than bins.';
             TableRelation = "WHA Handling Unit"."No.";
         }
+        field(16; "Lot No."; Code[50])
+        {
+            Caption = 'Lot no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the lot the goods on this line belong to. It is taken from the handling unit when the sheet counts units, and is what lets a difference on a tracked item be adjusted at all.';
+        }
+        field(17; "Serial No."; Code[50])
+        {
+            Caption = 'Serial no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the serial number of the goods on this line. It is taken from the handling unit when the sheet counts units.';
+        }
         field(20; "Expected Quantity"; Decimal)
         {
             Caption = 'Expected quantity';
@@ -116,6 +128,21 @@ table 50502 "WHA Count Sheet Line"
             ToolTip = 'Specifies whether somebody has accepted a difference that is out of tolerance. Counting the line again withdraws the approval, because it is a new number.';
             Editable = false;
         }
+        field(26; Posted; Boolean)
+        {
+            Caption = 'Posted';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether the difference on this line reached the item ledger when the sheet was closed.';
+            Editable = false;
+        }
+        field(27; "Posting Quantity"; Decimal)
+        {
+            Caption = 'Posting quantity';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the adjustment the line handed to the posting method when the sheet was closed. It is the difference as it stood at that moment, which is not necessarily the difference shown now.';
+            DecimalPlaces = 0 : 5;
+            Editable = false;
+        }
         field(30; "Counted By User ID"; Code[50])
         {
             Caption = 'Counted by user ID';
@@ -154,6 +181,9 @@ table 50502 "WHA Count Sheet Line"
         {
         }
         key(HandlingUnit; "Handling Unit No.")
+        {
+        }
+        key(Posting; "Sheet No.", Variance)
         {
         }
     }

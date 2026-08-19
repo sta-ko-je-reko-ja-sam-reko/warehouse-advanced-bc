@@ -10,6 +10,7 @@ using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.LabourManagement;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
+using WarehouseAdvanced.Posting;
 using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.Slotting;
@@ -156,6 +157,7 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Count Line Logic" = X,
         codeunit "WHA Count Bin Selection" = X,
         codeunit "WHA Count HU Selection" = X,
+        codeunit "WHA Count Posting" = X,
         codeunit "WHA Count Feature Setup" = X,
         codeunit "WHA Count App Area Sub." = X,
         codeunit "WHA Demo Count" = X,
@@ -172,6 +174,7 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Disp. Release" = X,
         codeunit "WHA Disp. Rework" = X,
         codeunit "WHA Disp. Scrap" = X,
+        codeunit "WHA QC Posting" = X,
         codeunit "WHA QC Feature Setup" = X,
         codeunit "WHA QC App Area Sub." = X,
         codeunit "WHA Demo Quality Hold" = X,
@@ -246,5 +249,10 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA KPI Feature Setup" = X,
         codeunit "WHA KPI App Area Sub." = X,
         codeunit "WHA Demo Analytics" = X,
-        page "WHA API Demo Analytics" = X;
+        page "WHA API Demo Analytics" = X,
+        table "WHA Posting Request" = X,
+        codeunit "WHA Posting Mgt." = X,
+        codeunit "WHA No Invt. Posting" = X,
+        codeunit "WHA Jnl. Line Posting" = X,
+        codeunit "WHA Direct Posting" = X;
 }

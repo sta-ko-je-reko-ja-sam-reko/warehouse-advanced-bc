@@ -27,12 +27,29 @@ It is another vendor's registered product; referring to it in internal docs is f
 | BC version | 28.1.49838.50988 (2026 wave 1) |
 | AL runtime | 17.0 |
 | Dev container | `http://mrt28/BC/?tenant=default`, docker, sandbox artifact, **US** |
-| Dev endpoint | port 7049, Windows auth |
+| Dev endpoint | port 7049, **NavUserPassword** (`"authentication": "UserPassword"`) |
 | Production | BC online, **W1** |
 | Distribution | **Per-tenant extension (PTE)** — not AppSource |
 
 The container is US while production is W1. Low risk for warehouse objects, but rebuild the
 container from a W1 artifact before working on posting or documents.
+
+### Determining a container's auth mode
+
+Do not infer it from `GET /BC/dev/metadata` — that endpoint answers **anonymously** and
+returns 200 regardless. Read the `WWW-Authenticate` header from an endpoint that genuinely
+requires auth:
+
+```powershell
+$req = [System.Net.HttpWebRequest]::Create("http://mrt28:7048/BC/api/v2.0/companies")
+try { $req.GetResponse() } catch { $_.Exception.Response.Headers['WWW-Authenticate'] }
+```
+
+`Basic realm=""` → NavUserPassword, so use `"authentication": "UserPassword"`.
+`Negotiate` or `NTLM` → Windows, so use `"authentication": "Windows"`.
+
+A mismatch surfaces as `Failed to establish SignalR hub connection ... 401 (Unauthorized)`
+when starting a debug session.
 
 Because distribution is PTE, the `50000..50999` range and the `WHA` affix need no
 registration with Microsoft. The affix is kept regardless — it prevents collision with other

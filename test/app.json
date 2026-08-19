@@ -46,7 +46,6 @@
   },
   "runtime": "17.0",
   "target": "Cloud",
-  "ruleset": "../.bc-conventions/ruleset.json",
   "features": [
     "NoImplicitWith",
     "NoPromotedActionProperties"

@@ -160,6 +160,34 @@ table 50201 "WHA Warehouse Task"
             TableRelation = "WHA Wave"."No.";
             Editable = false;
         }
+        field(34; "Source Type"; Enum "WHA Task Source")
+        {
+            Caption = 'Source type';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies what kind of document this work was raised from. A task created by hand has no document behind it, and says so.';
+            Editable = false;
+        }
+        field(35; "Source No."; Code[20])
+        {
+            Caption = 'Source no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the warehouse document this work was raised from, such as the warehouse receipt or shipment.';
+            Editable = false;
+        }
+        field(36; "Source Line No."; Integer)
+        {
+            Caption = 'Source line no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the line of the warehouse document this work was raised from.';
+            Editable = false;
+        }
+        field(37; "Source Document No."; Code[20])
+        {
+            Caption = 'Source document no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the order the warehouse document is serving, such as the purchase or sales order the goods belong to. It is what ties a job on the floor back to the customer or vendor waiting on it.';
+            Editable = false;
+        }
         field(40; "Assigned To User ID"; Code[50])
         {
             Caption = 'Assigned to user ID';
@@ -214,6 +242,9 @@ table 50201 "WHA Warehouse Task"
         {
         }
         key(Due; "Due Date", Priority)
+        {
+        }
+        key(Source; "Source Type", "Source No.", "Source Line No.")
         {
         }
     }

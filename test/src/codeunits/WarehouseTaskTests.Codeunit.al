@@ -7,6 +7,8 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Assert: Codeunit "Library Assert";
         TestLocationTok: Label 'WHATEST', Locked = true;
         TestBinTok: Label 'WHATEST-01', Locked = true;
+        TestItemTok: Label 'WHA-TASK-IT', Locked = true;
+        LastOrderNo: Code[20];
 
     [Test]
     procedure LocationChangeClearsBothBins()
@@ -694,6 +696,190 @@ codeunit 51001 "WHA Warehouse Task Tests"
         end;
     end;
 
+    [Test]
+    procedure RaisingWorkFromAReceiptPutsAPutAwayOnTheQueue()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+        TaskType: Enum "WHA Warehouse Task Type";
+    begin
+        // [SCENARIO] Goods have arrived and are standing in the receiving bin. The queue should know about
+        // them without anybody typing a task, and the job should say to take them out of that bin.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-01', 'PO-1001');
+        AddReceiptLine('WHA-WR-01', 10000, 6);
+
+        Assert.AreEqual(1, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-01'), 'The one outstanding line should have raised one job.');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseReceipt, 'WHA-WR-01', 10000);
+        Assert.AreEqual(TaskType::WHAPutAway, WarehouseTask."Task Type", 'Goods that have arrived are put away.');
+        Assert.AreEqual(6, WarehouseTask.Quantity, 'The job should ask for what is still outstanding.');
+        Assert.AreEqual(CopyStr(TestBinTok, 1, 20), WarehouseTask."From Bin Code", 'A put-away starts in the bin the receipt named.');
+        Assert.AreEqual('', WarehouseTask."To Bin Code", 'Where it goes is not the receipt''s to say.');
+    end;
+
+    [Test]
+    procedure RaisingWorkFromAShipmentPutsAPickOnTheQueue()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+        TaskType: Enum "WHA Warehouse Task Type";
+    begin
+        // [SCENARIO] Goods are due to leave. The job should end at the shipping bin, and say nothing about
+        // where the stock is to be found, because the document does not know.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateShipment('WHA-WS-01', 'SO-2001');
+        AddShipmentLine('WHA-WS-01', 10000, 4);
+
+        Assert.AreEqual(1, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseShipment, 'WHA-WS-01'), 'The one outstanding line should have raised one job.');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseShipment, 'WHA-WS-01', 10000);
+        Assert.AreEqual(TaskType::WHAPick, WarehouseTask."Task Type", 'Goods that are leaving are picked.');
+        Assert.AreEqual(4, WarehouseTask.Quantity, 'The job should ask for what is still outstanding.');
+        Assert.AreEqual(CopyStr(TestBinTok, 1, 20), WarehouseTask."To Bin Code", 'A pick ends in the bin the shipment named.');
+        Assert.AreEqual('', WarehouseTask."From Bin Code", 'Where the stock is found is a question about stock, not about the document.');
+    end;
+
+    [Test]
+    procedure ALineWithNothingOutstandingRaisesNoWork()
+    var
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] A line that has already been dealt with is not work. Raising nothing is the right
+        // answer and is not an error.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-02', 'PO-1002');
+        AddReceiptLine('WHA-WR-02', 10000, 0);
+
+        Assert.AreEqual(0, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-02'), 'Nothing outstanding means nothing to raise.');
+    end;
+
+    [Test]
+    procedure RaisingWorkTwiceAddsOnlyWhatIsMissing()
+    var
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Somebody presses the button again, or a line is added to a document that has already
+        // been through it. Neither should double the warehouse's work.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-03', 'PO-1003');
+        AddReceiptLine('WHA-WR-03', 10000, 5);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-03');
+
+        Assert.AreEqual(0, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-03'), 'Running it again should raise nothing.');
+
+        AddReceiptLine('WHA-WR-03', 20000, 3);
+        Assert.AreEqual(1, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-03'), 'A line added afterwards should raise its own job and nothing else.');
+    end;
+
+    [Test]
+    procedure WorkThatWasCancelledCanBeRaisedAgain()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] A job raised in error is cancelled, not deleted. The line it came from still wants
+        // doing, so the document must be able to raise it again.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-04', 'PO-1004');
+        AddReceiptLine('WHA-WR-04', 10000, 7);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-04');
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseReceipt, 'WHA-WR-04', 10000);
+        TaskLogic.Cancel(WarehouseTask);
+
+        Assert.AreEqual(1, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-04'), 'A cancelled job leaves the line uncovered, so it should be raised again.');
+    end;
+
+    [Test]
+    procedure AJobRemembersTheOrderBehindTheDocument()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] The warehouse document is a step; the order is what somebody is waiting on. A job on
+        // the floor has to be traceable to the second, not only to the first.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateShipment('WHA-WS-02', 'SO-2002');
+        AddShipmentLine('WHA-WS-02', 10000, 2);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseShipment, 'WHA-WS-02');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseShipment, 'WHA-WS-02', 10000);
+        Assert.AreEqual('SO-2002', WarehouseTask."Source Document No.", 'The job should name the order the shipment is serving.');
+        Assert.AreNotEqual('', TaskSourceMgt.DescribeLink(WarehouseTask), 'The job should be able to say where it came from.');
+    end;
+
+    [Test]
+    procedure AJobWhoseSourceLineIsFinishedIsNoLongerWanted()
+    var
+        WarehouseReceiptLine: Record "Warehouse Receipt Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] The goods were received by some other route. The job is still on the queue and is now
+        // a walk nobody needs, which is worth being able to notice.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-05', 'PO-1005');
+        AddReceiptLine('WHA-WR-05', 10000, 9);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-05');
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseReceipt, 'WHA-WR-05', 10000);
+        Assert.IsTrue(TaskSourceMgt.SourceIsOpen(WarehouseTask), 'The line still wants receiving.');
+
+        WarehouseReceiptLine.Get('WHA-WR-05', 10000);
+        WarehouseReceiptLine."Qty. Outstanding" := 0;
+        WarehouseReceiptLine.Modify(false);
+
+        Assert.IsFalse(TaskSourceMgt.SourceIsOpen(WarehouseTask), 'Nothing is outstanding any more, so nobody needs to walk it.');
+    end;
+
+    [Test]
+    procedure AJobPutOnTheQueueByHandHasNoDocumentBehindIt()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Segment 1 work still exists and still has to behave. A hand-made job has no document,
+        // says so, and is nobody's to close but the warehouse's.
+        ConfigureQueue(0);
+        CreateWorkableTask(WarehouseTask, 'WHA-TASK-MANUAL');
+
+        Assert.AreEqual(SourceType::WHAManual, WarehouseTask."Source Type", 'A job nobody raised from a document is a hand-made one.');
+        Assert.AreEqual('', TaskSourceMgt.DescribeLink(WarehouseTask), 'There is no document to name.');
+        Assert.IsTrue(TaskSourceMgt.SourceIsOpen(WarehouseTask), 'Nothing outside the app can finish it.');
+        Assert.IsFalse(TaskSourceMgt.ShowSource(WarehouseTask), 'There is nothing to open.');
+    end;
+
+    [Test]
+    procedure RaisingWorkFromADocumentThatIsNotThereIsRefused()
+    var
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Asking a document that does not exist for work is a mistake worth being told about,
+        // not an empty answer that looks like a document with nothing on it.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-NOPE');
+
+        Assert.ExpectedError('does not exist');
+    end;
+
     local procedure ConfigureQueue(MaxOpenTasks: Integer)
     var
         Setup: Record "WHA Warehouse Task Setup";
@@ -782,5 +968,108 @@ codeunit 51001 "WHA Warehouse Task Tests"
         User."User Name" := UserName;
         User.Insert();
         exit(UserName);
+    end;
+
+    local procedure EnsureTaskNumbering()
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+        NoSeriesMgt: Codeunit "WHA No. Series Mgt.";
+    begin
+        EnsureTaskSetup(Setup);
+        if Setup."Warehouse Task Nos." <> '' then
+            exit;
+
+        Setup.Validate("Warehouse Task Nos.", NoSeriesMgt.EnsureSeries('WHA-TSTTASK', 'Warehouse advanced test tasks', 'WT000001', 'WT999999'));
+        Setup.Modify(true);
+    end;
+
+    local procedure CreateReceipt(ReceiptNo: Code[20]; OrderNo: Code[20])
+    var
+        WarehouseReceiptHeader: Record "Warehouse Receipt Header";
+    begin
+        EnsureLocationAndBin();
+        EnsureTestItem();
+
+        if WarehouseReceiptHeader.Get(ReceiptNo) then
+            exit;
+
+        WarehouseReceiptHeader.Init();
+        WarehouseReceiptHeader."No." := ReceiptNo;
+        WarehouseReceiptHeader."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        WarehouseReceiptHeader.Insert(false);
+
+        LastOrderNo := OrderNo;
+    end;
+
+    local procedure AddReceiptLine(ReceiptNo: Code[20]; LineNo: Integer; Outstanding: Decimal)
+    var
+        WarehouseReceiptLine: Record "Warehouse Receipt Line";
+    begin
+        WarehouseReceiptLine.Init();
+        WarehouseReceiptLine."No." := ReceiptNo;
+        WarehouseReceiptLine."Line No." := LineNo;
+        WarehouseReceiptLine."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        WarehouseReceiptLine."Bin Code" := CopyStr(TestBinTok, 1, 20);
+        WarehouseReceiptLine."Item No." := CopyStr(TestItemTok, 1, 20);
+        WarehouseReceiptLine.Quantity := Outstanding;
+        WarehouseReceiptLine."Qty. Outstanding" := Outstanding;
+        WarehouseReceiptLine."Source No." := LastOrderNo;
+        WarehouseReceiptLine.Insert(false);
+    end;
+
+    local procedure CreateShipment(ShipmentNo: Code[20]; OrderNo: Code[20])
+    var
+        WarehouseShipmentHeader: Record "Warehouse Shipment Header";
+    begin
+        EnsureLocationAndBin();
+        EnsureTestItem();
+
+        if WarehouseShipmentHeader.Get(ShipmentNo) then
+            exit;
+
+        WarehouseShipmentHeader.Init();
+        WarehouseShipmentHeader."No." := ShipmentNo;
+        WarehouseShipmentHeader."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        WarehouseShipmentHeader.Insert(false);
+
+        LastOrderNo := OrderNo;
+    end;
+
+    local procedure AddShipmentLine(ShipmentNo: Code[20]; LineNo: Integer; Outstanding: Decimal)
+    var
+        WarehouseShipmentLine: Record "Warehouse Shipment Line";
+    begin
+        WarehouseShipmentLine.Init();
+        WarehouseShipmentLine."No." := ShipmentNo;
+        WarehouseShipmentLine."Line No." := LineNo;
+        WarehouseShipmentLine."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        WarehouseShipmentLine."Bin Code" := CopyStr(TestBinTok, 1, 20);
+        WarehouseShipmentLine."Item No." := CopyStr(TestItemTok, 1, 20);
+        WarehouseShipmentLine.Quantity := Outstanding;
+        WarehouseShipmentLine."Qty. Outstanding" := Outstanding;
+        WarehouseShipmentLine."Source No." := LastOrderNo;
+        WarehouseShipmentLine.Insert(false);
+    end;
+
+    local procedure FindTaskForSource(var WarehouseTask: Record "WHA Warehouse Task"; SourceType: Enum "WHA Task Source"; SourceNo: Code[20]; SourceLineNo: Integer)
+    begin
+        WarehouseTask.Reset();
+        WarehouseTask.SetRange("Source Type", SourceType);
+        WarehouseTask.SetRange("Source No.", SourceNo);
+        WarehouseTask.SetRange("Source Line No.", SourceLineNo);
+        WarehouseTask.SetFilter(Status, '<>%1', WarehouseTask.Status::WHACancelled);
+        WarehouseTask.FindFirst();
+    end;
+
+    local procedure EnsureTestItem()
+    var
+        Item: Record Item;
+    begin
+        if Item.Get(CopyStr(TestItemTok, 1, 20)) then
+            exit;
+
+        Item.Init();
+        Item."No." := CopyStr(TestItemTok, 1, 20);
+        Item.Insert(true);
     end;
 }

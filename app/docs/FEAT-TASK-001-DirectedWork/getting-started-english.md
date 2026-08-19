@@ -48,7 +48,33 @@ as **Enable this feature**.
 - An administrator also gets a **configuration package** for warehouse tasks, which can be copied
   into other companies.
 
-## Create a task
+## Raise work from goods that have arrived or are due to leave
+
+This is usually where work should come from, rather than from typing.
+
+1. Open a **warehouse receipt** (goods that have arrived) or a **warehouse shipment** (goods due to
+   leave).
+2. Choose **Create warehouse tasks**.
+3. You are told how many jobs were put on the queue — one for every line that still has something
+   outstanding on it.
+
+A receipt raises **put-aways**, each starting in the bin the receipt names. A shipment raises
+**picks**, each ending in the bin the shipment names. The other bin is deliberately left empty: where
+goods should be put, and where they should be taken from, depends on your stock and your warehouse
+layout, and the document cannot know it. The person doing the job fills it in.
+
+**It is safe to press again.** Lines that already have a job are skipped, so pressing it a second
+time, or after adding a line to the document, only raises what is missing. If everything is already
+covered you are told that too.
+
+If you cancelled a job by mistake, press the button again — a cancelled job leaves its line
+uncovered, so the document will raise it afresh.
+
+**Nothing happens by itself.** Releasing or posting a receipt or shipment does not create work; a
+person presses the button. That is deliberate until it is confirmed how your warehouse actually
+receives and ships.
+
+## Create a task by hand
 
 1. Choose the search icon, enter **Warehouse tasks**, and choose the related link.
 2. Choose **New**.
@@ -142,6 +168,23 @@ Each task records the time it moved through the life cycle:
 **Completed** or **Cancelled**. You cannot type over it — it changes through the actions above, so
 the times always match what really happened.
 
+## See where a job came from
+
+Open a task and look at **Where the work came from**:
+
+- **Source type** — whether it was raised from a receipt, from a shipment, or typed by hand.
+- **Document** — the document and line it came from, named in full.
+- **Source document no.** — the purchase or sales order behind it, which is what tells you who is
+  actually waiting.
+- **Still wanted** — whether the line it came from still has something outstanding. If this says no,
+  the goods have been received or shipped some other way and the job is a walk for nothing. Cancel
+  it.
+
+**Source document** opens the receipt or shipment itself.
+
+Nothing warns you about a job that is no longer wanted, and nothing cancels one for you — you have to
+look.
+
 ## Withdraw a task
 
 Open the task and choose **Cancel**. The task stays in the list as a record of what was asked for.
@@ -151,7 +194,12 @@ want, and delete only drafts that never went anywhere.
 
 ## What is not here yet
 
-Warehouse tasks are not created automatically from receipts, shipments or worksheets — you enter
-them, or another system creates them. Nothing yet plans a route around the warehouse or combines a
-pick and a put-away into one trip. There is no handheld screen for the floor; that comes with the
-mobile device feature.
+**Finishing a job tells the document nothing.** The receipt or shipment it came from does not know
+the warehouse has done the work, and nothing stops somebody posting it while jobs against it are
+still open. For now the queue is a place to organise work, not a replacement for the document.
+
+Only warehouse receipts and warehouse shipments raise work. Internal put-aways, movement worksheets,
+production and assembly do not.
+
+Nothing yet plans a route around the warehouse or combines a pick and a put-away into one trip. There
+is no handheld screen for the floor; that comes with the mobile device feature.

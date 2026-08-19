@@ -23,6 +23,11 @@ app/src/
 └── <Feature>/             one folder per shipped feature, same subfolder shape
 ```
 
+A feature also gets a `pageextensions/` folder when it puts something on a **standard** Business
+Central page. `FEAT-TASK-001` is the first that does — its *Create warehouse tasks* action sits on
+the warehouse receipt and shipment — so it is the first place this app is visible to somebody who
+never opens one of its own pages. Extend a standard page only where the work genuinely starts there.
+
 Feature folders are created **when a feature is actually scoped**, not up front — the table
 below is a candidate list, not a build order.
 

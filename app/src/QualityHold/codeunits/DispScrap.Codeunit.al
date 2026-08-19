@@ -7,11 +7,12 @@ codeunit 50558 "WHA Disp. Scrap" implements "WHA IHoldDisposition"
     Access = Public;
 
     var
-        DescriptionLbl: Label 'The goods are written off. The unit is marked as scrapped and never comes back into use. Nothing is posted.';
+        DescriptionLbl: Label 'The goods are written off. The unit is marked as scrapped and never comes back into use, and what it was holding leaves the item ledger if the quality hold setup says it should.';
 
     /// <summary>
     /// Marks the unit as scrapped, which keeps it out of every queue, worksheet and measurement in the
-    /// app. It does not post an inventory write-off — see the feature documentation.
+    /// app. Taking the stock out of the ledger is the hold manager's job, not this one's: a disposition
+    /// owns the state the unit is left in and nothing else.
     /// </summary>
     /// <param name="QualityHold">The hold being released.</param>
     /// <param name="HandlingUnit">The handling unit the hold was placed on.</param>
@@ -37,5 +38,14 @@ codeunit 50558 "WHA Disp. Scrap" implements "WHA IHoldDisposition"
     procedure ReturnsToUse(): Boolean
     begin
         exit(false);
+    end;
+
+    /// <summary>
+    /// Answers whether this decision takes the goods out of stock for good.
+    /// </summary>
+    /// <returns>True. The goods are gone.</returns>
+    procedure WritesOffStock(): Boolean
+    begin
+        exit(true);
     end;
 }

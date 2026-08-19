@@ -34,6 +34,9 @@ page 50502 "WHA Count Sheet Card"
                 field("Assigned To User ID"; Rec."Assigned To User ID")
                 {
                 }
+                field("Posting Date"; Rec."Posting Date")
+                {
+                }
             }
             group(Building)
             {
@@ -85,6 +88,20 @@ page 50502 "WHA Count Sheet Card"
                 {
                 }
             }
+            group(Adjustment)
+            {
+                Caption = 'What was adjusted';
+
+                field(Posted; Rec.Posted)
+                {
+                }
+                field("Posting Document No."; Rec."Posting Document No.")
+                {
+                }
+                field("Posted At"; Rec."Posted At")
+                {
+                }
+            }
         }
     }
 
@@ -130,7 +147,7 @@ page 50502 "WHA Count Sheet Card"
             action(CloseSheet)
             {
                 Caption = 'Close';
-                ToolTip = 'Specifies the action that closes the sheet, once every difference beyond the tolerance has been approved.';
+                ToolTip = 'Specifies the action that closes the sheet, once every difference beyond the tolerance has been approved, and hands its differences to the posting method set up for counting.';
                 Image = Close;
 
                 trigger OnAction()

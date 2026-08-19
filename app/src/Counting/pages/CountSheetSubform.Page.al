@@ -33,6 +33,12 @@ page 50503 "WHA Count Sheet Subform"
                 field("Unit of Measure Code"; Rec."Unit of Measure Code")
                 {
                 }
+                field("Lot No."; Rec."Lot No.")
+                {
+                }
+                field("Serial No."; Rec."Serial No.")
+                {
+                }
                 field("Expected Quantity"; Rec."Expected Quantity")
                 {
                     Visible = ExpectedVisible;
@@ -60,6 +66,13 @@ page 50503 "WHA Count Sheet Subform"
                 {
                 }
                 field("Approved By User ID"; Rec."Approved By User ID")
+                {
+                }
+                field("Posting Quantity"; Rec."Posting Quantity")
+                {
+                    Visible = ExpectedVisible;
+                }
+                field(Posted; Rec.Posted)
                 {
                 }
             }

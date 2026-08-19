@@ -403,6 +403,130 @@ codeunit 51009 "WHA Quality Hold Tests"
         Assert.AreEqual(CountAfterFirstRun, QualityHold.Count(), 'A second import should not place more holds.');
     end;
 
+    [Test]
+    procedure ScrappingAUnitWritesOffWhatItWasHolding()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        TempPostingRequest: Record "WHA Posting Request" temporary;
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+        Disposition: Enum "WHA Hold Disposition";
+        PostingType: Enum "WHA Posting Type";
+        Reason: Enum "WHA Hold Reason";
+        Status: Enum "WHA Handling Unit Status";
+    begin
+        // [SCENARIO] Scrapping goods is the one decision that ends them. Marking the pallet is not enough:
+        // what it was holding has to leave the ledger as well, or the app and Business Central disagree
+        // about stock that no longer exists.
+        ConfigureQualityHold(true, true);
+        ConfigureWriteOff();
+        Recorder.Forget();
+        CreateUnit(HandlingUnit, 'WHA-QC-SCR1', '', Status::WHAOpen);
+        AddContents('WHA-QC-SCR1', 12);
+        QualityHold.Get(QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, CopyStr(DamageDescTok, 1, 100)));
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAScrap);
+
+        QualityHoldMgt.Release(QualityHold);
+
+        Assert.AreEqual(1, Recorder.Recorded(TempPostingRequest), 'The one thing the unit held should have been written off.');
+        TempPostingRequest.FindFirst();
+        Assert.AreEqual(PostingType::WHANegativeAdjustment, TempPostingRequest."Posting Type", 'Scrapped goods leave stock.');
+        Assert.AreEqual(12, TempPostingRequest.Quantity, 'The whole quantity on the unit goes.');
+        Assert.AreEqual(12, QualityHold."Posted Quantity", 'The hold should record how much it wrote off.');
+        Assert.IsTrue(QualityHold.Posted, 'The write-off reached the ledger.');
+    end;
+
+    [Test]
+    procedure ReleasingGoodsBackIntoStockWritesNothingOff()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        TempPostingRequest: Record "WHA Posting Request" temporary;
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Status: Enum "WHA Handling Unit Status";
+    begin
+        // [SCENARIO] Only one of the three decisions ends the goods. Releasing them back into stock must
+        // not touch the ledger, because nothing about the stock changed.
+        ConfigureQualityHold(true, true);
+        ConfigureWriteOff();
+        Recorder.Forget();
+        CreateUnit(HandlingUnit, 'WHA-QC-SCR2', '', Status::WHAOpen);
+        AddContents('WHA-QC-SCR2', 8);
+        QualityHold.Get(QualityHoldMgt.Place(HandlingUnit, Reason::WHAInspection, ''));
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAReleaseToStock);
+
+        QualityHoldMgt.Release(QualityHold);
+
+        Assert.AreEqual(0, Recorder.Recorded(TempPostingRequest), 'Goods that go back into stock are written off nowhere.');
+        Assert.IsFalse(QualityHold.Posted, 'Nothing was posted.');
+    end;
+
+    [Test]
+    procedure ScrappingAPalletWritesOffTheCartonInsideItSeparately()
+    var
+        Pallet: Record "WHA Handling Unit";
+        Carton: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        CascadedHold: Record "WHA Quality Hold";
+        TempPostingRequest: Record "WHA Posting Request" temporary;
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Status: Enum "WHA Handling Unit Status";
+    begin
+        // [SCENARIO] A pallet held with a carton on it is two holds, so it is two write-offs under two
+        // documents. Rolling them into one would lose which unit the stock actually left.
+        ConfigureQualityHold(true, true);
+        ConfigureWriteOff();
+        Recorder.Forget();
+        CreateUnit(Pallet, 'WHA-QC-SCR3', '', Status::WHAOpen);
+        AddContents('WHA-QC-SCR3', 5);
+        CreateUnit(Carton, 'WHA-QC-SCR4', 'WHA-QC-SCR3', Status::WHAOpen);
+        AddContents('WHA-QC-SCR4', 3);
+        QualityHold.Get(QualityHoldMgt.Place(Pallet, Reason::WHADamaged, CopyStr(DamageDescTok, 1, 100)));
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAScrap);
+
+        QualityHoldMgt.Release(QualityHold);
+
+        Assert.AreEqual(2, Recorder.Recorded(TempPostingRequest), 'Each unit writes off what it was holding.');
+        CascadedHold.SetRange("Cascaded From Entry No.", QualityHold."Entry No.");
+        CascadedHold.FindFirst();
+        Assert.AreEqual(3, CascadedHold."Posted Quantity", 'The carton writes off its own contents.');
+        Assert.AreNotEqual(QualityHold."Posting Document No.", CascadedHold."Posting Document No.", 'Each unit goes under its own document.');
+    end;
+
+    [Test]
+    procedure AScrapSetToWriteNothingOffStillTakesTheUnitOutOfUse()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Status: Enum "WHA Handling Unit Status";
+    begin
+        // [SCENARIO] Not writing off is a choice, not a missing feature. The pallet is still finished with
+        // as far as the warehouse is concerned; what the ledger believes is somebody else's decision.
+        ConfigureQualityHold(true, true);
+        ConfigureNoWriteOff();
+        CreateUnit(HandlingUnit, 'WHA-QC-SCR5', '', Status::WHAOpen);
+        AddContents('WHA-QC-SCR5', 4);
+        QualityHold.Get(QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, ''));
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAScrap);
+
+        QualityHoldMgt.Release(QualityHold);
+
+        HandlingUnit.Get('WHA-QC-SCR5');
+        Assert.AreEqual(Status::WHAScrapped, HandlingUnit.Status, 'The unit is still scrapped.');
+        Assert.IsFalse(QualityHold.Posted, 'Nothing reached the ledger.');
+        Assert.AreEqual(0, QualityHold."Posted Quantity", 'Nothing was written off.');
+    end;
+
     local procedure ConfigureQualityHold(HoldNested: Boolean; RequireDisposition: Boolean)
     var
         Setup: Record "WHA Quality Hold Setup";
@@ -465,5 +589,25 @@ codeunit 51009 "WHA Quality Hold Tests"
         Location.Init();
         Location.Code := LocationCode;
         Location.Insert();
+    end;
+
+    local procedure ConfigureWriteOff()
+    var
+        Setup: Record "WHA Quality Hold Setup";
+        Method: Enum "WHA Posting Method";
+    begin
+        Setup.Get();
+        Setup.Validate("Posting Method", Method::WHATestRecorder);
+        Setup.Modify(true);
+    end;
+
+    local procedure ConfigureNoWriteOff()
+    var
+        Setup: Record "WHA Quality Hold Setup";
+        Method: Enum "WHA Posting Method";
+    begin
+        Setup.Get();
+        Setup.Validate("Posting Method", Method::WHANone);
+        Setup.Modify(true);
     end;
 }

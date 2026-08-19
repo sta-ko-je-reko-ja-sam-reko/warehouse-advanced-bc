@@ -51,32 +51,17 @@ codeunit 50506 "WHA Count HU Selection" implements "WHA ICountSelection"
         Added: Integer;
         LineNo: Integer;
     begin
-        HandlingUnitLine.SetLoadFields("Item No.", "Variant Code", "Unit of Measure Code", Quantity, Description);
+        HandlingUnitLine.SetLoadFields("Item No.", "Variant Code", "Unit of Measure Code", Quantity, Description, "Lot No.", "Serial No.");
         HandlingUnitLine.SetRange("Handling Unit No.", HandlingUnit."No.");
         if not HandlingUnitLine.FindSet() then
             exit(0);
 
         repeat
             LineNo := CountSheetLogic.AddLine(CountSheet, HandlingUnit."Bin Code", HandlingUnitLine."Item No.", HandlingUnitLine."Variant Code", HandlingUnitLine."Unit of Measure Code", HandlingUnit."No.", HandlingUnitLine.Quantity);
-            DescribeLine(CountSheet, LineNo, HandlingUnitLine.Description);
+            CountSheetLogic.SetLineDetails(CountSheet, LineNo, HandlingUnitLine.Description, HandlingUnitLine."Lot No.", HandlingUnitLine."Serial No.");
             Added += 1;
         until HandlingUnitLine.Next() = 0;
 
         exit(Added);
-    end;
-
-    local procedure DescribeLine(var CountSheet: Record "WHA Count Sheet"; LineNo: Integer; LineDescription: Text[100])
-    var
-        CountSheetLine: Record "WHA Count Sheet Line";
-    begin
-        if LineDescription = '' then
-            exit;
-
-        CountSheetLine.SetLoadFields(Description);
-        if not CountSheetLine.Get(CountSheet."No.", LineNo) then
-            exit;
-
-        CountSheetLine.Description := LineDescription;
-        CountSheetLine.Modify(true);
     end;
 }

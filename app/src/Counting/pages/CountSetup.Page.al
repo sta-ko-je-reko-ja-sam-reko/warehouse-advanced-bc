@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.Core;
+using WarehouseAdvanced.Posting;
 
 page 50500 "WHA Count Setup"
 {
@@ -55,6 +56,40 @@ page 50500 "WHA Count Setup"
                     ApplicationArea = WHACounting;
                 }
             }
+            group(Posting)
+            {
+                Caption = 'Posting';
+
+                field("Posting Method"; Rec."Posting Method")
+                {
+                    ApplicationArea = WHACounting;
+
+                    trigger OnValidate()
+                    begin
+                        DescribePostingMethod();
+                    end;
+                }
+                field(PostingMethodDescription; PostingMethodDescription)
+                {
+                    Caption = 'What that does';
+                    ToolTip = 'Specifies what closing a count sheet will do about its differences, in full, so the choice above is made with its consequence in view.';
+                    ApplicationArea = WHACounting;
+                    Editable = false;
+                    MultiLine = true;
+                }
+                field("Item Journal Template Name"; Rec."Item Journal Template Name")
+                {
+                    ApplicationArea = WHACounting;
+                }
+                field("Item Journal Batch Name"; Rec."Item Journal Batch Name")
+                {
+                    ApplicationArea = WHACounting;
+                }
+                field("Posting Reason Code"; Rec."Posting Reason Code")
+                {
+                    ApplicationArea = WHACounting;
+                }
+            }
             group(Numbering)
             {
                 Caption = 'Numbering';
@@ -88,6 +123,7 @@ page 50500 "WHA Count Setup"
     begin
         CountFeatureSetup.EnsureSetup(Rec);
         OpeningEnabled := Rec."WHA Enabled";
+        DescribePostingMethod();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -96,8 +132,21 @@ page 50500 "WHA Count Setup"
         exit(true);
     end;
 
+    trigger OnAfterGetRecord()
+    begin
+        DescribePostingMethod();
+    end;
+
     var
         OpeningEnabled: Boolean;
+        PostingMethodDescription: Text;
+
+    local procedure DescribePostingMethod()
+    var
+        PostingMgt: Codeunit "WHA Posting Mgt.";
+    begin
+        PostingMethodDescription := PostingMgt.Describe(Rec."Posting Method");
+    end;
 
     local procedure ApplyEnabledChangeIfNeeded()
     var

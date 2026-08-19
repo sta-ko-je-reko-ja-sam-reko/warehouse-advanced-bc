@@ -8,7 +8,7 @@ codeunit 50502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
 
     var
         StepNameLbl: Label 'Counting';
-        StepDescriptionLbl: Label 'Count part of the warehouse while it keeps working. A sheet says what to count, the floor counts it without seeing what was expected, and anything that comes out wrong by more than you allow has to be looked at before the sheet is closed.';
+        StepDescriptionLbl: Label 'Count part of the warehouse while it keeps working. A sheet says what to count, the floor counts it blind, differences beyond what you allow are approved before the sheet closes, and closing it adjusts stock the way you choose to.';
         NoSeriesCodeTok: Label 'WHA-COUNT', Locked = true;
         NoSeriesDescLbl: Label 'Warehouse advanced count sheets';
         StartingNoTok: Label 'CS000001', Locked = true;

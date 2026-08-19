@@ -37,6 +37,26 @@ interface "WHA ICountSheet"
     procedure AddLine(var CountSheet: Record "WHA Count Sheet"; BinCode: Code[20]; ItemNo: Code[20]; VariantCode: Code[10]; UnitOfMeasureCode: Code[10]; HandlingUnitNo: Code[20]; ExpectedQuantity: Decimal): Integer;
 
     /// <summary>
+    /// Refuses to move the posting date of a sheet that has already been closed, because the date a
+    /// difference was posted under is part of what was posted.
+    /// </summary>
+    /// <param name="CountSheet">The count sheet being changed.</param>
+    /// <param name="xCountSheet">The count sheet as it was before the change.</param>
+    procedure Validate_PostingDate(var CountSheet: Record "WHA Count Sheet"; xCountSheet: Record "WHA Count Sheet");
+
+    /// <summary>
+    /// Puts on a line the things the selection knows and the caller of AddLine cannot pass: what the goods
+    /// are called, and which lot or serial number they carry. Without the tracking, a difference on a
+    /// tracked item cannot be adjusted at all.
+    /// </summary>
+    /// <param name="CountSheet">The sheet the line is on.</param>
+    /// <param name="LineNo">The line to complete.</param>
+    /// <param name="LineDescription">What the goods are, or blank to leave it alone.</param>
+    /// <param name="LotNo">The lot the goods belong to, or blank.</param>
+    /// <param name="SerialNo">The serial number of the goods, or blank.</param>
+    procedure SetLineDetails(var CountSheet: Record "WHA Count Sheet"; LineNo: Integer; LineDescription: Text[100]; LotNo: Code[50]; SerialNo: Code[50]);
+
+    /// <summary>
     /// Sends the sheet to the floor. From here the expected quantities are fixed, so what is counted is
     /// compared against what was believed when the count was ordered.
     /// </summary>
@@ -59,7 +79,9 @@ interface "WHA ICountSheet"
     procedure CompleteIfCounted(var CountSheet: Record "WHA Count Sheet"): Boolean;
 
     /// <summary>
-    /// Closes a counted sheet, once every difference beyond tolerance has been approved.
+    /// Closes a counted sheet, once every difference beyond tolerance has been approved, and hands its
+    /// differences to the posting method chosen in the counting setup. What the method does with them —
+    /// nothing, a journal line, or a ledger entry — is the method's business, not the sheet's.
     /// </summary>
     /// <param name="CountSheet">The sheet to close.</param>
     procedure Close(var CountSheet: Record "WHA Count Sheet");

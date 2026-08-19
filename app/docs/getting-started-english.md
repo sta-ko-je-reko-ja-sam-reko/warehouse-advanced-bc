@@ -40,9 +40,15 @@ product does not include.
 ### Checking what you have
 
 - [Counting](FEAT-CNT-001-Counting/getting-started-english.md) — count a slice of the warehouse while
-  the rest of it keeps working, without showing the counter what was expected.
+  the rest of it keeps working, without showing the counter what was expected, and correct your stock
+  by as much or as little as you choose to let it.
 - [Quality hold](FEAT-QC-001-QualityHold/getting-started-english.md) — stop goods being used until
-  somebody has decided what happens to them, and keep the record of who decided what.
+  somebody has decided what happens to them, keep the record of who decided what, and write off what
+  gets scrapped.
+
+Both of these can change what Business Central believes you have, and both start out set **not to**.
+Each has a step in its own guide about deciding what it should do; read it before you count or scrap
+anything in earnest.
 
 ### Making the warehouse work better
 

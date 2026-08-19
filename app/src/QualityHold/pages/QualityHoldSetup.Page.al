@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.Core;
+using WarehouseAdvanced.Posting;
 
 page 50550 "WHA Quality Hold Setup"
 {
@@ -47,6 +48,40 @@ page 50550 "WHA Quality Hold Setup"
                     ApplicationArea = WHAQualityHold;
                 }
             }
+            group(Posting)
+            {
+                Caption = 'Writing off scrapped goods';
+
+                field("Posting Method"; Rec."Posting Method")
+                {
+                    ApplicationArea = WHAQualityHold;
+
+                    trigger OnValidate()
+                    begin
+                        DescribePostingMethod();
+                    end;
+                }
+                field(PostingMethodDescription; PostingMethodDescription)
+                {
+                    Caption = 'What that does';
+                    ToolTip = 'Specifies what scrapping goods will do to what Business Central believes is in stock, in full, so the choice above is made with its consequence in view.';
+                    ApplicationArea = WHAQualityHold;
+                    Editable = false;
+                    MultiLine = true;
+                }
+                field("Item Journal Template Name"; Rec."Item Journal Template Name")
+                {
+                    ApplicationArea = WHAQualityHold;
+                }
+                field("Item Journal Batch Name"; Rec."Item Journal Batch Name")
+                {
+                    ApplicationArea = WHAQualityHold;
+                }
+                field("Posting Reason Code"; Rec."Posting Reason Code")
+                {
+                    ApplicationArea = WHAQualityHold;
+                }
+            }
         }
     }
 
@@ -71,6 +106,7 @@ page 50550 "WHA Quality Hold Setup"
     begin
         QCFeatureSetup.EnsureSetup(Rec);
         OpeningEnabled := Rec."WHA Enabled";
+        DescribePostingMethod();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -79,8 +115,21 @@ page 50550 "WHA Quality Hold Setup"
         exit(true);
     end;
 
+    trigger OnAfterGetRecord()
+    begin
+        DescribePostingMethod();
+    end;
+
     var
         OpeningEnabled: Boolean;
+        PostingMethodDescription: Text;
+
+    local procedure DescribePostingMethod()
+    var
+        PostingMgt: Codeunit "WHA Posting Mgt.";
+    begin
+        PostingMethodDescription := PostingMgt.Describe(Rec."Posting Method");
+    end;
 
     local procedure ApplyEnabledChangeIfNeeded()
     var

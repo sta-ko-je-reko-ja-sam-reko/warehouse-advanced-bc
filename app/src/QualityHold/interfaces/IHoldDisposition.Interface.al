@@ -26,4 +26,12 @@ interface "WHA IHoldDisposition"
     /// </summary>
     /// <returns>True when releasing with this decision makes the unit available again.</returns>
     procedure ReturnsToUse(): Boolean;
+
+    /// <summary>
+    /// Answers whether this decision takes the goods out of stock for good, and so whether releasing the
+    /// hold should write them off. The hold manager asks; the disposition never posts anything itself,
+    /// because who wrote what off and under which document is part of the audit trail the hold owns.
+    /// </summary>
+    /// <returns>True when the goods are gone and the ledger should say so.</returns>
+    procedure WritesOffStock(): Boolean;
 }

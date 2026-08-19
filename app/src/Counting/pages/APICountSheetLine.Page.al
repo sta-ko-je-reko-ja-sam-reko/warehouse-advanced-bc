@@ -60,6 +60,14 @@ page 50505 "WHA API Count Sheet Line"
                 {
                     Caption = 'Unit of measure code';
                 }
+                field(lotNumber; Rec."Lot No.")
+                {
+                    Caption = 'Lot number';
+                }
+                field(serialNumber; Rec."Serial No.")
+                {
+                    Caption = 'Serial number';
+                }
                 field(expectedQuantity; Rec."Expected Quantity")
                 {
                     Caption = 'Expected quantity';
@@ -102,6 +110,16 @@ page 50505 "WHA API Count Sheet Line"
                 field(approvedByUserId; Rec."Approved By User ID")
                 {
                     Caption = 'Approved by user ID';
+                    Editable = false;
+                }
+                field(postingQuantity; Rec."Posting Quantity")
+                {
+                    Caption = 'Posting quantity';
+                    Editable = false;
+                }
+                field(posted; Rec.Posted)
+                {
+                    Caption = 'Posted';
                     Editable = false;
                 }
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)

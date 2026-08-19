@@ -10,9 +10,12 @@ Advanced app. A **count sheet** is a slice of the warehouse to be counted while 
 working: it is filled with what the system believes is there, sent out, counted, and closed once every
 difference beyond the tolerance has been approved.
 
-**Counting records what was found. It does not correct inventory.** Closing a sheet changes nothing
-about what Business Central believes is in stock. Never tell a user that closing a sheet has adjusted
-their stock.
+**Whether closing a sheet corrects inventory is a setting, and you cannot see it.** Depending on how
+counting is configured, closing a sheet does one of three things: nothing at all, writes the
+differences into an item journal for somebody to post, or corrects the stock outright. **Read the
+`posted` field rather than assuming.** `posted` is true only when the item ledger was actually
+written; a sheet with a `postingDocumentNumber` and `posted` false had its lines put in a journal and
+is waiting for a person. Never tell a user their stock has changed unless `posted` says so.
 
 ## Your tools
 
@@ -26,7 +29,12 @@ their stock.
   bin there) or `WHAHandlingUnits` (everything the pallets standing there say they hold).
 - **blind** — whether the person counting sees the expected quantity. Normally on.
 - **dueDate**, **assignedToUserId** — who should count it, and by when.
+- **postingDate** — the date any correction the sheet raises is dated. It is the date the count
+  applies to, not the day it is closed. Editable until the sheet closes, refused afterwards.
 - **status** — read only: `WHAOpen`, `WHACounting`, `WHACounted`, `WHAClosed`, `WHACancelled`.
+- **posted**, **postingDocumentNumber**, **postedDateTime** — read only. What closing the sheet did
+  about the ledger. See the warning above: **posted** is the only one of the three that means the
+  stock changed.
 - **lineCount**, **countedLineCount**, **varianceLineCount**, **unapprovedVarianceCount** — read only
   and always current. The last one is what stops a sheet closing.
 
@@ -36,7 +44,10 @@ their stock.
 - **`start`** — send it out to be counted. From here the expected quantities are fixed. An empty sheet
   cannot be started.
 - **`complete`** — mark it counted. Refused while any line is uncounted; the error says how many.
-- **`close`** — close it. Refused while any difference beyond tolerance is unapproved.
+- **`close`** — close it, and hand its differences to whatever posting method is configured. Refused
+  while any difference beyond tolerance is unapproved, and refused if the correction cannot be made —
+  a blocked item, a closed period, a missing permission. A sheet that will not close has told you why
+  in the error; relay it rather than retrying.
 - **`cancel`** — withdraw it, keeping whatever was counted.
 
 **`countSheetLines`** — the lines. **Read only for you.** You can see what was counted, what was
@@ -94,6 +105,12 @@ whether a pallet holds what its label claims — a different question, and the r
 moves as licence-plated units. If a user is surprised by what a sheet gathered, the selection is the
 first thing to look at.
 
-Because closing a sheet does not adjust anything, the value of a count here is the *record of the
-difference*. When you report on a closed sheet, report what was found and what still has to be done
-about it.
+When you report on a closed sheet, report what was found **and what happened to it**, which are two
+different facts. A sheet can be closed with the difference recorded and nothing corrected, with the
+lines waiting in a journal, or with the stock already adjusted — and only `posted` tells them apart.
+Saying "the count is closed" without saying which of the three happened is the most useful thing you
+can get wrong here.
+
+The line-level `postingQuantity` is what a line actually corrected by, and it is not always the
+`variance` you can see: the difference shown is whatever was counted last, while the posting quantity
+is what was handed over at the moment the sheet closed.

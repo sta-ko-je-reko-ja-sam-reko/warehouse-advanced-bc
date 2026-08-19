@@ -70,7 +70,8 @@ in different modules cannot collide. Test objects use `51000..51999`.
 | Labelling | `Labelling` | 50600–50649 | Basic report layouts | GS1-128 / SSCC generation, label templates, printer routing per zone |
 | Integration | `Integration` | 50650–50699 | Standard APIs | API pages and event contracts for the replacement interface and downstream automation |
 | Analytics | `Analytics` | 50700–50749 | Standard warehouse reports | Operational KPI queries, throughput and dock-to-stock measures |
-| _reserved_ | — | 50750–50999 | — | Unallocated headroom |
+| Posting | `Posting` | 50750–50799 | Item journal, physical inventory journal | A shared way for any feature to change what Business Central believes is in stock, chosen per feature: not at all, a journal line somebody posts, or straight to the ledger. **Not a feature** — no toggle, no wizard step, no application area of its own |
+| _reserved_ | — | 50800–50999 | — | Unallocated headroom |
 
 ## Sequencing note
 

@@ -30,6 +30,10 @@ not a permission to ask for: see below.
   another unit that was stopped. Blank means the unit was stopped in its own right.
 - **heldByUserId**, **heldDateTime**, **releasedByUserId**, **releasedDateTime** — the audit trail.
 - **previousUnitStatus** — what the unit was before it was stopped.
+- **posted**, **postedQuantity**, **postingDocumentNumber**, **postedDateTime** — read only. What
+  releasing the hold did about the inventory. **posted** is true only when the stock actually left the
+  item ledger; a hold with a `postingDocumentNumber` and `posted` false had its write-off put in a
+  journal and is waiting for a person.
 
 ## What you are actually for
 
@@ -43,6 +47,10 @@ The questions nobody has time to ask:
 - **What keeps going wrong?** Group by `reason` over a period. Repeated `WHADamaged` from one location
   is a finding.
 - **What happened to that pallet?** The whole trail for one `handlingUnitNumber`, in order.
+- **What has been scrapped but never written off?** `disposition eq 'WHAScrap'` and `posted eq false`.
+  Depending on the configuration this is either normal or a backlog somebody has forgotten — worth
+  asking about either way, since it is stock the warehouse has finished with and the books still
+  carry.
 
 When you report on a cascade, say so plainly: a hold with `cascadedFromEntryNumber` set was not a
 separate decision — the unit was inside something that got stopped.
@@ -57,9 +65,10 @@ separate decision — the unit was inside something that got stopped.
   only worth recording if they are true, and an agent in those fields makes the audit trail a fiction.
 - **Do not suggest switching off *Decide before releasing*** to clear a backlog of held goods. That
   setting is the only thing stopping quarantined stock going back on the shelf undecided.
-- **Do not describe scrapped goods as written off.** The app marks the unit and posts nothing; the
-  stock is still on hand in Business Central until somebody adjusts it. If you are asked what scrapping
-  did, say exactly that.
+- **Do not say whether scrapped goods were written off without reading `posted`.** Whether scrapping
+  takes stock out of the ledger is a setting, and it can be off, staged into a journal, or immediate.
+  `posted` true means the stock is gone; `posted` false with a `postingDocumentNumber` means a journal
+  line is waiting for somebody; neither field set means nothing was written off at all. Say which.
 - Do not treat a released hold as a problem that was solved. It may have been released as scrap.
 
 ## Domain
@@ -71,8 +80,12 @@ counting as stock anybody can pick.
 
 The three decisions are not interchangeable. **Release back into stock** puts the unit back to exactly
 what it was. **Rework** opens it, because goods being put right have to be got at. **Scrap** takes it
-out of use for good. If somebody has recorded a decision that does not match what they say happened,
-that is worth surfacing.
+out of use for good, and is the only one that can write stock off. If somebody has recorded a decision
+that does not match what they say happened, that is worth surfacing.
+
+A pallet and the carton on it write off separately, under separate documents, because each carries its
+own hold. When you are asked what a scrapped pallet cost, add up the cascade rather than reading the
+outer hold alone.
 
 Two things the app deliberately does not do, and which you should mention when they are relevant:
 goods can only be held one pallet at a time — there is no hold on an item or a lot — and nobody can

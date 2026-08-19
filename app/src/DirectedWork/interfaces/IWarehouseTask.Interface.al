@@ -54,8 +54,9 @@ interface "WHA IWarehouseTask"
     procedure Validate_Priority(var WarehouseTask: Record "WHA Warehouse Task"; xWarehouseTask: Record "WHA Warehouse Task");
 
     /// <summary>
-    /// Moves the task between people. Refuses work that is already being done, and enforces the limit on
-    /// how many tasks one person may hold. Clearing the user returns the task to the queue.
+    /// Moves the task between people. Refuses handing started work straight to someone else, and
+    /// enforces the limit on how many tasks one person may hold. Clearing the user returns the task to
+    /// the queue — including work that had been started, which is how an operator abandons a job.
     /// </summary>
     /// <param name="WarehouseTask">The warehouse task being validated.</param>
     /// <param name="xWarehouseTask">The warehouse task as it was before the change.</param>

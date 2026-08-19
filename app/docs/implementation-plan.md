@@ -25,6 +25,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-HU-001` — handling units: the unit, nesting, contents (PRs #11–#12) |
 | Delivered | `FEAT-TASK-001` segment 1 — warehouse tasks: life cycle, priority queue, operator assignment, handling unit move on completion |
 | Delivered | `FEAT-INT-001` segment 1 — integration message spine, handler dispatch, two inbound and two outbound message types. **Built on assumed contracts** — see below |
+| Delivered | `FEAT-RF-001` segment 1 — handheld screen, device register, and a swappable scan-through flow. **Not yet seen by an operator** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
@@ -156,6 +157,13 @@ feature most likely to be judged by operators against what Qguar already does. I
 work is in scope, prototype it against real operators **early** — before the features it
 depends on are finished — because it can invalidate the design of the task queue beneath it.
 
+**Segment 1 is built, and building it early already paid for itself**: it exposed a state the
+task queue could reach but never leave — work abandoned mid-job stayed *In progress* with nobody
+holding it, invisible to everyone. Fixed, with tests. That is the cheap version of what this
+feature is for. **The expensive version is still outstanding: no operator has seen the screen.**
+Until one has, treat the step sequence as unvalidated — which is why it sits behind a single
+swappable interface rather than in the page.
+
 ## 5. Suggested sequence
 
 Assuming Phase 0 confirms a broad scope. **Re-derive this from the real register.**
@@ -168,7 +176,7 @@ Wave A    FEAT-HU-001      handling units            ← delivered
           FEAT-INT-001     integration surface       ← segment 1 delivered on assumed contracts
 
 Wave B    FEAT-TASK-001    directed work             ← segment 1 delivered
-          FEAT-RF-001      mobile device             ← prototype during Wave A
+          FEAT-RF-001      mobile device             ← segment 1 delivered; needs operator review
 
 Wave C    FEAT-WAVE-001    wave management
           FEAT-PACK-001    packing

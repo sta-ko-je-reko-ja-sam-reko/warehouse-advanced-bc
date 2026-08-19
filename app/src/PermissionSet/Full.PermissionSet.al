@@ -3,6 +3,7 @@ namespace WarehouseAdvanced.Core;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
+using WarehouseAdvanced.MobileDevice;
 
 permissionset 50002 "WHA Full"
 {
@@ -19,5 +20,7 @@ permissionset 50002 "WHA Full"
         tabledata "WHA Warehouse Task" = RIMD,
         tabledata "WHA Integration Setup" = RIMD,
         tabledata "WHA Integration Message" = RIMD,
+        tabledata "WHA RF Setup" = RIMD,
+        tabledata "WHA RF Device" = RIMD,
         tabledata "WHA Demo Data" = RIMD;
 }

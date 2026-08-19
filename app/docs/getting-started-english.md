@@ -25,6 +25,8 @@ product does not include.
 
 - [Directed work](FEAT-TASK-001-DirectedWork/getting-started-english.md) — queue warehouse jobs by
   urgency, hand the next one to whoever asks for work, and see who did what and when.
+- [Handheld](FEAT-RF-001-MobileDevice/getting-started-english.md) — the scanner screen the floor
+  actually uses: sign in, take the next job, scan your way through it.
 
 ### Talking to other systems
 

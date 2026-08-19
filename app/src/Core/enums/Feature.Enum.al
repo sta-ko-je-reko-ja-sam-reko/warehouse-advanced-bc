@@ -3,6 +3,7 @@ namespace WarehouseAdvanced.Core;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
+using WarehouseAdvanced.MobileDevice;
 
 enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
 {
@@ -28,5 +29,10 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Integration';
         Implementation = "WHA IFeatureSetup" = "WHA Int. Feature Setup";
+    }
+    value(4; WHAMobileDevice)
+    {
+        Caption = 'Handheld';
+        Implementation = "WHA IFeatureSetup" = "WHA RF Feature Setup";
     }
 }

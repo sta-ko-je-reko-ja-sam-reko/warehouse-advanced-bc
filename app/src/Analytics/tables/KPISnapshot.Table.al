@@ -93,6 +93,9 @@ table 50701 "WHA KPI Snapshot"
         key(Trend; Measure, "To Date")
         {
         }
+        key(Captured; "Location Code", "To Date")
+        {
+        }
     }
 
     fieldgroups

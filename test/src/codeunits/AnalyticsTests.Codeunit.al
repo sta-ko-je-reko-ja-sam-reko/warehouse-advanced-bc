@@ -260,6 +260,79 @@ codeunit 51013 "WHA Analytics Tests"
         Assert.ExpectedError('not enabled');
     end;
 
+    [Test]
+    procedure TheScheduledCaptureFillsInTheDaysItMissed()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+        Measure: Enum "WHA KPI Measure";
+        Captured: Integer;
+    begin
+        // [SCENARIO] A job queue entry that did not run for three days leaves three days with no figures,
+        // and nothing else ever produces them: a figure covers a period ending on the day the run
+        // happened, so the history breaks exactly where the schedule did.
+        ConfigureAnalytics();
+        SetCatchUpDays(14);
+        ClearSnapshots();
+        KeepSnapshotFor(WorkDate() - 4, Measure::WHATasksCompleted);
+
+        KpiMgt.CaptureMissing(CopyStr(LocationTok, 1, 10));
+
+        KpiSnapshot.Reset();
+        KpiSnapshot.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        KpiSnapshot.SetRange(Measure, Measure::WHATasksCompleted);
+        KpiSnapshot.SetRange("To Date", WorkDate() - 3, WorkDate());
+        Captured := KpiSnapshot.Count();
+
+        Assert.AreEqual(4, Captured, 'The three missed days and today should all have figures.');
+    end;
+
+    [Test]
+    procedure TheCatchUpGoesNoFurtherBackThanTheSettingAllows()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+        Measure: Enum "WHA KPI Measure";
+    begin
+        // [SCENARIO] A run that has been off for a year should not compute a year of history the first
+        // time somebody switches it back on. The setting bounds how far back it will go.
+        ConfigureAnalytics();
+        SetCatchUpDays(2);
+        ClearSnapshots();
+        KeepSnapshotFor(WorkDate() - 30, Measure::WHATasksCompleted);
+
+        KpiMgt.CaptureMissing(CopyStr(LocationTok, 1, 10));
+
+        KpiSnapshot.Reset();
+        KpiSnapshot.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        KpiSnapshot.SetRange(Measure, Measure::WHATasksCompleted);
+        KpiSnapshot.SetFilter("To Date", '<%1', WorkDate() - 2);
+        KpiSnapshot.SetFilter("To Date", '>%1', WorkDate() - 30);
+
+        Assert.IsTrue(KpiSnapshot.IsEmpty(), 'Nothing older than the catch-up setting should have been filled in.');
+    end;
+
+    [Test]
+    procedure AFirstEverCaptureInventsNoHistory()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+    begin
+        // [SCENARIO] A company that has never captured anything gets today and nothing else. Filling in
+        // days nobody was there for would read as a history that was never taken.
+        ConfigureAnalytics();
+        SetCatchUpDays(14);
+        ClearSnapshots();
+
+        KpiMgt.CaptureMissing(CopyStr(LocationTok, 1, 10));
+
+        KpiSnapshot.Reset();
+        KpiSnapshot.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        KpiSnapshot.SetFilter("To Date", '<%1', WorkDate());
+
+        Assert.IsTrue(KpiSnapshot.IsEmpty(), 'A first capture should keep today and nothing before it.');
+    end;
+
     local procedure ConfigureAnalytics()
     var
         Setup: Record "WHA Analytics Setup";
@@ -392,4 +465,36 @@ codeunit 51013 "WHA Analytics Tests"
         Setup."WHA Enabled" := Enabled;
         Setup.Modify(true);
     end;
+
+    local procedure SetCatchUpDays(Days: Integer)
+    var
+        Setup: Record "WHA Analytics Setup";
+    begin
+        Setup.Get();
+        Setup.Validate("Catch Up Days", Days);
+        Setup.Modify(true);
+    end;
+
+    local procedure ClearSnapshots()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+    begin
+        KpiSnapshot.Reset();
+        KpiSnapshot.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        KpiSnapshot.DeleteAll(false);
+    end;
+
+    local procedure KeepSnapshotFor(Day: Date; KpiMeasure: Enum "WHA KPI Measure")
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+    begin
+        KpiSnapshot.Init();
+        KpiSnapshot."Location Code" := CopyStr(LocationTok, 1, 10);
+        KpiSnapshot.Measure := KpiMeasure;
+        KpiSnapshot."From Date" := Day - 7;
+        KpiSnapshot."To Date" := Day;
+        KpiSnapshot.Value := 1;
+        KpiSnapshot.Insert(true);
+    end;
+
 }

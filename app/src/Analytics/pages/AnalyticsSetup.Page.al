@@ -37,6 +37,10 @@ page 50700 "WHA Analytics Setup"
                 {
                     ApplicationArea = WHAAnalytics;
                 }
+                field("Catch Up Days"; Rec."Catch Up Days")
+                {
+                    ApplicationArea = WHAAnalytics;
+                }
             }
         }
     }

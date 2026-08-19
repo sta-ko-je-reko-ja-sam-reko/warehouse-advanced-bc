@@ -76,6 +76,7 @@ codeunit 50702 "WHA KPI Feature Setup" implements "WHA IFeatureSetup"
 
         Setup.Init();
         Setup."Default Period Days" := 7;
+        Setup."Catch Up Days" := 14;
         Setup.Insert(true);
     end;
 

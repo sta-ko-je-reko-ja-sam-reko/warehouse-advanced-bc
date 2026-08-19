@@ -227,9 +227,13 @@ left in place after somebody switches the feature off stops rather than quietly 
 - **Indirect time is typed in.** There is no clock-on for a break and nothing on the handheld, so
   indirect time is only as complete as somebody's diligence — and the incomplete case makes the
   warehouse look **better** than it is, which is the direction that misleads.
-- **The scheduled run is unbounded.** It reads every completed job and skips the ones that already
-  have an entry, which is safe to repeat and costs more each time the history grows. A period to look
-  back over would bound it, and there is nowhere to put one until somebody asks for it.
+- ~~**The scheduled run is unbounded.**~~ **Delivered.** **Look back over** in the setup bounds it,
+  and the dates now go on the record before it is read rather than being checked after, so a bounded
+  run asks the database for a month of work instead of for every job the warehouse has ever finished.
+  Two things to know: the window has to be **longer than the gap between runs**, or work finished
+  while the job queue was down falls out of every run and is never measured — which is why the
+  default is a month and not a week; and **zero still reads everything**, kept on purpose for a
+  warehouse that would rather pay the cost.
 - **No standards by item or by zone.** A standard is per task type and location. Picking a pallet of
   bricks and a box of envelopes are the same job to this feature.
 - **Getting-started in the customer language** — the language has not been confirmed.

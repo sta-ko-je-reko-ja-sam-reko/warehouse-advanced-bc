@@ -1,8 +1,10 @@
 # Warehouse Advanced - Privacy Statement
 
-> **Placeholder.** This must be replaced with the publisher's real privacy statement before
-> the app is delivered to a customer. It is referenced from `app.json` (`privacyStatement`),
-> which AppSourceCop requires to be a valid, non-empty URL.
+> **Placeholder, and not yet published.** `app.json` points `privacyStatement` at
+> <https://dmom.ai/privacy>, which does not exist yet — there is no site on that domain. This
+> file is the draft content for that page. AppSourceCop only checks that the value is a
+> non-empty, well-formed URL, so the build passes either way, but a customer following the
+> link will get nothing until the page is published.
 
 ## Data this app stores
 

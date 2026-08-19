@@ -60,7 +60,6 @@ A signed-off capability register: one row per Qguar capability, its bucket, and 
 - [ ] What is the cutover model — big bang, or does the new app run alongside Qguar?
 - [ ] Which automation is planned "on top of" the WMS solution, and does it consume the
       `Integration` module's API surface or drive the UI?
-- [ ] What is the real publisher name? Both manifests still say `"Default Publisher"`.
 
 ## Known environment mismatch
 

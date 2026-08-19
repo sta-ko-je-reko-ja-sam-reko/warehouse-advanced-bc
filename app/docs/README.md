@@ -42,6 +42,17 @@ These are not feature documentation and follow no `{MARK}` convention:
 - [gap-analysis.md](gap-analysis.md) — method for turning candidate scope into real scope
 - [inventory-posting.md](inventory-posting.md) — the shared posting engine two features use, and why it is not a feature
 
+## Customer-facing legal text
+
+Drafts for the pages `app.json` links to. Neither is published — the manifest points at a
+domain with no site on it, which is a recorded and accepted debt.
+
+- [privacy-statement.md](privacy-statement.md) — draft content for the privacy page
+- [eula.md](eula.md) — draft content for the EULA page. **Unreviewed, and two clauses are
+  deliberately unfilled.** Repo-level copyright is [LICENSE](../../LICENSE) instead, which is
+  a different document for a different audience: the EULA is the agreement with the customer
+  who installs the app, the licence file is the notice to anyone who can read the source
+
 `FEAT-CORE-001-Foundation/` was **back-filled**: the foundation shipped in PRs #5–#7 without
 documentation, and everything except the role centre section was written afterwards by reading the
 objects rather than from a design record. It says so at the top. That is the honest state of it, and

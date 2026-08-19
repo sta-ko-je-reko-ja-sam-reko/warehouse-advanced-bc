@@ -192,8 +192,14 @@ set in this repo's `.git/config` only. Consequences:
 
 - Manifest URLs point at **dmom.ai** (`/privacy`, `/eula`, `/help`). **None of those pages
   exist yet** — there is no site on the domain. AppSourceCop only validates URL shape, so the
-  build passes, but the links are dead until the pages are published.
-- No LICENSE file, so there is no EULA text behind `https://dmom.ai/eula`
+  build passes, but the links are dead until the pages are published. **Decided: leave the
+  manifest pointing there and carry the debt**, rather than repoint it at the repository.
+  The consequence is that a customer following either link gets nothing, and that must be
+  closed before delivery, not before the next feature.
+- **Licence: proprietary, all rights reserved.** `LICENSE` at the repo root is the notice to
+  anyone who can read the public source and grants nothing. `app/docs/eula.md` is the
+  customer-facing agreement and is **draft, unreviewed, and has two clauses deliberately
+  left unfilled** — governing law and support terms, both commercial decisions.
 - `app/docs/privacy-statement.md` is the draft content for the privacy page
 - `app/img/AppLogo.png` is a generated placeholder, not real branding
 - No CI: `.github/workflows/` holds only a `.gitkeep`, and CI would need private

@@ -22,6 +22,9 @@ page 50000 "WHA Warehouse Setup"
                 field("Handling Unit Nos."; Rec."Handling Unit Nos.")
                 {
                 }
+                field("Warehouse Task Nos."; Rec."Warehouse Task Nos.")
+                {
+                }
             }
         }
     }

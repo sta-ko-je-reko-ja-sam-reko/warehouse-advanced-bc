@@ -26,6 +26,18 @@ table 50000 "WHA Warehouse Setup"
                 Logic().Validate_HandlingUnitNos(Rec, xRec);
             end;
         }
+        field(20; "Warehouse Task Nos."; Code[20])
+        {
+            Caption = 'Warehouse task nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to warehouse tasks.';
+            TableRelation = "No. Series";
+
+            trigger OnValidate()
+            begin
+                Logic().Validate_WarehouseTaskNos(Rec, xRec);
+            end;
+        }
     }
 
     keys

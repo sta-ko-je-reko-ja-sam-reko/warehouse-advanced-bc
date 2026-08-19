@@ -18,6 +18,10 @@ codeunit 50002 "WHA Guided Setup"
         HandlingUnitNoSeriesDescLbl: Label 'Warehouse advanced handling units';
         HandlingUnitStartingNoTok: Label 'HU000001', Locked = true;
         HandlingUnitEndingNoTok: Label 'HU999999', Locked = true;
+        WarehouseTaskNoSeriesCodeTok: Label 'WHA-TASK', Locked = true;
+        WarehouseTaskNoSeriesDescLbl: Label 'Warehouse advanced tasks';
+        WarehouseTaskStartingNoTok: Label 'WT000001', Locked = true;
+        WarehouseTaskEndingNoTok: Label 'WT999999', Locked = true;
 
     /// <summary>
     /// Fills the step buffer with the foundation step plus every feature that registers one, then
@@ -67,7 +71,7 @@ codeunit 50002 "WHA Guided Setup"
             FeatureSetup.ApplyChoices(Enable, CreateNoSeries, ImportDemoData);
         end else
             if CreateNoSeries then
-                EnsureHandlingUnitNoSeries();
+                EnsureFoundationNoSeries();
 
         FeatureMgt.RefreshExperienceAreas();
     end;
@@ -163,42 +167,45 @@ codeunit 50002 "WHA Guided Setup"
         exit(SetupLogic.IsComplete());
     end;
 
-    local procedure EnsureHandlingUnitNoSeries()
+    local procedure EnsureFoundationNoSeries()
     var
         WarehouseSetup: Record "WHA Warehouse Setup";
         SetupLogic: Codeunit "WHA Warehouse Setup Logic";
     begin
-        CreateNoSeriesIfMissing();
+        CreateNoSeriesIfMissing(HandlingUnitNoSeriesCodeTok, HandlingUnitNoSeriesDescLbl, HandlingUnitStartingNoTok, HandlingUnitEndingNoTok);
+        CreateNoSeriesIfMissing(WarehouseTaskNoSeriesCodeTok, WarehouseTaskNoSeriesDescLbl, WarehouseTaskStartingNoTok, WarehouseTaskEndingNoTok);
 
         SetupLogic.EnsureExists(WarehouseSetup);
-        if WarehouseSetup."Handling Unit Nos." <> '' then
-            exit;
 
-        WarehouseSetup.Validate("Handling Unit Nos.", HandlingUnitNoSeriesCodeTok);
+        if WarehouseSetup."Handling Unit Nos." = '' then
+            WarehouseSetup.Validate("Handling Unit Nos.", HandlingUnitNoSeriesCodeTok);
+        if WarehouseSetup."Warehouse Task Nos." = '' then
+            WarehouseSetup.Validate("Warehouse Task Nos.", WarehouseTaskNoSeriesCodeTok);
+
         WarehouseSetup.Modify(true);
     end;
 
-    local procedure CreateNoSeriesIfMissing()
+    local procedure CreateNoSeriesIfMissing(SeriesCode: Text; SeriesDescription: Text; StartingNo: Text; EndingNo: Text)
     var
         NoSeries: Record "No. Series";
         NoSeriesLine: Record "No. Series Line";
     begin
         NoSeries.SetLoadFields(Code);
-        if NoSeries.Get(HandlingUnitNoSeriesCodeTok) then
+        if NoSeries.Get(CopyStr(SeriesCode, 1, MaxStrLen(NoSeries.Code))) then
             exit;
 
         Clear(NoSeries);
         NoSeries.Init();
-        NoSeries.Code := CopyStr(HandlingUnitNoSeriesCodeTok, 1, MaxStrLen(NoSeries.Code));
-        NoSeries.Description := CopyStr(HandlingUnitNoSeriesDescLbl, 1, MaxStrLen(NoSeries.Description));
+        NoSeries.Code := CopyStr(SeriesCode, 1, MaxStrLen(NoSeries.Code));
+        NoSeries.Description := CopyStr(SeriesDescription, 1, MaxStrLen(NoSeries.Description));
         NoSeries."Default Nos." := true;
         NoSeries.Insert(true);
 
         NoSeriesLine.Init();
         NoSeriesLine."Series Code" := NoSeries.Code;
         NoSeriesLine."Line No." := 10000;
-        NoSeriesLine."Starting No." := CopyStr(HandlingUnitStartingNoTok, 1, MaxStrLen(NoSeriesLine."Starting No."));
-        NoSeriesLine."Ending No." := CopyStr(HandlingUnitEndingNoTok, 1, MaxStrLen(NoSeriesLine."Ending No."));
+        NoSeriesLine."Starting No." := CopyStr(StartingNo, 1, MaxStrLen(NoSeriesLine."Starting No."));
+        NoSeriesLine."Ending No." := CopyStr(EndingNo, 1, MaxStrLen(NoSeriesLine."Ending No."));
         NoSeriesLine.Insert(true);
     end;
 

@@ -29,7 +29,7 @@ candidate feature catalogue, and the order it should be tackled in.
 The Core module deliberately ships with **no toggleable features**: `WHA Feature` carries
 only a `None` value, and the `Application Area Setup` extension and its experience-tier
 subscriber arrive with the first real feature. Every feature below plugs into machinery that
-already exists — the step registration event, the wizard, the deferred session restart.
+already exists — the feature enum's interface dispatch, the wizard, the deferred session restart.
 
 ## 2. Phase 0 — the capability register (gates everything)
 
@@ -79,8 +79,8 @@ repo, not reachable from this repo) requires **all** of the following before a f
 |---|---|
 | Setup table + page | Single-record, with `Enabled`, delegating to a logic interface |
 | Dedicated application area | `Application Area Setup` field + experience-tier subscriber, toggled from `Enabled` |
-| Assisted setup step | Registered through the `OnRegisterSetupSteps` event; wizard branch |
-| Polymorphic logic | Interface + default logic codeunit per entity; no logic in triggers or subscribers |
+| Assisted setup step | An `enumextension` value on `WHA Feature` bound to the feature's `WHA IFeatureSetup` implementation |
+| Polymorphic logic | Interface + default logic codeunit per entity; no logic in triggers or subscribers; **no custom event publishers** |
 | API pages | One per persisted table, in the module's `apiGroup` |
 | Demo data | `WHA Demo <Feature>` idempotent `Import()`, covering every field and relation |
 | Demo API + MCP config | `[ServiceEnabled] ImportDemoData` in a dedicated `demo<Feature>` group, with agent instructions |

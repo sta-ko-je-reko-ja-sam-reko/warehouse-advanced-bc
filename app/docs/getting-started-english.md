@@ -32,6 +32,9 @@ product does not include.
 - [Wave management](FEAT-WAVE-001-WaveManagement/getting-started-english.md) — gather work into a
   batch and send it to the floor together, so a round starts and finishes as a round.
 
+- [Packing](FEAT-PACK-001-Packing/getting-started-english.md) — pack goods into a carton at a bench,
+  check what went in, and close it.
+
 ### Talking to other systems
 
 - [Integration surface](FEAT-INT-001-Integration/getting-started-english.md) — take in receipts and

@@ -9,6 +9,7 @@ codeunit 50004 "WHA Upgrade"
     begin
         EnsureSetupRecord();
         RegisterGuidedSetup();
+        RegisterMcpConfigurations();
     end;
 
     local procedure EnsureSetupRecord()
@@ -24,5 +25,12 @@ codeunit 50004 "WHA Upgrade"
         GuidedSetup: Codeunit "WHA Guided Setup";
     begin
         GuidedSetup.RegisterAssistedSetup();
+    end;
+
+    local procedure RegisterMcpConfigurations()
+    var
+        MCPSetup: Codeunit "WHA MCP Setup";
+    begin
+        MCPSetup.EnsureConfigurations();
     end;
 }

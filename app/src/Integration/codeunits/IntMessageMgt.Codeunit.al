@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.Integration;
 
 using Microsoft.Utilities;
+using WarehouseAdvanced.Core;
 
 codeunit 50653 "WHA Int. Message Mgt."
 {
@@ -14,10 +15,15 @@ codeunit 50653 "WHA Int. Message Mgt."
 
     /// <summary>
     /// The job queue entry point. Applies the inbound messages that are waiting, then fills the outbox
-    /// with anything the partner system has not been told about yet.
+    /// with anything the partner system has not been told about yet. Stops rather than carries on when
+    /// the feature has been switched off, so an entry somebody left behind cannot keep changing data
+    /// nobody expects it to touch — the same guard every scheduled run in this app carries.
     /// </summary>
     trigger OnRun()
+    var
+        FeatureMgt: Codeunit "WHA Feature Mgt.";
     begin
+        FeatureMgt.CheckEnabled(Enum::"WHA Feature"::WHAIntegration);
         ProcessQueue();
         SweepOutbound();
     end;

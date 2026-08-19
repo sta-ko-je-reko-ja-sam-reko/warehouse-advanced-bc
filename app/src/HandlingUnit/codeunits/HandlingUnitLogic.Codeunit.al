@@ -43,11 +43,15 @@ codeunit 50050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
     procedure Trigger_OnDelete(var HandlingUnit: Record "WHA Handling Unit")
     var
         Nested: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
     begin
         Nested.SetLoadFields("No.");
         Nested.SetRange("Parent No.", HandlingUnit."No.");
         if not Nested.IsEmpty() then
             Error(HasNestedUnitsErr, HandlingUnit."No.", Nested.Count());
+
+        HandlingUnitLine.SetRange("Handling Unit No.", HandlingUnit."No.");
+        HandlingUnitLine.DeleteAll(true);
     end;
 
     /// <summary>

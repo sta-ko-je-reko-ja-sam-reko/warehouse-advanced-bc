@@ -61,6 +61,24 @@ To remove an example later, open it and choose **Delete**. Take nested units out
 > Changing the **Location code** clears the **Bin code**, because a bin belongs to one location.
 > Choose the bin again after you change the location.
 
+## Record what is on a unit
+
+1. Open the handling unit.
+2. In the **Contents** part, choose the **Item no.** of the goods on the unit.
+   The description and unit of measure fill in for you.
+3. Enter the **Quantity**.
+4. If the goods carry a **Lot no.** or **Serial no.**, fill it in. A line with a serial number must
+   have a quantity of one, because a serial number identifies a single item.
+5. Add a line for each different kind of goods on the unit.
+
+**Total quantity** adds up the lines on this unit.
+
+> You can only change the contents while the unit is **Open**. Once it is closed or shipped, the
+> contents are fixed. Set the status back to **Open** if you need to correct something.
+
+> The contents belong to the unit you are looking at. If a carton sits inside a pallet, the carton's
+> goods are on the *carton* — the pallet's total does not include them.
+
 ## Put one unit inside another
 
 1. Open the handling unit you want to move inside another.
@@ -95,7 +113,9 @@ Open the unit and choose **Delete**.
 A unit that still holds nested units cannot be deleted. Take the inner units out first, then delete
 the outer one.
 
+Deleting a unit also deletes its contents, so check the **Contents** part before you delete.
+
 ## What is not here yet
 
-A handling unit does not yet record **which goods and quantities it holds**. That is coming in the
-next update, and it is what will let handling units be used in picking and shipping.
+Handling units are not yet used by picking, shipping or receiving. Recording what is on a unit works
+today, but the warehouse documents do not read it. That comes with the later features.

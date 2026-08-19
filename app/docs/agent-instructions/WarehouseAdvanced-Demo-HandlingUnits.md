@@ -15,6 +15,9 @@ demonstration and evaluation.
 a pallet, a carton nested inside that pallet, a closed cage, and a despatched pallet. Between them
 they show every status, nesting, and the SSCC label field.
 
+It also puts **example contents** on two of those units — a few lines of real items from the company,
+so the totals on the unit are not zero. If the company has no items, the units are created empty.
+
 That is the only thing you can do. You have **no** read, create, change or delete access to real
 handling units — a different configuration and a different agent handle those.
 

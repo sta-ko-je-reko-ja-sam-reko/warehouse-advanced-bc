@@ -26,11 +26,10 @@ This feature adds that unit:
 
 Nesting is configurable — it can be switched off entirely, or limited to a maximum depth.
 
-### Delivered in this segment
+### Delivered so far
 
-The handling unit entity, its nesting rules, and its enablement. **Contents are not modelled yet**:
-a handling unit does not yet know which item quantities it holds. That is the next segment and is
-what makes the unit useful for picking and shipping.
+**Segment 1** — the handling unit entity, its nesting rules, and its enablement.
+**Segment 2** — contents: which items, variants, quantities, lots and serials a unit holds.
 
 ## Data model
 
@@ -38,6 +37,7 @@ what makes the unit useful for picking and shipping.
 |---|---|---|
 | `WHA Handling Unit Setup` | 50050 | Single-record feature setup: enablement and nesting rules |
 | `WHA Handling Unit` | 50051 | The unit itself |
+| `WHA Handling Unit Line` | 50052 | What a unit holds — one line per item, variant, lot or serial |
 
 ### `WHA Handling Unit`
 
@@ -51,6 +51,7 @@ what makes the unit useful for picking and shipping.
 | `Parent No.` | `Code[20]` | Self-relation; the unit this one sits inside |
 | `Status` | `Enum "WHA Handling Unit Status"` | Open / Closed / Shipped |
 | `Nested Unit Count` | `Integer` | FlowField counting direct children |
+| `Total Quantity` | `Decimal` | FlowField summing the unit's own content lines |
 
 Keys: `PK` on `No.` (clustered), plus `Parent No.`, `Location Code + Bin Code`, and `SSCC`.
 
@@ -60,6 +61,26 @@ The handling unit number series lives on the **foundation** setup (`WHA Warehous
 Unit Nos."`), not on this feature's setup. Foundation owns cross-cutting numbering, and the guided
 setup's foundation step is what creates the `WHA-HU` series. Inserting a handling unit with no
 number errors if that series is unset.
+
+### `WHA Handling Unit Line`
+
+| Field | Type | Notes |
+|---|---|---|
+| `Handling Unit No.` | `Code[20]` | Part of the primary key |
+| `Line No.` | `Integer` | Part of the primary key; assigned in steps of 10000 |
+| `Item No.` / `Variant Code` | `Code[20]` / `Code[10]` | Changing the item clears the variant, description and unit of measure |
+| `Description` / `Unit of Measure Code` | `Text[100]` / `Code[10]` | Copied from the item |
+| `Quantity` | `Decimal` | Non-negative; exactly 1 when a serial number is present |
+| `Lot No.` / `Serial No.` | `Code[50]` | Tracking, when the goods carry it |
+
+Keys: `PK` on `Handling Unit No. + Line No.` (clustered, `SumIndexFields = Quantity`, which is what
+`Total Quantity` reads), plus `Item No. + Variant Code` (also summed), `Lot No.` and `Serial No.`
+
+**Contents are per unit, not rolled up through nesting.** A line belongs to the unit it names.
+`Total Quantity` on a pallet does not include the contents of a carton nested inside it — answering
+"everything on this pallet" means walking the nested units too. This is deliberate: rolling up
+through an arbitrary-depth hierarchy in a FlowField is not something SIFT can express, and hiding
+that cost behind a field would mislead.
 
 ## Objects
 
@@ -77,6 +98,13 @@ number errors if that series is unset.
 | `WHA Handling Unit Card` | page | 50051 | `app/src/HandlingUnit/pages/HandlingUnitCard.Page.al` |
 | `WHA Handling Units` | page | 50052 | `app/src/HandlingUnit/pages/HandlingUnits.Page.al` |
 | `WHA API Handling Unit` | page | 50053 | `app/src/HandlingUnit/pages/APIHandlingUnit.Page.al` |
+| `WHA Handling Unit Line` | table | 50052 | `app/src/HandlingUnit/tables/HandlingUnitLine.Table.al` |
+| `WHA IHandlingUnitLine` | interface | — | `app/src/HandlingUnit/interfaces/IHandlingUnitLine.Interface.al` |
+| `WHA HU Line Logic` | codeunit | 50054 | `app/src/HandlingUnit/codeunits/HULineLogic.Codeunit.al` |
+| `WHA Handling Unit Lines` | page | 50055 | `app/src/HandlingUnit/pages/HandlingUnitLines.Page.al` |
+| `WHA API Handling Unit Line` | page | 50056 | `app/src/HandlingUnit/pages/APIHandlingUnitLine.Page.al` |
+| `WHA Demo Handling Unit` | codeunit | 50053 | `app/src/HandlingUnit/codeunits/DemoHandlingUnit.Codeunit.al` |
+| `WHA API Demo Handling Unit` | page | 50054 | `app/src/HandlingUnit/pages/APIDemoHandlingUnit.Page.al` |
 | `WHA Handling Unit Tests` | codeunit | 51000 | `test/src/codeunits/HandlingUnit.Test.Codeunit.al` |
 
 All in namespace `WarehouseAdvanced.HandlingUnit`, from the reserved block `50050..50099`.
@@ -94,6 +122,18 @@ All table triggers and field validations delegate a single line to `Logic()`, re
 | `Validate_LocationCode` | Clears the bin when the location actually changes |
 | `Validate_ParentNo` | Rejects self-parenting, cycles, nesting when disabled, and exceeding max depth |
 | `GetNestingDepth` | Walks the parent chain, bounded at 100 hops |
+
+`WHA HU Line Logic` (`WHA IHandlingUnitLine`):
+
+| Operation | Behaviour |
+|---|---|
+| `Trigger_OnInsert` | Refuses contents on a unit that is not open; assigns the next line number |
+| `Validate_ItemNo` | Clears variant, description and unit of measure, then copies description and base unit of measure from the item |
+| `Validate_Quantity` | Rejects a negative quantity, and any quantity other than 1 on a serial line |
+| `GetNextLineNo` | Next free line number, in steps of 10000 |
+
+Deleting a handling unit **cascades to its lines**, so no orphan content survives. The nested-unit
+check still runs first, so the cascade only happens once the unit is genuinely deletable.
 
 Both hierarchy walks are **bounded by a guard counter**, so pre-existing cyclic data cannot hang a
 session — the cycle check prevents new cycles, but the guard protects against data that arrived
@@ -121,7 +161,7 @@ install and upgrade:
 
 | Configuration | API group | Tool | Agent may |
 |---|---|---|---|
-| `Warehouse Advanced - Handling Units` | `handlingUnit` | `WHA API Handling Unit` | read, create, modify, delete |
+| `Warehouse Advanced - Handling Units` | `handlingUnit` | `WHA API Handling Unit`, `WHA API Handling Unit Line` | read, create, modify, delete |
 | `Warehouse Advanced - Demo Handling Units` | `demoHandlingUnit` | `WHA API Demo Handling Unit` | run `importDemoData` only |
 
 The demo importer is deliberately in its **own** configuration and its **own** API group, so a
@@ -179,6 +219,8 @@ Cycle detection and depth limits need persisted parent chains, so they belong in
 tests that accompany the contents segment.
 
 ## Not done
+
+- **Rolling contents up through nesting.** See the data model note above — deliberate.
 
 - **Contents.** The unit holds no item quantities yet.
 - **Getting-started in the customer language** — the language has not been confirmed.

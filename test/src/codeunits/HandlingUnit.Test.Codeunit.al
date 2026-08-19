@@ -130,6 +130,120 @@ codeunit 51000 "WHA Handling Unit Tests"
     end;
 
     [Test]
+    procedure NegativeQuantityIsRejected()
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        xHandlingUnitLine: Record "WHA Handling Unit Line";
+        LineLogic: Codeunit "WHA HU Line Logic";
+    begin
+        // [SCENARIO] A handling unit cannot hold a negative quantity of anything.
+        HandlingUnitLine.Quantity := -1;
+
+        asserterror LineLogic.Validate_Quantity(HandlingUnitLine, xHandlingUnitLine);
+
+        Assert.ExpectedError('cannot be negative');
+    end;
+
+    [Test]
+    procedure SerialLineMustHaveQuantityOne()
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        xHandlingUnitLine: Record "WHA Handling Unit Line";
+        LineLogic: Codeunit "WHA HU Line Logic";
+    begin
+        // [SCENARIO] A serial number identifies exactly one item, so a serial line cannot carry more.
+        HandlingUnitLine."Serial No." := 'SN-0001';
+        HandlingUnitLine.Quantity := 5;
+
+        asserterror LineLogic.Validate_Quantity(HandlingUnitLine, xHandlingUnitLine);
+
+        Assert.ExpectedError('quantity of one');
+    end;
+
+    [Test]
+    procedure ChangingItemClearsVariantAndDescription()
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        xHandlingUnitLine: Record "WHA Handling Unit Line";
+        LineLogic: Codeunit "WHA HU Line Logic";
+    begin
+        // [SCENARIO] Changing the item clears the variant, so a variant of the previous item cannot
+        // be carried over onto a different item.
+        xHandlingUnitLine."Item No." := 'ITEM-A';
+        xHandlingUnitLine."Variant Code" := 'RED';
+        xHandlingUnitLine.Description := 'Old description';
+        HandlingUnitLine := xHandlingUnitLine;
+        HandlingUnitLine."Item No." := 'ITEM-B';
+
+        LineLogic.Validate_ItemNo(HandlingUnitLine, xHandlingUnitLine);
+
+        Assert.AreEqual('', HandlingUnitLine."Variant Code", 'The variant should be cleared when the item changes.');
+        Assert.AreEqual('', HandlingUnitLine.Description, 'The description should be cleared when the item changes.');
+    end;
+
+    [Test]
+    procedure ClosedUnitRefusesContents()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        // [SCENARIO] Once a handling unit is closed it is ready to ship, so its contents are fixed.
+        HandlingUnit.Init();
+        HandlingUnit."No." := 'TEST-CLOSED';
+        HandlingUnit.Status := HandlingUnit.Status::WHAClosed;
+        HandlingUnit.Insert(true);
+
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := HandlingUnit."No.";
+        asserterror HandlingUnitLine.Insert(true);
+
+        Assert.ExpectedError('Only an open handling unit can be changed');
+    end;
+
+    [Test]
+    procedure DeletingUnitRemovesItsContents()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        // [SCENARIO] Deleting a handling unit takes its content lines with it, leaving no orphans.
+        HandlingUnit.Init();
+        HandlingUnit."No." := 'TEST-DELETE';
+        HandlingUnit.Insert(true);
+
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := HandlingUnit."No.";
+        HandlingUnitLine.Insert(true);
+
+        HandlingUnit.Delete(true);
+
+        HandlingUnitLine.Reset();
+        HandlingUnitLine.SetRange("Handling Unit No.", 'TEST-DELETE');
+        Assert.IsTrue(HandlingUnitLine.IsEmpty(), 'Deleting a handling unit should remove its content lines.');
+    end;
+
+    [Test]
+    procedure LineNumbersStepByTenThousand()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        LineLogic: Codeunit "WHA HU Line Logic";
+    begin
+        // [SCENARIO] Line numbers leave room for insertion between existing lines.
+        HandlingUnit.Init();
+        HandlingUnit."No." := 'TEST-LINENO';
+        HandlingUnit.Insert(true);
+
+        Assert.AreEqual(10000, LineLogic.GetNextLineNo('TEST-LINENO'), 'The first line should be numbered 10000.');
+
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := 'TEST-LINENO';
+        HandlingUnitLine.Insert(true);
+
+        Assert.AreEqual(20000, LineLogic.GetNextLineNo('TEST-LINENO'), 'The second line should be numbered 20000.');
+    end;
+
+    [Test]
     procedure TopLevelUnitHasZeroDepth()
     var
         HandlingUnit: Record "WHA Handling Unit";

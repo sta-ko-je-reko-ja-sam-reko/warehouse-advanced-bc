@@ -6,7 +6,7 @@ N/A (greenfield).
 
 > **Scope note.** This feature was built from the candidate catalogue in
 > [../implementation-plan.md](../implementation-plan.md), **not** from a signed capability register.
-> The Qguar capability discovery (Phase 0) has not been run. Handling units were chosen first
+> The capability discovery (Phase 0) has not been run. Handling units were chosen first
 > because most of the catalogue depends on them — if this customer does not identify pallets, this
 > feature and much of what sits above it need re-scoping.
 

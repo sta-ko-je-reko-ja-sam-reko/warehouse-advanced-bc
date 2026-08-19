@@ -5,7 +5,7 @@ candidate feature catalogue, and the order it should be tackled in.
 
 > ## Read this first
 >
-> **This plan does not know what Qguar does at this customer.** No licence file,
+> **This plan does not know what the incumbent WMS does at this customer.** No licence file,
 > configuration export, transaction volumes, or floor observation has been supplied. The
 > feature catalogue in §4 is a hypothesis about what a tier-1 WMS typically offers and
 > standard Business Central typically lacks.
@@ -46,6 +46,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-WAVE-001` segment 2 — templates and workload: a reusable wave definition, a scheduled run for the job queue to call, and a cap measured in **minutes of work** rather than a count of jobs. The first time one feature's engineered standards are used to *plan* rather than to measure |
 | Delivered | `FEAT-TASK-001` segment 3 — the source document: work raised from a standard warehouse receipt or shipment, and a job that knows which order it is serving. The first `pageextension` in the app. **The link runs one way** — completing a task tells the document nothing |
 | Delivered | `FEAT-CNT-001` and `FEAT-QC-001` segment 2 — **posting**: a shared engine, chosen per feature, that turns a counted difference into an adjustment and a scrapped pallet into a write-off. Built once, in a module that is deliberately **not a feature** — see [inventory-posting.md](inventory-posting.md). **No ledger entry has ever been written by it** |
+| Delivered | **The capability register, in draft.** [gap-analysis.md](gap-analysis.md) named a signed-off register as its output and left producing one to a discovery that has never run, so every scope conversation started from a blank page. ~147 rows across 16 operational areas, buckets deliberately empty. `This app today` was checked against `app/src/` rather than taken from §4 below — which is why several catalogue promises read as absent |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of nine features — most of it blocked on customer facts, though **not as much as was claimed a moment ago**: see §5 |
@@ -75,11 +76,11 @@ Per [gap-analysis.md](gap-analysis.md). **No feature work starts until this is s
 
 | Input | Source | What it settles |
 |---|---|---|
-| Qguar module licence list | Licence file / vendor | What is *paid for* — an upper bound, not usage |
-| Configuration export | Qguar admin | What is *configured* |
-| 12 months of transaction volumes by document type | Qguar database | What is *actually used*, and how hard |
+| Incumbent WMS module licence list | Licence file / vendor | What is *paid for* — an upper bound, not usage |
+| Configuration export | Incumbent WMS admin | What is *configured* |
+| 12 months of transaction volumes by document type | Incumbent WMS database | What is *actually used*, and how hard |
 | ~~Current interface specification~~ **Observed interface traffic** | Message logs, database, and the people who operate the interface | The contract the replacement must satisfy. **No written specification exists** — this has to be reconstructed from what actually crosses the boundary |
-| Custom report and label inventory | Qguar admin | Output formats that must be reproduced |
+| Custom report and label inventory | Incumbent WMS admin | Output formats that must be reproduced |
 | Floor observation and operator interviews | On-site | Undocumented workarounds — the highest-value input |
 
 ### Classification
@@ -89,16 +90,20 @@ Every capability found lands in exactly one bucket:
 - **Standard BC** — the base app already does it, possibly with configuration. Build nothing.
 - **Configuration** — BC does it with setup work. Document it, build nothing.
 - **Build** — a genuine gap. Becomes a `FEAT-` item.
-- **Drop** — Qguar does it, nobody uses it, or the business will change process.
+- **Drop** — the incumbent does it, nobody uses it, or the business will change process.
 
 **Watch the drop rate.** A low one means the analysis is not finished, not that the scope is
 genuinely large. Record who approved each drop; they get re-litigated otherwise.
 
 ### Output
 
-A signed-off capability register: one row per Qguar capability, its bucket, and for **Build**
-rows a target feature. That register **replaces** §4 and rewrites
+A signed-off capability register: one row per capability of the system being replaced, its
+bucket, and for **Build** rows a target feature. That register **replaces** §4 and rewrites
 [modules.md](modules.md).
+
+A draft of it now exists — [gap-analysis.md](gap-analysis.md), *Candidate capability register*.
+Every bucket in it is empty, and every row was written from outside the customer's warehouse.
+It is an interview agenda, not an answer.
 
 ### Sequencing note
 
@@ -179,7 +184,7 @@ Object ID blocks are already reserved per module in [modules.md](modules.md).
 ### The one with a disproportionate risk
 
 `FEAT-RF-001`. A scanner UI is a different interaction model, not a page set, and it is the
-feature most likely to be judged by operators against what Qguar already does. If handheld
+feature most likely to be judged by operators against what the incumbent already does. If handheld
 work is in scope, prototype it against real operators **early** — before the features it
 depends on are finished — because it can invalidate the design of the task queue beneath it.
 
@@ -359,6 +364,13 @@ segments — and both times what was actually left was not a feature at all. Sch
 four features each described as somebody else's job. Retention was a table growing in the background
 that no business event bounds. Neither appears in §4, so neither was found by re-reading §4.
 
+**Then it happened a third time, from the opposite direction.** The question asked was not "what is
+left to build" but "what does the incumbent do that this app does not" — and answering it produced two
+deliverables in an afternoon: the draft register, and a documentation rule the repo had been breaking
+since the first commit. Neither is in §4 either. The lesson generalises past this document: *the work
+this project cannot see is the work no section of this project is about.* Reading §4 again will not
+find it, and neither will reading §5.
+
 **The list of catalogue work needing no customer facts is empty. The list of non-catalogue work is not,
 and it is not enumerated anywhere.** What is visible from here:
 
@@ -366,8 +378,10 @@ and it is not enumerated anywhere.** What is visible from here:
 |---|---|
 | ~~`FEAT-CORE-001` has no documentation~~ | **Back-filled.** It says at the top that everything but the role centre section was reconstructed by reading the objects, not taken from a design record |
 | ~~The app ships no role centre and no cues~~ | **Delivered.** The guess about *who uses what* was settled by decision, not by inference: the role centre belongs to Core, and every activity on it belongs to the feature it is about |
-| **No LICENSE**, and `dmom.ai/privacy`, `/eula`, `/help` do not exist | `CLAUDE.md` records all four. AppSourceCop validates URL shape only, so the build passes and the links are dead |
-| **No CI.** `.github/workflows/` is empty | And CI would need access to the private `bc-dev-templates` repo |
+| ~~The register has no draft, so discovery starts from a blank page~~ | **Delivered.** ~147 rows in [gap-analysis.md](gap-analysis.md), buckets empty. Found the same way as scheduling and retention were — by reading what the app *contains* rather than what the catalogue *claims*, which is how five stale catalogue promises surfaced |
+| ~~The incumbent WMS is named throughout the documentation~~ | **Scrubbed.** `CLAUDE.md` forbids naming another vendor's product in this public repo and 25 mentions across six files did it anyway. The vocabulary is now "the incumbent WMS" or "the system being replaced" |
+| **No LICENSE**, and `dmom.ai/privacy`, `/eula`, `/help` do not exist | `CLAUDE.md` records all four. AppSourceCop validates URL shape only, so the build passes and the links are dead. **This is the next thing that needs a decision rather than a commit** — the licence terms and whether the domain gets pages are not development calls |
+| **No CI.** `.github/workflows/` holds only a `.gitkeep` | And CI would need access to the private `bc-dev-templates` repo |
 | **`app/img/AppLogo.png` is a generated placeholder** | Not real branding |
 | **Customer-language getting-started files** | Deliberately deferred until a customer is engaged |
 
@@ -487,8 +501,8 @@ Undecided, and it changes the plan materially:
 
 - **Big bang** — everything in the register must ship before cutover. Sequencing is dictated
   by the cutover date, and the drop rate in Phase 0 becomes the main lever.
-- **Parallel run** — features ship incrementally while Qguar still runs. `FEAT-INT-001` then
-  has to handle two systems holding stock at once, which is a substantially harder integration
+- **Parallel run** — features ship incrementally while the incumbent WMS still runs.
+  `FEAT-INT-001` then has to handle two systems holding stock at once, which is a substantially harder integration
   problem and should be sized accordingly.
 
 The `Enabled` flag and per-feature application areas already support a phased rollout: a
@@ -500,8 +514,8 @@ feature can ship dark and be switched on per company when the business is ready.
 |---|---|---|
 | Scope taken from this document instead of Phase 0 | The catalogue is a hypothesis; §3 shows the cost of over-scoping | Treat §4 as an interview agenda; rewrite from the signed register |
 | Handling units turn out not to be used | Invalidates the dependency spine of the catalogue | Establish it in the first Phase 0 session |
-| Handheld expectations set by Qguar | `FEAT-RF-001` is judged against an incumbent operators know | Prototype early with real operators |
-| Undocumented Qguar customisations | The classic source of late scope | Floor observation and interviews, not just the config export |
+| Handheld expectations set by the incumbent | `FEAT-RF-001` is judged against a system operators already know | Prototype early with real operators |
+| Undocumented customisations in the incumbent | The classic source of late scope | Floor observation and interviews, not just the config export |
 | Dev container is US, production is W1 | Localisation-specific behaviour will not surface locally | Rebuild the container from a W1 artifact before posting-related work |
 | Public repo needs private conventions | A fresh clone will not build; CI cannot run without access | Accepted trade; revisit if CI is introduced |
 | No LICENSE, dead manifest URLs | `dmom.ai/privacy`, `/eula`, `/help` do not exist | Publish the pages, or point the manifest somewhere real, before customer delivery |
@@ -528,10 +542,21 @@ feature can ship dark and be switched on per company when the business is ready.
 
    So this is one credential away, not a piece of work. Whoever has the container password can open
    `test/` and press F5.
-2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
+2. **Run Phase 0.** Collect the six inputs in §2 and fill in the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
    badly overdue: **all fourteen features** in the catalogue have been built from the hypothesis, and
    there is no longer a next feature whose cost the register could reduce — only rework.
+
+   **The register itself is no longer the obstacle.** A draft exists in
+   [gap-analysis.md](gap-analysis.md) — ~147 rows, every bucket empty — so the step is now *fill
+   this in against the customer*, not *write it from nothing*. What it cannot supply is the part
+   that was always going to be expensive: the local customisations nobody wrote down. A list
+   composed from outside the warehouse cannot contain them, and it says so at the top.
+
+   Three of its rows are worth reading before any of the others, because they invalidate what is
+   already built rather than adding to it: **shelf life and FEFO** (nothing in the app refers to
+   expiry), **lot and serial on directed work** (`WHA Warehouse Task` has no tracking fields, so a
+   directed pick of a tracked item cannot say what it picked), and **multi-owner stock**.
 
    Wave C sharpened this from *overdue* to *blocking*. Reading the three features' outstanding work
    (§5) shows most of what remains cannot be designed at all without customer facts: label stock and

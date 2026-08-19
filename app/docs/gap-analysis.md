@@ -20,11 +20,11 @@ stage and expensive to fix later:
 
 | Input | Source | What it settles |
 |---|---|---|
-| Qguar module licence list | Customer's licence file / vendor | Which modules are *paid for* — an upper bound, not usage |
-| Configuration export | Qguar admin | Which are *configured* — closer to reality |
-| 12 months of transaction volumes by document type | Qguar database | Which are *actually used*, and how hard |
+| Incumbent WMS module licence list | Customer's licence file / vendor | Which modules are *paid for* — an upper bound, not usage |
+| Configuration export | Incumbent WMS admin | Which are *configured* — closer to reality |
+| 12 months of transaction volumes by document type | Incumbent WMS database | Which are *actually used*, and how hard |
 | Interface specification (current) | Existing integration | The contract the replacement must satisfy |
-| Custom report and label inventory | Qguar admin | Output formats that must be reproduced |
+| Custom report and label inventory | Incumbent WMS admin | Output formats that must be reproduced |
 | Floor observation / operator interviews | On-site | Undocumented workarounds — the highest-value input |
 
 ## Classification
@@ -34,7 +34,7 @@ Each capability found lands in exactly one bucket:
 - **Standard BC** — covered by the base app, possibly with configuration. Build nothing.
 - **Configuration** — covered by BC with setup work. Document it, build nothing.
 - **Build** — genuine gap. Goes into a module in `modules.md` with an ID block.
-- **Drop** — Qguar does it, nobody uses it, or the business is willing to change process.
+- **Drop** — the incumbent does it, nobody uses it, or the business is willing to change process.
   Record the decision and who made it; these get re-litigated later otherwise.
 
 The **Drop** column is the one that determines whether this project is deliverable. Treat
@@ -345,7 +345,7 @@ Drops, recorded one by one, because they are the rows that get re-opened:
 
 ## Open questions
 
-- [ ] What is the cutover model — big bang, or does the new app run alongside Qguar?
+- [ ] What is the cutover model — big bang, or does the new app run alongside the incumbent WMS?
 - [ ] Which automation is planned "on top of" the WMS solution, and does it consume the
       `Integration` module's API surface or drive the UI?
 

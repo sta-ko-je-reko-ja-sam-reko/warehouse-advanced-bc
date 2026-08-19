@@ -37,6 +37,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | `FEAT-CORE-001` — **documentation, back-filled.** The foundation shipped in PRs #5–#7 with none, and was the only feature without a docs folder. Four tests added for the enum mechanism that everything else in the app depends on |
 | Delivered | `FEAT-CORE-001` — **the role centre**: a home page owned by the foundation whose tiles are contributed by the features themselves, through an extensible enum. Core names no feature. Nine features contribute; five deliberately do not |
 | Delivered | `FEAT-INT-001` segment 2 — retention: the message log offered to Business Central's own retention policy framework, rather than a bespoke clean-up this feature would have imitated badly |
 | Delivered | Scheduling for `FEAT-SLOT-001`, `FEAT-LAB-001` and `FEAT-KPI-001` — the last piece of catalogue work that needed nothing from Phase 0. Every recurring run in the app can now be given to the job queue |
@@ -362,6 +363,7 @@ and it is not enumerated anywhere.** What is visible from here:
 
 | Not in the catalogue | State |
 |---|---|
+| ~~`FEAT-CORE-001` has no documentation~~ | **Back-filled.** It says at the top that everything but the role centre section was reconstructed by reading the objects, not taken from a design record |
 | ~~The app ships no role centre and no cues~~ | **Delivered.** The guess about *who uses what* was settled by decision, not by inference: the role centre belongs to Core, and every activity on it belongs to the feature it is about |
 | **No LICENSE**, and `dmom.ai/privacy`, `/eula`, `/help` do not exist | `CLAUDE.md` records all four. AppSourceCop validates URL shape only, so the build passes and the links are dead |
 | **No CI.** `.github/workflows/` is empty | And CI would need access to the private `bc-dev-templates` repo |
@@ -373,6 +375,26 @@ dimensions, what a packer verifies against, a bin capacity model) or a scope dec
 warehouse documents, what links a vehicle visit to a put-away). Continuing to build features would
 mean guessing at one of those, and every feature built that way adds unvalidated behaviour without
 reducing the risk that Phase 0 invalidates it.
+
+### What back-filling the foundation's documentation found
+
+Writing it required reading every Core object, which is not the same as reading the code while writing
+it. Two things surfaced that no feature work would have:
+
+- **The foundation had no tests at all.** Fourteen features depend on one mechanism — an extensible
+  enum walked by ordinal — and nothing asserted that the mechanism works. Four tests now do, and one of
+  them earns its place: every activity provider adds counts to a **single dictionary**, and
+  `Dictionary.Add` throws on a duplicate key, so two features claiming the same cue field number would
+  take the role centre down. That test is where it surfaces.
+- **Three claims the document makes are still unchecked**, and it says so rather than quietly asserting
+  them. One of them — that the guided setup lists every feature exactly once — would need
+  `PopulateSteps` widened from `internal` to reach the test project. **Widening an API to suit a test
+  is the wrong trade to make quietly**, so it was not made, and the gap is recorded instead.
+
+The document also carries a warning worth keeping on any back-filled document: everything but the role
+centre section was reconstructed from the objects rather than written from a design record, so its
+"why" is a reading of the code that has held up, not a decision log. That distinction matters most to
+whoever inherits it.
 
 ### What the role centre argued
 
@@ -469,7 +491,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 288 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 292 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

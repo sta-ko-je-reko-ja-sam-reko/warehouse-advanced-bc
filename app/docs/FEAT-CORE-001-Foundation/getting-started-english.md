@@ -1,5 +1,32 @@
 # FEAT-CORE-001 - Foundation
 
+Setting the app up, switching features on and off, and the home page that shows you what needs doing.
+
+## Set the app up
+
+1. Choose the search icon, enter **Warehouse Advanced Setup**, and choose the related link. You can
+   also find it in **Assisted Setup**.
+2. You get a list of everything the app can do. Each row tells you what the feature is for and whether
+   it is switched on.
+3. Choose a row, then **Set up**. A short wizard asks three things:
+   - **Enable this feature** — whether you want it at all.
+   - **Create and assign number series** — only offered for features that number something.
+   - **Load sample data** — examples to try things out with.
+4. Work down the list. Set up as few or as many as you like; the ones you skip stay hidden.
+5. **Close the list when you are done.** Your session restarts once, so the features you switched on
+   appear. It restarts once no matter how many features you set up.
+
+**Detailed setup** on any row opens that feature's full settings, for the things the wizard does not
+ask about.
+
+## Turning a feature off later
+
+Open its own setup page and clear **Enabled**, or come back to the list. Either way your session
+restarts so the pages and actions disappear. **Nothing is deleted** — what the feature recorded stays,
+and switching it back on brings it into view again.
+
+## Your home page
+
 A home page for the warehouse: what is waiting, what is stuck, and what nobody has looked at yet.
 
 Everything else this app does happens on its own page — a job on the queue, a sheet on the floor, a

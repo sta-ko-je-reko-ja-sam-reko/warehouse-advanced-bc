@@ -40,6 +40,7 @@ completed cannot be deleted at all, because it is the record that the work happe
 
 **Segment 1** — the task entity, its life cycle, the priority queue, operator assignment, and the
 handling unit move on completion.
+**Segment 2** — partial completion: a job finished with less than it asked for, and why.
 
 ## Data model
 
@@ -60,6 +61,8 @@ handling unit move on completion.
 | `Handling Unit No.` | `Code[20]` | The unit being moved. Setting it copies the unit's location and bin |
 | `Item No.` / `Variant Code` | `Code[20]` / `Code[10]` | The goods, when the task is not about a whole unit |
 | `Quantity` / `Unit of Measure Code` | `Decimal` / `Code[10]` | Non-negative; the unit of measure comes from the item |
+| `Quantity Handled` | `Decimal` | What was **actually** moved. Set on completion, not editable |
+| `Short Reason` | `Enum "WHA Whse. Short Reason"` | Why the rest was not moved |
 | `Status` | `Enum "WHA Warehouse Task Status"` | Created / Released / Assigned / In progress / Completed / Cancelled. Not editable — the actions move it |
 | `Priority` | `Integer` | Lower is more urgent. Defaults from the setup |
 | `Due Date` | `Date` | Breaks ties between tasks of equal priority |
@@ -93,6 +96,7 @@ idempotent and leaves the handling unit series alone.
 | `Enabled` | The feature toggle |
 | `Default Priority` | Given to a task created without one. Ships as 100, so more and less urgent work both fit around it |
 | `Auto Release Tasks` | Releases a new task as it is created — but only if it already names a location and something to move, so a half-built task never reaches the floor |
+| `Follow Up Short Picks` | Raises a new task for whatever an operator could not find. Off by default — see below |
 | `Max Open Tasks Per User` | How many assigned or in-progress tasks one person may hold. Zero means no limit |
 
 **No task history table.** The stamps on the task are the audit trail for segment 1. A separate
@@ -144,7 +148,8 @@ All table triggers and field validations delegate a single line to `Logic()`, re
 | `Release` | Created → Released. Refuses a task with no location, or with nothing to move |
 | `Assign` | Validates the user through the field, then modifies |
 | `Start` | Assigned → In progress, stamping `Started At` |
-| `Complete` | In progress → Completed, stamping `Completed At`, then moves the handling unit |
+| `Complete` | In progress → Completed, stamping `Completed At` and `Quantity Handled` in full, then moves the handling unit |
+| `CompleteShort` | In progress → Completed with **less** than was asked for, recording how much and why, and raising a follow-up if the setup asks for one |
 | `Cancel` | Anything not already completed or cancelled → Cancelled |
 | `GetNextForUser` | The operator's in-progress work, then their assigned work, then the most urgent released task at the location — which is assigned to them as it is handed over |
 
@@ -155,6 +160,28 @@ makes the stamps trustworthy.
 **Assignment is a field validation, not just an action.** Whether the change comes from the card, a
 `PATCH` on the API, or `GetNextForUser`, it lands in `Validate_AssignedToUserID` and gets the same
 checks. `Assign` is a thin wrapper that validates and modifies.
+
+### Partial completion — what a short pick does and does not do
+
+An operator sent for twelve who finds four reports the job **short**: it closes as *Completed* with
+`Quantity Handled = 4` and a reason. Three decisions worth arguing with:
+
+- **`Quantity` is never rewritten.** It stays as the record of what was asked for; `Quantity Handled`
+  is what happened. Overwriting the ask would destroy the only evidence there was a shortfall.
+- **A short pick closes the job — it is not a hand back.** An empty bin is an *answer*, and the
+  office needs it. Handing back instead sends the next operator to the same empty bin.
+- **The outstanding quantity is reported, not automatically re-queued.** `Follow Up Short Picks` is
+  **off** by default, because re-raising work for stock that is not there is how a warehouse gets
+  busy without getting anything done. Switched on, the follow-up carries the outstanding quantity,
+  the same location, bins, item and priority, and a description naming the task it came from.
+  Whether that follow-up reaches the floor is decided by `Auto Release Tasks` as for any other task.
+
+Whole-unit jobs — a task naming a handling unit and no quantity — **cannot** be short: there is no
+partial version of moving a pallet, and `CompleteShort` says so rather than pretending.
+
+`WHA Whse. Short Reason` is extensible and its values are **a guess at how this warehouse talks**
+(nothing in the bin, not enough, damaged, cannot reach it). The operator review script asks for the
+words operators actually use; expect to replace these with them.
 
 ### Where this touches handling units
 
@@ -250,6 +277,13 @@ tests use real records and rely on the test runner's rollback.
 | `CompletingMovesTheHandlingUnit` | The cross-feature move actually lands on the unit |
 | `ShippedHandlingUnitCannotBeGivenWork` | A shipped unit is out of scope for new work |
 | `UserTaskLimitIsEnforced` | The per-user limit blocks the second assignment |
+| `HandingBackStartedWorkReturnsItToTheQueue` | Abandoned work returns to the queue and stops claiming it was started |
+| `ShortPickRecordsWhatWasActuallyMoved` | Four of twelve closes at four, with the ask left intact |
+| `CompletingInFullRecordsTheWholeQuantity` | Every finished task can be read the same way |
+| `ShortPickCannotClaimMoreThanWasAsked` | Short is for finding less, never more |
+| `AJobWithNoQuantityCannotBeShort` | A pallet move is all or nothing |
+| `NoFollowUpIsRaisedUnlessTheSetupAsksForOne` / `AFollowUpCarriesTheOutstandingQuantity` | The re-queue decision is configuration, both ways |
+| `NothingFoundAtAllStillClosesTheJob` | An empty bin is an answer, not a hand back |
 | `DemoImportIsIdempotent` / `DemoImportCoversEveryTaskType` | The seeder is safe to re-run and covers the enum |
 
 ## Not done
@@ -263,5 +297,9 @@ tests use real records and rely on the test runner's rollback.
   that turns this from a queue into an execution layer, and it should be designed against what the
   capability register says the customer actually receives and ships.
 - **Task history.** See the data model note above — deliberate.
+- **Over-picking.** A job can be closed with less than was asked for, never with more. Finding
+  fourteen where twelve were wanted is a different conversation, and nobody has had it yet.
+- **No inventory effect.** `Quantity Handled` records what an operator moved; it posts nothing. What
+  a short pick should do to stock is a question for the capability register.
 - **Handheld presentation.** `FEAT-RF-001` is the scanner-shaped view of this queue.
 - **Getting-started in the customer language** — the language has not been confirmed.

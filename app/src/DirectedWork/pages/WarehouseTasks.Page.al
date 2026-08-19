@@ -49,6 +49,12 @@ page 50202 "WHA Warehouse Tasks"
                 field(Quantity; Rec.Quantity)
                 {
                 }
+                field("Quantity Handled"; Rec."Quantity Handled")
+                {
+                }
+                field("Short Reason"; Rec."Short Reason")
+                {
+                }
                 field("Assigned To User ID"; Rec."Assigned To User ID")
                 {
                 }

@@ -25,7 +25,8 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-HU-001` — handling units: the unit, nesting, contents (PRs #11–#12) |
 | Delivered | `FEAT-TASK-001` segment 1 — warehouse tasks: life cycle, priority queue, operator assignment, handling unit move on completion |
 | Delivered | `FEAT-INT-001` segment 1 — integration message spine, handler dispatch, two inbound and two outbound message types. **Built on assumed contracts** — see below |
-| Delivered | `FEAT-RF-001` segment 1 — handheld screen, device register, and a swappable scan-through flow. **Not yet seen by an operator** |
+| Delivered | `FEAT-RF-001` segments 1-2 — handheld screen, device register, a swappable scan-through flow, and the short pick. **Not yet seen by an operator** |
+| Delivered | `FEAT-TASK-001` segment 2 — partial completion: a job finished with less than it asked for, and why |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |

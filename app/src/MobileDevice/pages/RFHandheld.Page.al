@@ -66,6 +66,26 @@ page 50103 "WHA RF Handheld"
                     Editable = false;
                 }
             }
+            group(Short)
+            {
+                Caption = 'What you found';
+                Visible = ShortVisible;
+
+                field(HandledQuantity; HandledQuantity)
+                {
+                    Caption = 'Quantity found';
+                    ToolTip = 'Specifies how many you actually found. Enter zero if there were none at all.';
+                    DecimalPlaces = 0 : 5;
+                    MinValue = 0;
+                    Editable = true;
+                }
+                field(ShortReason; ShortReason)
+                {
+                    Caption = 'Why';
+                    ToolTip = 'Specifies why the rest is missing, so the office knows what to do about it.';
+                    Editable = true;
+                }
+            }
             group(Job)
             {
                 Caption = 'Your job';
@@ -130,6 +150,30 @@ page 50103 "WHA RF Handheld"
                     ApplyConfirm();
                 end;
             }
+            action(ShortPickTask)
+            {
+                Caption = 'Report short';
+                ToolTip = 'Specifies the action for when there is less on the shelf than the job asks for.';
+                Image = Warning;
+                Enabled = HasJob and not ShortVisible;
+
+                trigger OnAction()
+                begin
+                    ApplyStartShortPick();
+                end;
+            }
+            action(ConfirmShortTask)
+            {
+                Caption = 'Confirm short';
+                ToolTip = 'Specifies the action that finishes the job with what you actually found.';
+                Image = ApprovalSetup;
+                Enabled = ShortVisible;
+
+                trigger OnAction()
+                begin
+                    ApplyShortPick();
+                end;
+            }
             action(HandBackTask)
             {
                 Caption = 'Hand back';
@@ -155,6 +199,12 @@ page 50103 "WHA RF Handheld"
                 actionref(ConfirmTaskRef; ConfirmTask)
                 {
                 }
+                actionref(ShortPickTaskRef; ShortPickTask)
+                {
+                }
+                actionref(ConfirmShortTaskRef; ConfirmShortTask)
+                {
+                }
                 actionref(HandBackTaskRef; HandBackTask)
                 {
                 }
@@ -171,10 +221,13 @@ page 50103 "WHA RF Handheld"
     var
         RFDevice: Record "WHA RF Device";
         CurrentStep: Enum "WHA RF Step";
+        ShortReason: Enum "WHA Whse. Short Reason";
         DeviceCode: Code[20];
         ScanInput: Text;
         InstructionText: Text;
+        HandledQuantity: Decimal;
         HasJob: Boolean;
+        ShortVisible: Boolean;
 
     local procedure SignIn()
     begin
@@ -216,6 +269,20 @@ page 50103 "WHA RF Handheld"
         Refresh();
     end;
 
+    local procedure ApplyStartShortPick()
+    begin
+        CurrentStep := Flow().StartShortPick(Rec, CurrentStep);
+        HandledQuantity := 0;
+        Clear(ShortReason);
+        Refresh();
+    end;
+
+    local procedure ApplyShortPick()
+    begin
+        CurrentStep := Flow().ShortPick(Rec, HandledQuantity, ShortReason);
+        ClearJob();
+    end;
+
     local procedure ApplyConfirm()
     begin
         CurrentStep := Flow().Confirm(Rec, CurrentStep);
@@ -231,12 +298,15 @@ page 50103 "WHA RF Handheld"
     local procedure ClearJob()
     begin
         Rec.Init();
+        HandledQuantity := 0;
+        Clear(ShortReason);
         Refresh();
     end;
 
     local procedure Refresh()
     begin
         HasJob := Rec."No." <> '';
+        ShortVisible := CurrentStep = CurrentStep::WHAShortPick;
         InstructionText := Flow().Instruction(Rec, CurrentStep);
         CurrPage.Update(false);
     end;

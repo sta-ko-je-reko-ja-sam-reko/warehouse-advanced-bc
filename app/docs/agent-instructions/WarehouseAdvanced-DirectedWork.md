@@ -24,6 +24,10 @@ Standard Business Central directs work through documents and has no such queue; 
 - **handlingUnitNumber** — the pallet, cage or carton being moved, if the job is about a whole unit.
 - **itemNumber**, **variantCode**, **quantity**, **unitOfMeasureCode** — the goods, if the job is not
   about a whole unit.
+- **quantityHandled** and **shortReason** — read only. What was *actually* moved, and why the rest was
+  not. On a job done in full, `quantityHandled` equals `quantity`; on a short pick it is less, and
+  `shortReason` says what the operator found. **`quantity` is never rewritten** — it stays as the
+  record of what was asked for, so the difference between the two is the shortfall.
 - **priority** — **lower is more urgent**. Leave it empty to take the configured default.
 - **dueDate** — breaks ties between tasks of equal priority.
 - **assignedToUserId** — who is doing it. Setting this assigns the task; clearing it hands the task
@@ -88,6 +92,10 @@ You cannot skip a step and you cannot write `status` directly:
 - **Do not pick the next job for an operator by guessing.** Read the queue in priority order, or ask
   the user which task they mean.
 - **Do not delete tasks to tidy up.** Cancel is the withdrawal that keeps the history.
+- **Do not report a job short, and do not "correct" `quantityHandled`.** A short pick is a claim
+  about what was on a shelf, made by someone who was standing in front of it. You were not. If a
+  user says the recorded quantity is wrong, tell them who can change it and how — do not do it for
+  them.
 - Do not treat a completed task as an inventory posting. Completing work records where a handling
   unit now is; it does not post item ledger entries.
 
@@ -95,6 +103,10 @@ You cannot skip a step and you cannot write `status` directly:
 
 A task answers three questions: *what kind of job*, *where*, and *what is being moved*. The third is
 answered either by a handling unit or by an item and a quantity — one or the other, not usually both.
+
+A finished job carries two quantities, and reading the wrong one is the classic mistake: `quantity`
+is what was wanted, `quantityHandled` is what happened. "Did that order get picked" is answered by
+comparing them, never by the status alone — a job completed short is `WHACompleted` too.
 
 Priority is the queue. A lower number is more urgent, and a due date breaks the tie between equally
 urgent jobs. An operator asking for work gets their own unfinished job back before anything new,

@@ -60,6 +60,9 @@ codeunit 50656 "WHA Int. Task Confirm" implements "WHA IIntMessageHandler"
         PayloadObject.Add('itemNumber', WarehouseTask."Item No.");
         PayloadObject.Add('variantCode', WarehouseTask."Variant Code");
         PayloadObject.Add('quantity', WarehouseTask.Quantity);
+        PayloadObject.Add('quantityHandled', WarehouseTask."Quantity Handled");
+        PayloadObject.Add('quantityOutstanding', WarehouseTask.Quantity - WarehouseTask."Quantity Handled");
+        PayloadObject.Add('shortReason', Format(WarehouseTask."Short Reason", 0, 9));
         PayloadObject.Add('unitOfMeasureCode', WarehouseTask."Unit of Measure Code");
         PayloadObject.Add('assignedToUserId', WarehouseTask."Assigned To User ID");
         PayloadObject.Add('startedDateTime', MessageMgt.IsoDateTime(WarehouseTask."Started At"));

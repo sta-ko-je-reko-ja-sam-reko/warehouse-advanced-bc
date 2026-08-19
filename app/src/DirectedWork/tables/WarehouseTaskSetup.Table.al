@@ -31,6 +31,12 @@ table 50200 "WHA Warehouse Task Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies whether a new warehouse task is released for work as soon as it is created, provided it already names a location and something to move. Leave this off to review tasks before they reach the floor.';
         }
+        field(35; "Follow Up Short Picks"; Boolean)
+        {
+            Caption = 'Raise a follow-up for short picks';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether a new warehouse task is raised for whatever an operator could not find. The follow-up is created as a draft, so somebody decides whether it is worth sending a second person to the same bin.';
+        }
         field(40; "Max Open Tasks Per User"; Integer)
         {
             Caption = 'Max open tasks per user';

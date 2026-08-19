@@ -70,6 +70,21 @@ That is the screen doing its job. Go to the bin it names and scan again. If the 
 asks for does not exist where it says, hand the job back and tell your supervisor: something is
 wrong with the job, not with you.
 
+## When there is less on the shelf than the job asks for
+
+1. Choose **Report short**. You can do this at any point while you are holding the job — you do not
+   have to scan your way to the end first.
+2. Enter **Quantity found** — how many you actually have. Enter zero if there were none at all.
+3. Choose **Why**: nothing in the bin, not enough in the bin, damaged, or cannot reach it.
+4. Choose **Confirm short**.
+
+The job closes with what you actually found, and the office can see the difference and what you said
+about it. This is better than handing the job back: handing back sends the next person to the same
+shelf to find the same problem.
+
+A job that moves a whole pallet cannot be reported short — there is no half a pallet. Hand that one
+back instead.
+
 ## When you cannot finish a job
 
 Choose **Hand back**. The job returns to the queue and anybody, including you, can be given it
@@ -86,6 +101,7 @@ feature**. It is safe to run more than once.
 
 ## What is not here yet
 
-You cannot yet say that only part of a job was possible — that there were four on the shelf and not
-twelve. There is no way to scan the item or the lot, only the pallet. And the screen needs a
-connection: if it drops, you lose your place on the job, though not the job itself.
+There is no way to scan the item or the lot, only the pallet — so an item job is confirmed without
+proving what was picked. You cannot report a wrong item in the bin, or a damaged pallet, other than
+by choosing a short reason. And the screen needs a connection: if it drops, you lose your place on
+the job, though not the job itself.

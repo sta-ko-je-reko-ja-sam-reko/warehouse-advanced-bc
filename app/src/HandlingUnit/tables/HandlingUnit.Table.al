@@ -77,6 +77,15 @@ table 50051 "WHA Handling Unit"
             CalcFormula = count("WHA Handling Unit" where("Parent No." = field("No.")));
             Editable = false;
         }
+        field(41; "Total Quantity"; Decimal)
+        {
+            Caption = 'Total quantity';
+            ToolTip = 'Specifies the total quantity of goods recorded on the handling unit.';
+            FieldClass = FlowField;
+            CalcFormula = sum("WHA Handling Unit Line".Quantity where("Handling Unit No." = field("No.")));
+            Editable = false;
+            DecimalPlaces = 0 : 5;
+        }
     }
 
     keys

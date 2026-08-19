@@ -174,6 +174,11 @@ set in this repo's `.git/config` only. Consequences:
 
 ## Known outstanding items
 
+- **Customer-language getting-started files are deliberately deferred.** `feature-ready.md` requires
+  `getting-started-<lang>.md` per feature, and no feature has one. This is an accepted deviation
+  until a customer is engaged and the language is known — not an oversight. English getting-started
+  files are written as features ship, so the translation pass has something to work from.
+
 - Manifest URLs point at **dmom.ai** (`/privacy`, `/eula`, `/help`). **None of those pages
   exist yet** — there is no site on the domain. AppSourceCop only validates URL shape, so the
   build passes, but the links are dead until the pages are published.

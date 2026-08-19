@@ -40,6 +40,20 @@ page 50051 "WHA Handling Unit Card"
                 {
                 }
             }
+            part(Contents; "WHA Handling Unit Lines")
+            {
+                Caption = 'Contents';
+                SubPageLink = "Handling Unit No." = field("No.");
+                UpdatePropagation = Both;
+            }
+            group(Totals)
+            {
+                Caption = 'Totals';
+
+                field("Total Quantity"; Rec."Total Quantity")
+                {
+                }
+            }
             group(Nesting)
             {
                 Caption = 'Nesting';

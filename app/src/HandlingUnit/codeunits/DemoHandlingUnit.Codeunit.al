@@ -1,5 +1,6 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
+using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Location;
 using System.IO;
 
@@ -32,6 +33,8 @@ codeunit 50053 "WHA Demo Handling Unit"
         InsertUnit('DEMO-HU-002', CartonDescLbl, '', 'DEMO-HU-001', Status::WHAOpen);
         InsertUnit('DEMO-HU-003', CageDescLbl, '', '', Status::WHAClosed);
         InsertUnit('DEMO-HU-004', ShippedDescLbl, '380123456789012357', '', Status::WHAShipped);
+
+        InsertSampleContents();
 
         CreateConfigPackage();
     end;
@@ -70,6 +73,40 @@ codeunit 50053 "WHA Demo Handling Unit"
         HandlingUnit.Validate("Location Code", Location.Code);
     end;
 
+    local procedure InsertSampleContents()
+    var
+        Item: Record Item;
+    begin
+        Item.SetLoadFields("No.");
+        Item.SetRange(Type, Item.Type::Inventory);
+        Item.SetRange(Blocked, false);
+        if not Item.FindSet() then
+            exit;
+
+        InsertLine('DEMO-HU-001', 10000, Item."No.", 12);
+        if Item.Next() = 0 then
+            exit;
+        InsertLine('DEMO-HU-001', 20000, Item."No.", 6);
+        if Item.Next() = 0 then
+            exit;
+        InsertLine('DEMO-HU-002', 10000, Item."No.", 24);
+    end;
+
+    local procedure InsertLine(UnitNo: Code[20]; LineNo: Integer; ItemNo: Code[20]; Qty: Decimal)
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        if HandlingUnitLine.Get(UnitNo, LineNo) then
+            exit;
+
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := UnitNo;
+        HandlingUnitLine."Line No." := LineNo;
+        HandlingUnitLine.Validate("Item No.", ItemNo);
+        HandlingUnitLine.Validate(Quantity, Qty);
+        HandlingUnitLine.Insert(true);
+    end;
+
     local procedure CreateConfigPackage()
     var
         ConfigPackage: Record "Config. Package";
@@ -81,5 +118,6 @@ codeunit 50053 "WHA Demo Handling Unit"
 
         ConfigPackageMgt.InsertPackage(ConfigPackage, PackageCodeTok, CopyStr(PackageNameLbl, 1, 50), true);
         ConfigPackageMgt.InsertPackageTable(ConfigPackageTable, PackageCodeTok, Database::"WHA Handling Unit");
+        ConfigPackageMgt.InsertPackageTable(ConfigPackageTable, PackageCodeTok, Database::"WHA Handling Unit Line");
     end;
 }

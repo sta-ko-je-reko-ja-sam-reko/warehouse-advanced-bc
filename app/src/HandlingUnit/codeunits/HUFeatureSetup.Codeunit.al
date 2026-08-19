@@ -95,6 +95,7 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
         MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Handling Unit", true, true, true);
+        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Handling Unit Line", true, true, true);
         MCPSetup.Activate(ConfigId);
     end;
 

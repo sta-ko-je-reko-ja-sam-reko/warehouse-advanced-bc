@@ -10,56 +10,76 @@ app. A handling unit is a physical thing that goods sit on or in — a pallet, c
 as one numbered item that can be moved, stacked inside another, and labelled for trading partners.
 Standard Business Central has no such concept; this app adds it.
 
-## What you can do
+## Your tools
 
-You have one tool, `handlingUnits`. You may read, create, change and delete. Each unit has:
+**`handlingUnits`** — the units themselves. Read, create, change, delete.
 
 - **number** — its identifier. **Leave this empty when creating**; the app assigns it from the
   configured number series. Never invent one.
-- **sscc** — the serial shipping container code on its label, used by trading partners.
+- **sscc** — the serial shipping container code on its label.
 - **description** — what the unit holds or is for.
 - **locationCode** and **binCode** — where it is. The bin must belong to that location.
 - **parentNumber** — the unit this one sits inside, if any.
-- **status** — `WHAOpen` while it is being built up, `WHAClosed` when ready, `WHAShipped` once gone.
+- **status** — `WHAOpen` while being built up, `WHAClosed` when ready, `WHAShipped` once gone.
+
+**`handlingUnitLines`** — what is inside a unit. Read, create, change, delete.
+
+- **handlingUnitNumber** — which unit the goods are on. Required.
+- **lineNumber** — leave empty when creating; the app numbers lines in steps of 10000.
+- **itemNumber** and **variantCode** — what the goods are. Look items up; never invent a number.
+- **description** and **unitOfMeasureCode** — filled in from the item when you set `itemNumber`.
+  Do not set them yourself unless the user asks for something different.
+- **quantity** — how much.
+- **lotNumber** / **serialNumber** — tracking, when the goods carry it.
 
 ## Rules the app enforces — do not fight them
 
-- **Changing `locationCode` clears `binCode`.** If you move a unit, set the new bin **after** the
-  location, in a separate step, or it will be blank.
-- **A unit cannot be inside itself, or inside one of its own nested units.** The app rejects it.
-- **Nesting may be switched off, or capped at a maximum depth.** If a write is refused for that
-  reason, do not retry — explain it and suggest the user check the handling unit setup.
-- **A unit holding nested units cannot be deleted.** Move the inner units out first, then delete.
-- **Creating or changing a unit fails if the feature is switched off.** That is deliberate. Tell the
-  user to enable handling units in the guided setup; do not try to work around it.
+- **A closed or shipped unit refuses new contents.** Only `WHAOpen` units can be changed. If a line
+  write is refused for this reason, do not retry — tell the user the unit is closed and ask whether
+  they want it reopened.
+- **A line with a `serialNumber` must have `quantity` exactly 1.** A serial number identifies one
+  physical item.
+- **Quantity cannot be negative.**
+- **Changing `itemNumber` clears `variantCode`, `description` and `unitOfMeasureCode`**, because a
+  variant of the old item is meaningless on a new one. Set the variant *after* the item, in a
+  separate step.
+- **Changing `locationCode` clears `binCode`.** Set the bin after the location.
+- **A unit cannot be inside itself, or inside one of its own nested units.**
+- **Nesting may be switched off, or capped at a maximum depth.** A refusal for that reason is a
+  configuration decision, not something to work around.
+- **A unit holding nested units cannot be deleted.** Move the inner units out first.
+- **Deleting a unit deletes its content lines with it.** Warn the user before deleting a unit that
+  has contents.
+- **Any write fails if the feature is switched off.** Tell the user to enable handling units in the
+  guided setup; do not try to work around it.
 
 ## When to use this
 
-- Finding where a unit is, or what is inside one (filter on `parentNumber`).
-- Building a unit up: create it, then set location, bin and description.
+- Finding where a unit is, what is on it (`handlingUnitLines` filtered by `handlingUnitNumber`), or
+  what is inside it (`handlingUnits` filtered by `parentNumber`).
+- Building a unit up: create the unit, then add lines for each kind of goods on it.
 - Recording a move: change `locationCode`, then `binCode`.
-- Nesting: set `parentNumber` on the inner unit — never on the outer one.
-- Closing a unit when it is ready to ship.
+- Nesting: set `parentNumber` on the **inner** unit — never on the outer one.
+- Closing a unit when it is ready to ship. Do this **after** its contents are complete.
 
 ## When not to use this
 
-- **Do not create a handling unit to satisfy a request that refers to an existing one.** Look it up
-  by number or SSCC first. Duplicates are hard to unpick, because stock people work from the number
+- **Do not create a handling unit or a line to satisfy a request about an existing one.** Look it up
+  first, by number or SSCC. Duplicates are hard to unpick, because stock people work from the number
   printed on the label.
 - **Do not generate an SSCC.** A valid code has a check digit and belongs to the company's GS1
   number range. Leave it empty unless the user supplies one.
-- Do not use `status` to mean anything other than the three values above — in particular,
-  `WHAShipped` means the goods have physically left.
-- Do not guess a `locationCode` or `binCode`. If you cannot confirm one, ask.
-
-## What this does not cover yet
-
-**A handling unit does not yet record which items and quantities it holds.** If asked what is *in* a
-unit in terms of goods, say that contents are not tracked yet — you can only report the units nested
-inside it. Do not infer contents from the description.
+- **Do not invent an item number.** If you cannot confirm the item exists, ask.
+- Do not treat the contents as inventory. These lines record what is *physically on the unit*; they
+  do not post entries or change item ledger quantities.
 
 ## Domain
 
-Units form a tree: a carton inside a pallet, a pallet inside a cage. `parentNumber` points upward,
-one level at a time. Moving the outer unit is understood to move everything inside it, so when a
-user asks to move a pallet, change the pallet — not each unit within it.
+A handling unit is a tree node and a container at once. `parentNumber` points one level up, so a
+carton sits in a pallet and the pallet sits in a cage. `handlingUnitLines` hang off a unit and say
+what goods are on **that** unit specifically — they are not rolled up from nested units, so to
+answer "what is on this pallet in total" you must also look at the units nested inside it and their
+lines.
+
+Moving the outer unit is understood to move everything inside it. When a user asks to move a pallet,
+change the pallet — not each unit or line within it.

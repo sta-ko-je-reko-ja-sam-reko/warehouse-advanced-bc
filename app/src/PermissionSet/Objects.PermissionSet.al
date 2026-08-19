@@ -1,11 +1,13 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.Counting;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
+using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50000 "WHA Objects"
@@ -122,5 +124,36 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Pack Feature Setup" = X,
         codeunit "WHA Pack App Area Sub." = X,
         codeunit "WHA Demo Pack" = X,
-        page "WHA API Demo Pack" = X;
+        page "WHA API Demo Pack" = X,
+        table "WHA Repl. Setup" = X,
+        table "WHA Replenishment Rule" = X,
+        page "WHA Repl. Setup" = X,
+        page "WHA Replenishment Rules" = X,
+        page "WHA Repl. Rule Card" = X,
+        page "WHA API Repl. Rule" = X,
+        codeunit "WHA Repl. Rule Logic" = X,
+        codeunit "WHA Replenishment Mgt." = X,
+        codeunit "WHA Repl. Bin Content" = X,
+        codeunit "WHA Repl. Handling Units" = X,
+        codeunit "WHA Repl. Feature Setup" = X,
+        codeunit "WHA Repl. App Area Sub." = X,
+        codeunit "WHA Demo Replenishment" = X,
+        page "WHA API Demo Repl." = X,
+        table "WHA Count Setup" = X,
+        table "WHA Count Sheet" = X,
+        table "WHA Count Sheet Line" = X,
+        page "WHA Count Setup" = X,
+        page "WHA Count Sheets" = X,
+        page "WHA Count Sheet Card" = X,
+        page "WHA Count Sheet Subform" = X,
+        page "WHA API Count Sheet" = X,
+        page "WHA API Count Sheet Line" = X,
+        codeunit "WHA Count Sheet Logic" = X,
+        codeunit "WHA Count Line Logic" = X,
+        codeunit "WHA Count Bin Selection" = X,
+        codeunit "WHA Count HU Selection" = X,
+        codeunit "WHA Count Feature Setup" = X,
+        codeunit "WHA Count App Area Sub." = X,
+        codeunit "WHA Demo Count" = X,
+        page "WHA API Demo Count" = X;
 }

@@ -28,6 +28,9 @@ page 50000 "WHA Warehouse Setup"
                 field("Wave Nos."; Rec."Wave Nos.")
                 {
                 }
+                field("Count Sheet Nos."; Rec."Count Sheet Nos.")
+                {
+                }
             }
         }
     }

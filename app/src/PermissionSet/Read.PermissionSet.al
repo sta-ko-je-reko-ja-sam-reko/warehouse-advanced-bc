@@ -1,11 +1,13 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.Counting;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
+using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50001 "WHA Read"
@@ -31,5 +33,10 @@ permissionset 50001 "WHA Read"
         tabledata "WHA Pack Setup" = R,
         tabledata "WHA Pack Station" = R,
         tabledata "WHA Pack Session" = R,
+        tabledata "WHA Repl. Setup" = R,
+        tabledata "WHA Replenishment Rule" = R,
+        tabledata "WHA Count Setup" = R,
+        tabledata "WHA Count Sheet" = R,
+        tabledata "WHA Count Sheet Line" = R,
         tabledata "WHA Demo Data" = R;
 }

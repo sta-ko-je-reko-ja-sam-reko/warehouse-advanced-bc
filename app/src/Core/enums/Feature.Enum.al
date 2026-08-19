@@ -1,11 +1,13 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.Counting;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
+using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.WaveManagement;
 
 enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
@@ -52,5 +54,15 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Packing';
         Implementation = "WHA IFeatureSetup" = "WHA Pack Feature Setup";
+    }
+    value(8; WHAReplenishment)
+    {
+        Caption = 'Replenishment';
+        Implementation = "WHA IFeatureSetup" = "WHA Repl. Feature Setup";
+    }
+    value(9; WHACounting)
+    {
+        Caption = 'Counting';
+        Implementation = "WHA IFeatureSetup" = "WHA Count Feature Setup";
     }
 }

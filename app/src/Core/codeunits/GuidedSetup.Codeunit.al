@@ -26,6 +26,10 @@ codeunit 50002 "WHA Guided Setup"
         WaveNoSeriesDescLbl: Label 'Warehouse advanced waves';
         WaveStartingNoTok: Label 'WV000001', Locked = true;
         WaveEndingNoTok: Label 'WV999999', Locked = true;
+        CountSheetNoSeriesCodeTok: Label 'WHA-COUNT', Locked = true;
+        CountSheetNoSeriesDescLbl: Label 'Warehouse advanced count sheets';
+        CountSheetStartingNoTok: Label 'CS000001', Locked = true;
+        CountSheetEndingNoTok: Label 'CS999999', Locked = true;
 
     /// <summary>
     /// Fills the step buffer with the foundation step plus every feature that registers one, then
@@ -179,6 +183,7 @@ codeunit 50002 "WHA Guided Setup"
         CreateNoSeriesIfMissing(HandlingUnitNoSeriesCodeTok, HandlingUnitNoSeriesDescLbl, HandlingUnitStartingNoTok, HandlingUnitEndingNoTok);
         CreateNoSeriesIfMissing(WarehouseTaskNoSeriesCodeTok, WarehouseTaskNoSeriesDescLbl, WarehouseTaskStartingNoTok, WarehouseTaskEndingNoTok);
         CreateNoSeriesIfMissing(WaveNoSeriesCodeTok, WaveNoSeriesDescLbl, WaveStartingNoTok, WaveEndingNoTok);
+        CreateNoSeriesIfMissing(CountSheetNoSeriesCodeTok, CountSheetNoSeriesDescLbl, CountSheetStartingNoTok, CountSheetEndingNoTok);
 
         SetupLogic.EnsureExists(WarehouseSetup);
 
@@ -188,6 +193,8 @@ codeunit 50002 "WHA Guided Setup"
             WarehouseSetup.Validate("Warehouse Task Nos.", WarehouseTaskNoSeriesCodeTok);
         if WarehouseSetup."Wave Nos." = '' then
             WarehouseSetup.Validate("Wave Nos.", WaveNoSeriesCodeTok);
+        if WarehouseSetup."Count Sheet Nos." = '' then
+            WarehouseSetup.Validate("Count Sheet Nos.", CountSheetNoSeriesCodeTok);
 
         WarehouseSetup.Modify(true);
     end;

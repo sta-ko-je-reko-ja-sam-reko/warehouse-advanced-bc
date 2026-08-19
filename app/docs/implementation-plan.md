@@ -30,12 +30,14 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-WAVE-001` segment 1 — waves: gathering work by a swappable strategy, releasing it as a batch, and closing it |
 | Delivered | `FEAT-LBL-001` segment 1 — label codes: GS1 SSCC with its check digit, or a sequential licence plate. Closes the gap `FEAT-HU-001` left open |
 | Delivered | `FEAT-PACK-001` segment 1 — the packing bench: open a carton, fill it, check it, close it. The carton is a handling unit |
+| Delivered | `FEAT-REPL-001` segment 1 — replenishment rules: min/max per pick bin, two ways of measuring the bin, and a run that raises the work to top it up |
+| Delivered | `FEAT-CNT-001` segment 1 — count sheets: blind counting, a tolerance, and an approval before a difference is accepted. **Adjusts nothing yet** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
 
-**What is delivered was built from §4, not from a capability register.** Both shipped features
-carry that caveat in their own technical documentation. Phase 0 can still invalidate them, and
+**What is delivered was built from §4, not from a capability register.** Every shipped feature
+carries that caveat in its own technical documentation. Phase 0 can still invalidate them, and
 the two chosen so far were chosen precisely because they are the least likely to be invalidated
 (§4, "the two that are probably not optional") and because almost everything else depends on them.
 
@@ -186,8 +188,8 @@ Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
           FEAT-PACK-001    packing                   ← segment 1 delivered
           FEAT-LBL-001     labelling                 ← segment 1 delivered
 
-Wave D    FEAT-REPL-001    replenishment
-          FEAT-CNT-001     counting
+Wave D    FEAT-REPL-001    replenishment             ← segment 1 delivered
+          FEAT-CNT-001     counting                  ← segment 1 delivered; posts no adjustment
           FEAT-QC-001      quality hold
 
 Wave E    FEAT-SLOT-001    slotting
@@ -230,14 +232,17 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 139 automated tests exist across seven codeunits and **not one has
+1. **Run the test suite once.** 166 automated tests exist across nine codeunits and **not one has
    ever been executed** — they are compile-verified only, because publishing to the dev container
    needs credentials that are not in the repo. Until they have run green once, every claim this
    project makes about its own behaviour rests on the compiler agreeing the code parses.
 2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
-   badly overdue: **seven features** have been built from the hypothesis — the whole of Waves A to C
-   — and each further one raises the cost of a register that contradicts it.
+   badly overdue: **nine features** have been built from the hypothesis — the whole of Waves A to C
+   and two thirds of Wave D — and each further one raises the cost of a register that contradicts it.
+   Replenishment sharpens the point: standard Business Central already replenishes bins through the
+   movement worksheet, so a real register may reclassify part of `FEAT-REPL-001` as *configuration*
+   rather than *build*.
 3. **Run the operator review** for `FEAT-RF-001`, per
    [FEAT-RF-001-MobileDevice/operator-review.md](FEAT-RF-001-MobileDevice/operator-review.md). The
    handheld has never been seen by anyone who would use it.

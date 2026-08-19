@@ -1,0 +1,250 @@
+# FEAT-CNT-001 - Counting
+
+## Source/legacy reference
+
+N/A (greenfield).
+
+> **Scope note.** Built from the candidate catalogue in
+> [../implementation-plan.md](../implementation-plan.md), **not** from a signed capability register.
+> Standard Business Central has a physical inventory journal and a warehouse physical inventory, so
+> the gap this feature claims is *perpetual counting while the warehouse keeps working* — blind
+> counts, a tolerance, and an approval before a difference is accepted. Whether the customer needs
+> that, or just the standard journal, is a Phase 0 question.
+
+## Business process
+
+A stocktake stops the warehouse. Cycle counting does not: a slice of the warehouse is counted while
+the rest of it works, and the count is compared with what the system believed at the moment the count
+was ordered.
+
+A **count sheet** is that slice:
+
+1. A sheet is opened for a location, with a **selection** — what it gathers when it is filled — and a
+   **blind** flag.
+2. It is **filled**. Each line records what the system believes is there as the **expected quantity**.
+3. It is **sent out to be counted**. From here the expected quantities are fixed.
+4. Lines are counted. Each count works out a **difference** and decides whether that difference is
+   bigger than the **tolerance** allows.
+5. When every line has been counted, the sheet is **marked as counted**.
+6. Every difference beyond the tolerance is **approved** by somebody, and the sheet is **closed**.
+
+A sheet that is no longer wanted is **cancelled**, keeping whatever was counted.
+
+### Delivered so far
+
+**Segment 1** — the sheet and its lines, two selections, blind counting, the tolerance, the approval,
+and the life cycle. **Segment 1 does not adjust inventory** — see *Not done*.
+
+## Data model
+
+| Table | ID | Purpose |
+|---|---|---|
+| `WHA Count Setup` | 50500 | Single-record feature setup |
+| `WHA Count Sheet` | 50501 | One slice of the warehouse to count |
+| `WHA Count Sheet Line` | 50502 | One thing to count, and what was found |
+
+### `WHA Count Sheet`
+
+| Field | Type | Notes |
+|---|---|---|
+| `No.` | `Code[20]` | Primary key, from the foundation number series |
+| `Description` | `Text[100]` | The aisle or the round the sheet covers |
+| `Location Code` | `Code[10]` | The location being counted. **Required before filling** |
+| `Status` | `Enum "WHA Count Status"` | Open / Counting / Counted / Closed / Cancelled. Not editable |
+| `Selection` | `Enum "WHA Count Selection"` | What the sheet gathers when it is filled |
+| `Blind` | `Boolean` | Whether the expected quantity is hidden from the counter |
+| `Due Date`, `Assigned To User ID` | | Who should count it, and by when |
+| `Started At` / `Counted At` / `Closed At` | `DateTime` | Stamped by the life cycle |
+| `Line Count`, `Counted Line Count`, `Variance Line Count`, `Unapproved Variance Count` | `Integer` | FlowFields over the lines |
+
+### `WHA Count Sheet Line`
+
+| Field | Notes |
+|---|---|
+| `Sheet No.`, `Line No.` | Primary key |
+| `Bin Code`, `Item No.`, `Variant Code`, `Unit of Measure Code`, `Handling Unit No.` | What is being counted |
+| `Expected Quantity` | What the system believed when the sheet was filled. Not editable |
+| `Counted Quantity` | What was found. **The only editable field on a line** |
+| `Counted` | Set by entering a count. **A count of zero is a count** |
+| `Variance` | Counted minus expected |
+| `Out of Tolerance` | Whether the difference is bigger than the setup allows |
+| `Approved`, `Approved By User ID` | Who accepted the difference |
+| `Counted By User ID`, `Counted At` | Who counted it, and when |
+
+Entering `Counted Quantity` is what counts a line: the table field delegates to
+`WHA Count Line Logic`, which works out the difference, decides the tolerance question, and stamps
+who and when. There is no separate "record the count" action to forget, and the API, the page and any
+future handheld screen all go through the same one line of logic.
+
+### `WHA Count Setup`
+
+| Field | Notes |
+|---|---|
+| `Enabled` | The feature toggle |
+| `Default Selection` | What a new sheet gathers unless it says otherwise |
+| `Count blind` | Ships **on** |
+| `Tolerance Quantity` / `Tolerance Percent` | Ships as 0 and 2%. A line is within tolerance when it passes **either**, whichever is the more generous |
+| `Approve differences above tolerance` | Ships **on**. Off closes sheets without an approval step |
+
+**The setup defaults are applied on insert, and win.** A new sheet takes `Selection` and `Blind` from
+the setup whenever it was inserted with the enum's first value or with `Blind` false — which a Boolean
+cannot distinguish from *deliberately not blind*. So a sheet created through the API with
+`blind: false` while the setup says blind comes out blind. Untick **Count blind** on the sheet
+afterwards; the field stays editable for exactly that reason. The same shape as `Strategy` on a wave,
+and the same trade: one setting that always applies, rather than a second flag saying whether the
+first one meant it.
+
+## Objects
+
+| Object | Type | ID | File |
+|---|---|---|---|
+| `WHA Count Setup` | table | 50500 | `app/src/Counting/tables/CountSetup.Table.al` |
+| `WHA Count Sheet` | table | 50501 | `app/src/Counting/tables/CountSheet.Table.al` |
+| `WHA Count Sheet Line` | table | 50502 | `app/src/Counting/tables/CountSheetLine.Table.al` |
+| `WHA Count Status` | enum | 50500 | `app/src/Counting/enums/CountStatus.Enum.al` |
+| `WHA Count Selection` | enum | 50501 | `app/src/Counting/enums/CountSelection.Enum.al` |
+| `WHA ICountSheet` | interface | — | `app/src/Counting/interfaces/ICountSheet.Interface.al` |
+| `WHA ICountSheetLine` | interface | — | `app/src/Counting/interfaces/ICountSheetLine.Interface.al` |
+| `WHA ICountSelection` | interface | — | `app/src/Counting/interfaces/ICountSelection.Interface.al` |
+| `WHA Count Sheet Logic` | codeunit | 50500 | `app/src/Counting/codeunits/CountSheetLogic.Codeunit.al` |
+| `WHA Count Line Logic` | codeunit | 50501 | `app/src/Counting/codeunits/CountLineLogic.Codeunit.al` |
+| `WHA Count Feature Setup` | codeunit | 50502 | `app/src/Counting/codeunits/CountFeatureSetup.Codeunit.al` |
+| `WHA Count App Area Sub.` | codeunit | 50503 | `app/src/Counting/codeunits/CountAppAreaSub.Codeunit.al` |
+| `WHA Demo Count` | codeunit | 50504 | `app/src/Counting/codeunits/DemoCount.Codeunit.al` |
+| `WHA Count Bin Selection` | codeunit | 50505 | `app/src/Counting/codeunits/CountBinSelection.Codeunit.al` |
+| `WHA Count HU Selection` | codeunit | 50506 | `app/src/Counting/codeunits/CountHUSelection.Codeunit.al` |
+| `WHA Count Appl. Area Setup` | tableextension | 50500 | `app/src/Counting/tableextensions/CountApplAreaSetup.TableExt.al` |
+| `WHA Count Setup` | page | 50500 | `app/src/Counting/pages/CountSetup.Page.al` |
+| `WHA Count Sheets` | page | 50501 | `app/src/Counting/pages/CountSheets.Page.al` |
+| `WHA Count Sheet Card` | page | 50502 | `app/src/Counting/pages/CountSheetCard.Page.al` |
+| `WHA Count Sheet Subform` | page | 50503 | `app/src/Counting/pages/CountSheetSubform.Page.al` |
+| `WHA API Count Sheet` | page | 50504 | `app/src/Counting/pages/APICountSheet.Page.al` |
+| `WHA API Count Sheet Line` | page | 50505 | `app/src/Counting/pages/APICountSheetLine.Page.al` |
+| `WHA API Demo Count` | page | 50506 | `app/src/Counting/pages/APIDemoCount.Page.al` |
+| `WHA Counting Tests` | codeunit | 51008 | `test/src/codeunits/CountingTests.Codeunit.al` |
+
+All in namespace `WarehouseAdvanced.Counting`, from the reserved block `50500..50549`. Core gained a
+`WHA Feature` enum value and a fourth number series (see *Enablement*).
+
+## Selections — what a sheet counts
+
+`WHA ICountSelection` has `Fill`, which adds the lines, and `Describe`, which says in one line what it
+gathers.
+
+**This differs deliberately from a wave strategy.** A wave strategy is a filter and a sort and never
+loops, because every candidate is the same kind of record. A count selection is not: the two that ship
+produce different shapes of line — one per item in a bin, one per handling unit line — so a filter
+cannot express the choice. What a selection is *not* allowed to do is write the line itself: it calls
+`AddLine` on the sheet logic, which owns the guard that a sheet can only be filled while it is open.
+
+Two ship:
+
+- **Bins** (default) — every item Business Central believes is in a bin at the location. A bin content
+  of zero is still counted: a bin the system thinks is empty is worth confirming, and one that turns
+  out not to be is exactly the finding a count exists for.
+- **Handling units** — every line of every unit standing at the location, with the unit number on the
+  line. This is what a licence-plate warehouse counts: not what is in the bin, but whether the pallet
+  holds what its label claims.
+
+`WHA Count Selection` is extensible, so ABC velocity, "bins not counted since", or by-zone is an
+`enumextension` value and one codeunit.
+
+## Blind counting
+
+A counter who can see the expected number tends to write it down. When a sheet is blind, the expected
+quantity and the difference are **hidden on the lines** until the sheet reaches *Counted* — then they
+appear, because the person reviewing differences needs both.
+
+This is a page-level rule, not a data rule: `WHA Count Sheet Card` tells its subform whether to show
+the columns. An API caller can always read `expectedQuantity`, which is the right trade — the
+integration that feeds counts in from a device is not the person doing the counting.
+
+## Tolerance and approval
+
+A line is **within tolerance** when the absolute difference is no more than the more generous of the
+two allowances: the flat `Tolerance Quantity`, or `Tolerance Percent` of the expected quantity. Both
+zero means any difference at all is out of tolerance.
+
+Out-of-tolerance lines have to be approved before the sheet can be closed — unless
+`Approve differences above tolerance` is switched off.
+
+**Counting a line again withdraws its approval.** An approval is an approval of a number, and a
+recount is a different number.
+
+## What survives
+
+A sheet that has been **counted or closed** cannot be deleted, and neither can one that carries a count
+on any of its lines — including a **cancelled** one. Cancelling is how a sheet is withdrawn while
+keeping what was found; without the second guard, cancel-then-delete would be the way round the first.
+An open sheet nobody has counted is a draft, and deleting it takes its lines with it.
+
+## Completion is asked for, not pushed
+
+As with waves, nothing pushes a finished line back to its sheet. `CompleteIfCounted` marks a sheet
+counted when every line has been, and does nothing otherwise; it is called from **Mark fully counted
+sheets** on the sheet list and is safe to run from a job queue. A sheet's status can therefore lag
+behind reality, while the FlowField counts are always current.
+
+## Enablement
+
+Per `_patterns/feature-setup-and-toggle.md`: `WHA Feature` gained `WHACounting` bound to
+`WHA Count Feature Setup` (guided setup step 100); `Application Area Setup` gained `WHA Counting`
+through this feature's own tableextension; the setup page is `ApplicationArea = All` while the count
+pages carry `WHACounting`. Every API write path and bound action calls `CheckEnabled`.
+
+**The foundation now creates four number series** (`WHA-HU`, `WHA-TASK`, `WHA-WAVE`, `WHA-COUNT`) and
+`IsComplete` checks all four, so a company that ran the foundation step before this feature shipped
+shows it as *not started* again until it is re-run. Re-running is idempotent.
+
+## MCP configuration
+
+| Configuration | API group | Tool | Agent may |
+|---|---|---|---|
+| `Warehouse Advanced - Counting` | `counting` | `WHA API Count Sheet` | read, create, modify, and run fill / start / complete / close / cancel |
+| `Warehouse Advanced - Counting` | `counting` | `WHA API Count Sheet Line` | **read only** |
+| `Warehouse Advanced - Demo Counting` | `demoCounting` | `WHA API Demo Count` | run `importDemoData` only |
+
+The line tool is read-only **on purpose**. An agent may plan a count, send it out, and report what
+came back; it may not enter a count or approve a difference. Both of those are claims about physical
+stock made by a person standing in front of it, and an approval is an accountability. The API page
+itself allows the write, so a handheld or an interface can push counts in — the restriction is on the
+agent, not on the entity.
+
+## Demo data
+
+`WHA Demo Count` seeds three sheets under fixed numbers `DEMO-COUNT-001..003`: one filled from the
+bins at a location, one filled from the handling units standing there and part-counted with a
+difference on it, and one blind sheet that has not been started. It prefers a location that already
+has handling units, so the second sheet is not empty on a company that ran the handling unit sample
+data first. `Import()` also builds the `WHA-COUNT` RapidStart package.
+
+## Tests
+
+`WHA Counting Tests` (codeunit 51008), 16 tests: filling from handling units takes what each unit says
+it holds, with the bin it is standing in; a count that matches leaves no difference; a count of nothing
+is still a count and is flagged; a difference inside the percentage allowance is not flagged while one
+beyond the flat allowance is; nothing can be counted before the sheet goes out; a sheet with lines
+still uncounted cannot be marked counted and is marked when its last line is counted; a sheet waits for
+its differences to be approved and closes once they are; counting a line again withdraws its approval;
+a line within tolerance cannot be approved; an empty sheet cannot be sent out; a counted sheet cannot
+be deleted while an open one takes its lines with it; a cancelled sheet that carries a count cannot be
+deleted either; and demo idempotency.
+
+The **bins** selection needs posted warehouse entries to be worth asserting on and belongs in the
+integration test plan; the automated tests use the handling unit selection and hand-added lines.
+
+## Not done
+
+- **Nothing is adjusted.** This is the big one. A closed sheet records what was found; it does **not**
+  post an inventory adjustment, and standard Business Central still believes what it believed before.
+  Posting is deliberately held back: it needs the item journal, dimensions and a W1 container to test
+  against (see the environment note in `CLAUDE.md`), and getting the counting process right is worth
+  doing before anything writes to the ledger. Until it ships, counting is a **measuring** feature.
+- **No ABC or velocity-driven selection.** The catalogue names perpetual counting "by ABC/trigger".
+  What ships is two selections that gather everything at a location; nothing decides *which* slice is
+  due to be counted, so the choice of slice is currently a person's.
+- **No counting on the handheld.** Counts are entered on the sheet at a desk. A count sheet on the
+  scanner is the obvious next segment, and it is an operator-review question first.
+- **No recount round.** A difference is approved or it is not; there is no "count it again and use the
+  second number" step that many warehouses run before approving.
+- **Getting-started in the customer language** — the language has not been confirmed.

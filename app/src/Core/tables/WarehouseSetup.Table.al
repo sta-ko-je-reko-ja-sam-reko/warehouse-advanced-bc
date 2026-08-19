@@ -50,6 +50,18 @@ table 50000 "WHA Warehouse Setup"
                 Logic().Validate_WaveNos(Rec, xRec);
             end;
         }
+        field(40; "Count Sheet Nos."; Code[20])
+        {
+            Caption = 'Count sheet nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to count sheets.';
+            TableRelation = "No. Series";
+
+            trigger OnValidate()
+            begin
+                Logic().Validate_CountSheetNos(Rec, xRec);
+            end;
+        }
     }
 
     keys

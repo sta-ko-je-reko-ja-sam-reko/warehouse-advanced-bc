@@ -26,6 +26,10 @@ configuration. One configuration ↔ one agent ↔ one file.
 | `Warehouse Advanced - Demo Labelling` | `demoLabelling` | [WarehouseAdvanced-Demo-Labelling.md](WarehouseAdvanced-Demo-Labelling.md) | The agent bound to the Demo Labelling configuration |
 | `Warehouse Advanced - Packing` | `packing` | [WarehouseAdvanced-Packing.md](WarehouseAdvanced-Packing.md) | The agent bound to the Packing configuration |
 | `Warehouse Advanced - Demo Packing` | `demoPacking` | [WarehouseAdvanced-Demo-Packing.md](WarehouseAdvanced-Demo-Packing.md) | The agent bound to the Demo Packing configuration |
+| `Warehouse Advanced - Replenishment` | `replenishment` | [WarehouseAdvanced-Replenishment.md](WarehouseAdvanced-Replenishment.md) | The agent bound to the Replenishment configuration |
+| `Warehouse Advanced - Demo Replenishment` | `demoReplenishment` | [WarehouseAdvanced-Demo-Replenishment.md](WarehouseAdvanced-Demo-Replenishment.md) | The agent bound to the Demo Replenishment configuration |
+| `Warehouse Advanced - Counting` | `counting` | [WarehouseAdvanced-Counting.md](WarehouseAdvanced-Counting.md) | The agent bound to the Counting configuration |
+| `Warehouse Advanced - Demo Counting` | `demoCounting` | [WarehouseAdvanced-Demo-Counting.md](WarehouseAdvanced-Demo-Counting.md) | The agent bound to the Demo Counting configuration |
 
 **Demo importers are deliberately in their own configurations and their own API groups**, so a
 "load sample data" agent can be given the importer *without* also getting the functional write

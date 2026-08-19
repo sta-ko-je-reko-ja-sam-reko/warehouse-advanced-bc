@@ -42,6 +42,23 @@ page 50250 "WHA Repl. Setup"
             {
                 Caption = 'Running replenishment';
 
+                field("Demand Method"; Rec."Demand Method")
+                {
+                    ApplicationArea = WHAReplenishment;
+
+                    trigger OnValidate()
+                    begin
+                        DescribeDemand();
+                    end;
+                }
+                field(DemandDescription; DemandDescription)
+                {
+                    Caption = 'What that takes into account';
+                    ToolTip = 'Specifies what a run will weigh a bin against, in full, so the choice above is made with its consequence in view.';
+                    ApplicationArea = WHAReplenishment;
+                    Editable = false;
+                    MultiLine = true;
+                }
                 field("Release Replenishment Work"; Rec."Release Replenishment Work")
                 {
                     ApplicationArea = WHAReplenishment;
@@ -71,6 +88,7 @@ page 50250 "WHA Repl. Setup"
     begin
         ReplFeatureSetup.EnsureSetup(Rec);
         OpeningEnabled := Rec."WHA Enabled";
+        DescribeDemand();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -79,8 +97,21 @@ page 50250 "WHA Repl. Setup"
         exit(true);
     end;
 
+    trigger OnAfterGetRecord()
+    begin
+        DescribeDemand();
+    end;
+
     var
         OpeningEnabled: Boolean;
+        DemandDescription: Text;
+
+    local procedure DescribeDemand()
+    var
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        DemandDescription := ReplenishmentMgt.DescribeDemand();
+    end;
 
     local procedure ApplyEnabledChangeIfNeeded()
     var

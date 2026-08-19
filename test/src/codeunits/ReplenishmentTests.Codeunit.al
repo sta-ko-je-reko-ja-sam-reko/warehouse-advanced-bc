@@ -229,6 +229,144 @@ codeunit 51007 "WHA Replenishment Tests"
         Assert.AreEqual(CountAfterFirstRun, ReplenishmentRule.Count(), 'A second import should not create more rules.');
     end;
 
+    [Test]
+    procedure ABinThatIsFullNowButPromisedAwayIsSeenAsLow()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        WarehouseTask: Record "WHA Warehouse Task";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] The whole point of looking ahead. A pick face with a hundred pieces in it and ninety
+        // already promised has ten, and a run that only reads the shelf sends nobody.
+        ConfigureReplenishment(false);
+        ConfigureDemand();
+        StockInBin('WHA-RP-D1', CopyStr(PickBinTok, 1, 20), 100);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), CopyStr(PickBinTok, 1, 20), 20, 100);
+        RaisePick('WHA-RP-P1', 90, '');
+
+        Assert.AreEqual(1, ReplenishmentMgt.Run(CopyStr(LocationTok, 1, 10)), 'The bin is promised away, so it needs filling.');
+
+        FindWorkForBin(WarehouseTask, CopyStr(PickBinTok, 1, 20));
+        Assert.AreEqual(90, WarehouseTask.Quantity, 'It should ask for what is missing once the promise is taken off.');
+    end;
+
+    [Test]
+    procedure LookingOnlyAtTheShelfMissesTheSameBin()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] The behaviour before this segment, kept as a configured choice. It is also what a
+        // fresh installation does, so nobody's runs change under them on upgrade.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        StockInBin('WHA-RP-D2', CopyStr(PickBinTok, 1, 20), 100);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), CopyStr(PickBinTok, 1, 20), 20, 100);
+        RaisePick('WHA-RP-P2', 90, '');
+
+        Assert.AreEqual(0, ReplenishmentMgt.Run(CopyStr(LocationTok, 1, 10)), 'The shelf is full, so this way of looking sees nothing to do.');
+    end;
+
+    [Test]
+    procedure WorkAlreadyWalkedIsNoLongerAPromise()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] A pick that has been part-filled has only its remainder still to take. Counting the
+        // whole job again would fill the bin twice.
+        ConfigureReplenishment(false);
+        ConfigureDemand();
+        StockInBin('WHA-RP-D3', CopyStr(PickBinTok, 1, 20), 100);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), CopyStr(PickBinTok, 1, 20), 20, 100);
+        RaisePartlyWalkedPick('WHA-RP-P3', 90, 85);
+
+        Assert.AreEqual(0, ReplenishmentMgt.Run(CopyStr(LocationTok, 1, 10)), 'Only five of the ninety are still to come, so the bin is fine.');
+    end;
+
+    [Test]
+    procedure PreReplenishingAWaveLooksOnlyAtThatWave()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] Filling a pick face for the wave that is about to go out is a different question from
+        // filling it for everything ever planned, and answering the wrong one over-fills the bin.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        StockInBin('WHA-RP-D4', CopyStr(PickBinTok, 1, 20), 100);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), CopyStr(PickBinTok, 1, 20), 20, 100);
+        CreateWave(Wave, 'WHA-RP-W1');
+        RaisePick('WHA-RP-P4', 90, Wave."No.");
+        RaisePick('WHA-RP-P5', 50, '');
+
+        Assert.AreEqual(1, ReplenishmentMgt.RunForWave(Wave), 'The wave promises ninety of the hundred, so the bin needs filling.');
+
+        FindWorkForBin(WarehouseTask, CopyStr(PickBinTok, 1, 20));
+        Assert.AreEqual(90, WarehouseTask.Quantity, 'Only the wave''s ninety counts, not the fifty outside it.');
+    end;
+
+    [Test]
+    procedure PreReplenishingNamesTheWaveOnTheWorkItRaises()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] An operator handed a replenishment job should be able to see it exists because a
+        // particular wave is waiting on it.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        StockInBin('WHA-RP-D5', CopyStr(PickBinTok, 1, 20), 100);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), CopyStr(PickBinTok, 1, 20), 20, 100);
+        CreateWave(Wave, 'WHA-RP-W2');
+        RaisePick('WHA-RP-P6', 95, Wave."No.");
+
+        ReplenishmentMgt.RunForWave(Wave);
+
+        FindWorkForBin(WarehouseTask, CopyStr(PickBinTok, 1, 20));
+        Assert.IsTrue(WarehouseTask.Description.Contains(Wave."No."), 'The job should say which wave it is being prepared for.');
+    end;
+
+    [Test]
+    procedure AWaveThatIsFinishedCannotBePreReplenished()
+    var
+        Wave: Record "WHA Wave";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [SCENARIO] Pre-replenishment fills a pick face before the work goes out. Asking for it after the
+        // wave is over is a mistake worth being told about rather than a run that quietly does nothing.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        CreateWave(Wave, 'WHA-RP-W3');
+        WaveLogic.Cancel(Wave);
+
+        asserterror ReplenishmentMgt.RunForWave(Wave);
+
+        Assert.ExpectedError('nothing left to prepare for');
+    end;
+
+    [Test]
+    procedure APickThatNamesAnotherBinIsNotAPromiseAgainstThisOne()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] A pick that says where it is coming from, and says somewhere else, is nothing to do
+        // with this pick face.
+        ConfigureReplenishment(false);
+        ConfigureDemand();
+        StockInBin('WHA-RP-D6', CopyStr(PickBinTok, 1, 20), 100);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), CopyStr(PickBinTok, 1, 20), 20, 100);
+        RaisePickFromBin('WHA-RP-P7', 90, CopyStr(BulkBinTok, 1, 20));
+
+        Assert.AreEqual(0, ReplenishmentMgt.Run(CopyStr(LocationTok, 1, 10)), 'That pick is drawing from the bulk bin, not this pick face.');
+    end;
+
     local procedure ConfigureReplenishment(ReleaseWork: Boolean)
     var
         Setup: Record "WHA Repl. Setup";
@@ -364,5 +502,70 @@ codeunit 51007 "WHA Replenishment Tests"
 
         TaskSetup.Validate("Warehouse Task Nos.", CopyStr(NoSeriesTok, 1, 20));
         TaskSetup.Modify(true);
+    end;
+
+    local procedure ConfigureDemand()
+    var
+        Setup: Record "WHA Repl. Setup";
+        Demand: Enum "WHA Repl. Demand";
+    begin
+        Setup.Get();
+        Setup.Validate("Demand Method", Demand::WHAOutstandingPicks);
+        Setup.Modify(true);
+    end;
+
+    local procedure ConfigureNoDemand()
+    var
+        Setup: Record "WHA Repl. Setup";
+        Demand: Enum "WHA Repl. Demand";
+    begin
+        Setup.Get();
+        Setup.Validate("Demand Method", Demand::WHANone);
+        Setup.Modify(true);
+    end;
+
+    local procedure RaisePick(TaskNo: Code[20]; Quantity: Decimal; WaveNo: Code[20])
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        InitPick(WarehouseTask, TaskNo, Quantity);
+        WarehouseTask."Wave No." := WaveNo;
+        WarehouseTask.Insert(true);
+    end;
+
+    local procedure RaisePickFromBin(TaskNo: Code[20]; Quantity: Decimal; FromBinCode: Code[20])
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        InitPick(WarehouseTask, TaskNo, Quantity);
+        WarehouseTask."From Bin Code" := FromBinCode;
+        WarehouseTask.Insert(true);
+    end;
+
+    local procedure RaisePartlyWalkedPick(TaskNo: Code[20]; Quantity: Decimal; Handled: Decimal)
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        InitPick(WarehouseTask, TaskNo, Quantity);
+        WarehouseTask."Quantity Handled" := Handled;
+        WarehouseTask.Insert(true);
+    end;
+
+    local procedure InitPick(var WarehouseTask: Record "WHA Warehouse Task"; TaskNo: Code[20]; Quantity: Decimal)
+    begin
+        WarehouseTask.Init();
+        WarehouseTask."No." := TaskNo;
+        WarehouseTask."Task Type" := WarehouseTask."Task Type"::WHAPick;
+        WarehouseTask."Location Code" := CopyStr(LocationTok, 1, 10);
+        WarehouseTask."Item No." := CopyStr(ItemTok, 1, 20);
+        WarehouseTask.Quantity := Quantity;
+    end;
+
+    local procedure CreateWave(var Wave: Record "WHA Wave"; WaveNo: Code[20])
+    begin
+        Wave.Init();
+        Wave."No." := WaveNo;
+        Wave."Location Code" := CopyStr(LocationTok, 1, 10);
+        Wave.Insert(true);
     end;
 }

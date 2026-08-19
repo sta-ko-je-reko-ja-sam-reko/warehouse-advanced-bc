@@ -1,7 +1,9 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.Analytics;
 using WarehouseAdvanced.Counting;
 using WarehouseAdvanced.DirectedWork;
+using WarehouseAdvanced.DockYard;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
@@ -49,5 +51,11 @@ permissionset 50001 "WHA Read"
         tabledata "WHA Slotting Setup" = R,
         tabledata "WHA Item Velocity" = R,
         tabledata "WHA Slotting Proposal" = R,
+        tabledata "WHA Dock Setup" = R,
+        tabledata "WHA Dock Door" = R,
+        tabledata "WHA Yard Position" = R,
+        tabledata "WHA Dock Appointment" = R,
+        tabledata "WHA Analytics Setup" = R,
+        tabledata "WHA KPI Snapshot" = R,
         tabledata "WHA Demo Data" = R;
 }

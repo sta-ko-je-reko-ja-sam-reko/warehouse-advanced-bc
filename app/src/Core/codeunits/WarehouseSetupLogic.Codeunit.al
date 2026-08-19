@@ -62,6 +62,19 @@ codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
     end;
 
     /// <summary>
+    /// Validates a change to the dock appointment number series.
+    /// </summary>
+    /// <param name="WarehouseSetup">The setup record being validated.</param>
+    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
+    procedure Validate_DockAppointmentNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup")
+    begin
+        if WarehouseSetup."Dock Appointment Nos." = xWarehouseSetup."Dock Appointment Nos." then
+            exit;
+
+        CheckSeriesExists(WarehouseSetup."Dock Appointment Nos.");
+    end;
+
+    /// <summary>
     /// Ensures the single setup record exists, creating it if it does not.
     /// </summary>
     /// <param name="WarehouseSetup">The setup record to materialise.</param>
@@ -83,7 +96,7 @@ codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
     var
         WarehouseSetup: Record "WHA Warehouse Setup";
     begin
-        WarehouseSetup.SetLoadFields("Handling Unit Nos.", "Warehouse Task Nos.", "Wave Nos.", "Count Sheet Nos.");
+        WarehouseSetup.SetLoadFields("Handling Unit Nos.", "Warehouse Task Nos.", "Wave Nos.", "Count Sheet Nos.", "Dock Appointment Nos.");
         if not WarehouseSetup.Get() then
             exit(false);
         if WarehouseSetup."Handling Unit Nos." = '' then
@@ -92,7 +105,9 @@ codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
             exit(false);
         if WarehouseSetup."Wave Nos." = '' then
             exit(false);
-        exit(WarehouseSetup."Count Sheet Nos." <> '');
+        if WarehouseSetup."Count Sheet Nos." = '' then
+            exit(false);
+        exit(WarehouseSetup."Dock Appointment Nos." <> '');
     end;
 
     local procedure CheckSeriesExists(SeriesCode: Code[20])

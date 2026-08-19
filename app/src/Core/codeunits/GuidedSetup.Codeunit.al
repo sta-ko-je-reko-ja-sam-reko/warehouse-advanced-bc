@@ -30,6 +30,10 @@ codeunit 50002 "WHA Guided Setup"
         CountSheetNoSeriesDescLbl: Label 'Warehouse advanced count sheets';
         CountSheetStartingNoTok: Label 'CS000001', Locked = true;
         CountSheetEndingNoTok: Label 'CS999999', Locked = true;
+        DockAppointmentNoSeriesCodeTok: Label 'WHA-DOCK', Locked = true;
+        DockAppointmentNoSeriesDescLbl: Label 'Warehouse advanced dock appointments';
+        DockAppointmentStartingNoTok: Label 'DA000001', Locked = true;
+        DockAppointmentEndingNoTok: Label 'DA999999', Locked = true;
 
     /// <summary>
     /// Fills the step buffer with the foundation step plus every feature that registers one, then
@@ -184,6 +188,7 @@ codeunit 50002 "WHA Guided Setup"
         CreateNoSeriesIfMissing(WarehouseTaskNoSeriesCodeTok, WarehouseTaskNoSeriesDescLbl, WarehouseTaskStartingNoTok, WarehouseTaskEndingNoTok);
         CreateNoSeriesIfMissing(WaveNoSeriesCodeTok, WaveNoSeriesDescLbl, WaveStartingNoTok, WaveEndingNoTok);
         CreateNoSeriesIfMissing(CountSheetNoSeriesCodeTok, CountSheetNoSeriesDescLbl, CountSheetStartingNoTok, CountSheetEndingNoTok);
+        CreateNoSeriesIfMissing(DockAppointmentNoSeriesCodeTok, DockAppointmentNoSeriesDescLbl, DockAppointmentStartingNoTok, DockAppointmentEndingNoTok);
 
         SetupLogic.EnsureExists(WarehouseSetup);
 
@@ -195,6 +200,8 @@ codeunit 50002 "WHA Guided Setup"
             WarehouseSetup.Validate("Wave Nos.", WaveNoSeriesCodeTok);
         if WarehouseSetup."Count Sheet Nos." = '' then
             WarehouseSetup.Validate("Count Sheet Nos.", CountSheetNoSeriesCodeTok);
+        if WarehouseSetup."Dock Appointment Nos." = '' then
+            WarehouseSetup.Validate("Dock Appointment Nos.", DockAppointmentNoSeriesCodeTok);
 
         WarehouseSetup.Modify(true);
     end;

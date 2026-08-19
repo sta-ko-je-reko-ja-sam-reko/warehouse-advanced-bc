@@ -62,6 +62,18 @@ table 50000 "WHA Warehouse Setup"
                 Logic().Validate_CountSheetNos(Rec, xRec);
             end;
         }
+        field(50; "Dock Appointment Nos."; Code[20])
+        {
+            Caption = 'Dock appointment nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to dock appointments.';
+            TableRelation = "No. Series";
+
+            trigger OnValidate()
+            begin
+                Logic().Validate_DockAppointmentNos(Rec, xRec);
+            end;
+        }
     }
 
     keys

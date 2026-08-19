@@ -35,9 +35,11 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-QC-001` segment 1 — quality hold: stopping a handling unit and everything on it, three dispositions, and an audit trail that cannot be deleted. **Posts nothing** |
 | Delivered | `FEAT-LAB-001` segment 1 — labour management: standards, finished work turned into measured time, and the hours nobody spent on a job. The first feature that only *reads* what the app already recorded |
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
+| Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
+| Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
-| Not started | Everything else in §4 |
+| Not started | Nothing in §4. **Every feature in the catalogue now has a first segment.** What is unbuilt is the second segment of most of them, and posting |
 
 **What is delivered was built from §4, not from a capability register.** Every shipped feature
 carries that caveat in its own technical documentation. Phase 0 can still invalidate them, and
@@ -197,13 +199,14 @@ Wave D    FEAT-REPL-001    replenishment             ← segment 1 delivered
 
 Wave E    FEAT-SLOT-001    slotting                  ← segment 1 delivered
           FEAT-LAB-001     labour management         ← segment 1 delivered
-          FEAT-DOCK-001    dock and yard
+          FEAT-DOCK-001    dock and yard             ← segment 1 delivered
 
-Wave F    FEAT-KPI-001     analytics
+Wave F    FEAT-KPI-001     analytics                 ← segment 1 delivered
 ```
 
-**Waves A to D are built, and two thirds of Wave E.** Only `FEAT-DOCK-001` and `FEAT-KPI-001` remain
-in the catalogue.
+**Every wave now has a first segment.** The catalogue is exhausted, and that is a milestone worth
+reading carefully rather than celebrating: fourteen features have been built from a hypothesis, and
+Phase 0 has still not been run.
 
 Wave E changed the shape of the argument. Slotting and labour management are the first features that
 add **no new warehouse operation at all** — they read what the app has already been recording since
@@ -216,7 +219,15 @@ dimensions and a W1 container, and both are the same decision taken twice. **Pos
 largest single piece of unbuilt work in the app**, and it is worth planning as one piece rather than
 twice.
 
-`FEAT-DOCK-001` has no dependencies and can move anywhere it fits.
+Wave F closed the loop the app has been building towards since directed work: analytics measures
+**nothing but what the app itself recorded**, so every figure it produces is a statement about how
+much of the app the warehouse actually uses. On a company that runs none of it, all five measures
+read zero and are right to.
+
+It also produced the clearest example so far of a gap the app will not paper over. The catalogue asks
+for **dock-to-stock**; nothing links a put-away to the vehicle that brought the goods, so the measure
+is not shipped. What ships instead is its two halves, each honest about where its clock starts.
+Closing it is a scope decision about receiving, not a reporting problem.
 
 Each feature runs the greenfield loop — intake → design → document → implement → test →
 deliver — **in segments**, with a test and a documentation update shipping alongside each
@@ -249,7 +260,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 210 automated tests exist across twelve codeunits and **not one has
+1. **Run the test suite once.** 237 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 
@@ -267,8 +278,8 @@ feature can ship dark and be switched on per company when the business is ready.
    `test/` and press F5.
 2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
-   badly overdue: **twelve features** have been built from the hypothesis — Waves A to D and most of
-   Wave E — and each further one raises the cost of a register that contradicts it.
+   badly overdue: **all fourteen features** in the catalogue have been built from the hypothesis, and
+   there is no longer a next feature whose cost the register could reduce — only rework.
    Replenishment sharpens the point: standard Business Central already replenishes bins through the
    movement worksheet, so a real register may reclassify part of `FEAT-REPL-001` as *configuration*
    rather than *build*.

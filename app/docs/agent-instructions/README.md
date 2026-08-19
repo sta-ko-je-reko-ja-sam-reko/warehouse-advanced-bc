@@ -32,6 +32,10 @@ configuration. One configuration ↔ one agent ↔ one file.
 | `Warehouse Advanced - Demo Counting` | `demoCounting` | [WarehouseAdvanced-Demo-Counting.md](WarehouseAdvanced-Demo-Counting.md) | The agent bound to the Demo Counting configuration |
 | `Warehouse Advanced - Quality Hold` | `qualityHold` | [WarehouseAdvanced-QualityHold.md](WarehouseAdvanced-QualityHold.md) | The agent bound to the Quality Hold configuration |
 | `Warehouse Advanced - Demo Quality Hold` | `demoQualityHold` | [WarehouseAdvanced-Demo-QualityHold.md](WarehouseAdvanced-Demo-QualityHold.md) | The agent bound to the Demo Quality Hold configuration |
+| `Warehouse Advanced - Labour Management` | `labourManagement` | [WarehouseAdvanced-LabourManagement.md](WarehouseAdvanced-LabourManagement.md) | The agent bound to the Labour Management configuration |
+| `Warehouse Advanced - Demo Labour Management` | `demoLabourManagement` | [WarehouseAdvanced-Demo-LabourManagement.md](WarehouseAdvanced-Demo-LabourManagement.md) | The agent bound to the Demo Labour Management configuration |
+| `Warehouse Advanced - Slotting` | `slotting` | [WarehouseAdvanced-Slotting.md](WarehouseAdvanced-Slotting.md) | The agent bound to the Slotting configuration |
+| `Warehouse Advanced - Demo Slotting` | `demoSlotting` | [WarehouseAdvanced-Demo-Slotting.md](WarehouseAdvanced-Demo-Slotting.md) | The agent bound to the Demo Slotting configuration |
 
 **Demo importers are deliberately in their own configurations and their own API groups**, so a
 "load sample data" agent can be given the importer *without* also getting the functional write

@@ -44,6 +44,13 @@ product does not include.
 - [Quality hold](FEAT-QC-001-QualityHold/getting-started-english.md) — stop goods being used until
   somebody has decided what happens to them, and keep the record of who decided what.
 
+### Making the warehouse work better
+
+- [Labour management](FEAT-LAB-001-LabourManagement/getting-started-english.md) — how long the work
+  actually takes against how long you think it should, and how much of the day is not spent on jobs.
+- [Slotting](FEAT-SLOT-001-Slotting/getting-started-english.md) — which items your people walk to most,
+  and which of them are sitting in the wrong bin.
+
 ### Talking to other systems
 
 - [Integration surface](FEAT-INT-001-Integration/getting-started-english.md) — take in receipts and

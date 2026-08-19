@@ -19,7 +19,27 @@ next job rather than be given one. **Those are not questions a developer can ans
 cheap to change now and expensive to change later.** The step sequence sits behind a single
 swappable interface (`WHA IRFFlow`) precisely so this review can rewrite it.
 
+## Two ways to run it
+
+**On the floor, with the real app.** What this document was written for, and what actually settles
+the questions. Everything under *Before the session* applies.
+
+**At a desk, with the bench.** `tools/rf-simulator/index.html` is the same screen, the same step
+sequence and the same wording, running in a browser with nothing behind it. It needs no company, no
+sample data, no container and no credential — which is why it exists: this review has been blocked
+on infrastructure rather than on anybody's time since the feature shipped.
+
+The bench settles **sequence and wording**: how many scans a job costs, whether the short-pick form
+asks for the number an operator expects, what they do at an empty bin, and whether `Confirm by scan`
+earns its keep. It settles **nothing** about a scanner in one hand and a pallet in the other. A
+finding from the bench is a hypothesis; a finding on the floor is a decision.
+
+Run the bench first anyway. It is free, and every wording problem it catches is one that does not
+waste a floor session.
+
 ## Before the session
+
+*(For the floor session. The bench needs none of it.)*
 
 - [ ] A test company with **directed work** and **handheld** enabled, and sample data loaded.
 - [ ] Real-looking work: at least 10 tasks, of at least three types, at the location you will use.

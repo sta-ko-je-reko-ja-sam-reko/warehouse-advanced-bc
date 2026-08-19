@@ -1,0 +1,1262 @@
+<title>Handheld Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --concrete: #E6E7E2;
+    --surface: #F4F5F2;
+    --surface-2: #DCDED7;
+    --ink: #14171A;
+    --ink-2: #4A5158;
+    --ink-3: #767D83;
+    --line: #C9CCC4;
+    --hazard: #C88A02;
+    --hazard-bright: #F0B429;
+    --dock: #2C4E6C;
+    --signal: #2C7A4B;
+    --stop: #B03626;
+
+    --lcd: #0B1013;
+    --lcd-2: #131B20;
+    --lcd-line: #26343C;
+    --lcd-fg: #E9EDE7;
+    --lcd-dim: #8E9C9E;
+    --shell: #2A3138;
+    --shell-2: #1D2328;
+
+    --step: clamp(0.4rem, 1.2vw, 0.75rem);
+    --radius: 4px;
+    --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --font-body: "IBM Plex Sans", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --concrete: #101417;
+      --surface: #191E22;
+      --surface-2: #232A2F;
+      --ink: #E4E7E2;
+      --ink-2: #A2ABAF;
+      --ink-3: #79838A;
+      --line: #2E373D;
+      --hazard: #F0B429;
+      --dock: #7FA8CC;
+      --signal: #55B87C;
+      --stop: #E0705C;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --concrete: #101417;
+    --surface: #191E22;
+    --surface-2: #232A2F;
+    --ink: #E4E7E2;
+    --ink-2: #A2ABAF;
+    --ink-3: #79838A;
+    --line: #2E373D;
+    --hazard: #F0B429;
+    --dock: #7FA8CC;
+    --signal: #55B87C;
+    --stop: #E0705C;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--concrete);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  a { color: var(--dock); }
+
+  /* ---------- page frame ---------- */
+
+  .masthead {
+    border-bottom: 3px solid var(--ink);
+    background: var(--surface);
+    padding: calc(var(--step) * 2) calc(var(--step) * 2.5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--step) calc(var(--step) * 3);
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .masthead h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1; text-transform: uppercase; }
+  .masthead p { margin: 0.35rem 0 0; max-width: 62ch; color: var(--ink-2); font-size: 0.95rem; }
+
+  .hazard-rule {
+    height: 8px;
+    background: repeating-linear-gradient(-45deg, var(--hazard-bright) 0 14px, #14171A 14px 28px);
+  }
+
+  .bench {
+    display: grid;
+    grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+    gap: calc(var(--step) * 2.5);
+    align-items: start;
+    padding: calc(var(--step) * 2.5);
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 900px) {
+    .bench { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* ---------- the device ---------- */
+
+  .device-column { position: sticky; top: var(--step); display: grid; gap: var(--step); }
+  @media (max-width: 900px) { .device-column { position: static; } }
+
+  .terminal {
+    background: linear-gradient(180deg, var(--shell) 0%, var(--shell-2) 100%);
+    border-radius: 26px;
+    padding: 16px 14px 20px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 14px 30px rgba(0,0,0,0.28);
+    border: 1px solid #10151A;
+  }
+
+  .terminal-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6px 10px;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8D979E;
+  }
+
+  .screen {
+    background: var(--lcd);
+    border: 1px solid #05090B;
+    border-radius: 6px;
+    padding: 12px;
+    min-height: 430px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--lcd-fg);
+  }
+
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--lcd-dim);
+    border-bottom: 1px solid var(--lcd-line);
+    padding-bottom: 6px;
+  }
+
+  .statusbar strong { color: var(--lcd-fg); font-weight: 500; }
+
+  .instruction {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    line-height: 1.15;
+    font-weight: 600;
+    color: var(--hazard-bright);
+    min-height: 3.2em;
+  }
+
+  .job {
+    border: 1px solid var(--lcd-line);
+    border-radius: 4px;
+    background: var(--lcd-2);
+    padding: 8px 10px;
+    display: grid;
+    gap: 3px;
+  }
+
+  .job[hidden] { display: none; }
+
+  .job-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    border-bottom: 1px solid var(--lcd-line);
+    padding-bottom: 5px;
+    margin-bottom: 3px;
+  }
+
+  .job-no { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; }
+
+  .job-type {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.72rem;
+    background: var(--hazard-bright);
+    color: #14171A;
+    padding: 1px 7px;
+    border-radius: 2px;
+  }
+
+  .job-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.8rem; }
+  .job-row dt { color: var(--lcd-dim); font-family: var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.72rem; }
+  .job-row dd { margin: 0; font-family: var(--font-mono); font-size: 0.8rem; }
+  .job-row dd.target { color: var(--hazard-bright); font-weight: 600; }
+
+  .alert {
+    border-left: 4px solid var(--stop);
+    background: rgba(176, 54, 38, 0.14);
+    padding: 7px 9px;
+    font-size: 0.86rem;
+    color: #FFC9BF;
+  }
+
+  .alert.ok { border-left-color: var(--signal); background: rgba(44, 122, 75, 0.16); color: #B9E7C9; }
+  .alert[hidden] { display: none; }
+
+  .scanline { display: grid; gap: 6px; }
+
+  .scanline label {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    color: var(--lcd-dim);
+  }
+
+  .scanline input {
+    width: 100%;
+    background: #050809;
+    border: 1px solid var(--lcd-line);
+    border-radius: 3px;
+    color: var(--lcd-fg);
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    padding: 9px 10px;
+  }
+
+  .scanline input:focus-visible { outline: 2px solid var(--hazard-bright); outline-offset: 1px; }
+  .scanline input:disabled { opacity: 0.35; }
+
+  .labels { display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .labels button {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    background: #F4F3EE;
+    color: #14171A;
+    border: 1px solid #9AA0A4;
+    border-radius: 2px;
+    padding: 3px 7px 2px;
+    cursor: pointer;
+    border-bottom-width: 3px;
+  }
+
+  .labels button:hover { background: #fff; }
+  .labels button:focus-visible { outline: 2px solid var(--hazard-bright); outline-offset: 2px; }
+
+  .labels-hint { font-size: 0.7rem; color: var(--lcd-dim); font-style: italic; }
+
+  .shortform { display: grid; gap: 8px; }
+  .shortform[hidden] { display: none; }
+
+  .shortform label {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    color: var(--lcd-dim);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .shortform input, .shortform select {
+    width: 100%;
+    background: #050809;
+    border: 1px solid var(--lcd-line);
+    border-radius: 3px;
+    color: var(--lcd-fg);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    padding: 8px 9px;
+  }
+
+  .keys { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+  .key {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 12px 8px;
+    border-radius: 3px;
+    border: 1px solid #05090B;
+    background: #2F383E;
+    color: var(--lcd-fg);
+    cursor: pointer;
+    border-bottom-width: 3px;
+  }
+
+  .key:hover:not(:disabled) { background: #3B464D; }
+  .key:focus-visible { outline: 2px solid var(--hazard-bright); outline-offset: 2px; }
+  .key:disabled { opacity: 0.3; cursor: not-allowed; }
+  .key.primary { background: var(--hazard-bright); color: #14171A; border-color: #7A5A00; }
+  .key.primary:hover:not(:disabled) { background: #FFC64A; }
+  .key.wide { grid-column: 1 / -1; }
+
+  .trigger {
+    margin: 12px auto 0;
+    display: block;
+    width: 62%;
+    background: #3B464D;
+    border: 1px solid #10151A;
+    border-bottom-width: 4px;
+    border-radius: 20px;
+    height: 26px;
+    cursor: pointer;
+  }
+
+  .trigger:hover { background: #4A565E; }
+  .trigger:focus-visible { outline: 2px solid var(--hazard-bright); outline-offset: 3px; }
+
+  /* ---------- harness ---------- */
+
+  .panels { display: grid; gap: calc(var(--step) * 2); }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .panel > header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--step);
+    padding: calc(var(--step) * 1.4) calc(var(--step) * 1.8);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+
+  .panel > header h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .panel > .body { padding: calc(var(--step) * 1.8); display: grid; gap: calc(var(--step) * 1.4); }
+
+  .toggles { display: grid; gap: calc(var(--step) * 1.1); }
+
+  .toggle { display: flex; gap: 10px; align-items: flex-start; }
+  .toggle input { margin-top: 4px; width: 17px; height: 17px; accent-color: var(--dock); }
+  .toggle .t-name { font-weight: 600; font-size: 0.92rem; }
+  .toggle .t-why { color: var(--ink-2); font-size: 0.84rem; }
+
+  .field-row { display: flex; flex-wrap: wrap; gap: var(--step) calc(var(--step) * 2); align-items: center; }
+
+  select.plain, input.plain {
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--concrete);
+    color: var(--ink);
+  }
+
+  .queue { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  .queue th {
+    text-align: left;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.72rem;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    padding: 4px 8px 4px 0;
+  }
+  .queue td { padding: 5px 8px 5px 0; border-bottom: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.8rem; }
+  .queue td.name { font-family: var(--font-body); }
+  .table-wrap { overflow-x: auto; }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    padding: 1px 7px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+  }
+  .pill.waiting { color: var(--ink-3); }
+  .pill.holding { color: var(--dock); }
+  .pill.done { color: var(--signal); }
+  .pill.short { color: var(--hazard); }
+
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: var(--step); }
+
+  .metric {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: calc(var(--step) * 1.1);
+    background: var(--concrete);
+  }
+  .metric .n { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .metric .l { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.68rem; color: var(--ink-3); margin-top: 3px; }
+  .metric.warn .n { color: var(--stop); }
+
+  .log {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    line-height: 1.5;
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--concrete);
+    padding: calc(var(--step) * 1.2);
+    display: grid;
+    gap: 2px;
+  }
+
+  .log .t { color: var(--ink-3); }
+  .log .e-err { color: var(--stop); }
+  .log .e-ok { color: var(--signal); }
+
+  textarea.notes {
+    width: 100%;
+    min-height: 120px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--concrete);
+    color: var(--ink);
+    resize: vertical;
+  }
+
+  .btn {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .btn:hover { background: var(--surface-2); }
+  .btn:focus-visible { outline: 2px solid var(--dock); outline-offset: 2px; }
+
+  .script { display: grid; gap: calc(var(--step) * 1.4); }
+  .script section { border-left: 3px solid var(--hazard); padding-left: calc(var(--step) * 1.4); }
+  .script h3 { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .script p { margin: 2px 0 0; color: var(--ink-2); font-size: 0.87rem; }
+  .script ul { margin: 5px 0 0; padding-left: 1.1rem; color: var(--ink-2); font-size: 0.87rem; }
+  .script li { margin-bottom: 2px; }
+
+  .caveat {
+    border: 2px solid var(--hazard);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: calc(var(--step) * 1.8);
+    font-size: 0.9rem;
+  }
+  .caveat strong { display: block; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.95rem; margin-bottom: 4px; }
+
+  footer.page {
+    border-top: 1px solid var(--line);
+    padding: calc(var(--step) * 2.5);
+    color: var(--ink-3);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="hazard-rule"></div>
+
+<header class="masthead">
+  <div>
+    <p class="eyebrow">FEAT-RF-001 · operator review</p>
+    <h1>Handheld Bench</h1>
+    <p>The warehouse handheld, running in a browser, with no Business Central behind it. The step
+      sequence, the wording and every refusal are ported line for line from
+      <code>WHA RF Standard Flow</code>. Use it to put the screen in front of operators before the
+      container, the licence and the sample data exist.</p>
+  </div>
+  <div>
+    <button class="btn" id="reset-all" type="button">Restart session</button>
+  </div>
+</header>
+
+<div class="bench">
+
+  <div class="device-column">
+    <div class="terminal">
+      <div class="terminal-top">
+        <span id="shell-model">WHA-RF</span>
+        <span id="shell-clock" class="mono">--:--</span>
+      </div>
+
+      <div class="screen">
+        <div class="statusbar">
+          <span>DEV <strong id="sb-device">—</strong></span>
+          <span>LOC <strong id="sb-location">—</strong></span>
+          <span id="sb-step">SIGN IN</span>
+        </div>
+
+        <p class="instruction" id="instruction">Scan the code on your handheld to sign in.</p>
+
+        <div class="alert" id="alert" role="status" hidden></div>
+
+        <div class="job" id="job" hidden>
+          <div class="job-head">
+            <span class="job-no" id="job-no">—</span>
+            <span class="job-type" id="job-type">—</span>
+          </div>
+          <dl style="margin:0;display:grid;gap:3px">
+            <div class="job-row"><dt>Item</dt><dd id="job-item">—</dd></div>
+            <div class="job-row"><dt>Quantity</dt><dd id="job-qty">—</dd></div>
+            <div class="job-row"><dt>From</dt><dd id="job-from">—</dd></div>
+            <div class="job-row"><dt>To</dt><dd id="job-to">—</dd></div>
+            <div class="job-row"><dt>Unit</dt><dd id="job-hu">—</dd></div>
+          </dl>
+        </div>
+
+        <div class="scanline" id="scanline">
+          <label for="scan">Scan</label>
+          <input id="scan" autocomplete="off" spellcheck="false" placeholder="pull the trigger, or type and press Enter">
+          <div class="labels" id="labels"></div>
+          <p class="labels-hint" id="labels-hint">Labels within reach. Tap one as if you had scanned it.</p>
+        </div>
+
+        <div class="shortform" id="shortform" hidden>
+          <div>
+            <label for="short-qty">Quantity found</label>
+            <input id="short-qty" type="number" min="0" step="1" value="0">
+          </div>
+          <div>
+            <label for="short-reason">Why</label>
+            <select id="short-reason">
+              <option value="1">Nothing in the bin</option>
+              <option value="2">Not enough in the bin</option>
+              <option value="3">Damaged</option>
+              <option value="4">Cannot reach it</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="keys">
+          <button class="key primary wide" id="k-primary" type="button">Next task</button>
+          <button class="key" id="k-short" type="button">Report short</button>
+          <button class="key" id="k-handback" type="button">Hand back</button>
+          <button class="key wide" id="k-signout" type="button">Sign out</button>
+        </div>
+      </div>
+
+      <button class="trigger" id="trigger" type="button" aria-label="Scanner trigger"></button>
+    </div>
+  </div>
+
+  <div class="panels">
+
+    <div class="caveat">
+      <strong>What this cannot test</strong>
+      A desk review with tapped labels does not test what an operator does with a scanner in one hand
+      and a pallet in the other. <code>operator-review.md</code> asks for real bins with printed
+      barcodes, and it is right. Use this bench for the <em>sequence and the wording</em> — how many
+      scans a job costs, whether the short-pick form asks for the number they expect, what they do at
+      an empty bin. Then run the real session on the floor.
+    </div>
+
+    <section class="panel">
+      <header>
+        <h2>Handheld setup</h2>
+        <span class="eyebrow">WHA RF Setup</span>
+      </header>
+      <div class="body">
+        <div class="toggles">
+          <label class="toggle">
+            <input type="checkbox" id="s-require" checked>
+            <span>
+              <span class="t-name">Require device registration</span><br>
+              <span class="t-why">Off lets any code sign in — turn it off to see whether operators even read the sign-in screen.</span>
+            </span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="s-confirm" checked>
+            <span>
+              <span class="t-name">Confirm by scan</span><br>
+              <span class="t-why">The setting worth arguing about. Off collapses every job to a single confirm — quicker, and proves nothing.</span>
+            </span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="s-autostart" checked>
+            <span>
+              <span class="t-name">Start work automatically</span><br>
+              <span class="t-why">Off makes an operator say they have started before the clock runs.</span>
+            </span>
+          </label>
+        </div>
+        <div class="field-row">
+          <label for="s-device">Handheld to give them</label>
+          <select class="plain" id="s-device">
+            <option value="RF-01">RF-01 — registered, MAIN</option>
+            <option value="RF-02">RF-02 — registered but blocked</option>
+            <option value="RF-99">RF-99 — never registered</option>
+            <option value="">(blank — no device)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header>
+        <h2>Work waiting</h2>
+        <span class="eyebrow" id="queue-count">—</span>
+      </header>
+      <div class="body">
+        <div class="table-wrap">
+          <table class="queue">
+            <thead>
+              <tr><th>Job</th><th>Type</th><th class="name">What</th><th>From</th><th>To</th><th>Qty</th><th>State</th></tr>
+            </thead>
+            <tbody id="queue-body"></tbody>
+          </table>
+        </div>
+        <p style="margin:0;color:var(--ink-2);font-size:0.85rem">
+          Eleven jobs, five types. Three are traps, and they are the reason the session is worth
+          running: <code>WT-1003</code> asks for 12 where 4 are on the shelf, <code>WT-1005</code>
+          points at an empty bin, and <code>WT-1009</code> is a count with no quantity, so
+          <em>Report short</em> refuses it.
+        </p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header>
+        <h2>Session log</h2>
+        <span class="eyebrow">for the note-taker</span>
+      </header>
+      <div class="body">
+        <div class="metrics">
+          <div class="metric"><div class="n" id="m-done">0</div><div class="l">Jobs done</div></div>
+          <div class="metric"><div class="n" id="m-short">0</div><div class="l">Short</div></div>
+          <div class="metric"><div class="n" id="m-back">0</div><div class="l">Handed back</div></div>
+          <div class="metric warn"><div class="n" id="m-wrong">0</div><div class="l">Wrong scans</div></div>
+          <div class="metric"><div class="n" id="m-taps">0</div><div class="l">Taps</div></div>
+          <div class="metric"><div class="n" id="m-avg">—</div><div class="l">Sec / job</div></div>
+        </div>
+        <div class="log" id="log"></div>
+        <div class="field-row">
+          <button class="btn" id="copy-log" type="button">Copy the log</button>
+          <span class="eyebrow" id="copy-state"></span>
+        </div>
+        <textarea class="notes" id="notes" placeholder="What happened, what they expected, and the words they used. Type it here and it copies with the log."></textarea>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header>
+        <h2>Facilitator prompts</h2>
+        <span class="eyebrow">45 minutes</span>
+      </header>
+      <div class="body script">
+        <p style="margin:0;color:var(--ink-2);font-size:0.87rem">
+          Say this first, and mean it: <em>“This is a first version and we expect it to be wrong.
+          You are not being tested — it is.”</em> Then hand it over and stop talking. Every
+          explanation you give is a finding you have destroyed.
+        </p>
+        <section>
+          <h3>1 · Cold start</h3>
+          <p>Give it to them on the sign-in screen and say nothing.</p>
+          <ul><li>Do they scan the device label unprompted?</li><li>Do they know what to do once signed in?</li></ul>
+        </section>
+        <section>
+          <h3>2 · Three jobs in a row</h3>
+          <p>The interesting behaviour is the third job, not the first.</p>
+          <ul><li>Do they read the instruction line, or go straight to the job details?</li><li>Do they scan what was asked, or the first label they see?</li></ul>
+        </section>
+        <section>
+          <h3>3 · The short pick — WT-1003</h3>
+          <p>Twelve asked for, four on the shelf, no warning.</p>
+          <ul><li>How long to find <em>Report short</em>?</li><li>Do they type what they found, or what is missing?</li><li>Write down the words they use for the reason, and use those words as the captions.</li></ul>
+        </section>
+        <section>
+          <h3>4 · The empty bin — WT-1005</h3>
+          <ul><li>Short with zero, hand back, or something else?</li><li>Ask which is right. Short-with-zero closes the job; handing back sends the next person to the same empty bin.</li></ul>
+        </section>
+        <section>
+          <h3>5 · Interruption</h3>
+          <p>While they hold a job, tell them the supervisor needs them.</p>
+          <ul><li>Hand back, or walk away holding it? Ask what they expect to happen either way.</li></ul>
+        </section>
+        <section>
+          <h3>6 · Afterwards</h3>
+          <ul><li>“What did this stop you doing that you can do today?”</li><li>“What did it make you do twice?”</li><li>“Which scan felt pointless — and which would you keep even if it were optional?”</li></ul>
+        </section>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<footer class="page">
+  Ported from <code>app/src/MobileDevice/</code> at commit time. If the AL flow changes, this bench
+  is wrong until somebody changes it too — it is a prototype for a conversation, not a second
+  implementation.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var STEP = { SIGNIN: "SignIn", GETWORK: "GetWork", SCANFROM: "ScanFrom", SCANUNIT: "ScanUnit", SCANTO: "ScanTo", CONFIRM: "Confirm", SHORTPICK: "ShortPick" };
+
+  var STEP_LABEL = {
+    SignIn: "SIGN IN", GetWork: "GET WORK", ScanFrom: "SCAN FROM",
+    ScanUnit: "SCAN UNIT", ScanTo: "SCAN TO", Confirm: "CONFIRM", ShortPick: "SHORT"
+  };
+
+  // Text ported verbatim from WHA RF Standard Flow.
+  var TXT = {
+    deviceRequired: "Scan the code on your handheld before asking for work.",
+    unknownDevice: "Handheld {0} is not registered. Ask your supervisor to register it.",
+    deviceBlocked: "Handheld {0} is blocked and cannot be used.",
+    wrongBin: "You scanned {0}. Go to bin {1}.",
+    wrongUnit: "You scanned {0}. This job is for handling unit {1}.",
+    nothingToScan: "There is nothing to scan now. Read the screen and choose the action it asks for.",
+    notReady: "Finish the steps on the screen before confirming.",
+    noTask: "You are not holding a job. Choose Next task first.",
+    notCounted: "This job does not move a counted quantity, so there is nothing to be short of. Hand it back instead.",
+    signIn: "Scan the code on your handheld to sign in.",
+    getWork: "Choose Next task when you are ready for the next job.",
+    scanFrom: "Go to bin {0} and scan it.",
+    scanUnit: "Scan handling unit {0}.",
+    scanTo: "Put it in bin {0} and scan it.",
+    confirm: "Confirm to finish job {0}.",
+    shortPick: "The job asks for {0}. Enter how many you found, and why the rest is missing.",
+    noWork: "There is no work waiting for you at this location."
+  };
+
+  var REASONS = { 1: "Nothing in the bin", 2: "Not enough in the bin", 3: "Damaged", 4: "Cannot reach it" };
+
+  var DEVICES = {
+    "RF-01": { code: "RF-01", location: "MAIN", blocked: false },
+    "RF-02": { code: "RF-02", location: "MAIN", blocked: true }
+  };
+
+  function seedTasks() {
+    return [
+      { no: "WT-1001", type: "Pick",          desc: "Pick 6 for order SO-30412",      from: "A-01-02",  to: "STAGE-01", hu: "",       sscc: "", item: "WHA-1001", qty: 6,  uom: "PCS", prio: 10, onShelf: 6 },
+      { no: "WT-1002", type: "Put-away",      desc: "Pallet from receiving",           from: "RECV-01",  to: "B-04-01",  hu: "HU00042", sscc: "380123456789012364", item: "WHA-1044", qty: 48, uom: "PCS", prio: 10, onShelf: 48 },
+      { no: "WT-1003", type: "Pick",          desc: "Pick 12 for order SO-30418",      from: "A-02-01",  to: "STAGE-01", hu: "",       sscc: "", item: "WHA-1007", qty: 12, uom: "PCS", prio: 20, onShelf: 4 },
+      { no: "WT-1004", type: "Movement",      desc: "Move pallet to the fast aisle",   from: "B-01-03",  to: "B-02-03",  hu: "HU00051", sscc: "380123456789012371", item: "WHA-1044", qty: 30, uom: "PCS", prio: 20, onShelf: 30 },
+      { no: "WT-1005", type: "Pick",          desc: "Pick 5 for order SO-30421",       from: "A-03-04",  to: "STAGE-02", hu: "",       sscc: "", item: "WHA-1012", qty: 5,  uom: "PCS", prio: 20, onShelf: 0 },
+      { no: "WT-1006", type: "Replenishment", desc: "Top up the pick face",            from: "BULK-07",  to: "A-01-02",  hu: "HU00058", sscc: "", item: "WHA-1001", qty: 24, uom: "PCS", prio: 30, onShelf: 24 },
+      { no: "WT-1007", type: "Pick",          desc: "Pick 2 for order SO-30423",       from: "A-01-05",  to: "STAGE-01", hu: "",       sscc: "", item: "WHA-1019", qty: 2,  uom: "PCS", prio: 30, onShelf: 2 },
+      { no: "WT-1008", type: "Put-away",      desc: "Pallet from receiving",           from: "RECV-02",  to: "C-01-01",  hu: "HU00063", sscc: "380123456789012388", item: "WHA-1055", qty: 60, uom: "PCS", prio: 30, onShelf: 60 },
+      { no: "WT-1009", type: "Count",         desc: "Count what is in the bin",        from: "A-04-02",  to: "",         hu: "",       sscc: "", item: "WHA-1030", qty: 0,  uom: "PCS", prio: 40, onShelf: 7 },
+      { no: "WT-1010", type: "Pick",          desc: "Pick 3 for order SO-30427",       from: "A-02-06",  to: "STAGE-02", hu: "",       sscc: "", item: "WHA-1007", qty: 3,  uom: "PCS", prio: 40, onShelf: 3 },
+      { no: "WT-1011", type: "Movement",      desc: "Consolidate two part pallets",    from: "B-03-01",  to: "B-03-08",  hu: "HU00071", sscc: "", item: "WHA-1055", qty: 18, uom: "PCS", prio: 50, onShelf: 18 }
+    ].map(function (t) { t.state = "waiting"; t.held = false; return t; });
+  }
+
+  var setup = { requireDevice: true, confirmByScan: true, autoStart: true };
+  var state = {};
+
+  function fmt(text) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return text.replace(/\{(\d)\}/g, function (m, i) { return args[i]; });
+  }
+
+  function normalise(v) { return String(v == null ? "" : v).replace(/\s/g, "").toUpperCase(); }
+
+  // ---- the flow, ported from WHA RF Standard Flow ----
+
+  function signIn(code) {
+    if (!code) {
+      if (setup.requireDevice) throw new Error(TXT.deviceRequired);
+      return null;
+    }
+    var device = DEVICES[code];
+    if (!device) {
+      if (setup.requireDevice) throw new Error(fmt(TXT.unknownDevice, code));
+      return null;
+    }
+    if (device.blocked) throw new Error(fmt(TXT.deviceBlocked, code));
+    return device;
+  }
+
+  function nextTask() {
+    var loc = state.device ? state.device.location : "";
+    var open = state.tasks.filter(function (t) { return t.state === "waiting"; });
+    if (loc) open = open.filter(function () { return true; });
+    open.sort(function (a, b) { return a.prio - b.prio; });
+    return open.length ? open[0] : null;
+  }
+
+  function afterUnit(task) { return task.to ? STEP.SCANTO : STEP.CONFIRM; }
+  function afterFromBin(task) { return task.hu ? STEP.SCANUNIT : afterUnit(task); }
+
+  function firstStep(task) {
+    if (!setup.confirmByScan) return STEP.CONFIRM;
+    if (task.from) return STEP.SCANFROM;
+    return afterFromBin(task);
+  }
+
+  function isTheUnit(task, scanned) {
+    if (scanned === normalise(task.hu)) return true;
+    return task.sscc !== "" && scanned === normalise(task.sscc);
+  }
+
+  function scan(task, step, value) {
+    var scanned = normalise(value);
+    if (step === STEP.SCANFROM) {
+      if (scanned !== normalise(task.from)) throw new Error(fmt(TXT.wrongBin, scanned, task.from));
+      return afterFromBin(task);
+    }
+    if (step === STEP.SCANUNIT) {
+      if (!isTheUnit(task, scanned)) throw new Error(fmt(TXT.wrongUnit, scanned, task.hu));
+      return afterUnit(task);
+    }
+    if (step === STEP.SCANTO) {
+      if (scanned !== normalise(task.to)) throw new Error(fmt(TXT.wrongBin, scanned, task.to));
+      return STEP.CONFIRM;
+    }
+    throw new Error(TXT.nothingToScan);
+  }
+
+  function instruction(task, step) {
+    switch (step) {
+      case STEP.SIGNIN: return TXT.signIn;
+      case STEP.GETWORK: return TXT.getWork;
+      case STEP.SCANFROM: return fmt(TXT.scanFrom, task.from);
+      case STEP.SCANUNIT: return fmt(TXT.scanUnit, task.hu);
+      case STEP.SCANTO: return fmt(TXT.scanTo, task.to);
+      case STEP.CONFIRM: return fmt(TXT.confirm, task.no);
+      case STEP.SHORTPICK: return fmt(TXT.shortPick, task.qty);
+      default: return TXT.getWork;
+    }
+  }
+
+  // ---- session bookkeeping ----
+
+  function now() { return new Date(); }
+  function clock(d) { return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") + ":" + String(d.getSeconds()).padStart(2, "0"); }
+
+  function log(kind, text) {
+    state.log.push({ at: now(), kind: kind, text: text });
+    renderLog();
+  }
+
+  function tap(what) { state.metrics.taps += 1; log("tap", what); }
+
+  // ---- rendering ----
+
+  var el = {};
+  ["sb-device", "sb-location", "sb-step", "instruction", "alert", "job", "job-no", "job-type",
+   "job-item", "job-qty", "job-from", "job-to", "job-hu", "scanline", "scan", "labels",
+   "labels-hint", "shortform", "short-qty", "short-reason", "k-primary", "k-short", "k-handback",
+   "k-signout", "trigger", "log", "queue-body", "queue-count", "m-done", "m-short", "m-back",
+   "m-wrong", "m-taps", "m-avg", "shell-clock", "notes", "copy-state"].forEach(function (id) {
+    el[id] = document.getElementById(id);
+  });
+
+  function setAlert(text, ok) {
+    if (!text) { el.alert.hidden = true; el.alert.textContent = ""; return; }
+    el.alert.hidden = false;
+    el.alert.textContent = text;
+    el.alert.className = ok ? "alert ok" : "alert";
+  }
+
+  function nearbyLabels() {
+    var t = state.task;
+    var out = [];
+    if (state.step === STEP.SCANFROM && t) {
+      out.push(t.from, neighbour(t.from), t.item);
+      if (t.hu) out.push(t.hu);
+    } else if (state.step === STEP.SCANUNIT && t) {
+      out.push(t.hu, "HU00099", t.item);
+      if (t.sscc) out.push(t.sscc);
+    } else if (state.step === STEP.SCANTO && t) {
+      out.push(t.to, neighbour(t.to), t.item);
+    } else if (state.step === STEP.SIGNIN) {
+      out.push("RF-01", "RF-02", "RF-99");
+    }
+    return out.filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+  }
+
+  function neighbour(bin) {
+    if (!bin) return "";
+    var m = bin.match(/^(.*?)(\d+)$/);
+    if (!m) return bin + "-X";
+    var n = String(Number(m[2]) + 1).padStart(m[2].length, "0");
+    return m[1] + n;
+  }
+
+  function shuffleStable(list) {
+    // Deterministic reordering so the wanted label is not always first.
+    if (list.length < 3) return list;
+    var copy = list.slice();
+    var head = copy.shift();
+    copy.splice(Math.min(1, copy.length), 0, head);
+    return copy;
+  }
+
+  function render() {
+    var t = state.task;
+    var scanning = state.step === STEP.SCANFROM || state.step === STEP.SCANUNIT || state.step === STEP.SCANTO || state.step === STEP.SIGNIN;
+
+    el["sb-device"].textContent = state.device ? state.device.code : (state.signedIn ? "any" : "—");
+    el["sb-location"].textContent = state.device ? state.device.location : "—";
+    el["sb-step"].textContent = STEP_LABEL[state.step] || "";
+
+    el.instruction.textContent = instruction(t, state.step);
+
+    el.job.hidden = !t;
+    if (t) {
+      el["job-no"].textContent = t.no;
+      el["job-type"].textContent = t.type;
+      el["job-item"].textContent = t.item;
+      el["job-qty"].textContent = t.qty ? t.qty + " " + t.uom : "—";
+      el["job-from"].textContent = t.from || "—";
+      el["job-to"].textContent = t.to || "—";
+      el["job-hu"].textContent = t.hu || "—";
+      el["job-from"].className = state.step === STEP.SCANFROM ? "target" : "";
+      el["job-to"].className = state.step === STEP.SCANTO ? "target" : "";
+      el["job-hu"].className = state.step === STEP.SCANUNIT ? "target" : "";
+    }
+
+    el.scanline.hidden = !scanning;
+    el.scan.disabled = !scanning;
+    el.trigger.disabled = !scanning;
+    el.shortform.hidden = state.step !== STEP.SHORTPICK;
+
+    if (state.step === STEP.SHORTPICK && t) el["short-qty"].max = String(t.qty);
+
+    el.labels.innerHTML = "";
+    if (scanning) {
+      shuffleStable(nearbyLabels()).forEach(function (code) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = code;
+        b.addEventListener("click", function () { submitScan(code, true); });
+        el.labels.appendChild(b);
+      });
+      el["labels-hint"].hidden = false;
+    } else {
+      el["labels-hint"].hidden = true;
+    }
+
+    if (state.step === STEP.SIGNIN) {
+      el["k-primary"].textContent = "Sign in";
+    } else if (state.step === STEP.GETWORK) {
+      el["k-primary"].textContent = "Next task";
+    } else if (state.step === STEP.SHORTPICK) {
+      el["k-primary"].textContent = "Finish short";
+    } else {
+      el["k-primary"].textContent = "Confirm";
+    }
+
+    el["k-primary"].disabled = false;
+    el["k-short"].disabled = !t || state.step === STEP.SHORTPICK;
+    el["k-handback"].disabled = !t;
+    el["k-signout"].disabled = state.step === STEP.SIGNIN;
+
+    renderQueue();
+    renderMetrics();
+  }
+
+  function renderQueue() {
+    el["queue-body"].innerHTML = "";
+    var waiting = 0;
+    state.tasks.forEach(function (t) {
+      if (t.state === "waiting") waiting += 1;
+      var tr = document.createElement("tr");
+      var cls = t.state === "done" ? "done" : t.state === "short" ? "short" : t.held ? "holding" : "waiting";
+      var name = t.state === "done" ? "Done" : t.state === "short" ? "Short" : t.held ? "Held" : "Waiting";
+      tr.innerHTML =
+        "<td>" + t.no + "</td><td class='name'>" + t.type + "</td><td class='name'>" + t.desc +
+        "</td><td>" + (t.from || "—") + "</td><td>" + (t.to || "—") + "</td><td>" + (t.qty || "—") +
+        "</td><td><span class='pill " + cls + "'>" + name + "</span></td>";
+      el["queue-body"].appendChild(tr);
+    });
+    el["queue-count"].textContent = waiting + " waiting";
+  }
+
+  function renderMetrics() {
+    el["m-done"].textContent = state.metrics.done;
+    el["m-short"].textContent = state.metrics.short;
+    el["m-back"].textContent = state.metrics.handedBack;
+    el["m-wrong"].textContent = state.metrics.wrongScans;
+    el["m-taps"].textContent = state.metrics.taps;
+    var finished = state.metrics.done + state.metrics.short;
+    el["m-avg"].textContent = finished ? Math.round(state.metrics.workedMs / finished / 1000) : "—";
+  }
+
+  function renderLog() {
+    el.log.innerHTML = "";
+    state.log.slice(-200).forEach(function (entry) {
+      var row = document.createElement("div");
+      row.className = entry.kind === "error" ? "e-err" : entry.kind === "done" ? "e-ok" : "";
+      row.innerHTML = "<span class='t'>" + clock(entry.at) + "</span> " + entry.text.replace(/</g, "&lt;");
+      el.log.appendChild(row);
+    });
+    el.log.scrollTop = el.log.scrollHeight;
+  }
+
+  // ---- actions ----
+
+  function fail(err) {
+    setAlert(err.message, false);
+    log("error", "REFUSED — " + err.message);
+  }
+
+  function submitScan(value, fromLabel) {
+    if (!value) return;
+    state.metrics.taps += 1;
+
+    if (state.step === STEP.SIGNIN) {
+      log("scan", "scanned " + value + (fromLabel ? " (label)" : " (typed)"));
+      try {
+        state.device = signIn(value);
+        state.signedIn = true;
+        state.step = STEP.GETWORK;
+        setAlert("Signed in on " + (state.device ? state.device.code : "an unregistered handheld") + ".", true);
+        log("ok", "signed in as " + (state.device ? state.device.code : "unregistered"));
+      } catch (err) { fail(err); }
+      el.scan.value = "";
+      render();
+      return;
+    }
+
+    log("scan", "scanned " + value + (fromLabel ? " (label)" : " (typed)"));
+    try {
+      state.step = scan(state.task, state.step, value);
+      setAlert("", true);
+    } catch (err) {
+      state.metrics.wrongScans += 1;
+      fail(err);
+    }
+    el.scan.value = "";
+    render();
+  }
+
+  function doPrimary() {
+    if (state.step === STEP.SIGNIN) { tap("Sign in"); submitScan(el.scan.value || document.getElementById("s-device").value, false); return; }
+
+    if (state.step === STEP.GETWORK) {
+      tap("Next task");
+      var t = nextTask();
+      if (!t) { setAlert(TXT.noWork, false); log("error", "no work waiting"); return; }
+      t.held = true;
+      state.task = t;
+      state.jobStarted = Date.now();
+      state.step = firstStep(t);
+      setAlert(setup.autoStart ? "Job " + t.no + " started." : "Job " + t.no + " is yours.", true);
+      log("job", "took " + t.no + " (" + t.type + ")");
+      render();
+      return;
+    }
+
+    if (state.step === STEP.SHORTPICK) {
+      tap("Finish short");
+      var qty = Number(el["short-qty"].value || 0);
+      var reason = el["short-reason"].value;
+      finishJob("short", qty, REASONS[reason]);
+      return;
+    }
+
+    tap("Confirm");
+    if (!state.task) { fail(new Error(TXT.noTask)); return; }
+    if (state.step !== STEP.CONFIRM) { fail(new Error(TXT.notReady)); return; }
+    finishJob("done", state.task.qty, "");
+  }
+
+  function finishJob(kind, qty, reason) {
+    var t = state.task;
+    t.state = kind;
+    t.held = false;
+    state.metrics.workedMs += Date.now() - state.jobStarted;
+    if (kind === "short") {
+      state.metrics.short += 1;
+      log("done", t.no + " finished short — found " + qty + " of " + t.qty + ", " + reason.toLowerCase());
+      setAlert("Job " + t.no + " closed with " + qty + " of " + t.qty + ".", true);
+    } else {
+      state.metrics.done += 1;
+      log("done", t.no + " completed");
+      setAlert("Job " + t.no + " done.", true);
+    }
+    state.task = null;
+    state.step = STEP.GETWORK;
+    render();
+  }
+
+  function doShort() {
+    tap("Report short");
+    try {
+      if (!state.task) throw new Error(TXT.noTask);
+      if (state.task.qty <= 0) throw new Error(TXT.notCounted);
+      state.step = STEP.SHORTPICK;
+      el["short-qty"].value = "0";
+      setAlert("", true);
+      log("short", "opened the short form on " + state.task.no);
+    } catch (err) { fail(err); }
+    render();
+  }
+
+  function doHandBack() {
+    tap("Hand back");
+    try {
+      if (!state.task) throw new Error(TXT.noTask);
+      var t = state.task;
+      t.held = false;
+      t.state = "waiting";
+      state.metrics.handedBack += 1;
+      state.task = null;
+      state.step = STEP.GETWORK;
+      setAlert("Job " + t.no + " is back in the queue.", true);
+      log("back", t.no + " handed back");
+    } catch (err) { fail(err); }
+    render();
+  }
+
+  function doSignOut() {
+    tap("Sign out");
+    if (state.task) { doHandBack(); }
+    state.device = null;
+    state.signedIn = false;
+    state.step = STEP.SIGNIN;
+    setAlert("", true);
+    log("out", "signed out");
+    render();
+  }
+
+  function reset(keepLog) {
+    state = {
+      tasks: seedTasks(),
+      task: null,
+      device: null,
+      signedIn: false,
+      step: STEP.SIGNIN,
+      jobStarted: 0,
+      log: keepLog && state.log ? state.log : [],
+      metrics: { done: 0, short: 0, handedBack: 0, wrongScans: 0, taps: 0, workedMs: 0 }
+    };
+    setAlert("", true);
+    log("start", "— session started —");
+    render();
+  }
+
+  // ---- wiring ----
+
+  el["k-primary"].addEventListener("click", doPrimary);
+  el["k-short"].addEventListener("click", doShort);
+  el["k-handback"].addEventListener("click", doHandBack);
+  el["k-signout"].addEventListener("click", doSignOut);
+
+  el.trigger.addEventListener("click", function () {
+    if (el.scan.disabled) return;
+    if (el.scan.value) { submitScan(el.scan.value, false); return; }
+    var options = nearbyLabels();
+    if (options.length) submitScan(options[0], true);
+  });
+
+  el.scan.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); submitScan(el.scan.value, false); }
+  });
+
+  document.getElementById("s-require").addEventListener("change", function (e) {
+    setup.requireDevice = e.target.checked;
+    log("setup", "require device registration = " + e.target.checked);
+  });
+  document.getElementById("s-confirm").addEventListener("change", function (e) {
+    setup.confirmByScan = e.target.checked;
+    log("setup", "confirm by scan = " + e.target.checked);
+  });
+  document.getElementById("s-autostart").addEventListener("change", function (e) {
+    setup.autoStart = e.target.checked;
+    log("setup", "start work automatically = " + e.target.checked);
+  });
+  document.getElementById("s-device").addEventListener("change", function (e) {
+    log("setup", "handheld handed over = " + (e.target.value || "(blank)"));
+  });
+
+  document.getElementById("reset-all").addEventListener("click", function () { reset(false); });
+
+  document.getElementById("copy-log").addEventListener("click", function () {
+    var lines = state.log.map(function (entry) { return clock(entry.at) + "  " + entry.text; });
+    var m = state.metrics;
+    var finished = m.done + m.short;
+    var text = [
+      "FEAT-RF-001 handheld bench — session log",
+      "",
+      "jobs done      " + m.done,
+      "finished short " + m.short,
+      "handed back    " + m.handedBack,
+      "wrong scans    " + m.wrongScans,
+      "taps           " + m.taps,
+      "sec per job    " + (finished ? Math.round(m.workedMs / finished / 1000) : "—"),
+      "",
+      "setup: require device=" + setup.requireDevice + ", confirm by scan=" + setup.confirmByScan + ", auto start=" + setup.autoStart,
+      "",
+      "--- log ---",
+      lines.join("\n"),
+      "",
+      "--- notes ---",
+      el.notes.value || "(none)"
+    ].join("\n");
+
+    var done = function () { el["copy-state"].textContent = "copied"; setTimeout(function () { el["copy-state"].textContent = ""; }, 2000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); });
+    } else { fallbackCopy(text); }
+  });
+
+  function fallbackCopy(text) {
+    el.notes.value = text;
+    el.notes.select();
+    el["copy-state"].textContent = "selected — press Ctrl+C";
+  }
+
+  setInterval(function () { el["shell-clock"].textContent = clock(now()).slice(0, 5); }, 1000);
+  el["shell-clock"].textContent = clock(now()).slice(0, 5);
+
+  reset(false);
+}());
+</script>

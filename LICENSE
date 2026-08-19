@@ -1,0 +1,29 @@
+Warehouse Advanced
+Copyright (c) 2026 Marko Trnavac. All rights reserved.
+
+This software is proprietary. It is distributed as a per-tenant extension for Microsoft
+Dynamics 365 Business Central, and its use is governed by an end-user licence agreement
+between the publisher and the customer. The draft of that agreement is app/docs/eula.md;
+the operative version is whatever the EULA URL in app/app.json resolves to.
+
+PUBLISHING THIS REPOSITORY PUBLICLY GRANTS NO LICENCE OF ANY KIND. No permission is given
+to any person to use, copy, modify, merge, publish, distribute, sublicense, or sell this
+software or any part of it, in source or compiled form, except under a written agreement
+with the publisher.
+
+Two consequences are easy to misread, so they are stated here:
+
+  - The source is readable in this repository, and resourceExposurePolicy in app/app.json
+    permits debugging and downloading the source from a tenant where the app is installed.
+    Neither is a grant of rights. Both exist so a customer can support and audit what runs
+    in their own environment.
+
+  - This repository does not build on its own. It requires the private bc-dev-templates
+    repository, which is separately licensed and not covered by this file.
+
+Third-party components remain under their own licences. Microsoft Dynamics 365 Business
+Central, the AL language, and the Microsoft base and system applications are Microsoft's,
+and nothing here grants any right in them.
+
+For any use beyond the end-user licence agreement, contact the publisher through the URL
+in app/app.json.

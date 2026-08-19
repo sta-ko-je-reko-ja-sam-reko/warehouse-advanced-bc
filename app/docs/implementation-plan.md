@@ -380,7 +380,8 @@ and it is not enumerated anywhere.** What is visible from here:
 | ~~The app ships no role centre and no cues~~ | **Delivered.** The guess about *who uses what* was settled by decision, not by inference: the role centre belongs to Core, and every activity on it belongs to the feature it is about |
 | ~~The register has no draft, so discovery starts from a blank page~~ | **Delivered.** ~147 rows in [gap-analysis.md](gap-analysis.md), buckets empty. Found the same way as scheduling and retention were — by reading what the app *contains* rather than what the catalogue *claims*, which is how five stale catalogue promises surfaced |
 | ~~The incumbent WMS is named throughout the documentation~~ | **Scrubbed.** `CLAUDE.md` forbids naming another vendor's product in this public repo and 25 mentions across six files did it anyway. The vocabulary is now "the incumbent WMS" or "the system being replaced" |
-| **No LICENSE**, and `dmom.ai/privacy`, `/eula`, `/help` do not exist | `CLAUDE.md` records all four. AppSourceCop validates URL shape only, so the build passes and the links are dead. **This is the next thing that needs a decision rather than a commit** — the licence terms and whether the domain gets pages are not development calls |
+| ~~**No LICENSE**~~ | **Delivered.** Proprietary, all rights reserved: `LICENSE` grants nothing to anyone reading the public source, and [eula.md](eula.md) is the customer-facing agreement. The EULA is **draft and unreviewed**, with governing law and support terms left visibly unfilled — both are commercial decisions, and a guess there would have been worse than a gap |
+| **`dmom.ai/privacy`, `/eula`, `/help` do not exist** | **Decided: leave the manifest pointing there and carry the debt.** The alternative — repointing at files in this repository — would have made the links resolve today. AppSourceCop validates URL shape only, so the build passes and the links stay dead. This closes before customer delivery, not before the next feature |
 | **No CI.** `.github/workflows/` holds only a `.gitkeep` | And CI would need access to the private `bc-dev-templates` repo |
 | **`app/img/AppLogo.png` is a generated placeholder** | Not real branding |
 | **Customer-language getting-started files** | Deliberately deferred until a customer is engaged |
@@ -518,7 +519,8 @@ feature can ship dark and be switched on per company when the business is ready.
 | Undocumented customisations in the incumbent | The classic source of late scope | Floor observation and interviews, not just the config export |
 | Dev container is US, production is W1 | Localisation-specific behaviour will not surface locally | Rebuild the container from a W1 artifact before posting-related work |
 | Public repo needs private conventions | A fresh clone will not build; CI cannot run without access | Accepted trade; revisit if CI is introduced |
-| No LICENSE, dead manifest URLs | `dmom.ai/privacy`, `/eula`, `/help` do not exist | Publish the pages, or point the manifest somewhere real, before customer delivery |
+| Dead manifest URLs | `dmom.ai/privacy`, `/eula`, `/help` do not exist, and the decision is to keep pointing at them | Publish the pages before customer delivery. The content is drafted — [privacy-statement.md](privacy-statement.md) and [eula.md](eula.md) — so this is a hosting task, not a writing one |
+| The EULA has unfilled clauses | Governing law and support terms are blank in [eula.md](eula.md), and neither can be inferred | Settle them commercially, then have the whole document reviewed by somebody qualified. It was drafted by a developer, and says so |
 
 ## 8. Immediate next steps
 

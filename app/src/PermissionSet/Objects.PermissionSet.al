@@ -29,5 +29,8 @@ permissionset 50000 "WHA Objects"
         page "WHA API Handling Unit" = X,
         codeunit "WHA Handling Unit Logic" = X,
         codeunit "WHA HU Feature Setup" = X,
-        codeunit "WHA HU App Area Sub." = X;
+        codeunit "WHA HU App Area Sub." = X,
+        table "WHA Demo Data" = X,
+        codeunit "WHA Demo Handling Unit" = X,
+        page "WHA API Demo Handling Unit" = X;
 }

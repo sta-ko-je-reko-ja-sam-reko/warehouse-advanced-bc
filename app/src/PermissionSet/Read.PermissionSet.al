@@ -11,5 +11,6 @@ permissionset 50001 "WHA Read"
     Permissions =
         tabledata "WHA Warehouse Setup" = R,
         tabledata "WHA Handling Unit Setup" = R,
-        tabledata "WHA Handling Unit" = R;
+        tabledata "WHA Handling Unit" = R,
+        tabledata "WHA Demo Data" = R;
 }

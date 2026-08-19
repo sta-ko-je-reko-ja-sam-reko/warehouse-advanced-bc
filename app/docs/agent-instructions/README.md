@@ -13,6 +13,11 @@ configuration. One configuration ↔ one agent ↔ one file.
 |---|---|---|---|
 | `Warehouse Advanced - Core` | `core` | [WarehouseAdvanced-Core.md](WarehouseAdvanced-Core.md) | The agent bound to the Core configuration |
 | `Warehouse Advanced - Handling Units` | `handlingUnit` | [WarehouseAdvanced-HandlingUnits.md](WarehouseAdvanced-HandlingUnits.md) | The agent bound to the Handling Units configuration |
+| `Warehouse Advanced - Demo Handling Units` | `demoHandlingUnit` | [WarehouseAdvanced-Demo-HandlingUnits.md](WarehouseAdvanced-Demo-HandlingUnits.md) | The agent bound to the Demo Handling Units configuration |
+
+**Demo importers are deliberately in their own configurations and their own API groups**, so a
+"load sample data" agent can be given the importer *without* also getting the functional write
+tools — and vice versa.
 
 ## How an administrator uses these
 

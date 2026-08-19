@@ -31,6 +31,23 @@ everything inside it.
 3. If you allow nesting, set **Max nesting depth** to limit how many levels deep units may go.
    Leave it at zero for no limit.
 
+## Load sample data
+
+If you want something to look at before entering your own units, you can load a small set of
+examples: a pallet, a carton inside that pallet, a closed cage, and a despatched pallet.
+
+You are offered this while turning the feature on — switch on **Load sample data** on the same step
+as **Enable this feature**.
+
+- The examples are created in the company you are working in.
+- It is safe to run more than once. Nothing is duplicated.
+- The examples are for trying things out. Review them before relying on them in a company you use
+  for real work.
+- An administrator also gets a **configuration package** for handling units, which can be copied
+  into other companies.
+
+To remove an example later, open it and choose **Delete**. Take nested units out first.
+
 ## Create a handling unit
 
 1. Choose the search icon, enter **Handling units**, and choose the related link.

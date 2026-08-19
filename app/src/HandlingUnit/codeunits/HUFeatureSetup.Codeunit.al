@@ -11,6 +11,8 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
         StepDescriptionLbl: Label 'Track pallets and containers as numbered units, so a whole unit can be moved, nested inside another, and labelled with an SSCC.';
         McpConfigNameTok: Label 'Warehouse Advanced - Handling Units', Locked = true;
         McpConfigDescLbl: Label 'Handling unit tools. Read the Warehouse Advanced Handling Units agent instructions before use.';
+        DemoMcpConfigNameTok: Label 'Warehouse Advanced - Demo Handling Units', Locked = true;
+        DemoMcpConfigDescLbl: Label 'Seeds sample handling units. Read the Warehouse Advanced Demo Handling Units agent instructions before use.';
 
     /// <summary>
     /// Adds the handling unit step to the guided setup list.
@@ -81,6 +83,12 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
     /// Creates or refreshes the handling unit MCP configuration and its API tool.
     /// </summary>
     procedure RegisterMcpConfiguration()
+    begin
+        RegisterFunctionalConfiguration();
+        RegisterDemoConfiguration();
+    end;
+
+    local procedure RegisterFunctionalConfiguration()
     var
         MCPSetup: Codeunit "WHA MCP Setup";
         ConfigId: Guid;
@@ -90,7 +98,20 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
         MCPSetup.Activate(ConfigId);
     end;
 
-    local procedure ImportSampleUnits()
+    local procedure RegisterDemoConfiguration()
+    var
+        MCPSetup: Codeunit "WHA MCP Setup";
+        ConfigId: Guid;
     begin
+        ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
+        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Handling Unit", false, false, false);
+        MCPSetup.Activate(ConfigId);
+    end;
+
+    local procedure ImportSampleUnits()
+    var
+        DemoHandlingUnit: Codeunit "WHA Demo Handling Unit";
+    begin
+        DemoHandlingUnit.Import();
     end;
 }

@@ -11,5 +11,6 @@ permissionset 50002 "WHA Full"
     Permissions =
         tabledata "WHA Warehouse Setup" = RIMD,
         tabledata "WHA Handling Unit Setup" = RIMD,
-        tabledata "WHA Handling Unit" = RIMD;
+        tabledata "WHA Handling Unit" = RIMD,
+        tabledata "WHA Demo Data" = RIMD;
 }

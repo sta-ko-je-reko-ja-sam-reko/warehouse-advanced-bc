@@ -122,6 +122,10 @@ install and upgrade:
 | Configuration | API group | Tool | Agent may |
 |---|---|---|---|
 | `Warehouse Advanced - Handling Units` | `handlingUnit` | `WHA API Handling Unit` | read, create, modify, delete |
+| `Warehouse Advanced - Demo Handling Units` | `demoHandlingUnit` | `WHA API Demo Handling Unit` | run `importDemoData` only |
+
+The demo importer is deliberately in its **own** configuration and its **own** API group, so a
+"load sample data" agent can be given the importer without the functional write tools.
 
 Registration goes through `WHA IFeatureSetup.RegisterMcpConfiguration`, so the feature owns its
 configuration and Core needs no per-feature knowledge. `WHA MCP Setup` supplies the idempotent
@@ -132,6 +136,31 @@ Business Central has no field that carries agent instructions, so they ship as a
 [../agent-instructions/WarehouseAdvanced-HandlingUnits.md](../agent-instructions/WarehouseAdvanced-HandlingUnits.md).
 **Changing the tools in this configuration is not done until that file is updated in the same
 change.**
+
+## Demo data
+
+`WHA Demo Handling Unit` seeds four sample units with fixed numbers `DEMO-HU-001..004`, covering
+every status value, nesting (002 inside 001), the SSCC field, and the `Nested Unit Count` FlowField.
+Each insert is guarded by `if Rec.Get(...) then exit;`, so the import is idempotent.
+
+Location is applied only when one exists — on an empty company the units are created without it,
+per the pattern's "loads what it can" rule.
+
+**One seeder, two front doors**, never forked:
+
+| Path | Caller |
+|---|---|
+| End user | The guided setup wizard's sample-data opt-in → `ApplyChoices` → `Import()` |
+| Agent | `WHA API Demo Handling Unit.ImportDemoData` (MCP tool) → `Import()` |
+
+`Import()` also builds the feature's RapidStart configuration package (`WHA-HU`) through
+`Config. Package Management`, containing `WHA Handling Unit` only. Per the pattern the package is
+built **inside `Import()`** — so it exists only when the user opted into sample data, never eagerly
+on install — and it **never** includes the feature's `Setup` table. It is idempotent on the package
+code.
+
+The shared dummy source table `WHA Demo Data` (Core, 50002) exists because the API page's value is
+its bound action, not its rows.
 
 ## Tests
 
@@ -152,9 +181,5 @@ tests that accompany the contents segment.
 ## Not done
 
 - **Contents.** The unit holds no item quantities yet.
-- **Demo data**, the `[ServiceEnabled] ImportDemoData` API, its **own** demo MCP configuration, and
-  the RapidStart package. `ApplyChoices` accepts the sample-data opt-in and currently does nothing
-  with it. Note the functional MCP configuration below is separate — the demo importer gets its own,
-  so importers can be routed to a different agent.
 - **Getting-started in the customer language** — the language has not been confirmed.
 - **SSCC generation.** The field exists; generating a valid GS1 check digit belongs to `FEAT-LBL-001`.

@@ -185,6 +185,30 @@ codeunit 51001 "WHA Warehouse Task Tests"
     end;
 
     [Test]
+    procedure HandingBackStartedWorkReturnsItToTheQueue()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        xWarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+    begin
+        // [SCENARIO] An operator who cannot finish a job they started hands it back, and it becomes work
+        // anybody can pick up again. Leaving it in progress with nobody holding it would hide it from
+        // the queue for ever.
+        xWarehouseTask."No." := 'TEST-ABANDON';
+        xWarehouseTask.Status := xWarehouseTask.Status::WHAInProgress;
+        xWarehouseTask."Assigned To User ID" := 'OPERATOR';
+        xWarehouseTask."Assigned At" := CurrentDateTime;
+        xWarehouseTask."Started At" := CurrentDateTime;
+        WarehouseTask := xWarehouseTask;
+        WarehouseTask."Assigned To User ID" := '';
+
+        TaskLogic.Validate_AssignedToUserID(WarehouseTask, xWarehouseTask);
+
+        Assert.AreEqual(WarehouseTask.Status::WHAReleased, WarehouseTask.Status, 'Abandoned work should return to the queue.');
+        Assert.AreEqual(0DT, WarehouseTask."Started At", 'Abandoned work should no longer claim to have been started.');
+    end;
+
+    [Test]
     procedure StartingAnUnassignedTaskIsRejected()
     var
         WarehouseTask: Record "WHA Warehouse Task";

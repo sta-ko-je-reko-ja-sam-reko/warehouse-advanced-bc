@@ -3,6 +3,7 @@ namespace WarehouseAdvanced.Core;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
+using WarehouseAdvanced.MobileDevice;
 
 permissionset 50000 "WHA Objects"
 {
@@ -67,5 +68,17 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Int. Feature Setup" = X,
         codeunit "WHA Int. App Area Sub." = X,
         codeunit "WHA Demo Integration" = X,
-        page "WHA API Demo Integration" = X;
+        page "WHA API Demo Integration" = X,
+        table "WHA RF Setup" = X,
+        table "WHA RF Device" = X,
+        page "WHA RF Setup" = X,
+        page "WHA RF Devices" = X,
+        page "WHA RF Device Card" = X,
+        page "WHA RF Handheld" = X,
+        page "WHA API RF Device" = X,
+        codeunit "WHA RF Standard Flow" = X,
+        codeunit "WHA RF Feature Setup" = X,
+        codeunit "WHA RF App Area Sub." = X,
+        codeunit "WHA Demo RF Device" = X,
+        page "WHA API Demo RF Device" = X;
 }

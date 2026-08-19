@@ -30,6 +30,10 @@ page 50003 "WHA API Warehouse Setup"
                 {
                     Caption = 'Handling unit number series';
                 }
+                field(warehouseTaskNumberSeries; Rec."Warehouse Task Nos.")
+                {
+                    Caption = 'Warehouse task number series';
+                }
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
                 {
                     Caption = 'Last modified date time';

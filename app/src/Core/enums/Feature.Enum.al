@@ -1,5 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 
 enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
@@ -16,5 +17,10 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Handling units';
         Implementation = "WHA IFeatureSetup" = "WHA HU Feature Setup";
+    }
+    value(2; WHADirectedWork)
+    {
+        Caption = 'Directed work';
+        Implementation = "WHA IFeatureSetup" = "WHA Task Feature Setup";
     }
 }

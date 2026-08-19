@@ -1,5 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 
 permissionset 50000 "WHA Objects"
@@ -36,5 +37,16 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA HU App Area Sub." = X,
         table "WHA Demo Data" = X,
         codeunit "WHA Demo Handling Unit" = X,
-        page "WHA API Demo Handling Unit" = X;
+        page "WHA API Demo Handling Unit" = X,
+        table "WHA Warehouse Task Setup" = X,
+        table "WHA Warehouse Task" = X,
+        page "WHA Warehouse Task Setup" = X,
+        page "WHA Warehouse Task Card" = X,
+        page "WHA Warehouse Tasks" = X,
+        page "WHA API Warehouse Task" = X,
+        codeunit "WHA Warehouse Task Logic" = X,
+        codeunit "WHA Task Feature Setup" = X,
+        codeunit "WHA Task App Area Sub." = X,
+        codeunit "WHA Demo Warehouse Task" = X,
+        page "WHA API Demo Warehouse Task" = X;
 }

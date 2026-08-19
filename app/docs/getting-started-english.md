@@ -3,8 +3,7 @@
 Warehouse Advanced extends Business Central with warehouse capabilities that the standard
 product does not include.
 
-> **This app is still in development.** No features have shipped yet, so this index is a
-> placeholder. Each feature adds its own entry below when it ships.
+> **This app is still in development.** Each feature adds its own entry below when it ships.
 
 ## Start here
 
@@ -21,3 +20,8 @@ product does not include.
 
 - [Handling units](FEAT-HU-001-HandlingUnits/getting-started-english.md) — track a pallet, cage or
   carton as one numbered thing, put one inside another, and label it for your customers.
+
+### Warehouse execution
+
+- [Directed work](FEAT-TASK-001-DirectedWork/getting-started-english.md) — queue warehouse jobs by
+  urgency, hand the next one to whoever asks for work, and see who did what and when.

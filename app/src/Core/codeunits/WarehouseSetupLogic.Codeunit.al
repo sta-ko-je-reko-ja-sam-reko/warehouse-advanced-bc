@@ -15,17 +15,24 @@ codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
     /// <param name="WarehouseSetup">The setup record being validated.</param>
     /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
     procedure Validate_HandlingUnitNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup")
-    var
-        NoSeries: Record "No. Series";
     begin
         if WarehouseSetup."Handling Unit Nos." = xWarehouseSetup."Handling Unit Nos." then
             exit;
-        if WarehouseSetup."Handling Unit Nos." = '' then
+
+        CheckSeriesExists(WarehouseSetup."Handling Unit Nos.");
+    end;
+
+    /// <summary>
+    /// Validates a change to the warehouse task number series.
+    /// </summary>
+    /// <param name="WarehouseSetup">The setup record being validated.</param>
+    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
+    procedure Validate_WarehouseTaskNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup")
+    begin
+        if WarehouseSetup."Warehouse Task Nos." = xWarehouseSetup."Warehouse Task Nos." then
             exit;
 
-        NoSeries.SetLoadFields(Code);
-        if not NoSeries.Get(WarehouseSetup."Handling Unit Nos.") then
-            Error(NoSeriesNotFoundErr, WarehouseSetup."Handling Unit Nos.");
+        CheckSeriesExists(WarehouseSetup."Warehouse Task Nos.");
     end;
 
     /// <summary>
@@ -50,9 +57,23 @@ codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
     var
         WarehouseSetup: Record "WHA Warehouse Setup";
     begin
-        WarehouseSetup.SetLoadFields("Handling Unit Nos.");
+        WarehouseSetup.SetLoadFields("Handling Unit Nos.", "Warehouse Task Nos.");
         if not WarehouseSetup.Get() then
             exit(false);
-        exit(WarehouseSetup."Handling Unit Nos." <> '');
+        if WarehouseSetup."Handling Unit Nos." = '' then
+            exit(false);
+        exit(WarehouseSetup."Warehouse Task Nos." <> '');
+    end;
+
+    local procedure CheckSeriesExists(SeriesCode: Code[20])
+    var
+        NoSeries: Record "No. Series";
+    begin
+        if SeriesCode = '' then
+            exit;
+
+        NoSeries.SetLoadFields(Code);
+        if not NoSeries.Get(SeriesCode) then
+            Error(NoSeriesNotFoundErr, SeriesCode);
     end;
 }

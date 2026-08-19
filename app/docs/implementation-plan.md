@@ -22,14 +22,22 @@ candidate feature catalogue, and the order it should be tackled in.
 | | |
 |---|---|
 | Delivered | `FEAT-CORE-001` — foundation setup, guided setup hub, per-feature wizard, feature facade, permission sets (17 objects, PRs #5–#7) |
+| Delivered | `FEAT-HU-001` — handling units: the unit, nesting, contents (PRs #11–#12) |
+| Delivered | `FEAT-TASK-001` segment 1 — warehouse tasks: life cycle, priority queue, operator assignment, handling unit move on completion |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
-| Not started | Everything in §4 |
+| Not started | Everything else in §4 |
 
-The Core module deliberately ships with **no toggleable features**: `WHA Feature` carries
-only a `None` value, and the `Application Area Setup` extension and its experience-tier
-subscriber arrive with the first real feature. Every feature below plugs into machinery that
-already exists — the feature enum's interface dispatch, the wizard, the deferred session restart.
+**What is delivered was built from §4, not from a capability register.** Both shipped features
+carry that caveat in their own technical documentation. Phase 0 can still invalidate them, and
+the two chosen so far were chosen precisely because they are the least likely to be invalidated
+(§4, "the two that are probably not optional") and because almost everything else depends on them.
+
+Core carries no per-feature knowledge: a feature ships by adding a `WHA Feature` enum value bound
+to its own `WHA IFeatureSetup` implementation, and the wizard, the guided setup list, the MCP
+registration and the deferred session restart pick it up with no Core change. Adding directed work
+changed Core only where the feature genuinely needed foundation support — a second number series on
+`WHA Warehouse Setup`.
 
 ## 2. Phase 0 — the capability register (gates everything)
 
@@ -150,10 +158,10 @@ Assuming Phase 0 confirms a broad scope. **Re-derive this from the real register
 Phase 0   Capability register                        ← gates everything below
           └─ FEAT-INT-001 may start in parallel
 
-Wave A    FEAT-HU-001      handling units            ← almost everything depends on this
-          FEAT-INT-001     integration surface
+Wave A    FEAT-HU-001      handling units            ← delivered
+          FEAT-INT-001     integration surface       ← blocked: needs the current interface spec
 
-Wave B    FEAT-TASK-001    directed work
+Wave B    FEAT-TASK-001    directed work             ← segment 1 delivered
           FEAT-RF-001      mobile device             ← prototype during Wave A
 
 Wave C    FEAT-WAVE-001    wave management
@@ -205,7 +213,9 @@ feature can ship dark and be switched on per company when the business is ready.
 ## 8. Immediate next steps
 
 1. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
-   consulting work, not development work, and it is the highest-value thing available.
+   consulting work, not development work, and it is the highest-value thing available. It is now
+   also overdue: two features have been built from the hypothesis, and each further one raises the
+   cost of a register that contradicts it.
 2. **Decide the cutover model** (§6) — it changes sequencing and the difficulty of
    `FEAT-INT-001`.
 3. **Get the current interface specification.** It unblocks `FEAT-INT-001` independently of

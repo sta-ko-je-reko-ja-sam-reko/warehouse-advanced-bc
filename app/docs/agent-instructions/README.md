@@ -14,6 +14,8 @@ configuration. One configuration ↔ one agent ↔ one file.
 | `Warehouse Advanced - Core` | `core` | [WarehouseAdvanced-Core.md](WarehouseAdvanced-Core.md) | The agent bound to the Core configuration |
 | `Warehouse Advanced - Handling Units` | `handlingUnit` | [WarehouseAdvanced-HandlingUnits.md](WarehouseAdvanced-HandlingUnits.md) | The agent bound to the Handling Units configuration |
 | `Warehouse Advanced - Demo Handling Units` | `demoHandlingUnit` | [WarehouseAdvanced-Demo-HandlingUnits.md](WarehouseAdvanced-Demo-HandlingUnits.md) | The agent bound to the Demo Handling Units configuration |
+| `Warehouse Advanced - Directed Work` | `directedWork` | [WarehouseAdvanced-DirectedWork.md](WarehouseAdvanced-DirectedWork.md) | The agent bound to the Directed Work configuration |
+| `Warehouse Advanced - Demo Directed Work` | `demoDirectedWork` | [WarehouseAdvanced-Demo-DirectedWork.md](WarehouseAdvanced-Demo-DirectedWork.md) | The agent bound to the Demo Directed Work configuration |
 
 **Demo importers are deliberately in their own configurations and their own API groups**, so a
 "load sample data" agent can be given the importer *without* also getting the functional write

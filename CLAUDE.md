@@ -149,6 +149,15 @@ Get-ChildItem "$art\us\Extensions" -Filter "*.app" |
 - **Errors as errors:** AA0008, AA0073, AA0137, AA0139, AA0217, AA0233, AL0606. Zero-error
   builds. Disable a rule in the ruleset with a `justification` — never disable an analyzer.
 - **Every new object goes into a permission set as it is created.**
+- **Test codeunits follow the same file-naming rule as everything else** — object name, affix
+  stripped, spaces removed, then `.Codeunit.al`. `codeunit "WHA Handling Unit Tests"` becomes
+  `HandlingUnitTests.Codeunit.al`. **Not** `<Feature>.Test.Codeunit.al`: that form is what
+  `.bc-conventions/instructions/03-source-folder-layout.md` §4 says, but AA0215 rejects it, so put
+  "Tests" in the **object name** instead. The `test/` project needs its own `AppSourceCop.json`
+  carrying `mandatoryAffixes`, or AA0215 cannot tell `WHA` is an affix and demands the affix-kept
+  file name.
+- **Run the analysers against `test/` too**, not just `app/`. A test-project compile without
+  `/analyzer` flags reports nothing and proves nothing.
 
 ## Git workflow
 
@@ -173,6 +182,11 @@ set in this repo's `.git/config` only. Consequences:
   inherited helpers, then the gh one — because system config sets `credential.helper = manager`
 
 ## Known outstanding items
+
+- **Customer-language getting-started files are deliberately deferred.** `feature-ready.md` requires
+  `getting-started-<lang>.md` per feature, and no feature has one. This is an accepted deviation
+  until a customer is engaged and the language is known — not an oversight. English getting-started
+  files are written as features ship, so the translation pass has something to work from.
 
 - Manifest URLs point at **dmom.ai** (`/privacy`, `/eula`, `/help`). **None of those pages
   exist yet** — there is no site on the domain. AppSourceCop only validates URL shape, so the

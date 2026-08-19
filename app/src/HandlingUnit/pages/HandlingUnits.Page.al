@@ -34,6 +34,9 @@ page 50052 "WHA Handling Units"
                 field("Parent No."; Rec."Parent No.")
                 {
                 }
+                field("Total Quantity"; Rec."Total Quantity")
+                {
+                }
                 field("Nested Unit Count"; Rec."Nested Unit Count")
                 {
                 }

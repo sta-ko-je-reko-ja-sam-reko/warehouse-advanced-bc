@@ -87,7 +87,7 @@ repo, not reachable from this repo) requires **all** of the following before a f
 | RapidStart package | Built on demo-data opt-in, feature tables only, never the setup table |
 | Permission sets | Every object added as it is created |
 | Tests | A `[Test]` **per segment**, added with the segment; unit + integration test plans |
-| Documentation | `technical-documentation.md` + getting-started in English **and** the customer language, updated per segment |
+| Documentation | `technical-documentation.md` + getting-started in English **and** the customer language, updated per segment. The customer-language pass is **deferred until a customer is engaged** — English ships with each feature so the translation has a source. |
 
 **Implication:** a "small" feature is not small. Two tables and a page still carry a setup
 surface, an application area, a wizard step, demo data, an MCP configuration, a RapidStart

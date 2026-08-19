@@ -77,6 +77,7 @@ codeunit 50651 "WHA Int. Feature Setup" implements "WHA IFeatureSetup"
 
         Setup.Init();
         Setup."Partner System" := CopyStr(DefaultPartnerTok, 1, MaxStrLen(Setup."Partner System"));
+        Setup."Release Requested Work" := true;
         Setup."Max Retry Count" := 3;
         Setup.Insert(true);
     end;

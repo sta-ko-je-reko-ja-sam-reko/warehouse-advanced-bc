@@ -36,8 +36,9 @@ as messages so that both halves are auditable:
 
 1. The partner system **posts an inbound message** — a receipt notification, or a request for work.
 2. The message is **applied** to the app's own data: a handling unit appears, or a warehouse task is
-   created and released to the floor. It is applied on arrival, or left waiting for review, as the
-   setup decides.
+   created — released to the floor, or held as a draft for review, as the setup and the message
+   between them decide. The message itself is applied on arrival or left waiting, again per the
+   setup.
 3. A message that cannot be applied **fails with its reason recorded** and nothing half-done left
    behind. It can be corrected and tried again.
 4. As work finishes, the app **fills an outbox** — a confirmation for every completed warehouse
@@ -97,6 +98,7 @@ anything in a dispute. Read and write it through `WHA Int. Message Mgt.`, never 
 | `Enabled` | The feature toggle |
 | `Partner System` | Stamped on every message. Ships as `HOST` |
 | `Process inbound messages on arrival` | Off means messages queue for review or for a scheduled run |
+| `Release requested work` | On sends requested work straight to the floor; off holds it as a draft for someone here to check. A message may override it for itself |
 | `Max Retry Count` | How many times a failed inbound message is tried again by the queue run. Zero means never |
 
 ## Objects
@@ -184,13 +186,32 @@ All bodies are JSON objects. Dates are `YYYY-MM-DD`; date-times are ISO 8601.
   "variantCode": "",
   "quantity": 12,
   "priority": 10,
-  "dueDate": "2026-08-20"
+  "dueDate": "2026-08-20",
+  "release": true
 }
 ```
 
-Either `handlingUnitNumber` or `itemNumber` must be present, or the message is refused. The task is
-created **and released**, so an incomplete request fails loudly instead of leaving a draft nobody
-looks at. `taskType` is the enum value name; an unknown one is named back in the error.
+`locationCode` is required, and either `handlingUnitNumber` or `itemNumber` must be present, or the
+message is refused with nothing created. `taskType` is the enum value name; an unknown one is named
+back in the error.
+
+**Whether the task reaches the floor is a decision, not a fixed behaviour.** It was the one place a
+guess would have been invisible: a partner that sends work to be done and a partner that sends work
+to be checked look identical in the payload. So:
+
+| | |
+|---|---|
+| `Release requested work` in the setup | The standing policy for this company |
+| `"release"` in the message | Overrides it, in either direction, for that message only |
+| Neither says anything | Released — the commoner arrangement, and the one that fails loudly |
+
+Completeness is checked by the handler itself, **not** by the release that follows it. That matters:
+when work is held rather than released, a request with no location is still refused, instead of
+quietly becoming a draft nobody can act on.
+
+> `Release tasks automatically` on the **directed work** setup is a warehouse-wide policy and wins:
+> with it on, a task reaches the floor as it is created, whatever this feature asked for. Holding
+> requested work for review means turning that off as well.
 
 ### Inbound — `WHAHandlingUnitReceived`
 
@@ -310,8 +331,13 @@ and pointing at it; incomplete and unknown-type requests refused with nothing le
 request applied only once; a receipt creating a unit with its contents; the outbound sweep reporting
 a completed task exactly once across repeated sweeps; the confirmation payload carrying the task;
 acknowledge closing an outbound message; process and acknowledge refusing each other's direction;
-cancel keeping the message; a waiting message refusing deletion; auto-process on arrival; and demo
-idempotency.
+cancel keeping the message; a waiting message refusing deletion; auto-process on arrival; requested
+work held when the setup says so and released when it does not, with a message overriding the
+standing setting in both directions; a request with no location refused and leaving nothing behind;
+and demo idempotency.
+
+The release tests switch off `Release tasks automatically` on the directed work setup first, so that
+a released task proves *this* feature released it rather than the task feature doing so on insert.
 
 ## What has to come from the customer
 
@@ -319,6 +345,8 @@ Everything here is replaceable once these are known. In rough order of how much 
 
 1. **The real message set.** Which events cross the boundary at all — is stock counted on our side
    or theirs, who owns the item master, does anything ask for a *cancellation* of work already sent?
+   And does requested work arrive ready to do, or to be checked first? The setting exists so that
+   answer is configuration rather than code, but somebody still has to give it.
 2. **The real payload shapes**, including the identifiers the partner uses. Every field name above
    is provisional.
 3. **The transport and its direction.** Does the partner post to us, do we post to them, is there a

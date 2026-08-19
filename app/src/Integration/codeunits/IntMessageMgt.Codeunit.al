@@ -292,6 +292,43 @@ codeunit 50653 "WHA Int. Message Mgt."
     end;
 
     /// <summary>
+    /// Determines whether a JSON object carries a value under a name at all. Use it to tell "the
+    /// partner said nothing" from "the partner said no".
+    /// </summary>
+    /// <param name="PayloadObject">The object to look in.</param>
+    /// <param name="KeyName">The name to look for.</param>
+    /// <returns>True when the name is present and is not null.</returns>
+    procedure JsonHasValue(PayloadObject: JsonObject; KeyName: Text): Boolean
+    var
+        ValueToken: JsonToken;
+    begin
+        if not PayloadObject.Get(KeyName, ValueToken) then
+            exit(false);
+        if not ValueToken.IsValue() then
+            exit(false);
+        exit(not ValueToken.AsValue().IsNull());
+    end;
+
+    /// <summary>
+    /// Reads a true or false value from a JSON object, falling back to what this side decided when the
+    /// partner system said nothing.
+    /// </summary>
+    /// <param name="PayloadObject">The object to read from.</param>
+    /// <param name="KeyName">The name of the value.</param>
+    /// <param name="DefaultValue">The answer to use when the message is silent.</param>
+    /// <returns>The value the message carries, or the default.</returns>
+    procedure JsonBoolean(PayloadObject: JsonObject; KeyName: Text; DefaultValue: Boolean): Boolean
+    var
+        ValueToken: JsonToken;
+    begin
+        if not JsonHasValue(PayloadObject, KeyName) then
+            exit(DefaultValue);
+
+        PayloadObject.Get(KeyName, ValueToken);
+        exit(ValueToken.AsValue().AsBoolean());
+    end;
+
+    /// <summary>
     /// Reads a decimal value from a JSON object.
     /// </summary>
     /// <param name="PayloadObject">The object to read from.</param>

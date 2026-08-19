@@ -28,8 +28,18 @@ After the restart, **Integration messages** is available from the search.
 3. Switch **Process inbound messages on arrival** on if incoming messages should be acted on
    immediately. Leave it off if someone should look at them first, or if you prefer to run them on a
    schedule.
-4. Set **Max retry count** — how many times a message that failed is tried again automatically.
+4. Switch **Release requested work** on if a job the other system asks for should go straight to the
+   floor. Turn it off if someone here should check requested work first — the job is then created as
+   a draft, and you release it yourself from **Warehouse tasks**.
+5. Set **Max retry count** — how many times a message that failed is tried again automatically.
    Leave it at zero if failures should always be looked at by a person.
+
+> A single message can ask for the opposite of your setting, and that wins for that message. So the
+> other system can send most work to be checked and still push an urgent job straight through.
+
+> If **Release tasks automatically** is switched on in the directed work setup, every task reaches
+> the floor as it is created, whatever you choose here. Turn that off too if you want requested work
+> held for review.
 
 ## What a message is
 

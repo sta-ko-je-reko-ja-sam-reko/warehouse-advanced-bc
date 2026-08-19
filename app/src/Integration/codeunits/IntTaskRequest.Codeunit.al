@@ -11,10 +11,13 @@ codeunit 50655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
         DuplicateErr: Label 'A warehouse task has already been created for external ID %1. The partner system should send a new identifier for new work.', Comment = '%1 = the external identifier the partner system sent';
         UnknownTaskTypeErr: Label 'The partner system asked for task type %1, which this app does not have.', Comment = '%1 = the task type name that arrived in the message';
         NothingToDoErr: Label 'Message %1 names neither a handling unit nor an item, so there is no work to do.', Comment = '%1 = the message entry number';
+        LocationMissingErr: Label 'Message %1 does not say which location the work happens at.', Comment = '%1 = the message entry number';
 
     /// <summary>
-    /// Creates a warehouse task from the request and releases it, so the work reaches the floor. An
-    /// incomplete request fails the message rather than leaving a half-built task behind.
+    /// Creates a warehouse task from the request. Whether the task goes straight to the floor or is
+    /// held as a draft for review is decided by the integration setup, which a single message may
+    /// override for itself. An incomplete request fails the message either way, rather than leaving a
+    /// half-built task behind.
     /// </summary>
     /// <param name="IntegrationMessage">The request to apply.</param>
     procedure HandleInbound(var IntegrationMessage: Record "WHA Integration Message")
@@ -33,8 +36,9 @@ codeunit 50655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
         BuildTask(WarehouseTask, PayloadObject, MessageMgt, IntegrationMessage."Entry No.");
         WarehouseTask.Insert(true);
 
-        if WarehouseTask.Status = WarehouseTask.Status::WHACreated then
-            TaskLogic.Release(WarehouseTask);
+        if ShouldRelease(PayloadObject, MessageMgt) then
+            if WarehouseTask.Status = WarehouseTask.Status::WHACreated then
+                TaskLogic.Release(WarehouseTask);
 
         IntegrationMessage."Record ID" := WarehouseTask.RecordId();
         IntegrationMessage.Modify(true);
@@ -49,6 +53,7 @@ codeunit 50655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
 
     local procedure BuildTask(var WarehouseTask: Record "WHA Warehouse Task"; PayloadObject: JsonObject; var MessageMgt: Codeunit "WHA Int. Message Mgt."; EntryNo: Integer)
     var
+        LocationCode: Code[10];
         HandlingUnitNo: Code[20];
         ItemNo: Code[20];
     begin
@@ -56,7 +61,10 @@ codeunit 50655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
         WarehouseTask.Validate("Task Type", TaskTypeFromName(MessageMgt.JsonText(PayloadObject, 'taskType')));
         WarehouseTask.Validate(Description, CopyStr(MessageMgt.JsonText(PayloadObject, 'description'), 1, MaxStrLen(WarehouseTask.Description)));
 
-        WarehouseTask.Validate("Location Code", CopyStr(MessageMgt.JsonText(PayloadObject, 'locationCode'), 1, MaxStrLen(WarehouseTask."Location Code")));
+        LocationCode := CopyStr(MessageMgt.JsonText(PayloadObject, 'locationCode'), 1, MaxStrLen(WarehouseTask."Location Code"));
+        if LocationCode = '' then
+            Error(LocationMissingErr, EntryNo);
+        WarehouseTask.Validate("Location Code", LocationCode);
 
         HandlingUnitNo := CopyStr(MessageMgt.JsonText(PayloadObject, 'handlingUnitNumber'), 1, MaxStrLen(WarehouseTask."Handling Unit No."));
         ItemNo := CopyStr(MessageMgt.JsonText(PayloadObject, 'itemNumber'), 1, MaxStrLen(WarehouseTask."Item No."));
@@ -77,6 +85,20 @@ codeunit 50655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
         if MessageMgt.JsonText(PayloadObject, 'priority') <> '' then
             WarehouseTask.Validate(Priority, MessageMgt.JsonInteger(PayloadObject, 'priority'));
         WarehouseTask.Validate("Due Date", MessageMgt.JsonDate(PayloadObject, 'dueDate'));
+    end;
+
+    local procedure ShouldRelease(PayloadObject: JsonObject; var MessageMgt: Codeunit "WHA Int. Message Mgt."): Boolean
+    var
+        Setup: Record "WHA Integration Setup";
+        ReleaseByDefault: Boolean;
+    begin
+        Setup.SetLoadFields("Release Requested Work");
+        if Setup.Get() then
+            ReleaseByDefault := Setup."Release Requested Work"
+        else
+            ReleaseByDefault := true;
+
+        exit(MessageMgt.JsonBoolean(PayloadObject, 'release', ReleaseByDefault));
     end;
 
     local procedure ApplyBins(var WarehouseTask: Record "WHA Warehouse Task"; PayloadObject: JsonObject; var MessageMgt: Codeunit "WHA Int. Message Mgt.")

@@ -45,9 +45,13 @@ Bodies are JSON objects. Dates are `YYYY-MM-DD`, date-times ISO 8601.
 
 **`WHAWarehouseTaskRequest`** (inbound) — asks the warehouse to do a job:
 `taskType` (`WHAPutAway`, `WHAPick`, `WHAMovement`, `WHAReplenishment`, `WHACount`), `description`,
-`locationCode`, `fromBinCode`, `toBinCode`, and then **either** `handlingUnitNumber` **or**
-`itemNumber` with `quantity` (plus optional `variantCode`), plus optional `priority` (lower is more
-urgent) and `dueDate`.
+`locationCode` (**required**), `fromBinCode`, `toBinCode`, and then **either** `handlingUnitNumber`
+**or** `itemNumber` with `quantity` (plus optional `variantCode`), plus optional `priority` (lower is
+more urgent), `dueDate`, and `release`.
+
+`release` decides whether the job goes straight to the warehouse floor or is held as a draft for
+someone to check. Leave it out and the warehouse's own setting decides. **Do not add it to a message
+the partner sent** — it is the partner's statement about its own work, not a knob for you to turn.
 
 **`WHAHandlingUnitReceived`** (inbound) — tells the warehouse a pallet has arrived: `sscc`,
 `description`, `locationCode`, `binCode`, and `lines` — an array of `itemNumber`, `variantCode`,
@@ -62,6 +66,9 @@ Read them; never write them.
 
 ## Rules the app enforces — do not fight them
 
+- **A request with no location, or with neither a handling unit nor an item, is refused** and
+  creates nothing. This is checked whether or not the work is released, so "it was going to be a
+  draft anyway" is never a reason a request got through.
 - **A message that fails changes nothing.** Everything it started is rolled back, and the reason is
   written to `errorMessage`. Read that text before doing anything else; it is the same wording a
   person would have seen doing the work by hand.

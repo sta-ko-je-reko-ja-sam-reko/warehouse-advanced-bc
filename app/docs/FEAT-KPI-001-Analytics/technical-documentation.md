@@ -104,6 +104,7 @@ flattering one.
 | `WHA KPI Pick Short Rate` | codeunit | 50707 | `app/src/Analytics/codeunits/KPIPickShortRate.Codeunit.al` |
 | `WHA KPI Trailer Turnaround` | codeunit | 50708 | `app/src/Analytics/codeunits/KPITrailerTurnaround.Codeunit.al` |
 | `WHA KPI Door Wait` | codeunit | 50709 | `app/src/Analytics/codeunits/KPIDoorWait.Codeunit.al` |
+| `WHA KPI Scheduler` | codeunit | 50710 | `app/src/Analytics/codeunits/KPIScheduler.Codeunit.al` |
 | `WHA Task Throughput` | query | 50700 | `app/src/Analytics/queries/TaskThroughput.Query.al` |
 | `WHA KPI Appl. Area Setup` | tableextension | 50700 | `app/src/Analytics/tableextensions/KPIApplAreaSetup.TableExt.al` |
 | `WHA Analytics Setup` | page | 50700 | `app/src/Analytics/pages/AnalyticsSetup.Page.al` |
@@ -168,7 +169,9 @@ rather than adding a second set. `Import()` builds the `WHA-KPI` RapidStart pack
 
 ## Tests
 
-`WHA Analytics Tests` (codeunit 51013), 12 tests: jobs finished counts only what was finished inside
+`WHA Analytics Tests` (codeunit 51013), 14 tests. Two cover the scheduled capture: it keeps the
+period's figures, and it refuses when analytics is switched off. The other 12: jobs finished counts
+only what was finished inside
 the period; nothing to measure is zero rather than a failure; the short rate is the share of picks
 that came up short and ignores put-aways; put-away lead time counts put-aways and nothing else;
 turnaround is measured gate to gate; waiting for a door is measured apart from the visit; a vehicle
@@ -180,14 +183,33 @@ The elapsed part of **hours from raised to put away** is the one thing not asser
 measured from the platform's own created stamp, which a test cannot fabricate. The test asserts
 which jobs the measure looks at instead.
 
+
+## Scheduling is the job queue's, not ours
+
+`WHA KPI Scheduler` is a `TableNo`-bound codeunit whose `OnRun` does the capture. A job queue entry points at it,
+and Business Central decides when and how often — the entry's own `Location Code` filter narrows the
+run.
+
+The period comes from `Default Period Days` on the analytics setup: the run passes no dates and lets
+`ResolveDates` fill them, so the schedule and the screen agree about what a period is without the
+scheduler holding an opinion of its own.
+
+**Nothing in this feature stores a recurrence.** BC already schedules, logs failures, retries and
+handles time zones; a *run at 06:00 daily* field here would be a worse copy of one that already
+exists. What the feature owns is *what* to run; *when* belongs to the platform.
+
+The first line of the run is the same `CheckEnabled` guard every write path uses, so a job queue entry
+left in place after somebody switches the feature off stops rather than quietly carrying on.
+
 ## Not done
 
 - **No dock-to-stock**, for the reason above. This is the largest gap and it is a scope decision
   rather than a reporting one.
 - **No targets.** Nothing says what good looks like, so nothing is ever red for being bad — only for
   moving the wrong way since last time.
-- **Nothing schedules a capture.** A job queue entry has to be created by an administrator, and
-  without one the snapshot history has gaps exactly where somebody forgot.
+- **A missed run is a gap, not a catch-up.** The scheduled capture keeps figures for the period
+  ending today. A job queue entry that failed for a week leaves that week uncaptured and nothing
+  backfills it, so the history has a hole exactly where the schedule broke.
 - **No labour measures.** `FEAT-LAB-001` already works out measured time against standards, and
   jobs-per-hour belongs here, but it would be the first measure to read a second app feature's
   derived figures rather than raw events.

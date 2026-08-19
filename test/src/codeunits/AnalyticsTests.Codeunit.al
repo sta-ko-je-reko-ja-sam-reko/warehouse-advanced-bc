@@ -225,6 +225,41 @@ codeunit 51013 "WHA Analytics Tests"
         Assert.AreEqual(CountAfterFirstRun, KpiSnapshot.Count(), 'A second import should not keep a second set of figures.');
     end;
 
+    [Test]
+    procedure TheScheduledCaptureKeepsASnapshot()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+    begin
+        // [SCENARIO] Without a schedule the snapshot history has gaps exactly where somebody forgot, which
+        // is the reading that makes a trend meaningless.
+        ConfigureAnalytics();
+        EnableAnalytics();
+
+        KpiSnapshot.Reset();
+        KpiSnapshot.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        Codeunit.Run(Codeunit::"WHA KPI Scheduler", KpiSnapshot);
+
+        KpiSnapshot.Reset();
+        KpiSnapshot.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        Assert.IsFalse(KpiSnapshot.IsEmpty(), 'The scheduled capture should have kept the period''s figures.');
+    end;
+
+    [Test]
+    procedure TheScheduledCaptureRefusesWhenAnalyticsIsSwitchedOff()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+    begin
+        // [SCENARIO] A job queue entry left in place after somebody switched the feature off must not keep
+        // filling the snapshot table.
+        ConfigureAnalytics();
+        DisableAnalytics();
+        KpiSnapshot.Reset();
+
+        asserterror Codeunit.Run(Codeunit::"WHA KPI Scheduler", KpiSnapshot);
+
+        Assert.ExpectedError('not enabled');
+    end;
+
     local procedure ConfigureAnalytics()
     var
         Setup: Record "WHA Analytics Setup";
@@ -337,5 +372,24 @@ codeunit 51013 "WHA Analytics Tests"
         Item.Init();
         Item."No." := ItemNo;
         Item.Insert(true);
+    end;
+
+    local procedure EnableAnalytics()
+    begin
+        SetAnalyticsEnabled(true);
+    end;
+
+    local procedure DisableAnalytics()
+    begin
+        SetAnalyticsEnabled(false);
+    end;
+
+    local procedure SetAnalyticsEnabled(Enabled: Boolean)
+    var
+        Setup: Record "WHA Analytics Setup";
+    begin
+        Setup.Get();
+        Setup."WHA Enabled" := Enabled;
+        Setup.Modify(true);
     end;
 }

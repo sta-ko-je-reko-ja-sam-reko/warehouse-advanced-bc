@@ -264,6 +264,60 @@ codeunit 51011 "WHA Slotting Tests"
         Assert.AreEqual(CountAfterFirstRun, SlottingProposal.Count(), 'A second import should not make more proposals.');
     end;
 
+    [Test]
+    procedure TheScheduledAnalysisRefusesToSweepEveryLocation()
+    var
+        ItemVelocity: Record "WHA Item Velocity";
+    begin
+        // [SCENARIO] Analysing a location replaces everything known about it. A scheduled run with no
+        // location named would wipe the classes of any site that simply had a quiet period, so it is
+        // refused rather than allowed to be quietly destructive.
+        ConfigureSlotting(1);
+        EnableSlotting();
+        ItemVelocity.Reset();
+
+        asserterror Codeunit.Run(Codeunit::"WHA Slotting Scheduler", ItemVelocity);
+
+        Assert.ExpectedError('location code filter');
+    end;
+
+    [Test]
+    procedure TheScheduledAnalysisRunsForTheLocationItIsGiven()
+    var
+        ItemVelocity: Record "WHA Item Velocity";
+    begin
+        // [SCENARIO] The whole point of the codeunit: an administrator points a job queue entry at it with
+        // a location filter, and the analysis happens without anybody opening a page.
+        ConfigureSlotting(1);
+        EnableSlotting();
+        CreatePick('WHA-SL-S1', CopyStr(FastItemTok, 1, 20), CopyStr(PoorBinTok, 1, 20), 40);
+
+        ItemVelocity.Reset();
+        ItemVelocity.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        Codeunit.Run(Codeunit::"WHA Slotting Scheduler", ItemVelocity);
+
+        ItemVelocity.Reset();
+        ItemVelocity.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        Assert.IsFalse(ItemVelocity.IsEmpty(), 'The scheduled run should have measured the location it was given.');
+    end;
+
+    [Test]
+    procedure TheScheduledAnalysisRefusesWhenSlottingIsSwitchedOff()
+    var
+        ItemVelocity: Record "WHA Item Velocity";
+    begin
+        // [SCENARIO] A job queue entry left in place after somebody switched the feature off must not keep
+        // working. The guard is the same one every write path uses.
+        ConfigureSlotting(1);
+        DisableSlotting();
+        ItemVelocity.Reset();
+        ItemVelocity.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+
+        asserterror Codeunit.Run(Codeunit::"WHA Slotting Scheduler", ItemVelocity);
+
+        Assert.ExpectedError('not enabled');
+    end;
+
     local procedure ConfigureSlotting(MinMovements: Integer)
     var
         Setup: Record "WHA Slotting Setup";
@@ -402,5 +456,24 @@ codeunit 51011 "WHA Slotting Tests"
 
         TaskSetup.Validate("Warehouse Task Nos.", 'WHA-STEST');
         TaskSetup.Modify(true);
+    end;
+
+    local procedure EnableSlotting()
+    begin
+        SetSlottingEnabled(true);
+    end;
+
+    local procedure DisableSlotting()
+    begin
+        SetSlottingEnabled(false);
+    end;
+
+    local procedure SetSlottingEnabled(Enabled: Boolean)
+    var
+        Setup: Record "WHA Slotting Setup";
+    begin
+        Setup.Get();
+        Setup."WHA Enabled" := Enabled;
+        Setup.Modify(true);
     end;
 }

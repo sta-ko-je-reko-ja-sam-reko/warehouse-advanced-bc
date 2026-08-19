@@ -85,6 +85,7 @@ ranking beside it. That pair is what a proposal is about.
 | `WHA Demo Slotting` | codeunit | 50304 | `app/src/Slotting/codeunits/DemoSlotting.Codeunit.al` |
 | `WHA Velocity By Movements` | codeunit | 50305 | `app/src/Slotting/codeunits/VelocityByMovements.Codeunit.al` |
 | `WHA Velocity By Quantity` | codeunit | 50306 | `app/src/Slotting/codeunits/VelocityByQuantity.Codeunit.al` |
+| `WHA Slotting Scheduler` | codeunit | 50307 | `app/src/Slotting/codeunits/SlottingScheduler.Codeunit.al` |
 | `WHA Slot. Appl. Area Setup` | tableextension | 50300 | `app/src/Slotting/tableextensions/SlotApplAreaSetup.TableExt.al` |
 | `WHA Slotting Setup` | page | 50300 | `app/src/Slotting/pages/SlottingSetup.Page.al` |
 | `WHA Item Velocities` | page | 50301 | `app/src/Slotting/pages/ItemVelocities.Page.al` |
@@ -177,13 +178,36 @@ the import correctly produces nothing. `Import()` builds the `WHA-SLOT` RapidSta
 
 ## Tests
 
-`WHA Slotting Tests` (codeunit 51011), 13 tests: velocity is measured from the picks already done,
+`WHA Slotting Tests` (codeunit 51011), 16 tests. Three cover the scheduled run: it refuses to sweep
+every location, it analyses and proposes for the location its filter names, and it refuses when
+slotting is switched off. The other 13: velocity is measured from the picks already done,
 including where the item is picked from; the fastest items are class A; an item picked too few times is
 left unclassified; the quantity basis ranks differently from the movement basis; re-running replaces
 rather than doubles; an analysis without a location is refused; a fast item in a poor bin is proposed
 and a fast item in a good bin is not; the same item is not proposed twice while one is open; accepting
 with a destination raises the movement and accepting without one records the decision only; an answered
 proposal cannot be answered again or deleted; and demo idempotency.
+
+
+## Scheduling is the job queue's, not ours
+
+`WHA Slotting Scheduler` is a `TableNo`-bound codeunit whose `OnRun` does the analysis and then the proposals. A job queue entry points at it,
+and Business Central decides when and how often — the entry's own `Location Code` filter narrows the
+run.
+
+**It refuses a blank location filter**, and that is the one decision in it worth arguing with.
+`Analyse` clears everything known about a location before it gathers, because a velocity is a
+statement about a period and two periods added together is a statement about neither. A scheduled run
+that swept every location would therefore **wipe the classes of any site that simply had a quiet
+period**. Rather than invent a sweep with a destructive edge, the run asks to be told which location
+it is for — the same contract `Analyse` has had since segment 1.
+
+**Nothing in this feature stores a recurrence.** BC already schedules, logs failures, retries and
+handles time zones; a *run at 06:00 daily* field here would be a worse copy of one that already
+exists. What the feature owns is *what* to run; *when* belongs to the platform.
+
+The first line of the run is the same `CheckEnabled` guard every write path uses, so a job queue entry
+left in place after somebody switches the feature off stops rather than quietly carrying on.
 
 ## Not done
 
@@ -196,5 +220,7 @@ proposal cannot be answered again or deleted; and demo idempotency.
   sequenced.
 - **No seasonality.** One period, one class. An item that sells only in December is class C in June and
   nothing says so.
-- **Nothing schedules the analysis.** A job queue entry has to be created by an administrator.
+- **The scheduled run needs one job queue entry per location.** It refuses a blank filter on purpose
+  — see above — so a company analysing three sites needs three entries. That is more setup than a
+  sweep, and it is the honest shape given what `Analyse` does.
 - **Getting-started in the customer language** — the language has not been confirmed.

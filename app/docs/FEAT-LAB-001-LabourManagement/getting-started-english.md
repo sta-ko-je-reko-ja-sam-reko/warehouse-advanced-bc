@@ -52,7 +52,14 @@ what the standard expected, and the two as a percentage. **A hundred percent is 
 and more than a hundred is faster than standard.**
 
 Running it again takes nothing extra — a job already counted is never counted twice — so it is safe to
-run whenever you like, and an administrator can have it run on a schedule.
+run whenever you like.
+
+To have it run by itself, ask an administrator to create a **job queue entry** for codeunit
+**WHA Labour Scheduler**. A **Location code** filter on the entry limits it to one site. When and how
+often it runs is set there, because that is where Business Central keeps schedules.
+
+Each run reads every finished job, not only recent ones, and skips the ones already counted. That is
+what makes it safe to repeat, and it does mean a run gets slower as your history grows.
 
 Two kinds of finished job are skipped rather than guessed at: work that nobody was holding when it
 finished, and work that was never properly started.

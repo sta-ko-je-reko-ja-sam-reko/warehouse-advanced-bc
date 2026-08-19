@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.DirectedWork;
+using WarehouseAdvanced.WaveManagement;
 
 codeunit 50256 "WHA Replenishment Mgt."
 {
@@ -10,6 +11,8 @@ codeunit 50256 "WHA Replenishment Mgt."
         BlockedRuleErr: Label 'The replenishment rule for %1 in bin %2 is blocked, so it does not ask for work.', Comment = '%1 = the item number on the rule, %2 = the bin the rule keeps stocked';
         NoMaximumErr: Label 'Give the replenishment rule for %1 in bin %2 a maximum quantity, so a run knows how full to fill the bin.', Comment = '%1 = the item number on the rule, %2 = the bin the rule keeps stocked';
         TaskDescriptionLbl: Label 'Replenish %1 in bin %2', Comment = '%1 = the item number being replenished, %2 = the bin being topped up';
+        WaveTaskDescriptionLbl: Label 'Replenish %1 in bin %2 for wave %3', Comment = '%1 = the item number being replenished, %2 = the bin being topped up, %3 = the wave the work is being prepared for';
+        WaveNotOpenErr: Label 'Wave %1 is %2, so there is nothing left to prepare for. Pre-replenishment fills a pick face before the work goes out.', Comment = '%1 = the wave number, %2 = the current status';
 
     /// <summary>
     /// Measures every rule at a location and raises replenishment work for each bin that has run below
@@ -20,22 +23,25 @@ codeunit 50256 "WHA Replenishment Mgt."
     /// <param name="LocationCode">The location to look at. Blank looks at every location.</param>
     /// <returns>How many pieces of work were raised.</returns>
     procedure Run(LocationCode: Code[10]): Integer
-    var
-        ReplenishmentRule: Record "WHA Replenishment Rule";
-        Raised: Integer;
     begin
-        ReplenishmentRule.SetRange(Blocked, false);
-        if LocationCode <> '' then
-            ReplenishmentRule.SetRange("Location Code", LocationCode);
-        if not ReplenishmentRule.FindSet(true) then
-            exit(0);
+        exit(RunRules(LocationCode, ConfiguredDemand(), ''));
+    end;
 
-        repeat
-            if RaiseIfNeeded(ReplenishmentRule) <> '' then
-                Raised += 1;
-        until ReplenishmentRule.Next() = 0;
+    /// <summary>
+    /// Fills the pick faces a wave is about to draw from, before it goes out. This is the half of
+    /// replenishment that stops a wave stalling: a bin that is above its minimum now, and will be empty
+    /// by the third pick, is invisible to a run that only looks at what is in it.
+    /// </summary>
+    /// <param name="Wave">The wave being prepared for. Its location is the location that is run.</param>
+    /// <returns>How many pieces of work were raised.</returns>
+    procedure RunForWave(var Wave: Record "WHA Wave"): Integer
+    var
+        Demand: Enum "WHA Repl. Demand";
+    begin
+        if Wave.Status in [Wave.Status::WHACompleted, Wave.Status::WHACancelled] then
+            Error(WaveNotOpenErr, Wave."No.", Wave.Status);
 
-        exit(Raised);
+        exit(RunRules(Wave."Location Code", Demand::WHAWave, Wave."No."));
     end;
 
     /// <summary>
@@ -52,7 +58,31 @@ codeunit 50256 "WHA Replenishment Mgt."
         if ReplenishmentRule."Maximum Quantity" = 0 then
             Error(NoMaximumErr, ReplenishmentRule."Item No.", ReplenishmentRule."Bin Code");
 
-        exit(RaiseIfNeeded(ReplenishmentRule));
+        exit(RaiseIfNeeded(ReplenishmentRule, ConfiguredDemand(), ''));
+    end;
+
+    /// <summary>
+    /// Answers how much of the rule's item is already spoken for out of its bin, using the way of
+    /// counting demand set up for the feature.
+    /// </summary>
+    /// <param name="ReplenishmentRule">The rule whose bin is being weighed up.</param>
+    /// <param name="WaveNo">The wave being planned for, or blank.</param>
+    /// <returns>The quantity already promised out of the bin.</returns>
+    procedure MeasureDemand(var ReplenishmentRule: Record "WHA Replenishment Rule"; WaveNo: Code[20]): Decimal
+    begin
+        exit(DemandOf(ReplenishmentRule, ConfiguredDemand(), WaveNo));
+    end;
+
+    /// <summary>
+    /// Describes in one line what the configured way of counting demand takes into account.
+    /// </summary>
+    /// <returns>A short description in the user's language.</returns>
+    procedure DescribeDemand(): Text
+    var
+        ReplDemand: Interface "WHA IReplDemand";
+    begin
+        ReplDemand := ConfiguredDemand();
+        exit(ReplDemand.Describe());
     end;
 
     /// <summary>
@@ -75,7 +105,7 @@ codeunit 50256 "WHA Replenishment Mgt."
     /// <returns>The quantity needed to fill the bin to its maximum, or zero when it needs nothing.</returns>
     procedure Shortfall(var ReplenishmentRule: Record "WHA Replenishment Rule"): Decimal
     begin
-        exit(ShortfallFrom(ReplenishmentRule, Measure(ReplenishmentRule)));
+        exit(ShortfallFrom(ReplenishmentRule, Available(ReplenishmentRule, ConfiguredDemand(), '')));
     end;
 
     /// <summary>
@@ -91,18 +121,61 @@ codeunit 50256 "WHA Replenishment Mgt."
         exit(ReplMethod.Describe());
     end;
 
-    local procedure RaiseIfNeeded(var ReplenishmentRule: Record "WHA Replenishment Rule"): Code[20]
+    local procedure RunRules(LocationCode: Code[10]; Demand: Enum "WHA Repl. Demand"; WaveNo: Code[20]): Integer
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        Raised: Integer;
+    begin
+        ReplenishmentRule.SetRange(Blocked, false);
+        if LocationCode <> '' then
+            ReplenishmentRule.SetRange("Location Code", LocationCode);
+        if not ReplenishmentRule.FindSet(true) then
+            exit(0);
+
+        repeat
+            if RaiseIfNeeded(ReplenishmentRule, Demand, WaveNo) <> '' then
+                Raised += 1;
+        until ReplenishmentRule.Next() = 0;
+
+        exit(Raised);
+    end;
+
+    local procedure RaiseIfNeeded(var ReplenishmentRule: Record "WHA Replenishment Rule"; Demand: Enum "WHA Repl. Demand"; WaveNo: Code[20]): Code[20]
     var
         Needed: Decimal;
         TaskNo: Code[20];
     begin
-        Needed := ShortfallFrom(ReplenishmentRule, Measure(ReplenishmentRule));
+        Needed := ShortfallFrom(ReplenishmentRule, Available(ReplenishmentRule, Demand, WaveNo));
 
         if (Needed > 0) and not HasOutstandingWork(ReplenishmentRule) then
-            TaskNo := RaiseTask(ReplenishmentRule, Needed);
+            TaskNo := RaiseTask(ReplenishmentRule, Needed, WaveNo);
 
         StampRule(ReplenishmentRule, TaskNo);
         exit(TaskNo);
+    end;
+
+    local procedure Available(var ReplenishmentRule: Record "WHA Replenishment Rule"; Demand: Enum "WHA Repl. Demand"; WaveNo: Code[20]): Decimal
+    begin
+        exit(Measure(ReplenishmentRule) - DemandOf(ReplenishmentRule, Demand, WaveNo));
+    end;
+
+    local procedure DemandOf(var ReplenishmentRule: Record "WHA Replenishment Rule"; Demand: Enum "WHA Repl. Demand"; WaveNo: Code[20]): Decimal
+    var
+        ReplDemand: Interface "WHA IReplDemand";
+    begin
+        ReplDemand := Demand;
+        exit(ReplDemand.Measure(ReplenishmentRule, WaveNo));
+    end;
+
+    local procedure ConfiguredDemand(): Enum "WHA Repl. Demand"
+    var
+        Setup: Record "WHA Repl. Setup";
+        Demand: Enum "WHA Repl. Demand";
+    begin
+        Setup.SetLoadFields("Demand Method");
+        if not Setup.Get() then
+            exit(Demand::WHANone);
+        exit(Setup."Demand Method");
     end;
 
     local procedure ShortfallFrom(var ReplenishmentRule: Record "WHA Replenishment Rule"; OnHand: Decimal): Decimal
@@ -130,13 +203,13 @@ codeunit 50256 "WHA Replenishment Mgt."
         exit(not WarehouseTask.IsEmpty());
     end;
 
-    local procedure RaiseTask(var ReplenishmentRule: Record "WHA Replenishment Rule"; Needed: Decimal): Code[20]
+    local procedure RaiseTask(var ReplenishmentRule: Record "WHA Replenishment Rule"; Needed: Decimal; WaveNo: Code[20]): Code[20]
     var
         WarehouseTask: Record "WHA Warehouse Task";
     begin
         WarehouseTask.Init();
         WarehouseTask.Validate("Task Type", WarehouseTask."Task Type"::WHAReplenishment);
-        WarehouseTask.Validate(Description, CopyStr(StrSubstNo(TaskDescriptionLbl, ReplenishmentRule."Item No.", ReplenishmentRule."Bin Code"), 1, MaxStrLen(WarehouseTask.Description)));
+        WarehouseTask.Validate(Description, DescribeTask(ReplenishmentRule, WaveNo));
         WarehouseTask.Validate("Location Code", ReplenishmentRule."Location Code");
         WarehouseTask.Validate("Item No.", ReplenishmentRule."Item No.");
         WarehouseTask."Variant Code" := ReplenishmentRule."Variant Code";
@@ -151,6 +224,13 @@ codeunit 50256 "WHA Replenishment Mgt."
 
         ReleaseIfSetupAsks(WarehouseTask);
         exit(WarehouseTask."No.");
+    end;
+
+    local procedure DescribeTask(var ReplenishmentRule: Record "WHA Replenishment Rule"; WaveNo: Code[20]): Text[100]
+    begin
+        if WaveNo <> '' then
+            exit(CopyStr(StrSubstNo(WaveTaskDescriptionLbl, ReplenishmentRule."Item No.", ReplenishmentRule."Bin Code", WaveNo), 1, 100));
+        exit(CopyStr(StrSubstNo(TaskDescriptionLbl, ReplenishmentRule."Item No.", ReplenishmentRule."Bin Code"), 1, 100));
     end;
 
     local procedure ReleaseIfSetupAsks(var WarehouseTask: Record "WHA Warehouse Task")

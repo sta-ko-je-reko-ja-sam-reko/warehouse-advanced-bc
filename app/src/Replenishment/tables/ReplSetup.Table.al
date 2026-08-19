@@ -31,6 +31,12 @@ table 50250 "WHA Repl. Setup"
             ToolTip = 'Specifies the priority given to the work a rule raises, unless the rule itself says otherwise. A lower number is more urgent, so it is offered to an operator first.';
             MinValue = 0;
         }
+        field(22; "Demand Method"; Enum "WHA Repl. Demand")
+        {
+            Caption = 'Measure a bin against';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether a run takes work already planned out of a bin into account, as well as what is in it. Looking only at what is there is what a new installation starts on, and it is the answer that misses a pick face a wave is about to empty.';
+        }
         field(30; "Release Replenishment Work"; Boolean)
         {
             Caption = 'Send replenishment work to the floor';

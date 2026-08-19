@@ -67,6 +67,13 @@ page 50252 "WHA Repl. Rule Card"
                     Editable = false;
                     DecimalPlaces = 0 : 5;
                 }
+                field(AlreadyPromised; AlreadyPromised)
+                {
+                    Caption = 'Already promised';
+                    ToolTip = 'Specifies how much of what is in the bin is already spoken for by work that has been planned and not yet walked. It reads zero unless the replenishment setup says to take planned work into account.';
+                    Editable = false;
+                    DecimalPlaces = 0 : 5;
+                }
                 field(WouldAskFor; WouldAskFor)
                 {
                     Caption = 'Would ask for';
@@ -146,6 +153,7 @@ page 50252 "WHA Repl. Rule Card"
     var
         MethodDescription: Text;
         InTheBinNow: Decimal;
+        AlreadyPromised: Decimal;
         WouldAskFor: Decimal;
         NothingNeededMsg: Label 'The bin has enough. No work was raised.';
         RaisedMsg: Label 'Replenishment work %1 was raised.', Comment = '%1 = the number of the warehouse task that was created';
@@ -157,6 +165,7 @@ page 50252 "WHA Repl. Rule Card"
     begin
         MethodDescription := ReplenishmentMgt.DescribeMethod(Rec);
         InTheBinNow := ReplenishmentMgt.Measure(Rec);
+        AlreadyPromised := ReplenishmentMgt.MeasureDemand(Rec, '');
         WouldAskFor := ReplenishmentMgt.Shortfall(Rec);
     end;
 

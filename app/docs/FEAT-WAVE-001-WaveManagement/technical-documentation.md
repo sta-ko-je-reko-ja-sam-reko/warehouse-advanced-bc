@@ -134,6 +134,17 @@ switched labour management on has no standards, every estimate is zero, and the 
 counting jobs exactly as segment 1 did. That is why the wave does not check whether labour management
 is enabled: the data answers the question honestly on its own.
 
+## Pre-replenishment — the wave card's one borrowed action
+
+The wave card carries **Replenish for this wave**, which fills the pick faces the wave is about to
+draw from before it goes out. The behaviour belongs to `FEAT-REPL-001` and is documented there; what
+belongs here is the shape of the borrowing.
+
+The action carries `ApplicationArea = WHAReplenishment` and an `AccessByPermission` on the
+replenishment rule table — the same shape the handling unit card uses to carry labelling and quality
+hold actions. A company without replenishment never sees it. Wave management gains a `using` for that
+namespace and nothing else: it calls one procedure and knows nothing about rules, bins or demand.
+
 ## Templates — the same wave again tomorrow
 
 A wave was a one-off. `WHA Wave Template` is the definition: this location, this strategy, this cap,

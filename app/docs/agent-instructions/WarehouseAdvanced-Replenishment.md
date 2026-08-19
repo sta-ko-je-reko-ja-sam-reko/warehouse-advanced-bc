@@ -73,6 +73,18 @@ rules.
 
 ## Domain
 
+**A run may or may not look ahead, and you cannot see which.** Depending on the setup, a run either
+weighs a bin against what is in it, or against what is in it less the picks already planned out of it.
+The second answers a different question, and it is the one that catches a pick face a wave is about to
+empty. If a user is puzzled that a full-looking bin was replenished — or that an empty-looking one was
+not — the setting is the first thing to ask about, not the rule.
+
+**Do not tell a user that replenishment looks ahead, or that it does not.** Ask, or have them check
+**Measure a bin against** on the replenishment setup.
+
+Pre-replenishing a single wave is a separate action on the wave, not something you can run, and it
+counts only that wave's picks.
+
 Replenishment is a claim about *levels*, not about *stock*. It measures a bin, compares it with two
 numbers somebody chose, and asks for work. Everything that can go wrong with it goes wrong in those
 two numbers: a minimum too low means the face runs dry before the job is done, a maximum bigger than

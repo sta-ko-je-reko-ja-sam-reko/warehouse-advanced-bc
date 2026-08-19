@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.DirectedWork;
+using WarehouseAdvanced.Replenishment;
 
 page 50152 "WHA Wave Card"
 {
@@ -103,6 +104,19 @@ page 50152 "WHA Wave Card"
                     ApplyFill();
                 end;
             }
+            action(PreReplenish)
+            {
+                Caption = 'Replenish for this wave';
+                ToolTip = 'Specifies the action that fills the pick faces this wave is about to draw from, before it goes out. A bin that is above its minimum now and empty by the third pick is invisible to an ordinary replenishment run.';
+                Image = Replan;
+                ApplicationArea = WHAReplenishment;
+                AccessByPermission = tabledata "WHA Replenishment Rule" = R;
+
+                trigger OnAction()
+                begin
+                    ApplyPreReplenish();
+                end;
+            }
             action(ReleaseWave)
             {
                 Caption = 'Release';
@@ -182,6 +196,8 @@ page 50152 "WHA Wave Card"
         EstimatedMinutes: Decimal;
         EffortMeasured: Boolean;
         FilledMsg: Label '%1 job(s) gathered into the wave.', Comment = '%1 = how many jobs were added';
+        PreReplenishedMsg: Label '%1 replenishment job(s) raised for the pick faces this wave will draw from.', Comment = '%1 = how many replenishment jobs were raised';
+        NothingToReplenishMsg: Label 'Every pick face this wave will draw from has enough in it, so nothing was raised.';
 
     local procedure ApplyFill()
     begin
@@ -192,6 +208,20 @@ page 50152 "WHA Wave Card"
     local procedure MeasureEffort()
     begin
         EstimatedMinutes := WaveLogic.EstimateMinutes(Rec, EffortMeasured);
+    end;
+
+    local procedure ApplyPreReplenish()
+    var
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+        Raised: Integer;
+    begin
+        Raised := ReplenishmentMgt.RunForWave(Rec);
+        if Raised = 0 then
+            Message(NothingToReplenishMsg)
+        else
+            Message(PreReplenishedMsg, Raised);
+
+        CurrPage.Update(false);
     end;
 
     local procedure DescribeStrategy()

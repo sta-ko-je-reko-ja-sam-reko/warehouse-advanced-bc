@@ -1,4 +1,5 @@
 {
+  "al.ruleSetPath": "../.bc-conventions/ruleset.json",
   "al.enableCodeAnalysis": true,
   "al.codeAnalyzers": [
     "${CodeCop}",

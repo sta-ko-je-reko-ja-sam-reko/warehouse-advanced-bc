@@ -1,7 +1,7 @@
 {
   "id": "b454ccc5-1c9b-4009-bbf5-b40521d385b2",
   "name": "Warehouse Advanced",
-  "publisher": "Default Publisher",
+  "publisher": "matr",
   "brief": "Advanced warehouse management for Dynamics 365 Business Central.",
   "description": "Extends standard Business Central warehousing with capabilities normally only found in dedicated WMS platforms.",
   "version": "1.0.0.0",
@@ -27,7 +27,6 @@
   },
   "runtime": "17.0",
   "target": "Cloud",
-  "ruleset": "../.bc-conventions/ruleset.json",
   "features": [
     "TranslationFile",
     "NoImplicitWith",

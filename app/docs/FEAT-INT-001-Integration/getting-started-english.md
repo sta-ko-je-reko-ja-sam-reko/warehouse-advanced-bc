@@ -111,9 +111,36 @@ An administrator can have the messages handled automatically:
 
 Each run acts on the inbound messages that are waiting and then fills the outbox.
 
+## Stop the message log growing for ever
+
+The message log is the one list in this app that nothing ever tidies. A partner sending a thousand
+messages a day adds a thousand rows a day, each carrying the message itself, and no step in the
+process removes one.
+
+You clear it with Business Central's own **retention policies**, in the same place you set every other
+one:
+
+1. Choose the search icon, enter **Retention Policies**, and choose the related link.
+2. Choose **New**, and pick the **Warehouse advanced integration message** table.
+3. Set how long messages should be kept, and switch the policy on.
+
+Three things are decided for you, and they are worth knowing:
+
+- **Age is counted from when a message was processed**, not from when it arrived. A message sitting in
+  the inbox unread is not getting old — nobody has dealt with it yet.
+- **Only processed messages are covered by default.** A failed or cancelled message is the record of
+  something going wrong, and it is not swept up unless you widen the filter yourself.
+- **Nothing can be kept for less than a week.** This log is what an argument with the other system
+  gets settled from.
+
+**Until you create a policy, nothing is deleted.** This makes the clean-up possible, not automatic.
+
 ## What is not here yet
 
 Nothing is sent or fetched over the network yet — the other system posts messages in and collects
 them from the outbox itself. Stock corrections, counts and item information are not exchanged, and
-there is no message for the other system to withdraw work it has already asked for. Messages are
-kept indefinitely; there is no automatic clean-up.
+there is no message for the other system to withdraw work it has already asked for.
+
+A retention policy **deletes** old messages; nothing copies them anywhere first. If you have to keep a
+year of interface traffic for audit, export it before the policy catches up with it — nothing will
+remind you.

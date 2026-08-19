@@ -74,6 +74,8 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Integration Msg. Logic" = X,
         codeunit "WHA Int. Message Mgt." = X,
         codeunit "WHA Int. Message Runner" = X,
+        codeunit "WHA Int. Retention" = X,
+        codeunit "WHA Int. Reten. Sub." = X,
         codeunit "WHA Int. Unhandled Message" = X,
         codeunit "WHA Int. Task Request" = X,
         codeunit "WHA Int. Task Confirm" = X,

@@ -41,6 +41,9 @@ completed cannot be deleted at all, because it is the record that the work happe
 **Segment 1** — the task entity, its life cycle, the priority queue, operator assignment, and the
 handling unit move on completion.
 **Segment 2** — partial completion: a job finished with less than it asked for, and why.
+**Segment 3** — the source document: work raised from a standard warehouse receipt or shipment, and a
+job that knows which document and which order it is serving. This is the segment that turns the queue
+into an execution layer rather than a list somebody types into.
 
 ## Data model
 
@@ -66,11 +69,16 @@ handling unit move on completion.
 | `Status` | `Enum "WHA Warehouse Task Status"` | Created / Released / Assigned / In progress / Completed / Cancelled. Not editable — the actions move it |
 | `Priority` | `Integer` | Lower is more urgent. Defaults from the setup |
 | `Due Date` | `Date` | Breaks ties between tasks of equal priority |
+| `Source Type` | `Enum "WHA Task Source"` | What kind of document raised the work. **Extensible**; a task typed in by hand says *created by hand* |
+| `Source No.` / `Source Line No.` | `Code[20]` / `Integer` | The warehouse document and line the work was read from |
+| `Source Document No.` | `Code[20]` | The order the warehouse document is serving — the purchase or sales order somebody is actually waiting on |
 | `Assigned To User ID` | `Code[50]` | `TableRelation = User."User Name"`. Clearing it returns the task to the queue |
 | `Assigned At` / `Started At` / `Completed At` | `DateTime` | Stamped by the life cycle, not editable |
 
 Keys: `PK` on `No.` (clustered), plus `Queue` (`Status`, `Location Code`, `Priority`, `Due Date`),
-`Assignment` (`Assigned To User ID`, `Status`, `Priority`), and `HandlingUnit` (`Handling Unit No.`).
+`Assignment` (`Assigned To User ID`, `Status`, `Priority`), `HandlingUnit` (`Handling Unit No.`), and
+`Source` (`Source Type`, `Source No.`, `Source Line No.`) — the last of which is what makes raising
+work from the same document twice cheap as well as harmless.
 
 **The `Queue` key is the feature.** It is the index the *Get next task* answer is read from, in one
 `FindFirst` — status first so only released work is scanned, then location so an operator sees only
@@ -110,6 +118,14 @@ time and per-step durations; it would be the wrong shape to guess at now.
 | `WHA Task Feature Setup` | codeunit | 50201 | `app/src/DirectedWork/codeunits/TaskFeatureSetup.Codeunit.al` |
 | `WHA Task App Area Sub.` | codeunit | 50202 | `app/src/DirectedWork/codeunits/TaskAppAreaSub.Codeunit.al` |
 | `WHA Demo Warehouse Task` | codeunit | 50203 | `app/src/DirectedWork/codeunits/DemoWarehouseTask.Codeunit.al` |
+| `WHA Task Source` | enum | 50203 | `app/src/DirectedWork/enums/TaskSource.Enum.al` |
+| `WHA ITaskSource` | interface | — | `app/src/DirectedWork/interfaces/ITaskSource.Interface.al` |
+| `WHA Src Manual` | codeunit | 50204 | `app/src/DirectedWork/codeunits/SrcManual.Codeunit.al` |
+| `WHA Src Whse. Receipt` | codeunit | 50205 | `app/src/DirectedWork/codeunits/SrcWhseReceipt.Codeunit.al` |
+| `WHA Src Whse. Shipment` | codeunit | 50206 | `app/src/DirectedWork/codeunits/SrcWhseShipment.Codeunit.al` |
+| `WHA Task Source Mgt.` | codeunit | 50207 | `app/src/DirectedWork/codeunits/TaskSourceMgt.Codeunit.al` |
+| `WHA Whse. Receipt Tasks` | pageextension | 50200 | `app/src/DirectedWork/pageextensions/WhseReceiptTasks.PageExt.al` |
+| `WHA Whse. Shipment Tasks` | pageextension | 50201 | `app/src/DirectedWork/pageextensions/WhseShipmentTasks.PageExt.al` |
 | `WHA Task Appl. Area Setup` | tableextension | 50200 | `app/src/DirectedWork/tableextensions/TaskApplAreaSetup.TableExt.al` |
 | `WHA Warehouse Task Setup` | page | 50200 | `app/src/DirectedWork/pages/WarehouseTaskSetup.Page.al` |
 | `WHA Warehouse Task Card` | page | 50201 | `app/src/DirectedWork/pages/WarehouseTaskCard.Page.al` |
@@ -123,6 +139,12 @@ All in namespace `WarehouseAdvanced.DirectedWork`, from the reserved block `5020
 Core objects changed in the same pass: `WHA Feature` gained a value. Numbering was originally added
 to Core as well; it has since moved to this feature's own setup, so Core no longer knows this feature
 numbers anything.
+
+**Segment 3 introduced the first `pageextension` in the app.** Until now nothing this project ships
+appeared anywhere in standard Business Central; from here, two standard pages carry one action each.
+That is a threshold worth noticing rather than a detail — the app is now visible to a user who never
+opens any of its own pages, and every future extension of a standard page inherits the argument made
+below about why this one is a button and not a subscriber.
 
 ## Logic
 
@@ -188,6 +210,67 @@ Two places, both one-directional — directed work reads handling units, never t
 
 Nested units are **not** walked. Moving a pallet does not rewrite the location of the cartons inside
 it, because a nested unit's position is defined by its parent, not by its own location field.
+
+## The source document — where work comes from
+
+Standard Business Central already knows what has arrived and what is due to leave; it just has no
+queue to put it on. Segment 3 reads those documents and raises tasks, behind an extensible seam so
+that *which* documents and *what they become* can be replaced without touching the queue.
+
+`WHA Task Source` is an extensible enum implementing `WHA ITaskSource`:
+
+| Value | Implementation | Reads | Raises |
+|---|---|---|---|
+| `WHAManual` (0) | `WHA Src Manual` | nothing | nothing — a task somebody typed |
+| `WHAWhseReceipt` | `WHA Src Whse. Receipt` | `Warehouse Receipt Line` | a **put-away** per outstanding line, out of the bin the receipt names |
+| `WHAWhseShipment` | `WHA Src Whse. Shipment` | `Warehouse Shipment Line` | a **pick** per outstanding line, into the bin the shipment names |
+
+The interface is five methods — `Generate`, `Describe`, `DescribeLink`, `SourceIsOpen`, `ShowSource` —
+and `WHA Task Source Mgt.` is the only thing the rest of the app calls. Nothing outside the three
+implementations names a warehouse receipt or a warehouse shipment.
+
+`WHAManual` being value 0 matters: every task that already exists, and every task anybody types from
+now on, reads as *created by hand* without an upgrade step, and answers the interface honestly —
+no document to name, nothing outside the app that can finish it.
+
+### One bin, not two, and why
+
+A put-away raised from a receipt sets `From Bin Code` and leaves `To Bin Code` blank. A pick raised
+from a shipment does the reverse. The missing half is not an oversight: **where goods should go, and
+where they should be taken from, is a question about stock and about the shape of the warehouse — not
+a question the document can answer.** Guessing it here would put a wrong bin in front of an operator,
+which is worse than putting none. Bin choice is what `FEAT-SLOT-001` exists to have an opinion about,
+and this is the seam it will eventually plug into.
+
+### A button, not a subscriber
+
+Work is raised by a person pressing **Create warehouse tasks** on the warehouse receipt or shipment.
+Nothing happens automatically on release or on posting, even though subscribing to a Microsoft
+publisher is allowed and would have been easy.
+
+That is the same judgement wave completion, label assignment and count posting all made: **until
+Phase 0 says how this warehouse actually receives and ships, an automatic trigger is a guess that
+fires by itself.** A button is a guess somebody chose. The seam is already in place, so making it
+automatic later is a subscriber whose body is one line — not a redesign.
+
+### Raising work twice is harmless
+
+`HasOpenTask` checks the `Source` key for a task on the same line that nobody has cancelled. So:
+
+- Pressing the button again raises nothing.
+- A line added to the document afterwards raises its own job and only that.
+- A job **cancelled** in error leaves its line uncovered, and the document can raise it again — which
+  is the behaviour that makes cancelling safe rather than final.
+
+### Noticing work nobody needs
+
+`SourceIsOpen` asks the document whether the line still has anything outstanding. A receipt received
+or a shipment shipped by some other route leaves a task on the queue that is now a walk for nothing,
+and the task card says so under **Still wanted**.
+
+**Nothing acts on that answer yet** — no automatic cancellation, no warning when an operator picks
+the job up. Deciding what should happen to stale work is a question about how much the warehouse
+trusts the link, and that is a conversation to have after the link has run against real documents.
 
 ## Enablement
 
@@ -277,6 +360,15 @@ tests use real records and rely on the test runner's rollback.
 | `ShortPickCannotClaimMoreThanWasAsked` | Short is for finding less, never more |
 | `AJobWithNoQuantityCannotBeShort` | A pallet move is all or nothing |
 | `NoFollowUpIsRaisedUnlessTheSetupAsksForOne` / `AFollowUpCarriesTheOutstandingQuantity` | The re-queue decision is configuration, both ways |
+| `RaisingWorkFromAReceiptPutsAPutAwayOnTheQueue` | A receipt line becomes a put-away out of the bin it named, and nothing decides where it goes |
+| `RaisingWorkFromAShipmentPutsAPickOnTheQueue` | A shipment line becomes a pick into the bin it named, and nothing decides where it comes from |
+| `ALineWithNothingOutstandingRaisesNoWork` | A finished line is not work, and raising nothing is not an error |
+| `RaisingWorkTwiceAddsOnlyWhatIsMissing` | The button is safe to press twice, and a line added afterwards raises only itself |
+| `WorkThatWasCancelledCanBeRaisedAgain` | Cancelling a job in error is recoverable from the document |
+| `AJobRemembersTheOrderBehindTheDocument` | The order somebody is waiting on survives onto the floor |
+| `AJobWhoseSourceLineIsFinishedIsNoLongerWanted` | Work overtaken by events can be noticed |
+| `AJobPutOnTheQueueByHandHasNoDocumentBehindIt` | Segment 1 work still behaves, and says honestly that it has no source |
+| `RaisingWorkFromADocumentThatIsNotThereIsRefused` | A missing document is an error, not an empty answer |
 | `NothingFoundAtAllStillClosesTheJob` | An empty bin is an answer, not a hand back |
 | `DemoImportIsIdempotent` / `DemoImportCoversEveryTaskType` | The seeder is safe to re-run and covers the enum |
 
@@ -286,10 +378,24 @@ tests use real records and rely on the test runner's rollback.
   returns an operator's own work first. It does not sequence a pick and a put-away into one trip, and
   it does not know the physical layout of the warehouse. Travel-path sequencing needs a bin
   coordinate or zone-ordering model that does not exist yet.
-- **A link to the source document.** A task is not yet tied to a warehouse receipt, shipment or
-  worksheet line, so nothing generates tasks from standard warehouse activity. That is the segment
-  that turns this from a queue into an execution layer, and it should be designed against what the
-  capability register says the customer actually receives and ships.
+- **The link runs one way only.** Work is raised *from* a warehouse receipt or shipment; completing
+  the task writes **nothing back** to it. Nobody looking at the document can see that the warehouse
+  has done the work, and nothing stops the document being posted while jobs against it are still open.
+  Closing that loop is the obvious next segment and it is a bigger decision than it looks: writing
+  `Qty. to Receive` or `Qty. to Ship` from a warehouse app is the point at which this stops being an
+  overlay and starts driving standard posting.
+- **Only two kinds of document.** Internal put-aways, movement worksheet lines, production and
+  assembly are not sources. Each is an `enumextension` value and one codeunit, and none of them should
+  be written until the capability register says the customer uses them.
+- **Nothing acts on a stale job.** `SourceIsOpen` can tell that the line behind a task has been dealt
+  with elsewhere, and nothing cancels, warns or filters on that answer.
+- **Bins are half-filled by design.** A generated put-away knows where to start and not where to
+  finish; a generated pick knows the reverse. See the section above — that half belongs to slotting.
+- **The source model is still a guess.** It assumes this customer receives through warehouse receipts
+  and ships through warehouse shipments. That is the standard shape, and it is not a signed-off fact;
+  Phase 0 is what would make it one. The guess is isolated in three codeunits behind an extensible
+  enum, so replacing it is a codeunit and an enum value, exactly as `FEAT-INT-001` isolated its
+  payload shapes.
 - **Task history.** See the data model note above — deliberate.
 - **Over-picking.** A job can be closed with less than was asked for, never with more. Finding
   fourteen where twelve were wanted is a different conversation, and nobody has had it yet.

@@ -95,6 +95,26 @@ page 50203 "WHA API Warehouse Task"
                     Caption = 'Wave number';
                     Editable = false;
                 }
+                field(sourceType; Rec."Source Type")
+                {
+                    Caption = 'Source type';
+                    Editable = false;
+                }
+                field(sourceNumber; Rec."Source No.")
+                {
+                    Caption = 'Source number';
+                    Editable = false;
+                }
+                field(sourceLineNumber; Rec."Source Line No.")
+                {
+                    Caption = 'Source line number';
+                    Editable = false;
+                }
+                field(sourceDocumentNumber; Rec."Source Document No.")
+                {
+                    Caption = 'Source document number';
+                    Editable = false;
+                }
                 field(assignedToUserId; Rec."Assigned To User ID")
                 {
                     Caption = 'Assigned to user ID';

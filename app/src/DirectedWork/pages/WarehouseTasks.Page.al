@@ -58,6 +58,15 @@ page 50202 "WHA Warehouse Tasks"
                 field("Wave No."; Rec."Wave No.")
                 {
                 }
+                field("Source Type"; Rec."Source Type")
+                {
+                }
+                field("Source No."; Rec."Source No.")
+                {
+                }
+                field("Source Document No."; Rec."Source Document No.")
+                {
+                }
                 field("Assigned To User ID"; Rec."Assigned To User ID")
                 {
                 }

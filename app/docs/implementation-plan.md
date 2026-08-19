@@ -37,10 +37,11 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | `FEAT-TASK-001` segment 3 — the source document: work raised from a standard warehouse receipt or shipment, and a job that knows which order it is serving. The first `pageextension` in the app. **The link runs one way** — completing a task tells the document nothing |
 | Delivered | `FEAT-CNT-001` and `FEAT-QC-001` segment 2 — **posting**: a shared engine, chosen per feature, that turns a counted difference into an adjustment and a scrapped pallet into a write-off. Built once, in a module that is deliberately **not a feature** — see [inventory-posting.md](inventory-posting.md). **No ledger entry has ever been written by it** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
-| Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, and the two that stopped short of the ledger no longer do. What is unbuilt is the second segment of the other twelve |
+| Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of eleven features — much of it blocked on customer facts rather than on engineering |
 
 **What is delivered was built from §4, not from a capability register.** Every shipped feature
 carries that caveat in its own technical documentation. Phase 0 can still invalidate them, and
@@ -193,8 +194,8 @@ Phase 0   Capability register                        ← gates everything below
 Wave A    FEAT-HU-001      handling units            ← delivered
           FEAT-INT-001     integration surface       ← segment 1 delivered on assumed contracts
 
-Wave B    FEAT-TASK-001    directed work             ← segment 1 delivered
-          FEAT-RF-001      mobile device             ← segment 1 delivered; needs operator review
+Wave B    FEAT-TASK-001    directed work             ← segment 3 delivered; fed by receipts and shipments
+          FEAT-RF-001      mobile device             ← segment 2 delivered; needs operator review
 
 Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
           FEAT-PACK-001    packing                   ← segment 1 delivered
@@ -256,6 +257,39 @@ for **dock-to-stock**; nothing links a put-away to the vehicle that brought the 
 is not shipped. What ships instead is its two halves, each honest about where its clock starts.
 Closing it is a scope decision about receiving, not a reporting problem.
 
+Wave C is where the shape of the remaining work became clear, and it is not what the wave order
+suggests. Reading what all three of its features left open:
+
+- **Labelling** cannot finish without knowing what label stock, printers and layouts exist.
+- **Packing** cannot cartonise without item dimensions "nobody has confirmed this customer maintains",
+  and cannot turn verification into a comparison without something to compare against.
+- **Wave management** could take templates and scheduling today, and that is genuinely all of it.
+
+**Most of what is left in the catalogue is blocked on Phase 0, not on engineering.** That is a
+different problem from the one this plan was written to sequence, and it is the strongest argument the
+project has yet produced for running the capability register now.
+
+What was buildable, and worth more than any of the above, was the thing three separate feature
+documents each named as their own blocker: **the source document link**. `FEAT-TASK-001` called it
+"the segment that turns this from a queue into an execution layer"; `FEAT-PACK-001` recorded that
+until it existed "there is nothing to pack against"; `FEAT-KPI-001` could not ship dock-to-stock
+without it. Delivered as segment 3.
+
+Three things about it are worth carrying forward:
+
+- **It is a button, not a subscriber.** Nothing fires on release or on posting, though subscribing to
+  a Microsoft publisher was allowed and would have been easy. Until Phase 0 says how this warehouse
+  receives and ships, an automatic trigger is a guess that fires by itself; a button is a guess
+  somebody chose. The seam is in place, so automating it later is a one-line subscriber body.
+- **It gave the app its first `pageextension`.** Nothing this project ships had ever appeared inside
+  standard Business Central before. Two standard pages now carry one action each — a threshold worth
+  noticing, because everything the app does is now reachable by a user who never opens one of its own
+  pages.
+- **The link runs one way, and that is the next argument.** Work is raised *from* a document;
+  completing it writes nothing back. Closing that loop means writing `Qty. to Receive` or
+  `Qty. to Ship` from a warehouse app, which is the point at which this stops being an overlay and
+  starts driving standard posting. That is a scope decision, not a task.
+
 Each feature runs the greenfield loop — intake → design → document → implement → test →
 deliver — **in segments**, with a test and a documentation update shipping alongside each
 segment rather than batched at the end.
@@ -287,7 +321,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 249 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 258 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 
@@ -311,6 +345,11 @@ feature can ship dark and be switched on per company when the business is ready.
    consulting work, not development work, and it is the highest-value thing available. It is now
    badly overdue: **all fourteen features** in the catalogue have been built from the hypothesis, and
    there is no longer a next feature whose cost the register could reduce — only rework.
+
+   Wave C sharpened this from *overdue* to *blocking*. Reading the three features' outstanding work
+   (§5) shows most of what remains cannot be designed at all without customer facts: label stock and
+   printers, item dimensions, and what the warehouse expects a packer to check against. Development
+   has, for the first time, run out of things it can honestly build ahead of the register.
    Replenishment sharpens the point: standard Business Central already replenishes bins through the
    movement worksheet, so a real register may reclassify part of `FEAT-REPL-001` as *configuration*
    rather than *build*.

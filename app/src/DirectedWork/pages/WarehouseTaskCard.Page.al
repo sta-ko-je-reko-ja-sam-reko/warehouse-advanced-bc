@@ -92,6 +92,29 @@ page 50201 "WHA Warehouse Task Card"
                 {
                 }
             }
+            group(Origin)
+            {
+                Caption = 'Where the work came from';
+
+                field("Source Type"; Rec."Source Type")
+                {
+                }
+                field(OriginDescription; OriginDescription)
+                {
+                    Caption = 'Document';
+                    ToolTip = 'Specifies the document this job was raised from, named in full.';
+                    Editable = false;
+                }
+                field("Source Document No."; Rec."Source Document No.")
+                {
+                }
+                field(SourceStillOpen; SourceStillOpen)
+                {
+                    Caption = 'Still wanted';
+                    ToolTip = 'Specifies whether the line this job came from still has something outstanding on it. A job whose source has been received or shipped some other way is work nobody needs doing.';
+                    Editable = false;
+                }
+            }
         }
     }
 
@@ -157,6 +180,18 @@ page 50201 "WHA Warehouse Task Card"
         }
         area(Navigation)
         {
+            action(SourceDocument)
+            {
+                Caption = 'Source document';
+                ToolTip = 'Specifies the action that opens the warehouse document this job was raised from.';
+                Image = Document;
+                Enabled = HasSource;
+
+                trigger OnAction()
+                begin
+                    OpenSource();
+                end;
+            }
             action(HandlingUnit)
             {
                 Caption = 'Handling unit';
@@ -191,6 +226,34 @@ page 50201 "WHA Warehouse Task Card"
         }
     }
 
+    trigger OnAfterGetRecord()
+    begin
+        DescribeOrigin();
+    end;
+
     var
         TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        OriginDescription: Text;
+        SourceStillOpen: Boolean;
+        HasSource: Boolean;
+        NoSourceMsg: Label 'This job was put on the queue by hand, so there is no document behind it to open.';
+        SourceGoneMsg: Label 'The document this job was raised from no longer exists.';
+
+    local procedure DescribeOrigin()
+    begin
+        OriginDescription := TaskSourceMgt.DescribeLink(Rec);
+        SourceStillOpen := TaskSourceMgt.SourceIsOpen(Rec);
+        HasSource := OriginDescription <> '';
+    end;
+
+    local procedure OpenSource()
+    begin
+        if not HasSource then begin
+            Message(NoSourceMsg);
+            exit;
+        end;
+        if not TaskSourceMgt.ShowSource(Rec) then
+            Message(SourceGoneMsg);
+    end;
 }

@@ -161,9 +161,11 @@ in place; a closed session cannot be deleted; and demo idempotency.
   and doing it badly produces suggestions packers learn to ignore.
 - **Packing list output.** No document, no report, no layout. It belongs with the label templates in
   `FEAT-LBL-001`, and both need to know what the customer actually prints.
-- **No link to an order or a shipment.** A carton is packed at a bench, not *for* anything. Until
-  directed work is tied to source documents, there is nothing to pack against — the same gap
-  `FEAT-TASK-001` records.
+- **No link to an order or a shipment.** A carton is packed at a bench, not *for* anything. Half of
+  what blocked this has since been built: `FEAT-TASK-001` segment 3 gives a **task** a source document
+  and the order behind it, so the warehouse now knows which shipment a pick is serving. A pack session
+  still does not, and giving it one is packing's own next segment rather than something directed work
+  can hand over.
 - **Verification is a claim, not a comparison.** `Verify` records that somebody said they checked. It
   does not re-scan the contents or compare them against an expected list, because there is no
   expected list to compare against yet. That is the honest limit of it, and the getting-started text

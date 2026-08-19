@@ -34,6 +34,11 @@ Standard Business Central directs work through documents and has no such queue; 
   back to the queue.
 - **status** — read only. It moves through the actions below, never by writing to it.
 - **assignedDateTime**, **startedDateTime**, **completedDateTime** — read only, stamped by the app.
+- **sourceType**, **sourceNumber**, **sourceLineNumber**, **sourceDocumentNumber** — read only. Where
+  the job came from: `WHAManual` (somebody typed it), `WHAWhseReceipt` or `WHAWhseShipment` and the
+  warehouse document behind it, plus **sourceDocumentNumber**, the purchase or sales order somebody is
+  actually waiting on. This is the field that lets you answer *who is waiting on this job*, which is
+  the question a warehouse asks most and could not ask before.
 
 ### The four actions
 
@@ -92,6 +97,13 @@ You cannot skip a step and you cannot write `status` directly:
 - **Do not pick the next job for an operator by guessing.** Read the queue in priority order, or ask
   the user which task they mean.
 - **Do not delete tasks to tidy up.** Cancel is the withdrawal that keeps the history.
+- **Never create a task that duplicates one raised from a document.** Before creating anything, check
+  whether a job already exists for that `sourceNumber` and `sourceLineNumber`. Work raised from a
+  receipt or shipment is created by a person pressing a button on that document, and it already skips
+  lines that are covered — typing a second one by hand defeats that and sends two operators to the
+  same goods.
+- **Do not tell a user that finishing a job updates their receipt or shipment.** It does not. The
+  link runs one way: the document raises the work and never hears back.
 - **Do not report a job short, and do not "correct" `quantityHandled`.** A short pick is a claim
   about what was on a shelf, made by someone who was standing in front of it. You were not. If a
   user says the recorded quantity is wrong, tell them who can change it and how — do not do it for

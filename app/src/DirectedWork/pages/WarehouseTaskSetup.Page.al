@@ -37,6 +37,10 @@ page 50200 "WHA Warehouse Task Setup"
                 {
                     ApplicationArea = WHADirectedWork;
                 }
+                field("Follow Up Short Picks"; Rec."Follow Up Short Picks")
+                {
+                    ApplicationArea = WHADirectedWork;
+                }
                 field("Max Open Tasks Per User"; Rec."Max Open Tasks Per User")
                 {
                     ApplicationArea = WHADirectedWork;

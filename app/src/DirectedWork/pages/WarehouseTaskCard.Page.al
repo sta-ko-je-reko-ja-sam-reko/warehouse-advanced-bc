@@ -59,6 +59,12 @@ page 50201 "WHA Warehouse Task Card"
                 field("Unit of Measure Code"; Rec."Unit of Measure Code")
                 {
                 }
+                field("Quantity Handled"; Rec."Quantity Handled")
+                {
+                }
+                field("Short Reason"; Rec."Short Reason")
+                {
+                }
             }
             group(Queue)
             {

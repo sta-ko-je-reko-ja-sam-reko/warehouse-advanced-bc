@@ -23,6 +23,10 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         CancelNotAllowedErr: Label 'Warehouse task %1 is already %2, so it cannot be cancelled.', Comment = '%1 = the warehouse task number, %2 = the current status';
         UserTaskLimitErr: Label '%1 already holds %2 warehouse task(s), which is the most the warehouse task setup allows. Finish or hand back a task before taking another.', Comment = '%1 = the user the task would be assigned to, %2 = how many open tasks that user already holds';
         DeleteNotAllowedErr: Label 'Warehouse task %1 cannot be deleted while its status is %2. Cancel it instead, so the record of the work is kept.', Comment = '%1 = the warehouse task number, %2 = the current status';
+        NotCountedErr: Label 'Warehouse task %1 does not move a counted quantity, so there is nothing to be short of. Complete it or hand it back.', Comment = '%1 = the warehouse task number';
+        TooMuchErr: Label 'Warehouse task %1 asked for %2, so %3 cannot have been moved. Complete the task instead of reporting it short.', Comment = '%1 = the warehouse task number, %2 = the quantity asked for, %3 = the quantity entered';
+        NegativeHandledErr: Label 'The quantity moved cannot be negative.';
+        FollowUpDescLbl: Label 'Outstanding from %1', Comment = '%1 = the warehouse task number that came up short';
 
     /// <summary>
     /// Assigns the number series value, the default priority, and releases the task when the setup asks
@@ -239,11 +243,47 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         if WarehouseTask.Status <> WarehouseTask.Status::WHAInProgress then
             Error(CompleteNotAllowedErr, WarehouseTask."No.", WarehouseTask.Status);
 
+        WarehouseTask."Quantity Handled" := WarehouseTask.Quantity;
         WarehouseTask."Completed At" := CurrentDateTime;
         WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
         WarehouseTask.Modify(true);
 
         MoveHandlingUnit(WarehouseTask);
+    end;
+
+    /// <summary>
+    /// Finishes a task with less than it asked for, recording how much was moved and why the rest was
+    /// not. Raises a follow-up task for the remainder when the setup asks for one.
+    /// </summary>
+    /// <param name="WarehouseTask">The warehouse task to complete short.</param>
+    /// <param name="HandledQuantity">How much was actually moved. Zero when nothing could be.</param>
+    /// <param name="Reason">Why the rest was not moved.</param>
+    procedure CompleteShort(var WarehouseTask: Record "WHA Warehouse Task"; HandledQuantity: Decimal; Reason: Enum "WHA Whse. Short Reason")
+    var
+        Outstanding: Decimal;
+    begin
+        if WarehouseTask.Status <> WarehouseTask.Status::WHAInProgress then
+            Error(CompleteNotAllowedErr, WarehouseTask."No.", WarehouseTask.Status);
+        if WarehouseTask.Quantity <= 0 then
+            Error(NotCountedErr, WarehouseTask."No.");
+        if HandledQuantity < 0 then
+            Error(NegativeHandledErr);
+        if HandledQuantity > WarehouseTask.Quantity then
+            Error(TooMuchErr, WarehouseTask."No.", WarehouseTask.Quantity, HandledQuantity);
+
+        Outstanding := WarehouseTask.Quantity - HandledQuantity;
+
+        WarehouseTask."Quantity Handled" := HandledQuantity;
+        WarehouseTask."Short Reason" := Reason;
+        WarehouseTask."Completed At" := CurrentDateTime;
+        WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
+        WarehouseTask.Modify(true);
+
+        if HandledQuantity > 0 then
+            MoveHandlingUnit(WarehouseTask);
+
+        if Outstanding > 0 then
+            CreateFollowUp(WarehouseTask, Outstanding);
     end;
 
     /// <summary>
@@ -321,6 +361,32 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         if WarehouseTask."To Bin Code" <> '' then
             HandlingUnit.Validate("Bin Code", WarehouseTask."To Bin Code");
         HandlingUnit.Modify(true);
+    end;
+
+    local procedure CreateFollowUp(var WarehouseTask: Record "WHA Warehouse Task"; Outstanding: Decimal)
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+        FollowUpTask: Record "WHA Warehouse Task";
+    begin
+        Setup.SetLoadFields("Follow Up Short Picks");
+        if not Setup.Get() then
+            exit;
+        if not Setup."Follow Up Short Picks" then
+            exit;
+
+        FollowUpTask.Init();
+        FollowUpTask."Task Type" := WarehouseTask."Task Type";
+        FollowUpTask.Description := CopyStr(StrSubstNo(FollowUpDescLbl, WarehouseTask."No."), 1, MaxStrLen(FollowUpTask.Description));
+        FollowUpTask."Location Code" := WarehouseTask."Location Code";
+        FollowUpTask."From Bin Code" := WarehouseTask."From Bin Code";
+        FollowUpTask."To Bin Code" := WarehouseTask."To Bin Code";
+        FollowUpTask."Item No." := WarehouseTask."Item No.";
+        FollowUpTask."Variant Code" := WarehouseTask."Variant Code";
+        FollowUpTask."Unit of Measure Code" := WarehouseTask."Unit of Measure Code";
+        FollowUpTask.Quantity := Outstanding;
+        FollowUpTask.Priority := WarehouseTask.Priority;
+        FollowUpTask."Due Date" := WarehouseTask."Due Date";
+        FollowUpTask.Insert(true);
     end;
 
     local procedure CheckUserTaskLimit(var WarehouseTask: Record "WHA Warehouse Task")

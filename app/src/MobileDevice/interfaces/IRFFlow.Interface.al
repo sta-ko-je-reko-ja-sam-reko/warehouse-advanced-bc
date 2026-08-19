@@ -54,6 +54,23 @@ interface "WHA IRFFlow"
     procedure Confirm(var WarehouseTask: Record "WHA Warehouse Task"; CurrentStep: Enum "WHA RF Step"): Enum "WHA RF Step";
 
     /// <summary>
+    /// Moves the operator to reporting that there was less on the shelf than the job asked for.
+    /// </summary>
+    /// <param name="WarehouseTask">The task being worked.</param>
+    /// <param name="CurrentStep">The step the operator is on.</param>
+    /// <returns>The step to show next.</returns>
+    procedure StartShortPick(var WarehouseTask: Record "WHA Warehouse Task"; CurrentStep: Enum "WHA RF Step"): Enum "WHA RF Step";
+
+    /// <summary>
+    /// Finishes the job with what the operator actually found, and says why the rest is missing.
+    /// </summary>
+    /// <param name="WarehouseTask">The task being worked.</param>
+    /// <param name="HandledQuantity">How much was actually moved.</param>
+    /// <param name="Reason">Why the rest was not.</param>
+    /// <returns>The step to show next.</returns>
+    procedure ShortPick(var WarehouseTask: Record "WHA Warehouse Task"; HandledQuantity: Decimal; Reason: Enum "WHA Whse. Short Reason"): Enum "WHA RF Step";
+
+    /// <summary>
     /// Gives the task back to the queue, for when the operator cannot finish it.
     /// </summary>
     /// <param name="WarehouseTask">The task being worked.</param>

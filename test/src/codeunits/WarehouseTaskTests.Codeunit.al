@@ -494,6 +494,170 @@ codeunit 51001 "WHA Warehouse Task Tests"
     end;
 
     [Test]
+    procedure ShortPickRecordsWhatWasActuallyMoved()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ShortReason: Enum "WHA Whse. Short Reason";
+        OperatorId: Code[50];
+    begin
+        // [SCENARIO] The job asked for twelve and the shelf held four. The task closes with four and
+        // says why the rest is missing. The quantity asked for is left alone, as the record of what was
+        // wanted.
+        ConfigureQueue(0);
+        ConfigureFollowUp(false);
+        OperatorId := EnsureUser('WHA-SHORT');
+        CreateStartedTask(WarehouseTask, 'TEST-SHORT-1', 12, OperatorId);
+
+        TaskLogic.CompleteShort(WarehouseTask, 4, ShortReason::WHANotEnough);
+
+        Assert.AreEqual(WarehouseTask.Status::WHACompleted, WarehouseTask.Status, 'A short pick still finishes the job.');
+        Assert.AreEqual(4, WarehouseTask."Quantity Handled", 'The task should record what was actually moved.');
+        Assert.AreEqual(12, WarehouseTask.Quantity, 'The quantity asked for should be left as it was.');
+        Assert.AreEqual(ShortReason::WHANotEnough, WarehouseTask."Short Reason", 'The task should record why the rest is missing.');
+    end;
+
+    [Test]
+    procedure CompletingInFullRecordsTheWholeQuantity()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        OperatorId: Code[50];
+    begin
+        // [SCENARIO] A job done in full says so, so that what was moved reads the same way on every
+        // finished task rather than being blank on most of them.
+        ConfigureQueue(0);
+        OperatorId := EnsureUser('WHA-FULL');
+        CreateStartedTask(WarehouseTask, 'TEST-FULL-1', 7, OperatorId);
+
+        TaskLogic.Complete(WarehouseTask);
+
+        Assert.AreEqual(7, WarehouseTask."Quantity Handled", 'A job done in full should record the whole quantity as moved.');
+    end;
+
+    [Test]
+    procedure ShortPickCannotClaimMoreThanWasAsked()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ShortReason: Enum "WHA Whse. Short Reason";
+        OperatorId: Code[50];
+    begin
+        // [SCENARIO] Reporting a job short is for finding less, never more. More than was asked for is a
+        // different conversation and this is not it.
+        ConfigureQueue(0);
+        OperatorId := EnsureUser('WHA-OVER');
+        CreateStartedTask(WarehouseTask, 'TEST-SHORT-OVER', 5, OperatorId);
+
+        asserterror TaskLogic.CompleteShort(WarehouseTask, 9, ShortReason::WHANotEnough);
+
+        Assert.ExpectedError('cannot have been moved');
+    end;
+
+    [Test]
+    procedure AJobWithNoQuantityCannotBeShort()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ShortReason: Enum "WHA Whse. Short Reason";
+        OperatorId: Code[50];
+    begin
+        // [SCENARIO] Moving a whole pallet is all or nothing. There is no partial version of it, so the
+        // operator is told to hand it back instead.
+        ConfigureQueue(0);
+        OperatorId := EnsureUser('WHA-NOQTY');
+
+        HandlingUnit.Init();
+        HandlingUnit."No." := 'TEST-SHORT-HU';
+        HandlingUnit."Location Code" := TestLocationTok;
+        HandlingUnit.Insert(true);
+
+        WarehouseTask.Init();
+        WarehouseTask."No." := 'TEST-SHORT-NOQTY';
+        WarehouseTask."Location Code" := TestLocationTok;
+        WarehouseTask."Handling Unit No." := HandlingUnit."No.";
+        WarehouseTask.Insert(true);
+        TaskLogic.Release(WarehouseTask);
+        TaskLogic.Assign(WarehouseTask, OperatorId);
+        TaskLogic.Start(WarehouseTask);
+
+        asserterror TaskLogic.CompleteShort(WarehouseTask, 0, ShortReason::WHANotFound);
+
+        Assert.ExpectedError('does not move a counted quantity');
+    end;
+
+    [Test]
+    procedure NoFollowUpIsRaisedUnlessTheSetupAsksForOne()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        FollowUpTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ShortReason: Enum "WHA Whse. Short Reason";
+        OperatorId: Code[50];
+    begin
+        // [SCENARIO] By default a shortfall is reported, not re-queued. Sending a second person to a bin
+        // that was empty for the first one is how a warehouse gets busy without getting anything done.
+        ConfigureQueue(0);
+        ConfigureFollowUp(false);
+        OperatorId := EnsureUser('WHA-NOFOLLOW');
+        CreateStartedTask(WarehouseTask, 'TEST-NOFOLLOW', 10, OperatorId);
+
+        TaskLogic.CompleteShort(WarehouseTask, 2, ShortReason::WHANotFound);
+
+        FollowUpTask.SetRange(Quantity, 8);
+        FollowUpTask.SetRange("Item No.", 'TEST-ITEM');
+        Assert.IsTrue(FollowUpTask.IsEmpty(), 'No follow-up should be raised unless the setup asks for one.');
+    end;
+
+    [Test]
+    procedure AFollowUpCarriesTheOutstandingQuantity()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        FollowUpTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ShortReason: Enum "WHA Whse. Short Reason";
+        OperatorId: Code[50];
+    begin
+        // [SCENARIO] With follow-ups switched on, whatever was not found becomes a new job for the
+        // remainder, carrying where the work is and what it is for.
+        ConfigureQueue(0);
+        ConfigureFollowUp(true);
+        OperatorId := EnsureUser('WHA-FOLLOW');
+        CreateStartedTask(WarehouseTask, 'TEST-FOLLOW', 10, OperatorId);
+
+        TaskLogic.CompleteShort(WarehouseTask, 3, ShortReason::WHANotEnough);
+
+        FollowUpTask.SetRange(Quantity, 7);
+        FollowUpTask.SetRange("Item No.", 'TEST-ITEM');
+        Assert.IsTrue(FollowUpTask.FindFirst(), 'A follow-up should be raised for what was not found.');
+        Assert.AreEqual(TestLocationTok, FollowUpTask."Location Code", 'The follow-up should be for the same location.');
+        Assert.ExpectedMessage('TEST-FOLLOW', FollowUpTask.Description);
+    end;
+
+    [Test]
+    procedure NothingFoundAtAllStillClosesTheJob()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ShortReason: Enum "WHA Whse. Short Reason";
+        OperatorId: Code[50];
+    begin
+        // [SCENARIO] An empty bin is an answer. The job closes with nothing moved and a reason, rather
+        // than being handed back and offered to the next person to walk to the same empty bin.
+        ConfigureQueue(0);
+        ConfigureFollowUp(false);
+        OperatorId := EnsureUser('WHA-EMPTY');
+        CreateStartedTask(WarehouseTask, 'TEST-EMPTY-BIN', 6, OperatorId);
+
+        TaskLogic.CompleteShort(WarehouseTask, 0, ShortReason::WHANotFound);
+
+        Assert.AreEqual(WarehouseTask.Status::WHACompleted, WarehouseTask.Status, 'Finding nothing should still close the job.');
+        Assert.AreEqual(0, WarehouseTask."Quantity Handled", 'Nothing moved should be recorded as nothing moved.');
+        Assert.AreEqual(ShortReason::WHANotFound, WarehouseTask."Short Reason", 'The reason is what makes an empty bin useful information.');
+    end;
+
+    [Test]
     procedure DemoImportIsIdempotent()
     var
         WarehouseTask: Record "WHA Warehouse Task";
@@ -539,6 +703,28 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Setup.Validate("Auto Release Tasks", false);
         Setup.Validate("Max Open Tasks Per User", MaxOpenTasks);
         Setup.Modify(true);
+    end;
+
+    local procedure ConfigureFollowUp(FollowUp: Boolean)
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+    begin
+        EnsureTaskSetup(Setup);
+        Setup.Validate("Follow Up Short Picks", FollowUp);
+        Setup.Modify(true);
+    end;
+
+    local procedure CreateStartedTask(var WarehouseTask: Record "WHA Warehouse Task"; TaskNo: Code[20]; Qty: Decimal; OperatorId: Code[50])
+    var
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+    begin
+        CreateWorkableTask(WarehouseTask, TaskNo);
+        WarehouseTask.Validate(Quantity, Qty);
+        WarehouseTask.Modify(true);
+
+        TaskLogic.Release(WarehouseTask);
+        TaskLogic.Assign(WarehouseTask, OperatorId);
+        TaskLogic.Start(WarehouseTask);
     end;
 
     local procedure EnsureTaskSetup(var Setup: Record "WHA Warehouse Task Setup")

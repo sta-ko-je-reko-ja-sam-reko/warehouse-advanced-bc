@@ -236,12 +236,18 @@ needs the partner's own pallet ID stored on the unit and searchable, that is a f
 
 Written for every task that reaches *Completed*. `External Id` is the task number.
 
+`quantityHandled` is what the operator actually moved and `quantityOutstanding` the difference — a
+job completed short reports both, with `shortReason` saying why. **This is the only way the partner
+system learns about a shortfall**, so a partner that ignores those three fields will believe every
+job was done in full.
+
 ```json
 {
   "number": "WT000012", "taskType": "WHAPick", "status": "WHACompleted",
   "description": "...", "locationCode": "BLUE", "fromBinCode": "B-01-0001", "toBinCode": "STAGE-01",
   "handlingUnitNumber": "HU000042", "itemNumber": "1896-S", "variantCode": "",
-  "quantity": 12, "unitOfMeasureCode": "PCS", "assignedToUserId": "MARK",
+  "quantity": 12, "quantityHandled": 4, "quantityOutstanding": 8, "shortReason": "WHANotEnough",
+  "unitOfMeasureCode": "PCS", "assignedToUserId": "MARK",
   "startedDateTime": "2026-08-19T09:12:44Z", "completedDateTime": "2026-08-19T09:31:02Z"
 }
 ```

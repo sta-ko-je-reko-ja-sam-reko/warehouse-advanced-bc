@@ -29,4 +29,8 @@ enum 50100 "WHA RF Step"
     {
         Caption = 'Confirm';
     }
+    value(6; WHAShortPick)
+    {
+        Caption = 'Report a short pick';
+    }
 }

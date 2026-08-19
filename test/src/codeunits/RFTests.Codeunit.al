@@ -318,6 +318,78 @@ codeunit 51003 "WHA RF Tests"
     end;
 
     [Test]
+    procedure ReportingShortAsksHowManyWereFound()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        Flow: Codeunit "WHA RF Standard Flow";
+        Step: Enum "WHA RF Step";
+    begin
+        // [SCENARIO] Saying there are fewer on the shelf than the job asks for moves the operator to a
+        // step that asks how many, rather than silently finishing the job.
+        ConfigureHandheld(true, false);
+        WarehouseTask."No." := 'RF-SHORT-STEP';
+        WarehouseTask.Quantity := 12;
+
+        Assert.AreEqual(Step::WHAShortPick, Flow.StartShortPick(WarehouseTask, Step::WHAScanFrom), 'Reporting short should ask how many were found.');
+    end;
+
+    [Test]
+    procedure TheShortStepSaysHowManyWereAskedFor()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        Flow: Codeunit "WHA RF Standard Flow";
+        Step: Enum "WHA RF Step";
+    begin
+        // [SCENARIO] The operator needs the number they are short against in front of them.
+        ConfigureHandheld(true, false);
+        WarehouseTask.Quantity := 12;
+
+        Assert.ExpectedMessage('12', Flow.Instruction(WarehouseTask, Step::WHAShortPick));
+    end;
+
+    [Test]
+    procedure AWholePalletJobCannotBeReportedShort()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        Flow: Codeunit "WHA RF Standard Flow";
+        Step: Enum "WHA RF Step";
+    begin
+        // [SCENARIO] There is no partial version of moving a pallet, and the operator is told what to do
+        // instead rather than being left with a dead button.
+        ConfigureHandheld(true, false);
+        WarehouseTask."No." := 'RF-SHORT-HU';
+        WarehouseTask."Handling Unit No." := 'RF-HU-003';
+
+        asserterror Flow.StartShortPick(WarehouseTask, Step::WHAScanFrom);
+
+        Assert.ExpectedError('Hand it back');
+    end;
+
+    [Test]
+    procedure ConfirmingShortFinishesTheJobWithWhatWasFound()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        Flow: Codeunit "WHA RF Standard Flow";
+        ShortReason: Enum "WHA Whse. Short Reason";
+        Step: Enum "WHA RF Step";
+        NextStep: Enum "WHA RF Step";
+    begin
+        // [SCENARIO] The whole point: an operator who finds four of twelve says so from the aisle, and
+        // the job closes with four rather than with a lie or with nothing.
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-SHORT-DONE');
+        WarehouseTask.Validate(Quantity, 12);
+        WarehouseTask.Modify(true);
+
+        NextStep := Flow.ShortPick(WarehouseTask, 4, ShortReason::WHANotEnough);
+
+        Assert.AreEqual(WarehouseTask.Status::WHACompleted, WarehouseTask.Status, 'A short pick should finish the job.');
+        Assert.AreEqual(4, WarehouseTask."Quantity Handled", 'The job should record what the operator actually found.');
+        Assert.AreEqual(ShortReason::WHANotEnough, WarehouseTask."Short Reason", 'The job should record why the rest is missing.');
+        Assert.AreEqual(Step::WHAGetWork, NextStep, 'Reporting short should leave the operator ready for the next job.');
+    end;
+
+    [Test]
     procedure DemoImportIsIdempotent()
     var
         RFDevice: Record "WHA RF Device";

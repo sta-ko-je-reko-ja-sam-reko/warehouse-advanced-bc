@@ -72,6 +72,16 @@ page 50203 "WHA API Warehouse Task"
                 {
                     Caption = 'Unit of measure code';
                 }
+                field(quantityHandled; Rec."Quantity Handled")
+                {
+                    Caption = 'Quantity handled';
+                    Editable = false;
+                }
+                field(shortReason; Rec."Short Reason")
+                {
+                    Caption = 'Short reason';
+                    Editable = false;
+                }
                 field(priority; Rec.Priority)
                 {
                     Caption = 'Priority';

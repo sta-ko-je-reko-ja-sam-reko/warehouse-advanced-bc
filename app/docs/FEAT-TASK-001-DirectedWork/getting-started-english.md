@@ -116,6 +116,23 @@ so nobody loses track of a half-finished job.
 If **Max open tasks per user** is set, you are told when someone already has as many jobs as they
 are allowed.
 
+## When there is less than the job asked for
+
+An operator who is sent for twelve and finds four reports the job **short** rather than finishing it
+in full. The job closes with what was actually moved and a reason why the rest is missing.
+
+- **Quantity** stays as what was asked for. **Quantity handled** shows what was really moved, and
+  **Short reason** says why.
+- Finding *nothing at all* is still worth reporting. It closes the job and tells you the bin is
+  empty, instead of sending the next person to the same place.
+- A job that moves a whole handling unit cannot be short — there is no half a pallet. Hand it back
+  instead.
+
+By default nobody is sent back for the missing eight; the shortfall is reported and you decide. If
+you would rather the app raised a new job for whatever was not found, switch on **Raise a follow-up
+for short picks** in the warehouse task setup. The follow-up is created as a draft, so somebody
+looks at it before anyone walks to the same bin again.
+
 ## Follow what happened
 
 Each task records the time it moved through the life cycle:
@@ -123,6 +140,8 @@ Each task records the time it moved through the life cycle:
 - **Assigned at** — when it was given to someone.
 - **Started at** — when they began.
 - **Completed at** — when they finished.
+
+**Quantity handled** and **Short reason** show whether the job was done in full.
 
 **Status** shows where a task is now: **Created**, **Released**, **Assigned**, **In progress**,
 **Completed** or **Cancelled**. You cannot type over it — it changes through the actions above, so

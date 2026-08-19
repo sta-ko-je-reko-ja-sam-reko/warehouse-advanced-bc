@@ -90,6 +90,15 @@ interface "WHA IWarehouseTask"
     procedure Complete(var WarehouseTask: Record "WHA Warehouse Task");
 
     /// <summary>
+    /// Finishes a task with less than it asked for, recording how much was moved and why the rest was
+    /// not. Raises a follow-up task for the remainder when the setup asks for one.
+    /// </summary>
+    /// <param name="WarehouseTask">The warehouse task to complete short.</param>
+    /// <param name="HandledQuantity">How much was actually moved. Zero when nothing could be.</param>
+    /// <param name="Reason">Why the rest was not moved.</param>
+    procedure CompleteShort(var WarehouseTask: Record "WHA Warehouse Task"; HandledQuantity: Decimal; Reason: Enum "WHA Whse. Short Reason");
+
+    /// <summary>
     /// Withdraws a task that is no longer needed, keeping it as a record of what was asked for.
     /// </summary>
     /// <param name="WarehouseTask">The warehouse task to cancel.</param>

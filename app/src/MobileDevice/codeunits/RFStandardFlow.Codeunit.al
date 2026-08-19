@@ -22,6 +22,8 @@ codeunit 50100 "WHA RF Standard Flow" implements "WHA IRFFlow"
         ScanUnitLbl: Label 'Scan handling unit %1.', Comment = '%1 = the handling unit to scan';
         ScanToLbl: Label 'Put it in bin %1 and scan it.', Comment = '%1 = the bin to put into';
         ConfirmLbl: Label 'Confirm to finish job %1.', Comment = '%1 = the warehouse task number';
+        ShortPickLbl: Label 'The job asks for %1. Enter how many you found, and why the rest is missing.', Comment = '%1 = the quantity the job asked for';
+        NotCountedErr: Label 'This job does not move a counted quantity, so there is nothing to be short of. Hand it back instead.';
 
     /// <summary>
     /// Establishes which device the operator is working on, and refuses one that is unknown or blocked.
@@ -162,6 +164,8 @@ codeunit 50100 "WHA RF Standard Flow" implements "WHA IRFFlow"
                 exit(StrSubstNo(ScanToLbl, WarehouseTask."To Bin Code"));
             Step::WHAConfirm:
                 exit(StrSubstNo(ConfirmLbl, WarehouseTask."No."));
+            Step::WHAShortPick:
+                exit(StrSubstNo(ShortPickLbl, WarehouseTask.Quantity));
         end;
 
         exit(GetWorkLbl);
@@ -187,6 +191,46 @@ codeunit 50100 "WHA RF Standard Flow" implements "WHA IRFFlow"
             TaskLogic.Start(WarehouseTask);
 
         TaskLogic.Complete(WarehouseTask);
+        exit(Step::WHAGetWork);
+    end;
+
+    /// <summary>
+    /// Moves the operator to reporting that there was less on the shelf than the job asked for.
+    /// </summary>
+    /// <param name="WarehouseTask">The task being worked.</param>
+    /// <param name="CurrentStep">The step the operator is on.</param>
+    /// <returns>The step to show next.</returns>
+    procedure StartShortPick(var WarehouseTask: Record "WHA Warehouse Task"; CurrentStep: Enum "WHA RF Step"): Enum "WHA RF Step"
+    var
+        Step: Enum "WHA RF Step";
+    begin
+        if WarehouseTask."No." = '' then
+            Error(NoTaskErr);
+        if WarehouseTask.Quantity <= 0 then
+            Error(NotCountedErr);
+
+        exit(Step::WHAShortPick);
+    end;
+
+    /// <summary>
+    /// Finishes the job with what the operator actually found, and says why the rest is missing.
+    /// </summary>
+    /// <param name="WarehouseTask">The task being worked.</param>
+    /// <param name="HandledQuantity">How much was actually moved.</param>
+    /// <param name="Reason">Why the rest was not.</param>
+    /// <returns>The step to show next.</returns>
+    procedure ShortPick(var WarehouseTask: Record "WHA Warehouse Task"; HandledQuantity: Decimal; Reason: Enum "WHA Whse. Short Reason"): Enum "WHA RF Step"
+    var
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        Step: Enum "WHA RF Step";
+    begin
+        if WarehouseTask."No." = '' then
+            Error(NoTaskErr);
+
+        if WarehouseTask.Status = WarehouseTask.Status::WHAAssigned then
+            TaskLogic.Start(WarehouseTask);
+
+        TaskLogic.CompleteShort(WarehouseTask, HandledQuantity, Reason);
         exit(Step::WHAGetWork);
     end;
 

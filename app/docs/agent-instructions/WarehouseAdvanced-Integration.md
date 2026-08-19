@@ -60,6 +60,11 @@ the partner sent** — it is the partner's statement about its own work, not a k
 **`WHAWarehouseTaskConfirmed`** and **`WHAHandlingUnitShipped`** (outbound) are built by the app.
 Read them; never write them.
 
+A task confirmation carries `quantity` (what was asked for), `quantityHandled` (what was actually
+moved), `quantityOutstanding`, and `shortReason`. **A job that came up short is still reported as
+completed**, so when a user asks whether something was picked in full, compare the quantities rather
+than reading the status.
+
 > These shapes are a first proposal agreed while the partner system's real specification is unknown.
 > If a user tells you the real format differs, **do not improvise a translation** — say that the
 > handler in the app has to be changed, and stop.

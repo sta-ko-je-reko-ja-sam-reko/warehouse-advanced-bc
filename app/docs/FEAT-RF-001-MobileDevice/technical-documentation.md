@@ -38,6 +38,8 @@ screen they actually use:
 
 **Segment 1** — device registration, sign-in, the standard scan-through flow, and the handheld
 screen itself.
+**Segment 2** — the short pick: reporting from the aisle that there is less on the shelf than the
+job asks for.
 
 ## Data model
 
@@ -108,6 +110,8 @@ Core changed only by gaining a `WHA Feature` enum value.
 | `Scan` | Check what was scanned against the current step; answer with the next step |
 | `Instruction` | The one line the operator reads |
 | `Confirm` | Finish the job |
+| `StartShortPick` | Move to reporting that there is less on the shelf than the job asks for |
+| `ShortPick` | Finish the job with what was actually found, and why |
 | `HandBack` | Return the job to the queue |
 
 `WHA RF Flow` is an **extensible enum implementing that interface**, with `WHA RF Standard Flow` as
@@ -120,7 +124,13 @@ feature setup and for integration message types.
 
 ```
 SignIn ──► GetWork ──► [ScanFrom] ──► [ScanUnit] ──► [ScanTo] ──► Confirm ──► GetWork
+                            └──────────── ShortPick ────────────────┘
 ```
+
+**Short pick is reachable from any step while holding a job**, not only at the end — an operator
+knows the shelf is short the moment they look at it, and making them scan their way to the end
+first would be theatre. It asks for the quantity found and a reason, then closes the job through
+`CompleteShort` in directed work.
 
 Steps in brackets appear **only when the job names them** — no empty prompts. With
 `Confirm by scan` off, every bracketed step is skipped and the job is one tap.
@@ -197,6 +207,10 @@ directly with unsaved task records and no database writes:
 | `ConfirmingBeforeTheStepsAreDoneIsRefused` | Confirm cannot skip the scans |
 | `ConfirmingFinishesTheJob` | The task completes and is stamped as started |
 | `HandingBackReturnsStartedWorkToTheQueue` | The fix above, through the flow |
+| `ReportingShortAsksHowManyWereFound` | Short pick asks rather than assuming |
+| `TheShortStepSaysHowManyWereAskedFor` | The operator can see what they are short against |
+| `AWholePalletJobCannotBeReportedShort` | And is told what to do instead |
+| `ConfirmingShortFinishesTheJobWithWhatWasFound` | Four of twelve, from the aisle |
 | `WorkIsOfferedOnlyAtTheDeviceLocation` | A handheld never sends an operator across the site |
 | `DemoImportIsIdempotent` | The seeder is safe to re-run |
 
@@ -204,6 +218,9 @@ directly with unsaved task records and no database writes:
 
 - **Prototyped against operators.** The single most valuable thing missing, and the plan says so.
   Nothing below should be built until the step sequence has been watched in use.
+  [operator-review.md](operator-review.md) is the script for that session: what to set up, what to
+  watch, and which finding changes which object. It is written to be run by someone who did not
+  build this.
 - **Offline tolerance.** The plan's own description of this feature includes an "offline-tolerant
   confirm"; there is none. A handheld that loses connectivity loses its place, and the job stays
   assigned to the operator until they hand it back or pick it up again. Doing this properly means a
@@ -211,9 +228,10 @@ directly with unsaved task records and no database writes:
   alone.
 - **The operator's place is session state, not stored.** Closing the page loses the current step,
   though not the job.
-- **No quantity prompt, no short pick, no exception handling** — no way to say "there are only 4
-  here, not 12". This is the first thing real operators will ask for, and it needs the directed work
-  side to model a partial completion first.
+- **No other exception handling.** The short pick is in (segment 2), but there is still no way to
+  report a wrong item in the bin, a damaged pallet that should be quarantined, or a bin that is not
+  where the job says it is. Each is a different conversation with directed work, and each should
+  come out of the operator review rather than out of a developer's imagination.
 - **No scan of the item or lot**, only the handling unit. Item-level jobs are confirmed without
   proving what was picked.
 - **Getting-started in the customer language** — the language has not been confirmed.

@@ -111,6 +111,21 @@ table 50201 "WHA Warehouse Task"
             ToolTip = 'Specifies the unit the quantity is counted in.';
             TableRelation = "Item Unit of Measure".Code where("Item No." = field("Item No."));
         }
+        field(25; "Quantity Handled"; Decimal)
+        {
+            Caption = 'Quantity handled';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies how much was actually moved. It is filled in when the work is completed, and is less than the quantity asked for when the operator could not find it all.';
+            DecimalPlaces = 0 : 5;
+            Editable = false;
+        }
+        field(26; "Short Reason"; Enum "WHA Whse. Short Reason")
+        {
+            Caption = 'Short reason';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies why less was moved than the work asked for.';
+            Editable = false;
+        }
         field(30; Status; Enum "WHA Warehouse Task Status")
         {
             Caption = 'Status';

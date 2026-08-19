@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
+using Microsoft.Foundation.NoSeries;
+
 table 50050 "WHA Handling Unit Setup"
 {
     Caption = 'Handling unit setup';
@@ -30,6 +32,13 @@ table 50050 "WHA Handling Unit Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies how many levels of handling unit may be nested inside one another. Zero means no limit.';
             MinValue = 0;
+        }
+        field(90; "Handling Unit Nos."; Code[20])
+        {
+            Caption = 'Handling unit nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to handling units.';
+            TableRelation = "No. Series";
         }
     }
 

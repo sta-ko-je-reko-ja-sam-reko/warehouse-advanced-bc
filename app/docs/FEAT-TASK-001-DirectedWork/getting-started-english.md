@@ -10,20 +10,15 @@ You only need to do this once, and you need administrator rights.
 
 1. Choose the search icon, enter **Warehouse Advanced Setup**, and choose the related link.
 2. Choose **Guided setup**.
-3. In the list of features, choose the **Foundation** row, and make sure **Create and assign number
-   series** is switched on. Warehouse tasks are numbered from a series created here.
-4. Back in the list of features, choose the **Directed work** row.
-5. Read the introduction, then choose **Next**.
-6. Switch on **Enable this feature**, then choose **Next** and **Finish**.
-7. You return to the feature list, where **Directed work** now shows as **Completed**.
-8. Close the feature list. Your session restarts so the change takes effect. This takes a few
+3. In the list of features, choose the **Directed work** row.
+4. Read the introduction, then choose **Next**.
+5. Switch on **Enable this feature**, and leave **Create and assign number series** on — warehouse
+   jobs are numbered from a series this step creates for you. Choose **Next** and **Finish**.
+6. You return to the feature list, where **Directed work** now shows as **Completed**.
+7. Close the feature list. Your session restarts so the change takes effect. This takes a few
    seconds and you do not need to sign in again.
 
 After the restart, **Warehouse tasks** is available from the search.
-
-> If you turned the app on before directed work was added, the **Foundation** row shows as **Not
-> started** again. That is because it now creates a second number series. Run it once more — nothing
-> you already set up is changed.
 
 ## Choose how the queue behaves
 

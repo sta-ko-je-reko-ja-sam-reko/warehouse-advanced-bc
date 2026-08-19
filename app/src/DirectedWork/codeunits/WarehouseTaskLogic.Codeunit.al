@@ -2,7 +2,6 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using Microsoft.Foundation.NoSeries;
 using Microsoft.Inventory.Item;
-using WarehouseAdvanced.Core;
 using WarehouseAdvanced.HandlingUnit;
 
 codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
@@ -10,7 +9,7 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
     Access = Public;
 
     var
-        NoSeriesMissingErr: Label 'Set the warehouse task number series in the warehouse advanced setup before creating warehouse tasks.';
+        NoSeriesMissingErr: Label 'Set the warehouse task number series on the directed work setup page before creating warehouse tasks.';
         ShippedUnitErr: Label 'Handling unit %1 has already been shipped, so no more work can be planned for it.', Comment = '%1 = the handling unit number';
         UnitNotAvailableErr: Label 'Handling unit %1 is %2, so no work can be planned for it.', Comment = '%1 = the handling unit number, %2 = the status of the handling unit';
         NegativeQuantityErr: Label 'The quantity on a warehouse task cannot be negative.';
@@ -431,15 +430,15 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
 
     local procedure NextTaskNo(): Code[20]
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        Setup: Record "WHA Warehouse Task Setup";
         NoSeries: Codeunit "No. Series";
     begin
-        WarehouseSetup.SetLoadFields("Warehouse Task Nos.");
-        if not WarehouseSetup.Get() then
+        Setup.SetLoadFields("Warehouse Task Nos.");
+        if not Setup.Get() then
             Error(NoSeriesMissingErr);
-        if WarehouseSetup."Warehouse Task Nos." = '' then
+        if Setup."Warehouse Task Nos." = '' then
             Error(NoSeriesMissingErr);
 
-        exit(NoSeries.GetNextNo(WarehouseSetup."Warehouse Task Nos."));
+        exit(NoSeries.GetNextNo(Setup."Warehouse Task Nos."));
     end;
 }

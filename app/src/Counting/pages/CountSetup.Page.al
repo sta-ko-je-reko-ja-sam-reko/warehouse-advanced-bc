@@ -55,6 +55,15 @@ page 50500 "WHA Count Setup"
                     ApplicationArea = WHACounting;
                 }
             }
+            group(Numbering)
+            {
+                Caption = 'Numbering';
+
+                field("Count Sheet Nos."; Rec."Count Sheet Nos.")
+                {
+                    ApplicationArea = WHACounting;
+                }
+            }
         }
     }
 

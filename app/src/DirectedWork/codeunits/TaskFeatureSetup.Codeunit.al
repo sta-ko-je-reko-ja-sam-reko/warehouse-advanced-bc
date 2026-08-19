@@ -9,6 +9,10 @@ codeunit 50201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
     var
         StepNameLbl: Label 'Directed work';
         StepDescriptionLbl: Label 'Queue warehouse work as numbered tasks, give each one a priority, and hand the most urgent one to whoever asks for work next.';
+        NoSeriesCodeTok: Label 'WHA-TASK', Locked = true;
+        NoSeriesDescLbl: Label 'Warehouse advanced tasks';
+        StartingNoTok: Label 'WT000001', Locked = true;
+        EndingNoTok: Label 'WT999999', Locked = true;
         McpConfigNameTok: Label 'Warehouse Advanced - Directed Work', Locked = true;
         McpConfigDescLbl: Label 'Warehouse task tools. Read the Warehouse Advanced Directed Work agent instructions before use.';
         DemoMcpConfigNameTok: Label 'Warehouse Advanced - Demo Directed Work', Locked = true;
@@ -24,6 +28,7 @@ codeunit 50201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
         TempSetupStep."Step No." := 30;
         TempSetupStep.Feature := TempSetupStep.Feature::WHADirectedWork;
         TempSetupStep."Has Toggle" := true;
+        TempSetupStep."Has No. Series" := true;
         TempSetupStep.Name := CopyStr(StepNameLbl, 1, MaxStrLen(TempSetupStep.Name));
         TempSetupStep.Description := CopyStr(StepDescriptionLbl, 1, MaxStrLen(TempSetupStep.Description));
         TempSetupStep."Setup Page ID" := Page::"WHA Warehouse Task Setup";
@@ -49,7 +54,7 @@ codeunit 50201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
     /// owns the single deferred restart.
     /// </summary>
     /// <param name="Enable">Whether directed work should be switched on.</param>
-    /// <param name="CreateNoSeries">Ignored. The warehouse task number series belongs to the foundation step.</param>
+    /// <param name="CreateNoSeries">Whether to create the number series that numbers warehouse jobs, and assign it to this feature's own setup.</param>
     /// <param name="ImportDemoData">Whether to load sample warehouse tasks.</param>
     procedure ApplyChoices(Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     var
@@ -59,6 +64,9 @@ codeunit 50201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
 
         Setup.Validate("WHA Enabled", Enable);
         Setup.Modify(true);
+
+        if CreateNoSeries then
+            EnsureNoSeries(Setup);
 
         if ImportDemoData then
             ImportSampleTasks();
@@ -95,6 +103,17 @@ codeunit 50201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
     begin
         RegisterFunctionalConfiguration();
         RegisterDemoConfiguration();
+    end;
+
+    local procedure EnsureNoSeries(var Setup: Record "WHA Warehouse Task Setup")
+    var
+        NoSeriesMgt: Codeunit "WHA No. Series Mgt.";
+    begin
+        if Setup."Warehouse Task Nos." <> '' then
+            exit;
+
+        Setup.Validate("Warehouse Task Nos.", NoSeriesMgt.EnsureSeries(NoSeriesCodeTok, NoSeriesDescLbl, StartingNoTok, EndingNoTok));
+        Setup.Modify(true);
     end;
 
     local procedure RegisterFunctionalConfiguration()

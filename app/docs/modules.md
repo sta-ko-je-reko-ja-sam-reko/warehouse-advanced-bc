@@ -55,7 +55,7 @@ in different modules cannot collide. Test objects use `51000..51999`.
 
 | Module | Folder | IDs | Standard BC today | Candidate gap to build |
 |---|---|---|---|---|
-| Foundation | `Foundation` | 50000–50049 | — | Setup table, permission sets, shared enums, number series, base events. No business logic. |
+| Foundation | `Core` | 50000–50049 | — | Setup record, guided setup hub and wizard, feature facade, permission sets, shared enums, and the generic ability to create a number series. No feature knowledge and no business logic — numbering belongs to the feature that uses it. |
 | Handling units | `HandlingUnit` | 50050–50099 | No first-class pallet/container entity; item tracking is lot/serial only | License plate / SSCC-identified handling unit, nesting, move-as-one, unit history |
 | Mobile device | `MobileDevice` | 50100–50149 | No RF/handheld UI; web client is desktop-shaped | Scanner-optimised page set, step-driven flows, offline-tolerant confirm, device registration |
 | Wave management | `WaveManagement` | 50150–50199 | Pick worksheet, release-to-pick; no wave entity | Wave definition, release strategies, wave templates, workload balancing |

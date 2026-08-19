@@ -68,7 +68,7 @@ off. That is what makes the yard list answer "where is that trailer" rather than
 
 | Field | Notes |
 |---|---|
-| `No.` | From the foundation number series `WHA-DOCK` |
+| `No.` | From this feature's own number series `WHA-DOCK` |
 | `Direction`, `Dock Door Code`, `Slot Minutes` | What was promised, and what it occupies |
 | `Carrier Name`, `Trailer No.`, `Reference` | What turns up, and what it is here for |
 | `Expected At` | The promise. Lateness is measured against it |
@@ -112,16 +112,13 @@ off. That is what makes the yard list answer "where is that trailer" rather than
 
 All in namespace `WarehouseAdvanced.DockYard`, from the reserved block `50450..50499`.
 
-**Core changed in three places**, all of them foundation support the feature genuinely needed: a
-`WHA Feature` enum value, a `Dock Appointment Nos.` field on `WHA Warehouse Setup` with its
-validation in `WHA IWarehouseSetup`, and the `WHA-DOCK` series in the foundation step. No feature
-knowledge was added to Core.
+**Core changed in one place**: a `WHA Feature` enum value. The appointment numbering lives on this
+feature's own setup, so Core does not know this feature numbers anything.
 
-> **Note on the foundation step.** `Dock Appointment Nos.` is part of what
-> `WHA Warehouse Setup Logic.IsComplete()` checks, so a company that finished the foundation step
-> before this feature shipped shows it as *not started* again until the step is re-run. That is the
-> same behaviour counting introduced when it added its own series, and re-running the step is
-> idempotent.
+> The first version of this feature put `Dock Appointment Nos.` on `WHA Warehouse Setup` and created
+> the series in the foundation step, which made the foundation step read as *not started* on
+> companies that had already finished it. That was the last straw for foundation-owned numbering; it
+> now lives here, and the foundation step no longer has anything to be incomplete about.
 
 ## Door selection is a decision the warehouse owns
 
@@ -154,7 +151,7 @@ Per `_patterns/feature-setup-and-toggle.md`: `WHA Feature` gained `WHADockYard` 
 through this feature's own tableextension; the setup page is `ApplicationArea = All` while the dock
 pages carry `WHADockYard`.
 
-**One new number series**, `WHA-DOCK` (`DA000001`..`DA999999`), created by the foundation step.
+**One new number series**, `WHA-DOCK` (`DA000001`..`DA999999`), created by this feature's own guided-setup step when numbering is asked for.
 
 ## MCP configuration
 

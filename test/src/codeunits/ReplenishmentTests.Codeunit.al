@@ -338,7 +338,7 @@ codeunit 51007 "WHA Replenishment Tests"
     var
         NoSeries: Record "No. Series";
         NoSeriesLine: Record "No. Series Line";
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        TaskSetup: Record "WHA Warehouse Task Setup";
     begin
         if not NoSeries.Get(CopyStr(NoSeriesTok, 1, 20)) then begin
             NoSeries.Init();
@@ -354,15 +354,15 @@ codeunit 51007 "WHA Replenishment Tests"
             NoSeriesLine.Insert(true);
         end;
 
-        WarehouseSetup.Reset();
-        if not WarehouseSetup.Get() then begin
-            WarehouseSetup.Init();
-            WarehouseSetup.Insert(true);
+        TaskSetup.Reset();
+        if not TaskSetup.Get() then begin
+            TaskSetup.Init();
+            TaskSetup.Insert(true);
         end;
-        if WarehouseSetup."Warehouse Task Nos." <> '' then
+        if TaskSetup."Warehouse Task Nos." <> '' then
             exit;
 
-        WarehouseSetup.Validate("Warehouse Task Nos.", CopyStr(NoSeriesTok, 1, 20));
-        WarehouseSetup.Modify(true);
+        TaskSetup.Validate("Warehouse Task Nos.", CopyStr(NoSeriesTok, 1, 20));
+        TaskSetup.Modify(true);
     end;
 }

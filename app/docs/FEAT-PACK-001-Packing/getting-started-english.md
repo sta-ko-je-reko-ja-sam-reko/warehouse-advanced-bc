@@ -14,8 +14,8 @@ You only need to do this once, and you need administrator rights.
 4. Switch on **Enable this feature**, then **Next** and **Finish**.
 5. Close the feature list. Your session restarts so the change takes effect.
 
-Handling units must be on as well, and the **Foundation** step must have created the handling unit
-number series — a carton is a handling unit and needs a number.
+Handling units must be on as well, with its numbering created — a carton is a handling unit and needs
+a number, and that series belongs to the handling unit feature.
 
 ## Set up your benches
 

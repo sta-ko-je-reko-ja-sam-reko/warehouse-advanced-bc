@@ -46,6 +46,15 @@ page 50200 "WHA Warehouse Task Setup"
                     ApplicationArea = WHADirectedWork;
                 }
             }
+            group(Numbering)
+            {
+                Caption = 'Numbering';
+
+                field("Warehouse Task Nos."; Rec."Warehouse Task Nos.")
+                {
+                    ApplicationArea = WHADirectedWork;
+                }
+            }
         }
     }
 

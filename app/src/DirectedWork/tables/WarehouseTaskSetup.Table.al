@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.DirectedWork;
 
+using Microsoft.Foundation.NoSeries;
+
 table 50200 "WHA Warehouse Task Setup"
 {
     Caption = 'Warehouse task setup';
@@ -43,6 +45,13 @@ table 50200 "WHA Warehouse Task Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies how many warehouse tasks one person may hold at a time. Zero means no limit.';
             MinValue = 0;
+        }
+        field(90; "Warehouse Task Nos."; Code[20])
+        {
+            Caption = 'Warehouse task nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to warehouse tasks.';
+            TableRelation = "No. Series";
         }
     }
 

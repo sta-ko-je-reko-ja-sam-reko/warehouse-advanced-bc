@@ -9,30 +9,24 @@ page 50000 "WHA Warehouse Setup"
     Caption = 'Warehouse advanced setup';
     InsertAllowed = false;
     DeleteAllowed = false;
+    Editable = false;
     AdditionalSearchTerms = 'WMS, warehouse advanced, handling unit';
 
     layout
     {
         area(Content)
         {
-            group(Numbering)
+            group(Foundation)
             {
-                Caption = 'Numbering';
+                Caption = 'Foundation';
 
-                field("Handling Unit Nos."; Rec."Handling Unit Nos.")
+                field(FoundationInfo; FoundationInfoLbl)
                 {
-                }
-                field("Warehouse Task Nos."; Rec."Warehouse Task Nos.")
-                {
-                }
-                field("Wave Nos."; Rec."Wave Nos.")
-                {
-                }
-                field("Count Sheet Nos."; Rec."Count Sheet Nos.")
-                {
-                }
-                field("Dock Appointment Nos."; Rec."Dock Appointment Nos.")
-                {
+                    Caption = 'About these settings';
+                    ToolTip = 'Specifies where the settings for each feature are kept.';
+                    Editable = false;
+                    MultiLine = true;
+                    ShowCaption = false;
                 }
             }
         }
@@ -69,4 +63,7 @@ page 50000 "WHA Warehouse Setup"
     begin
         SetupLogic.EnsureExists(Rec);
     end;
+
+    var
+        FoundationInfoLbl: Label 'There is nothing to fill in here. Every feature keeps its own settings on its own setup page, including the numbering it uses, so that a feature you never switch on asks you for nothing. Choose Guided setup to work through them.';
 }

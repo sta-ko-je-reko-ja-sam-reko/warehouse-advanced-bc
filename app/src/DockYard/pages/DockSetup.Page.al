@@ -59,6 +59,15 @@ page 50450 "WHA Dock Setup"
                     ApplicationArea = WHADockYard;
                 }
             }
+            group(Numbering)
+            {
+                Caption = 'Numbering';
+
+                field("Dock Appointment Nos."; Rec."Dock Appointment Nos.")
+                {
+                    ApplicationArea = WHADockYard;
+                }
+            }
         }
     }
 

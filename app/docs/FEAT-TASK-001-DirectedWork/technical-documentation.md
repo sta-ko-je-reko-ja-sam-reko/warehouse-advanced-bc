@@ -21,7 +21,7 @@ piece of it to the person who just finished something, and nothing records who d
 
 This feature adds that queue:
 
-1. A **warehouse task** is created and receives a number from the foundation number series. It says
+1. A **warehouse task** is created and receives a number from this feature's own number series. It says
    what kind of work it is, where it happens, and what is being moved — a handling unit, or an item
    and a quantity.
 2. It carries a **priority** and optionally a **due date**. A lower priority number is more urgent.
@@ -53,7 +53,7 @@ handling unit move on completion.
 
 | Field | Type | Notes |
 |---|---|---|
-| `No.` | `Code[20]` | Primary key, assigned from the foundation number series |
+| `No.` | `Code[20]` | Primary key, assigned from this feature's own number series |
 | `Task Type` | `Enum "WHA Warehouse Task Type"` | Put-away / Pick / Movement / Replenishment / Count |
 | `Description` | `Text[100]` | What the operator is being asked to do |
 | `Location Code` | `Code[10]` | `TableRelation = Location`. Changing it clears **both** bins |
@@ -78,16 +78,10 @@ their part of the warehouse, then priority and due date, which is the order work
 
 ### Number series
 
-The warehouse task number series lives on the **foundation** setup
-(`WHA Warehouse Setup."Warehouse Task Nos."`), not on this feature's setup, for the same reason the
-handling unit series does: foundation owns cross-cutting numbering, and the guided setup's foundation
-step is what creates the `WHA-TASK` series. Inserting a task with no number errors if that series is
-unset.
-
-**The foundation step now creates two series, and `IsComplete` checks both.** A company that ran the
-foundation step before this feature shipped will show the foundation step as *not started* again
-until it is re-run, because the warehouse task series genuinely is missing. Re-running it is
-idempotent and leaves the handling unit series alone.
+The warehouse task number series lives on **this feature's own setup**
+(`WHA Warehouse Task Setup."Warehouse Task Nos."`), with the feature's own application area, and the
+feature's guided-setup step creates the `WHA-TASK` series when numbering is asked for. Inserting a
+task with no number errors if that series is unset.
 
 ### `WHA Warehouse Task Setup`
 
@@ -126,9 +120,9 @@ time and per-step durations; it would be the wrong shape to guess at now.
 
 All in namespace `WarehouseAdvanced.DirectedWork`, from the reserved block `50200..50249`.
 
-Core objects changed in the same pass: `WHA Feature` (a new value), `WHA Warehouse Setup` +
-`WHA IWarehouseSetup` + `WHA Warehouse Setup Logic` (the second number series), `WHA Guided Setup`
-(creates both series), `WHA Warehouse Setup` page and `WHA API Warehouse Setup` (the new field).
+Core objects changed in the same pass: `WHA Feature` gained a value. Numbering was originally added
+to Core as well; it has since moved to this feature's own setup, so Core no longer knows this feature
+numbers anything.
 
 ## Logic
 
@@ -138,7 +132,7 @@ All table triggers and field validations delegate a single line to `Logic()`, re
 
 | Operation | Behaviour |
 |---|---|
-| `Trigger_OnInsert` | Assigns the number from the foundation series; applies the default priority; releases the task if the setup says so **and** it is ready for work |
+| `Trigger_OnInsert` | Assigns the number from this feature's series; applies the default priority; releases the task if the setup says so **and** it is ready for work |
 | `Trigger_OnDelete` | Refuses to delete a task that is in progress or completed |
 | `Validate_LocationCode` | Clears both bins when the location actually changes |
 | `Validate_HandlingUnitNo` | Refuses a shipped unit; copies the unit's location and bin onto the task |

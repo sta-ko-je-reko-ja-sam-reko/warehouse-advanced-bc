@@ -331,10 +331,9 @@ codeunit 51006 "WHA Packing Tests"
 
     local procedure EnsureUnitNumbering()
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        HandlingUnitSetup: Record "WHA Handling Unit Setup";
         NoSeries: Record "No. Series";
         NoSeriesLine: Record "No. Series Line";
-        SetupLogic: Codeunit "WHA Warehouse Setup Logic";
         SeriesCode: Code[20];
     begin
         SeriesCode := 'WHA-PACK-HU';
@@ -354,9 +353,13 @@ codeunit 51006 "WHA Packing Tests"
             NoSeriesLine.Insert();
         end;
 
-        SetupLogic.EnsureExists(WarehouseSetup);
-        WarehouseSetup.Validate("Handling Unit Nos.", SeriesCode);
-        WarehouseSetup.Modify(true);
+        HandlingUnitSetup.Reset();
+        if not HandlingUnitSetup.Get() then begin
+            HandlingUnitSetup.Init();
+            HandlingUnitSetup.Insert(true);
+        end;
+        HandlingUnitSetup.Validate("Handling Unit Nos.", SeriesCode);
+        HandlingUnitSetup.Modify(true);
     end;
 
     local procedure EnsureLocation()

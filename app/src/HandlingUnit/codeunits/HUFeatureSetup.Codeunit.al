@@ -9,6 +9,10 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
     var
         StepNameLbl: Label 'Handling units';
         StepDescriptionLbl: Label 'Track pallets and containers as numbered units, so a whole unit can be moved, nested inside another, and labelled with an SSCC.';
+        NoSeriesCodeTok: Label 'WHA-HU', Locked = true;
+        NoSeriesDescLbl: Label 'Warehouse advanced handling units';
+        StartingNoTok: Label 'HU000001', Locked = true;
+        EndingNoTok: Label 'HU999999', Locked = true;
         McpConfigNameTok: Label 'Warehouse Advanced - Handling Units', Locked = true;
         McpConfigDescLbl: Label 'Handling unit tools. Read the Warehouse Advanced Handling Units agent instructions before use.';
         DemoMcpConfigNameTok: Label 'Warehouse Advanced - Demo Handling Units', Locked = true;
@@ -24,6 +28,7 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
         TempSetupStep."Step No." := 20;
         TempSetupStep.Feature := TempSetupStep.Feature::WHAHandlingUnits;
         TempSetupStep."Has Toggle" := true;
+        TempSetupStep."Has No. Series" := true;
         TempSetupStep.Name := CopyStr(StepNameLbl, 1, MaxStrLen(TempSetupStep.Name));
         TempSetupStep.Description := CopyStr(StepDescriptionLbl, 1, MaxStrLen(TempSetupStep.Description));
         TempSetupStep."Setup Page ID" := Page::"WHA Handling Unit Setup";
@@ -49,7 +54,7 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
     /// owns the single deferred restart.
     /// </summary>
     /// <param name="Enable">Whether handling units should be switched on.</param>
-    /// <param name="CreateNoSeries">Ignored. The handling unit number series belongs to the foundation step.</param>
+    /// <param name="CreateNoSeries">Whether to create the number series that numbers handling units, and assign it to this feature's own setup.</param>
     /// <param name="ImportDemoData">Whether to load sample handling units.</param>
     procedure ApplyChoices(Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     var
@@ -59,6 +64,9 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
 
         Setup.Validate("WHA Enabled", Enable);
         Setup.Modify(true);
+
+        if CreateNoSeries then
+            EnsureNoSeries(Setup);
 
         if ImportDemoData then
             ImportSampleUnits();
@@ -86,6 +94,17 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
     begin
         RegisterFunctionalConfiguration();
         RegisterDemoConfiguration();
+    end;
+
+    local procedure EnsureNoSeries(var Setup: Record "WHA Handling Unit Setup")
+    var
+        NoSeriesMgt: Codeunit "WHA No. Series Mgt.";
+    begin
+        if Setup."Handling Unit Nos." <> '' then
+            exit;
+
+        Setup.Validate("Handling Unit Nos.", NoSeriesMgt.EnsureSeries(NoSeriesCodeTok, NoSeriesDescLbl, StartingNoTok, EndingNoTok));
+        Setup.Modify(true);
     end;
 
     local procedure RegisterFunctionalConfiguration()

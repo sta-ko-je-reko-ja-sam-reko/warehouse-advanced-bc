@@ -227,7 +227,7 @@ quietly becoming a draft nobody can act on.
 }
 ```
 
-**The unit is numbered by this app**, from the foundation number series. The partner's identifier
+**The unit is numbered by this app**, from the handling unit feature's number series. The partner's identifier
 stays on the message as `External Id`; it is not written onto the handling unit. If the customer
 needs the partner's own pallet ID stored on the unit and searchable, that is a field on
 `WHA Handling Unit` and a decision for the register — not something to invent here.

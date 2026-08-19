@@ -9,8 +9,9 @@ wired in at `.bc-conventions/` (gitignored — see "Shared conventions" below) a
 **override anything in this file** if the two ever disagree.
 
 Scenario: **greenfield** (`bc-greenfield-template`) — a brand-new app with no NAV ancestor.
-Qguar is a third-party WMS, not a Navision solution, so the NAV→BC migration machinery does
-not apply. Shared AL guides and the ruleset come from `bc-customer-project-template`.
+The incumbent is a third-party WMS, not a Navision solution, so the NAV→BC migration
+machinery does not apply. Shared AL guides and the ruleset come from
+`bc-customer-project-template`.
 
 Before authoring any object, read:
 
@@ -27,18 +28,19 @@ Before authoring any object, read:
 ## What this is
 
 An AL extension for Dynamics 365 Business Central adding warehouse capabilities BC does not
-have in the standard app. Part of a project replacing an existing **Qguar** WMS integration
+have in the standard app. Part of a project replacing an existing **third-party WMS** integration
 for a customer, with further automation planned on top.
 
 ## Non-negotiable context
 
 **`app/docs/modules.md` is a hypothesis, not confirmed scope.** The 15 modules describe what
 a tier-1 WMS typically has and BC typically lacks. They are *not* derived from the customer's
-live Qguar installation. Do not build a module because it appears in that table —
+live WMS installation. Do not build a module because it appears in that table —
 `app/docs/gap-analysis.md` is the process for turning it into real scope. Feature folders are
 created when a feature is actually scoped, never up front.
 
-Do not name Qguar in public-facing repo content. It is another vendor's registered product.
+Do not name the incumbent WMS or its vendor in repo content — it is another vendor's
+registered product. Call it "the incumbent WMS" or "the system being replaced".
 
 ## Shared conventions (`.bc-conventions/`)
 
@@ -194,11 +196,12 @@ set in this repo's `.git/config` only. Consequences:
 - No LICENSE file, so there is no EULA text behind `https://dmom.ai/eula`
 - `app/docs/privacy-statement.md` is the draft content for the privacy page
 - `app/img/AppLogo.png` is a generated placeholder, not real branding
-- No CI: `.github/workflows/` is empty, and CI would need private `bc-dev-templates` access
+- No CI: `.github/workflows/` holds only a `.gitkeep`, and CI would need private
+  `bc-dev-templates` access
 - **No interface specification exists for the system being replaced, and none can be produced.**
   Confirmed with the customer. `FEAT-INT-001` was therefore built on assumed contracts — see the
   boxed note at the top of `app/docs/FEAT-INT-001-Integration/technical-documentation.md`. Treat
   every payload shape in that feature as provisional, and keep new guesses inside the handler
   codeunits where they are cheap to replace. Do not add a message type by touching existing objects.
-- Cutover model (big bang vs. parallel run with Qguar) undecided
+- Cutover model (big bang vs. parallel run with the incumbent) undecided
 - The planned automation "on top of" the WMS is unspecified

@@ -6,7 +6,7 @@ N/A (greenfield).
 
 > **Scope note.** This feature was built from the candidate catalogue in
 > [../implementation-plan.md](../implementation-plan.md), **not** from a signed capability register.
-> The Qguar capability discovery (Phase 0) has not been run. Directed work was chosen as the first
+> The capability discovery (Phase 0) has not been run. Directed work was chosen as the first
 > Wave B item because it is what [FEAT-HU-001](../FEAT-HU-001-HandlingUnits/technical-documentation.md)
 > was built to feed, and because the mobile device feature above it is a presentation layer over this
 > queue rather than a separate model. If this customer directs work from paper lists or from the

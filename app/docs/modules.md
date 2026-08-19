@@ -3,7 +3,7 @@
 > **Status: candidate scope, not confirmed scope.**
 > The modules below are a starting hypothesis based on capabilities typically found in a
 > tier-1 WMS but absent from standard Business Central. They are **not** derived from the
-> customer's live Qguar installation. Every row must be validated against what Qguar
+> customer's live installation of the incumbent WMS. Every row must be validated against what it
 > actually does for this customer before any of it is built — a large share of a WMS
 > footprint is usually configuration the customer never switched on.
 >

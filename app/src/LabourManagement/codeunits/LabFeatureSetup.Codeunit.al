@@ -76,6 +76,7 @@ codeunit 50353 "WHA Lab. Feature Setup" implements "WHA IFeatureSetup"
 
         Setup.Init();
         Setup."Max Job Minutes" := 240;
+        Setup."Look Back Days" := 30;
         Setup.Insert(true);
     end;
 

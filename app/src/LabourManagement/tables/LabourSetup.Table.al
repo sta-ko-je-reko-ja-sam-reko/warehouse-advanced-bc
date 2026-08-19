@@ -24,6 +24,13 @@ table 50350 "WHA Labour Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies how a new standard works out expected time, unless the standard itself says otherwise.';
         }
+        field(40; "Look Back Days"; Integer)
+        {
+            Caption = 'Look back over';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies how many days of finished work a scheduled run reads. The run skips work that already has an entry, so a short window costs less and misses nothing while the run happens often enough. Zero reads every job the warehouse has ever finished, which is correct and gets slower for ever.';
+            MinValue = 0;
+        }
         field(30; "Max Job Minutes"; Decimal)
         {
             Caption = 'Longest believable job, in minutes';

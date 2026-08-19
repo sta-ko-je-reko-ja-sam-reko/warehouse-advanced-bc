@@ -305,6 +305,60 @@ codeunit 51010 "WHA Labour Tests"
         Assert.ExpectedError('not enabled');
     end;
 
+    [Test]
+    procedure TheScheduledRunReadsOnlyTheWindowItWasGiven()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        LabourEntry: Record "WHA Labour Entry";
+        TaskType: Enum "WHA Warehouse Task Type";
+        Basis: Enum "WHA Labour Standard Basis";
+    begin
+        // [SCENARIO] The run used to read every job the warehouse had ever finished, on every run, for
+        // ever. It now reads the window in the setup — which means work older than the window is not
+        // measured at all, and that is the trade the setting exists to let somebody make.
+        ConfigureLabour(240);
+        SetLookBackDays(7);
+        EnableLabour();
+        CreateStandard(CopyStr(LocationTok, 1, 10), TaskType::WHAPick, Basis::WHAFixedOnly, 5, 0);
+
+        CreateFinishedTask(WarehouseTask, 'LAB-OLD-1', TaskType::WHAPick, 1, 5);
+        WarehouseTask."Completed At" := CreateDateTime(WorkDate() - 60, 0T);
+        WarehouseTask.Modify(false);
+
+        CreateFinishedTask(WarehouseTask, 'LAB-NEW-1', TaskType::WHAPick, 1, 5);
+
+        LabourEntry.Reset();
+        Codeunit.Run(Codeunit::"WHA Labour Scheduler", LabourEntry);
+
+        Assert.AreEqual(1, EntryCountFor('LAB-NEW-1'), 'Work inside the window should be measured.');
+        Assert.AreEqual(0, EntryCountFor('LAB-OLD-1'), 'Work older than the window should be left alone.');
+    end;
+
+    [Test]
+    procedure AWindowOfZeroStillReadsEverything()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        LabourEntry: Record "WHA Labour Entry";
+        TaskType: Enum "WHA Warehouse Task Type";
+        Basis: Enum "WHA Labour Standard Basis";
+    begin
+        // [SCENARIO] Zero is the old behaviour, kept on purpose: a warehouse that would rather pay the
+        // cost than risk missing anything can ask for every job ever finished.
+        ConfigureLabour(240);
+        SetLookBackDays(0);
+        EnableLabour();
+        CreateStandard(CopyStr(LocationTok, 1, 10), TaskType::WHAPick, Basis::WHAFixedOnly, 5, 0);
+
+        CreateFinishedTask(WarehouseTask, 'LAB-OLD-2', TaskType::WHAPick, 1, 5);
+        WarehouseTask."Completed At" := CreateDateTime(WorkDate() - 400, 0T);
+        WarehouseTask.Modify(false);
+
+        LabourEntry.Reset();
+        Codeunit.Run(Codeunit::"WHA Labour Scheduler", LabourEntry);
+
+        Assert.AreEqual(1, EntryCountFor('LAB-OLD-2'), 'A window of zero should still reach work from any date.');
+    end;
+
     local procedure ConfigureLabour(MaxJobMinutes: Decimal)
     var
         Setup: Record "WHA Labour Setup";
@@ -411,4 +465,14 @@ codeunit 51010 "WHA Labour Tests"
         Setup."WHA Enabled" := Enabled;
         Setup.Modify(true);
     end;
+
+    local procedure SetLookBackDays(Days: Integer)
+    var
+        Setup: Record "WHA Labour Setup";
+    begin
+        Setup.Get();
+        Setup.Validate("Look Back Days", Days);
+        Setup.Modify(true);
+    end;
+
 }

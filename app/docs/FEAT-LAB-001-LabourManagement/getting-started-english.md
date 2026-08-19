@@ -58,8 +58,17 @@ To have it run by itself, ask an administrator to create a **job queue entry** f
 **WHA Labour Scheduler**. A **Location code** filter on the entry limits it to one site. When and how
 often it runs is set there, because that is where Business Central keeps schedules.
 
-Each run reads every finished job, not only recent ones, and skips the ones already counted. That is
-what makes it safe to repeat, and it does mean a run gets slower as your history grows.
+Each run reads the last **Look back over** days of finished work — a month unless you change it in
+**Labour setup** — and skips the jobs in it that are already counted. That is what makes it safe to
+repeat without getting slower as your history grows.
+
+> **Set the window longer than the gap between runs.** A daily run with a window of one day has no
+> margin: work finished on a day the schedule did not run falls outside every later window and is
+> never counted. A month of window for a daily run is not wasteful — the run skips what it has
+> already done — it is the margin.
+>
+> Setting it to **zero** reads every job you have ever finished, which is what it used to do. That is
+> still correct, and still gets slower for ever.
 
 Two kinds of finished job are skipped rather than guessed at: work that nobody was holding when it
 finished, and work that was never properly started.

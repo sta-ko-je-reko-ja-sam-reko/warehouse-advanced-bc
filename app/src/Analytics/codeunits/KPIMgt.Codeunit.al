@@ -52,6 +52,32 @@ codeunit 50700 "WHA KPI Mgt."
     end;
 
     /// <summary>
+    /// Captures the figures for today, and then for every day since the last capture that nobody
+    /// captured. A figure covers a period ending on the day the run happened, so a run that did not
+    /// happen leaves that day with no figures at all and nothing else ever produces them: the history
+    /// breaks exactly where the schedule did, which is the week somebody will most want to look at.
+    /// </summary>
+    /// <param name="LocationCode">The site to measure, or blank for the whole company.</param>
+    /// <returns>How many figures were kept.</returns>
+    /// <remarks>
+    /// Two limits are deliberate. A company that has never captured anything gets today and nothing
+    /// else — a first run should not invent a history nobody was there for. And a day already captured
+    /// is captured again only if it is today, because a figure for a finished day does not change, while
+    /// today's is still moving.
+    ///
+    /// A filled-in day is worked out **now** from the records as they stand now. Where a task was
+    /// edited after the fact, that is not the answer the run would have given on the day, and no
+    /// backfill can make it be.
+    /// </remarks>
+    procedure CaptureMissing(LocationCode: Code[10]): Integer
+    var
+        Kept: Integer;
+    begin
+        Kept := Capture(LocationCode, 0D, 0D);
+        exit(Kept + CatchUp(LocationCode));
+    end;
+
+    /// <summary>
     /// Fills a buffer with every measure for a period, without keeping anything. This is what the
     /// warehouse KPI screen shows: figures worked out on the spot, so nobody is reading last week's
     /// answer without knowing it.
@@ -257,6 +283,45 @@ codeunit 50700 "WHA KPI Mgt."
         if Whole = 0 then
             exit(0);
         exit(Round(Part / Whole * 100, 0.01));
+    end;
+
+    local procedure CatchUp(LocationCode: Code[10]): Integer
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+        FirstDay: Date;
+        Day: Date;
+        Kept: Integer;
+    begin
+        KpiSnapshot.SetLoadFields("To Date");
+        KpiSnapshot.SetCurrentKey("Location Code", "To Date");
+        KpiSnapshot.SetRange("Location Code", LocationCode);
+        KpiSnapshot.SetFilter("To Date", '<%1', WorkDate());
+        if not KpiSnapshot.FindLast() then
+            exit(0);
+
+        FirstDay := KpiSnapshot."To Date" + 1;
+        if FirstDay < EarliestCatchUp() then
+            FirstDay := EarliestCatchUp();
+
+        for Day := FirstDay to WorkDate() - 1 do
+            Kept += Capture(LocationCode, 0D, Day);
+
+        exit(Kept);
+    end;
+
+    local procedure EarliestCatchUp(): Date
+    var
+        Setup: Record "WHA Analytics Setup";
+        Days: Integer;
+    begin
+        Setup.SetLoadFields("Catch Up Days");
+        if Setup.Get() then
+            Days := Setup."Catch Up Days";
+
+        if Days <= 0 then
+            exit(WorkDate());
+
+        exit(CalcDate(StrSubstNo(DateFormulaTok, Days), WorkDate()));
     end;
 
     local procedure Direction(Better: Boolean): Integer

@@ -37,6 +37,10 @@ page 50350 "WHA Labour Setup"
                 {
                     ApplicationArea = WHALabourManagement;
                 }
+                field("Look Back Days"; Rec."Look Back Days")
+                {
+                    ApplicationArea = WHALabourManagement;
+                }
             }
         }
     }

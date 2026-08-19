@@ -31,6 +31,10 @@ A feature you do not use simply reads zero. Nothing breaks.
    quickly and jumps about; a month is steady and hides the week things went wrong.
 3. **Capture for location** — which site a kept set of figures is about. Leave it blank to measure
    the whole company as one, which is right until two sites start behaving differently.
+4. **Catch up over** — how many days back a scheduled capture will go to fill in figures it missed. A
+   figure covers a period ending on the day the capture ran, so a day nobody captured has no figures
+   and nothing else ever produces them. Two weeks covers a job queue that was down over a holiday.
+   Zero keeps only the day the capture runs, and accepts the gaps.
 
 ## Look at the figures
 
@@ -87,9 +91,12 @@ A **Location code** filter on the entry captures one site; leave it empty for th
   of it: how long a vehicle is on site, and how long put-away work waits.
 - **There are no targets.** Nothing is ever red for being a bad number, only for moving the wrong
   way.
-- **A missed capture is a gap for ever.** A scheduled capture keeps figures for the period ending
-  today. If the schedule breaks for a week, that week is simply missing and nothing fills it in
-  afterwards.
+- **A day filled in later is worked out from today's records.** If the schedule breaks, the next run
+  fills in the days it missed — see **Catch up over** in the setup — but a figure worked out
+  afterwards is based on what the records say now. If somebody corrected a job in the meantime, the
+  figure is not the one you would have seen on the day, and nothing can make it be.
+- **It does not fill in a history you never had.** The first capture in a company keeps today and
+  nothing before it.
 - **Nothing about people.** How long the work takes against how long it should is in labour
   management, not here.
 - **No charts and no home-page tiles.** Snapshots are a list; to draw a trend, export it.

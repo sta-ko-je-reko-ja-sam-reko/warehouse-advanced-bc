@@ -27,6 +27,13 @@ table 50700 "WHA Analytics Setup"
             ToolTip = 'Specifies how many days a figure covers when nobody gives it dates. A short period reacts quickly and swings about; a long one is steady and hides the week things went wrong.';
             MinValue = 0;
         }
+        field(22; "Catch Up Days"; Integer)
+        {
+            Caption = 'Catch up over';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies how many days back a scheduled capture will go to fill in figures it missed. A capture keeps the figures for a period ending on the day it runs, so a run that did not happen leaves that day with no figures and nothing else ever produces them. Zero captures only the day the run happens, and accepts the gaps.';
+            MinValue = 0;
+        }
         field(21; "Capture Location Code"; Code[10])
         {
             Caption = 'Capture for location';

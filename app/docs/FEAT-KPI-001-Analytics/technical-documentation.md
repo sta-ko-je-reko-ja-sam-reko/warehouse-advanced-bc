@@ -207,9 +207,14 @@ left in place after somebody switches the feature off stops rather than quietly 
   rather than a reporting one.
 - **No targets.** Nothing says what good looks like, so nothing is ever red for being bad — only for
   moving the wrong way since last time.
-- **A missed run is a gap, not a catch-up.** The scheduled capture keeps figures for the period
-  ending today. A job queue entry that failed for a week leaves that week uncaptured and nothing
-  backfills it, so the history has a hole exactly where the schedule broke.
+- ~~**A missed run is a gap, not a catch-up.**~~ **Delivered.** `CaptureMissing` keeps today's
+  figures and then fills in every day since the last capture, bounded by **Catch up over** in the
+  setup. Three limits stayed, deliberately: a company that has never captured anything gets today and
+  nothing else, because a first run should not invent a history nobody was there for; a day already
+  captured is left alone unless it is today, because a finished day's figure does not change; and a
+  filled-in day is worked out **now** from the records as they stand now, which is not what the run
+  would have said on the day if anything has been edited since. Nothing can fix the third one, and
+  saying so is the honest version of fixing the first two.
 - **No labour measures.** `FEAT-LAB-001` already works out measured time against standards, and
   jobs-per-hour belongs here, but it would be the first measure to read a second app feature's
   derived figures rather than raw events.

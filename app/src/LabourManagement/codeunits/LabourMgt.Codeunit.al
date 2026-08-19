@@ -16,9 +16,15 @@ codeunit 50352 "WHA Labour Mgt."
     /// asking, and a job that already has an entry is never counted twice.
     /// </summary>
     /// <param name="LocationCode">The location to look at. Blank looks everywhere.</param>
-    /// <param name="FromDate">The first day to take work from.</param>
-    /// <param name="ToDate">The last day to take work from.</param>
+    /// <param name="FromDate">The first day to take work from. Blank reads back to the beginning.</param>
+    /// <param name="ToDate">The last day to take work from. Blank reads up to the present.</param>
     /// <returns>How many entries were created.</returns>
+    /// <remarks>
+    /// The dates are put on the record before it is read, not checked after, so a bounded run asks the
+    /// database for a week of work rather than for every job the warehouse has ever finished. The check
+    /// afterwards stays: it is what excludes a job marked complete with no time on it, which no date
+    /// filter can express.
+    /// </remarks>
     procedure Generate(LocationCode: Code[10]; FromDate: Date; ToDate: Date): Integer
     var
         WarehouseTask: Record "WHA Warehouse Task";
@@ -28,6 +34,7 @@ codeunit 50352 "WHA Labour Mgt."
         WarehouseTask.SetRange(Status, WarehouseTask.Status::WHACompleted);
         if LocationCode <> '' then
             WarehouseTask.SetRange("Location Code", LocationCode);
+        ApplyDateFilter(WarehouseTask, FromDate, ToDate);
         if not WarehouseTask.FindSet() then
             exit(0);
 
@@ -177,6 +184,26 @@ codeunit 50352 "WHA Labour Mgt."
         LabourEntry.SetCurrentKey("Task No.");
         LabourEntry.SetRange("Task No.", TaskNo);
         exit(not LabourEntry.IsEmpty());
+    end;
+
+    local procedure ApplyDateFilter(var WarehouseTask: Record "WHA Warehouse Task"; FromDate: Date; ToDate: Date)
+    var
+        OneMillisecond: Duration;
+    begin
+        OneMillisecond := 1;
+
+        if (FromDate <> 0D) and (ToDate <> 0D) then begin
+            WarehouseTask.SetRange("Completed At", CreateDateTime(FromDate, 0T), CreateDateTime(ToDate + 1, 0T) - OneMillisecond);
+            exit;
+        end;
+
+        if FromDate <> 0D then begin
+            WarehouseTask.SetFilter("Completed At", '>=%1', CreateDateTime(FromDate, 0T));
+            exit;
+        end;
+
+        if ToDate <> 0D then
+            WarehouseTask.SetFilter("Completed At", '<=%1', CreateDateTime(ToDate + 1, 0T) - OneMillisecond);
     end;
 
     local procedure IsInRange(var WarehouseTask: Record "WHA Warehouse Task"; FromDate: Date; ToDate: Date): Boolean

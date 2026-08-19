@@ -558,6 +558,130 @@ codeunit 51002 "WHA Integration Tests"
             'The framework should refuse a policy shorter than the minimum this feature insists on.');
     end;
 
+    [Test]
+    procedure ReleaseWithoutADocumentIsRefused()
+    var
+        IntegrationMessage: Record "WHA Integration Message";
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
+        MessageType: Enum "WHA Int. Message Type";
+        EntryNo: Integer;
+    begin
+        // [SCENARIO] A release names its document in the external ID and nowhere else. A message that
+        // names nothing is refused, rather than releasing whichever document happens to sort first.
+        EnsureIntegrationSetup(false);
+        EntryNo := MessageMgt.CreateInbound(MessageType::WHAWarehouseReceiptRelease, '', '', '{}');
+
+        IntegrationMessage.Get(EntryNo);
+
+        Assert.IsFalse(MessageMgt.Process(IntegrationMessage), 'A release that names no receipt should not be applied.');
+        Assert.AreEqual(IntegrationMessage.Status::WHAFailed, IntegrationMessage.Status, 'A release that names no receipt should fail.');
+    end;
+
+    [Test]
+    procedure AdjustmentOfNothingIsRefused()
+    var
+        IntegrationMessage: Record "WHA Integration Message";
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
+        MessageType: Enum "WHA Int. Message Type";
+        EntryNo: Integer;
+    begin
+        // [SCENARIO] A correction of zero changes no stock. Recording it would put a line in a journal
+        // that adjusts nothing, so the message fails instead.
+        EnsureIntegrationSetup(false);
+        EnsureLocation();
+        EnsureItem();
+        EntryNo := MessageMgt.CreateInbound(MessageType::WHAInventoryAdjustment, 'ADJ-ZERO-1', '', AdjustmentPayload(0));
+
+        IntegrationMessage.Get(EntryNo);
+
+        Assert.IsFalse(MessageMgt.Process(IntegrationMessage), 'An adjustment of zero should not be applied.');
+        Assert.AreEqual(IntegrationMessage.Status::WHAFailed, IntegrationMessage.Status, 'An adjustment of zero should fail.');
+    end;
+
+    [Test]
+    procedure ReceiptIsReportedOnlyWhenNothingIsOpen()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        ReceiptCompleted: Codeunit "WHA Int. Receipt Completed";
+        MessageType: Enum "WHA Int. Message Type";
+        SourceType: Enum "WHA Task Source";
+        DocumentNo: Code[20];
+    begin
+        // [SCENARIO] A receipt is reported finished once, and only when no work against it is still open.
+        // Reporting it while a put-away is outstanding would tell the partner system something untrue.
+        EnsureIntegrationSetup(false);
+        DocumentNo := 'WR-DONE-1';
+
+        CreateSourceTask(WarehouseTask, 'TSK-WR-1', SourceType::WHAWhseReceipt, DocumentNo, 10000, true);
+        CreateSourceTask(WarehouseTask, 'TSK-WR-2', SourceType::WHAWhseReceipt, DocumentNo, 20000, false);
+
+        ReceiptCompleted.CollectOutbound();
+        Assert.AreEqual(0, OutboundCount(MessageType::WHAWarehouseReceiptDone, DocumentNo), 'A receipt with work still open should not be reported.');
+
+        WarehouseTask.Get('TSK-WR-2');
+        WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
+        WarehouseTask."Completed At" := CurrentDateTime;
+        WarehouseTask.Modify(false);
+
+        ReceiptCompleted.CollectOutbound();
+        Assert.AreEqual(1, OutboundCount(MessageType::WHAWarehouseReceiptDone, DocumentNo), 'A receipt whose work is finished should be reported once.');
+
+        ReceiptCompleted.CollectOutbound();
+        Assert.AreEqual(1, OutboundCount(MessageType::WHAWarehouseReceiptDone, DocumentNo), 'A second sweep should not report the same receipt again.');
+    end;
+
+    [Test]
+    procedure ClosedCountIsReportedOncePerSheet()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountResult: Codeunit "WHA Int. Count Result";
+        MessageType: Enum "WHA Int. Message Type";
+    begin
+        // [SCENARIO] A count is reported when it closes, and the outbox is what remembers that it was —
+        // no flag is kept on the sheet, so a second sweep has to find the message rather than a marker.
+        EnsureIntegrationSetup(false);
+        EnsureLocation();
+
+        CountSheet.Init();
+        CountSheet."No." := 'CNT-INT-1';
+        CountSheet."Location Code" := CopyStr(LocationTok, 1, MaxStrLen(CountSheet."Location Code"));
+        CountSheet.Status := CountSheet.Status::WHAClosed;
+        CountSheet."Closed At" := CurrentDateTime;
+        CountSheet.Insert(true);
+
+        CountResult.CollectOutbound();
+        CountResult.CollectOutbound();
+
+        Assert.AreEqual(1, OutboundCount(MessageType::WHACountResult, CountSheet."No."), 'A closed sheet should be reported exactly once.');
+    end;
+
+    [Test]
+    procedure StockPositionIsOneStatementPerLocation()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        IntegrationMessage: Record "WHA Integration Message";
+        StockPosition: Codeunit "WHA Int. Stock Position";
+        MessageType: Enum "WHA Int. Message Type";
+    begin
+        // [SCENARIO] Two pallets standing in the same place produce one statement, not two. The statement
+        // is per location and per day, which is what makes it comparable with what the partner believes.
+        EnsureIntegrationSetup(false);
+        EnsureLocation();
+        EnsureItem();
+
+        CreateStockedUnit(HandlingUnit, 'HU-POS-1', 3);
+        CreateStockedUnit(HandlingUnit, 'HU-POS-2', 2);
+
+        StockPosition.CollectOutbound();
+        StockPosition.CollectOutbound();
+
+        IntegrationMessage.SetRange("Message Type", MessageType::WHAStockPosition);
+        IntegrationMessage.SetRange(Direction, IntegrationMessage.Direction::WHAOutbound);
+        IntegrationMessage.SetFilter("External Id", StrSubstNo('%1|*', LocationTok));
+
+        Assert.AreEqual(1, IntegrationMessage.Count(), 'One location on one day should produce one statement.');
+    end;
+
     local procedure OutboundCount(MessageType: Enum "WHA Int. Message Type"; ExternalId: Code[50]): Integer
     var
         IntegrationMessage: Record "WHA Integration Message";
@@ -759,4 +883,55 @@ codeunit 51002 "WHA Integration Tests"
         Item.Description := CopyStr(ItemTok, 1, MaxStrLen(Item.Description));
         Item.Insert();
     end;
+
+    local procedure CreateSourceTask(var WarehouseTask: Record "WHA Warehouse Task"; TaskNo: Code[20]; SourceType: Enum "WHA Task Source"; SourceNo: Code[20]; SourceLineNo: Integer; Completed: Boolean)
+    begin
+        EnsureLocation();
+
+        WarehouseTask.Init();
+        WarehouseTask."No." := TaskNo;
+        WarehouseTask."Location Code" := CopyStr(LocationTok, 1, MaxStrLen(WarehouseTask."Location Code"));
+        WarehouseTask."Item No." := CopyStr(ItemTok, 1, MaxStrLen(WarehouseTask."Item No."));
+        WarehouseTask.Quantity := 1;
+        WarehouseTask."Source Type" := SourceType;
+        WarehouseTask."Source No." := SourceNo;
+        WarehouseTask."Source Line No." := SourceLineNo;
+        if Completed then begin
+            WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
+            WarehouseTask."Quantity Handled" := 1;
+            WarehouseTask."Completed At" := CurrentDateTime;
+        end else
+            WarehouseTask.Status := WarehouseTask.Status::WHAReleased;
+        WarehouseTask.Insert(true);
+    end;
+
+    local procedure CreateStockedUnit(var HandlingUnit: Record "WHA Handling Unit"; UnitNo: Code[20]; Qty: Decimal)
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        HandlingUnit.Init();
+        HandlingUnit."No." := UnitNo;
+        HandlingUnit."Location Code" := CopyStr(LocationTok, 1, MaxStrLen(HandlingUnit."Location Code"));
+        HandlingUnit.Insert(true);
+
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := HandlingUnit."No.";
+        HandlingUnitLine."Line No." := 10000;
+        HandlingUnitLine."Item No." := CopyStr(ItemTok, 1, MaxStrLen(HandlingUnitLine."Item No."));
+        HandlingUnitLine.Quantity := Qty;
+        HandlingUnitLine.Insert(true);
+    end;
+
+    local procedure AdjustmentPayload(Qty: Decimal): Text
+    var
+        PayloadObject: JsonObject;
+        PayloadText: Text;
+    begin
+        PayloadObject.Add('itemNumber', ItemTok);
+        PayloadObject.Add('locationCode', LocationTok);
+        PayloadObject.Add('quantity', Qty);
+        PayloadObject.WriteTo(PayloadText);
+        exit(PayloadText);
+    end;
+
 }

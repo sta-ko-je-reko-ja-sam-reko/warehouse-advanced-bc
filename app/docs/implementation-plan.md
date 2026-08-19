@@ -243,9 +243,21 @@ feature can ship dark and be switched on per company when the business is ready.
 ## 8. Immediate next steps
 
 1. **Run the test suite once.** 184 automated tests exist across ten codeunits and **not one has
-   ever been executed** — they are compile-verified only, because publishing to the dev container
-   needs credentials that are not in the repo. Until they have run green once, every claim this
-   project makes about its own behaviour rests on the compiler agreeing the code parses.
+   ever been executed** — they are compile-verified only. Until they have run green once, every claim
+   this project makes about its own behaviour rests on the compiler agreeing the code parses.
+
+   What is actually in the way, checked rather than assumed:
+
+   | | |
+   |---|---|
+   | Container | **Up and healthy.** Web client redirects to sign-in; the development endpoint answers on port 7049 |
+   | Auth mode | **NavUserPassword confirmed** — `GET :7048/BC/api/v2.0/companies` answers `401` with `Basic realm=""`. Note the API is on **7048**; asking 7049 for an API path returns `503` and means nothing |
+   | Credentials | **Missing, and the only real blocker.** They are deliberately not in the repo |
+   | Docker / BcContainerHelper | BcContainerHelper 6.1.11 is installed, but the Docker CLI needs an elevated shell on this machine, so `Run-TestsInBcContainer` cannot drive the container from an ordinary session |
+   | Test project launch config | ~~Pointed at the template default `http://bcserver`, so F5 on `test/` could never have worked~~ — fixed; it now points at `mrt28:7049` and starts on the **AL Test Tool** (page 130451) |
+
+   So this is one credential away, not a piece of work. Whoever has the container password can open
+   `test/` and press F5.
 2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
    badly overdue: **ten features** have been built from the hypothesis — the whole of Waves A to D —

@@ -1,23 +1,38 @@
-### AL ###
-#Template for AL projects for Dynamics 365 Business Central
-#launch.json folder
-.vscode/
-#Cache folder
+### AL / Dynamics 365 Business Central ###
+
+# VS Code: share settings + launch template, keep personal launch config local.
+# NOTE: must be ".vscode/*" (not ".vscode/") — git will not descend into an
+# ignored *directory*, so the negations below would never be evaluated.
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json.template
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# Cache folder
 .alcache/
-#Symbols folder
+# Symbols folder
 .alpackages/
-#Snapshots folder
+# Snapshots folder
 .snapshots/
-#Testing Output folder
+# Testing Output folder
 .output/
-#Extension App-file
+# Extension App-file
 *.app
-#Rapid Application Development File
+# Rapid Application Development File
 rad.json
-#Translation Base-file
+# Translation Base-file
 *.g.xlf
-#License-files
+# License-files
 *.bclicense
 *.flf
-#Test results file
+# Test results file
 TestResults.xml
+
+# Build / packaging output
+.buildartifacts/
+*.zip
+
+# OS noise
+Thumbs.db
+desktop.ini

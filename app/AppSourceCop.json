@@ -1,0 +1,5 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/al/master/schemas/AppSourceCop.schema.json",
+  "mandatoryAffixes": [ "WHA" ],
+  "mandatoryPrefix": ""
+}

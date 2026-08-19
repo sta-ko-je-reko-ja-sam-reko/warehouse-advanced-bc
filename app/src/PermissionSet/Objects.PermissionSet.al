@@ -2,6 +2,7 @@ namespace WarehouseAdvanced.Core;
 
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
+using WarehouseAdvanced.Integration;
 
 permissionset 50000 "WHA Objects"
 {
@@ -48,5 +49,23 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Task Feature Setup" = X,
         codeunit "WHA Task App Area Sub." = X,
         codeunit "WHA Demo Warehouse Task" = X,
-        page "WHA API Demo Warehouse Task" = X;
+        page "WHA API Demo Warehouse Task" = X,
+        table "WHA Integration Setup" = X,
+        table "WHA Integration Message" = X,
+        page "WHA Integration Setup" = X,
+        page "WHA Integration Messages" = X,
+        page "WHA Integration Message Card" = X,
+        page "WHA API Integration Message" = X,
+        codeunit "WHA Integration Msg. Logic" = X,
+        codeunit "WHA Int. Message Mgt." = X,
+        codeunit "WHA Int. Message Runner" = X,
+        codeunit "WHA Int. Unhandled Message" = X,
+        codeunit "WHA Int. Task Request" = X,
+        codeunit "WHA Int. Task Confirm" = X,
+        codeunit "WHA Int. HU Received" = X,
+        codeunit "WHA Int. HU Shipped" = X,
+        codeunit "WHA Int. Feature Setup" = X,
+        codeunit "WHA Int. App Area Sub." = X,
+        codeunit "WHA Demo Integration" = X,
+        page "WHA API Demo Integration" = X;
 }

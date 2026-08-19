@@ -5,10 +5,12 @@ using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
+using WarehouseAdvanced.LabourManagement;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Replenishment;
+using WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50000 "WHA Objects"
@@ -172,5 +174,38 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA QC Feature Setup" = X,
         codeunit "WHA QC App Area Sub." = X,
         codeunit "WHA Demo Quality Hold" = X,
-        page "WHA API Demo Quality Hold" = X;
+        page "WHA API Demo Quality Hold" = X,
+        table "WHA Labour Setup" = X,
+        table "WHA Labour Standard" = X,
+        table "WHA Labour Entry" = X,
+        page "WHA Labour Setup" = X,
+        page "WHA Labour Standards" = X,
+        page "WHA Labour Entries" = X,
+        page "WHA API Labour Standard" = X,
+        page "WHA API Labour Entry" = X,
+        codeunit "WHA Labour Std. Logic" = X,
+        codeunit "WHA Labour Entry Logic" = X,
+        codeunit "WHA Labour Mgt." = X,
+        codeunit "WHA Std. Fixed Plus Unit" = X,
+        codeunit "WHA Std. Fixed Only" = X,
+        codeunit "WHA Lab. Feature Setup" = X,
+        codeunit "WHA Lab. App Area Sub." = X,
+        codeunit "WHA Demo Labour" = X,
+        page "WHA API Demo Labour" = X,
+        table "WHA Slotting Setup" = X,
+        table "WHA Item Velocity" = X,
+        table "WHA Slotting Proposal" = X,
+        page "WHA Slotting Setup" = X,
+        page "WHA Item Velocities" = X,
+        page "WHA Slotting Proposals" = X,
+        page "WHA API Item Velocity" = X,
+        page "WHA API Slotting Proposal" = X,
+        codeunit "WHA Slotting Mgt." = X,
+        codeunit "WHA Slotting Prop. Logic" = X,
+        codeunit "WHA Velocity By Movements" = X,
+        codeunit "WHA Velocity By Quantity" = X,
+        codeunit "WHA Slot. Feature Setup" = X,
+        codeunit "WHA Slot. App Area Sub." = X,
+        codeunit "WHA Demo Slotting" = X,
+        page "WHA API Demo Slotting" = X;
 }

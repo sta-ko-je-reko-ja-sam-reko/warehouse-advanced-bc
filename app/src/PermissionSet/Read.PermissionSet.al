@@ -5,10 +5,12 @@ using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
+using WarehouseAdvanced.LabourManagement;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Replenishment;
+using WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50001 "WHA Read"
@@ -41,5 +43,11 @@ permissionset 50001 "WHA Read"
         tabledata "WHA Count Sheet Line" = R,
         tabledata "WHA Quality Hold Setup" = R,
         tabledata "WHA Quality Hold" = R,
+        tabledata "WHA Labour Setup" = R,
+        tabledata "WHA Labour Standard" = R,
+        tabledata "WHA Labour Entry" = R,
+        tabledata "WHA Slotting Setup" = R,
+        tabledata "WHA Item Velocity" = R,
+        tabledata "WHA Slotting Proposal" = R,
         tabledata "WHA Demo Data" = R;
 }

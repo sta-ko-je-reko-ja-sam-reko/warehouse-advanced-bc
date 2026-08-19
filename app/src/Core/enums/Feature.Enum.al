@@ -5,10 +5,12 @@ using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
+using WarehouseAdvanced.LabourManagement;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Replenishment;
+using WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.WaveManagement;
 
 enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
@@ -70,5 +72,15 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Quality hold';
         Implementation = "WHA IFeatureSetup" = "WHA QC Feature Setup";
+    }
+    value(11; WHALabourManagement)
+    {
+        Caption = 'Labour management';
+        Implementation = "WHA IFeatureSetup" = "WHA Lab. Feature Setup";
+    }
+    value(12; WHASlotting)
+    {
+        Caption = 'Slotting';
+        Implementation = "WHA IFeatureSetup" = "WHA Slot. Feature Setup";
     }
 }

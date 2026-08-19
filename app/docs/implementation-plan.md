@@ -33,6 +33,8 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-REPL-001` segment 1 — replenishment rules: min/max per pick bin, two ways of measuring the bin, and a run that raises the work to top it up |
 | Delivered | `FEAT-CNT-001` segment 1 — count sheets: blind counting, a tolerance, and an approval before a difference is accepted. **Adjusts nothing yet** |
 | Delivered | `FEAT-QC-001` segment 1 — quality hold: stopping a handling unit and everything on it, three dispositions, and an audit trail that cannot be deleted. **Posts nothing** |
+| Delivered | `FEAT-LAB-001` segment 1 — labour management: standards, finished work turned into measured time, and the hours nobody spent on a job. The first feature that only *reads* what the app already recorded |
+| Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
@@ -193,15 +195,20 @@ Wave D    FEAT-REPL-001    replenishment             ← segment 1 delivered
           FEAT-CNT-001     counting                  ← segment 1 delivered; posts no adjustment
           FEAT-QC-001      quality hold              ← segment 1 delivered; posts no write-off
 
-Wave E    FEAT-SLOT-001    slotting
-          FEAT-LAB-001     labour management
+Wave E    FEAT-SLOT-001    slotting                  ← segment 1 delivered
+          FEAT-LAB-001     labour management         ← segment 1 delivered
           FEAT-DOCK-001    dock and yard
 
 Wave F    FEAT-KPI-001     analytics
 ```
 
-**Waves A to D are built.** Wave E — slotting, labour management, dock and yard — is not started, and
-`FEAT-SLOT-001` depends on counting, which now exists.
+**Waves A to D are built, and two thirds of Wave E.** Only `FEAT-DOCK-001` and `FEAT-KPI-001` remain
+in the catalogue.
+
+Wave E changed the shape of the argument. Slotting and labour management are the first features that
+add **no new warehouse operation at all** — they read what the app has already been recording since
+directed work shipped, and both are worth exactly as much as that history is long. On a customer who
+has not run the app yet, both produce empty screens and are correct to.
 
 Two features stop deliberately short of the ledger: counting records differences without adjusting
 stock, and quality hold takes goods out of use without writing them off. Both need the item journal,
@@ -242,7 +249,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 184 automated tests exist across ten codeunits and **not one has
+1. **Run the test suite once.** 210 automated tests exist across twelve codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 
@@ -260,8 +267,8 @@ feature can ship dark and be switched on per company when the business is ready.
    `test/` and press F5.
 2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
-   badly overdue: **ten features** have been built from the hypothesis — the whole of Waves A to D —
-   and each further one raises the cost of a register that contradicts it.
+   badly overdue: **twelve features** have been built from the hypothesis — Waves A to D and most of
+   Wave E — and each further one raises the cost of a register that contradicts it.
    Replenishment sharpens the point: standard Business Central already replenishes bins through the
    movement worksheet, so a real register may reclassify part of `FEAT-REPL-001` as *configuration*
    rather than *build*.

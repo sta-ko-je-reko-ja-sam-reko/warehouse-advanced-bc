@@ -42,6 +42,7 @@ These are not feature documentation and follow no `{MARK}` convention:
 - [gap-analysis.md](gap-analysis.md) — method for turning candidate scope into real scope
 - [inventory-posting.md](inventory-posting.md) — the shared posting engine two features use, and why it is not a feature
 
-`FEAT-CORE-001-Foundation/` is **partial**: it documents the role centre and the activity seam only.
-The rest of the foundation shipped before this folder existed and is described in
-[implementation-plan.md](implementation-plan.md). Back-filling it is outstanding.
+`FEAT-CORE-001-Foundation/` was **back-filled**: the foundation shipped in PRs #5–#7 without
+documentation, and everything except the role centre section was written afterwards by reading the
+objects rather than from a design record. It says so at the top. That is the honest state of it, and
+it is worth knowing before treating any "why" in it as a decision log.

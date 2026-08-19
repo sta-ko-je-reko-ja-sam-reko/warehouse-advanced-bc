@@ -135,6 +135,10 @@ first one meant it.
 | `WHA API Count Sheet Line` | page | 50505 | `app/src/Counting/pages/APICountSheetLine.Page.al` |
 | `WHA API Demo Count` | page | 50506 | `app/src/Counting/pages/APIDemoCount.Page.al` |
 | `WHA Counting Tests` | codeunit | 51008 | `test/src/codeunits/CountingTests.Codeunit.al` |
+| `WHA Count Activities Cue` | tableextension | 50501 | `app/src/Counting/tableextensions/CountActivitiesCue.TableExt.al` |
+| `WHA Count Activity Provider` | enumextension | 50501 | `app/src/Counting/enumextensions/CountActivityProvider.EnumExt.al` |
+| `WHA Count Activity Cues` | codeunit | 50508 | `app/src/Counting/codeunits/CountActivityCues.Codeunit.al` |
+| `WHA Count Activities` | pageextension | 50501 | `app/src/Counting/pageextensions/CountActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.Counting`, from the reserved block `50500..50549`. Core gained a
 `WHA Feature` enum value; the count sheet numbering lives on this feature's own setup.
@@ -248,6 +252,19 @@ description across — one call where segment 1 had a local that only did the de
 The bin selection leaves them blank, and correctly: bin content is aggregated across lots, so there is
 no single lot to name. Counting a tracked item by bin therefore still cannot be posted. That is a real
 gap and it is listed in *Not done*, not papered over by guessing a lot.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **count sheets on the floor and counts waiting for approval**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

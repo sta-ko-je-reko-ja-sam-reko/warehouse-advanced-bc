@@ -880,6 +880,47 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Assert.ExpectedError('does not exist');
     end;
 
+    [Test]
+    procedure WorkWaitingOnTheFloorIsCountedForTheRoleCentre()
+    var
+        ActivitiesCue: Record "WHA Activities Cue";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskActivityCues: Codeunit "WHA Task Activity Cues";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        Results: Dictionary of [Text, Text];
+    begin
+        // [SCENARIO] The first tile a warehouse manager looks at is work nobody has picked up. The count
+        // is worked out in a background session, so what is asserted here is what that session returns.
+        ConfigureQueue(0);
+        EnableDirectedWork();
+        CreateWorkableTask(WarehouseTask, 'WHA-CUE-01');
+        TaskLogic.Release(WarehouseTask);
+
+        TaskActivityCues.AddCounts(Results);
+
+        Assert.AreEqual('1', Results.Get(Format(ActivitiesCue.FieldNo("WHA Tasks Waiting"))), 'One released job is one job waiting.');
+    end;
+
+    [Test]
+    procedure AFeatureThatIsSwitchedOffContributesNoTiles()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskActivityCues: Codeunit "WHA Task Activity Cues";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        Results: Dictionary of [Text, Text];
+    begin
+        // [SCENARIO] The role centre is one page for the whole app. A feature nobody switched on must add
+        // nothing to it — not a zero, but nothing at all, so its tiles never appear.
+        ConfigureQueue(0);
+        DisableDirectedWork();
+        CreateWorkableTask(WarehouseTask, 'WHA-CUE-02');
+        TaskLogic.Release(WarehouseTask);
+
+        TaskActivityCues.AddCounts(Results);
+
+        Assert.AreEqual(0, Results.Count(), 'A switched-off feature should not put a single count on the role centre.');
+    end;
+
     local procedure ConfigureQueue(MaxOpenTasks: Integer)
     var
         Setup: Record "WHA Warehouse Task Setup";
@@ -1071,5 +1112,24 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Item.Init();
         Item."No." := CopyStr(TestItemTok, 1, 20);
         Item.Insert(true);
+    end;
+
+    local procedure EnableDirectedWork()
+    begin
+        SetDirectedWorkEnabled(true);
+    end;
+
+    local procedure DisableDirectedWork()
+    begin
+        SetDirectedWorkEnabled(false);
+    end;
+
+    local procedure SetDirectedWorkEnabled(Enabled: Boolean)
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+    begin
+        Setup.Get();
+        Setup."WHA Enabled" := Enabled;
+        Setup.Modify(true);
     end;
 }

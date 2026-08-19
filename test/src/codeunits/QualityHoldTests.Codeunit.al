@@ -527,6 +527,36 @@ codeunit 51009 "WHA Quality Hold Tests"
         Assert.AreEqual(0, QualityHold."Posted Quantity", 'Nothing was written off.');
     end;
 
+    [Test]
+    procedure HeldGoodsNobodyHasDecidedAboutAreCountedSeparately()
+    var
+        ActivitiesCue: Record "WHA Activities Cue";
+        HandlingUnit: Record "WHA Handling Unit";
+        DecidedUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        QCActivityCues: Codeunit "WHA QC Activity Cues";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Status: Enum "WHA Handling Unit Status";
+        Results: Dictionary of [Text, Text];
+    begin
+        // [SCENARIO] Goods on hold and goods nobody has decided about are two different numbers. The
+        // second is the one that gets forgotten, which is why it earns a tile of its own.
+        ConfigureQualityHold(false, true);
+        EnableQualityHold();
+        CreateUnit(HandlingUnit, 'WHA-QC-CUE1', '', Status::WHAOpen);
+        QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, '');
+        CreateUnit(DecidedUnit, 'WHA-QC-CUE2', '', Status::WHAOpen);
+        QualityHold.Get(QualityHoldMgt.Place(DecidedUnit, Reason::WHAInspection, ''));
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHARework);
+
+        QCActivityCues.AddCounts(Results);
+
+        Assert.AreEqual('2', Results.Get(Format(ActivitiesCue.FieldNo("WHA Goods On Hold"))), 'Both units are still stopped.');
+        Assert.AreEqual('1', Results.Get(Format(ActivitiesCue.FieldNo("WHA Holds To Decide"))), 'Only one of them is still waiting for a decision.');
+    end;
+
     local procedure ConfigureQualityHold(HoldNested: Boolean; RequireDisposition: Boolean)
     var
         Setup: Record "WHA Quality Hold Setup";
@@ -608,6 +638,15 @@ codeunit 51009 "WHA Quality Hold Tests"
     begin
         Setup.Get();
         Setup.Validate("Posting Method", Method::WHANone);
+        Setup.Modify(true);
+    end;
+
+    local procedure EnableQualityHold()
+    var
+        Setup: Record "WHA Quality Hold Setup";
+    begin
+        Setup.Get();
+        Setup."WHA Enabled" := true;
         Setup.Modify(true);
     end;
 }

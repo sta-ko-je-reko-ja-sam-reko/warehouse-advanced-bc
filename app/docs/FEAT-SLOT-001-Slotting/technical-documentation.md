@@ -94,6 +94,10 @@ ranking beside it. That pair is what a proposal is about.
 | `WHA API Slotting Proposal` | page | 50304 | `app/src/Slotting/pages/APISlottingProposal.Page.al` |
 | `WHA API Demo Slotting` | page | 50305 | `app/src/Slotting/pages/APIDemoSlotting.Page.al` |
 | `WHA Slotting Tests` | codeunit | 51011 | `test/src/codeunits/SlottingTests.Codeunit.al` |
+| `WHA Slot Activities Cue` | tableextension | 50301 | `app/src/Slotting/tableextensions/SlotActivitiesCue.TableExt.al` |
+| `WHA Slot Activity Provider` | enumextension | 50301 | `app/src/Slotting/enumextensions/SlotActivityProvider.EnumExt.al` |
+| `WHA Slot Activity Cues` | codeunit | 50308 | `app/src/Slotting/codeunits/SlotActivityCues.Codeunit.al` |
+| `WHA Slot Activities` | pageextension | 50301 | `app/src/Slotting/pageextensions/SlotActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.Slotting`, from the reserved block `50300..50349`. Core gained a
 `WHA Feature` enum value; nothing else outside the feature changed.
@@ -143,6 +147,19 @@ An open proposal for an item stops a second one being made for it, so re-running
 does not build a pile of identical suggestions for the item nobody has got round to moving. An
 answered proposal cannot be answered again or deleted: what was suggested and what was decided is the
 only record of why the stock sits where it sits.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **slotting proposals waiting for an answer**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

@@ -122,6 +122,10 @@ answers is "what is still outstanding", and a withdrawn job is not.
 | `WHA API Wave` | page | 50153 | `app/src/WaveManagement/pages/APIWave.Page.al` |
 | `WHA API Demo Wave` | page | 50154 | `app/src/WaveManagement/pages/APIDemoWave.Page.al` |
 | `WHA Wave Tests` | codeunit | 51004 | `test/src/codeunits/WaveTests.Codeunit.al` |
+| `WHA Wave Activities Cue` | tableextension | 50151 | `app/src/WaveManagement/tableextensions/WaveActivitiesCue.TableExt.al` |
+| `WHA Wave Activity Provider` | enumextension | 50151 | `app/src/WaveManagement/enumextensions/WaveActivityProvider.EnumExt.al` |
+| `WHA Wave Activity Cues` | codeunit | 50159 | `app/src/WaveManagement/codeunits/WaveActivityCues.Codeunit.al` |
+| `WHA Wave Activities` | pageextension | 50151 | `app/src/WaveManagement/pageextensions/WaveActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.WaveManagement`, from the reserved block `50150..50199`.
 Directed work gained `Wave No.` and two keys; foundation gained the `Wave Nos.` series; Core gained
@@ -241,6 +245,19 @@ list, and is safe to run from a job queue.
 The consequence, stated plainly: **a wave's status can lag behind reality.** `Task Count` and
 `Completed Task Count` are FlowFields and are always current, so the list shows the truth about the
 *work* even when the wave's own status has not caught up.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **waves being built and waves on the floor**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

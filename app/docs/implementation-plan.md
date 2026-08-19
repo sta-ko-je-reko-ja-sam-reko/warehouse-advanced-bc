@@ -37,6 +37,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | `FEAT-CORE-001` — **the role centre**: a home page owned by the foundation whose tiles are contributed by the features themselves, through an extensible enum. Core names no feature. Nine features contribute; five deliberately do not |
 | Delivered | `FEAT-INT-001` segment 2 — retention: the message log offered to Business Central's own retention policy framework, rather than a bespoke clean-up this feature would have imitated badly |
 | Delivered | Scheduling for `FEAT-SLOT-001`, `FEAT-LAB-001` and `FEAT-KPI-001` — the last piece of catalogue work that needed nothing from Phase 0. Every recurring run in the app can now be given to the job queue |
 | Delivered | `FEAT-REPL-001` segment 2 — looking ahead: a bin weighed against what is already promised out of it, pre-replenishment for one wave, and a codeunit a job queue can call |
@@ -361,7 +362,7 @@ and it is not enumerated anywhere.** What is visible from here:
 
 | Not in the catalogue | State |
 |---|---|
-| The app ships **no role centre and no cues** | `FEAT-KPI-001` names cue tiles as its obvious next segment, and `_patterns/role-center-cues.md` has the pattern. It is a UX guess about who uses what, which is why it has not been taken |
+| ~~The app ships no role centre and no cues~~ | **Delivered.** The guess about *who uses what* was settled by decision, not by inference: the role centre belongs to Core, and every activity on it belongs to the feature it is about |
 | **No LICENSE**, and `dmom.ai/privacy`, `/eula`, `/help` do not exist | `CLAUDE.md` records all four. AppSourceCop validates URL shape only, so the build passes and the links are dead |
 | **No CI.** `.github/workflows/` is empty | And CI would need access to the private `bc-dev-templates` repo |
 | **`app/img/AppLogo.png` is a generated placeholder** | Not real branding |
@@ -372,6 +373,40 @@ dimensions, what a packer verifies against, a bin capacity model) or a scope dec
 warehouse documents, what links a vehicle visit to a put-away). Continuing to build features would
 mean guessing at one of those, and every feature built that way adds unvalidated behaviour without
 reducing the risk that Phase 0 invalidates it.
+
+### What the role centre argued
+
+Two rules were in direct tension, and the resolution is the most reusable thing in this segment.
+
+`CLAUDE.md` says **Core carries no per-feature knowledge**. A role centre listing fourteen features'
+counts would have been the largest violation of that rule in the app — and it is the shape almost every
+BC app ends up with, because a cue page binds to a cue table and somebody has to own the fields.
+
+The resolution is the seam the app already had: **an extensible enum**. Core ships
+`WHA Activity Provider` with one value meaning *nothing*, and a background codeunit that walks its
+ordinals asking each provider for counts. A feature contributes four objects in its **own** folder — a
+`tableextension` adding its cue fields, an `enumextension` registering itself, a codeunit that counts,
+and a `pageextension` that both places its fields and **declares its own background-task completion
+trigger** to write them back.
+
+That last object is what made it work without an event. A page extension can have its own
+`OnPageBackgroundTaskCompleted`, so each feature writes its own counts and Core never learns a cue
+field number. **A publisher was written and then deleted** once that was found — this app forbids
+custom event publishers, and the seam did not need one.
+
+Two smaller points worth keeping:
+
+- **A switched-off feature contributes nothing, not zero.** The count implementation's first line is
+  the `IsEnabled` guard, and the page fields carry the feature's application area. A tile reading zero
+  would be a claim about a warehouse that is not running that feature at all.
+- **Five features contribute no tile on purpose** — handling units, labelling, labour management,
+  analytics and the mobile device. A cue is a count of *things that need a person today*; a label
+  format is a setting, and labour and analytics are readings of history. Deciding what does **not**
+  belong on a home page is most of the work of designing one.
+
+It also exposed a documentation gap nobody had recorded: **`FEAT-CORE-001` had no docs folder at all**.
+It has one now, and it says plainly that it covers the role centre and not the rest of the foundation,
+which is still described only here.
 
 ### What integration's second segment argued
 
@@ -434,7 +469,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 285 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 288 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

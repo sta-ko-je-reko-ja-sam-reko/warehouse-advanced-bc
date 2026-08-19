@@ -14,6 +14,14 @@ product does not include.
 3. **Restart when prompted** — enabling or disabling a feature changes what appears in the
    app, so your session restarts once when you close the setup list.
 
+4. **Switch to the warehouse home page** — see below.
+
+## Your home page
+
+- [The warehouse home page](FEAT-CORE-001-Foundation/getting-started-english.md) — what is waiting,
+  what is stuck, and what nobody has looked at yet, as a set of tiles you can open. Every feature you
+  switch on adds its own; the ones you leave off add nothing at all.
+
 ## Features
 
 ### Warehouse structure

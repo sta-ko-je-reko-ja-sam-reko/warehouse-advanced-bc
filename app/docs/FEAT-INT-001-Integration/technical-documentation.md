@@ -132,6 +132,10 @@ anything in a dispute. Read and write it through `WHA Int. Message Mgt.`, never 
 | `WHA API Integration Message` | page | 50653 | `app/src/Integration/pages/APIIntegrationMessage.Page.al` |
 | `WHA API Demo Integration` | page | 50654 | `app/src/Integration/pages/APIDemoIntegration.Page.al` |
 | `WHA Integration Tests` | codeunit | 51002 | `test/src/codeunits/IntegrationTests.Codeunit.al` |
+| `WHA Int Activities Cue` | tableextension | 50651 | `app/src/Integration/tableextensions/IntActivitiesCue.TableExt.al` |
+| `WHA Int Activity Provider` | enumextension | 50651 | `app/src/Integration/enumextensions/IntActivityProvider.EnumExt.al` |
+| `WHA Int Activity Cues` | codeunit | 50663 | `app/src/Integration/codeunits/IntActivityCues.Codeunit.al` |
+| `WHA Int Activities` | pageextension | 50651 | `app/src/Integration/pageextensions/IntActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.Integration`, from the reserved block `50650..50699`.
 Core changed only by gaining a `WHA Feature` enum value.
@@ -295,6 +299,19 @@ the record that it arrived. That is the difference between an audit trail and a 
 
 There is no scheduled job queue entry created on install. Whether this runs every minute or on
 demand depends on volumes nobody has measured yet — see below.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **messages waiting and messages that failed**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

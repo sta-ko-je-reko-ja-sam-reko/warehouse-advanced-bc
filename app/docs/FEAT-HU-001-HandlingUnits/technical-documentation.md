@@ -226,7 +226,9 @@ tests that accompany the contents segment.
 
 - **Rolling contents up through nesting.** See the data model note above — deliberate.
 
-- **Contents.** The unit holds no item quantities yet.
+- ~~**Contents.** The unit holds no item quantities yet.~~ **Delivered** in segment 2 —
+  `WHA Handling Unit Line` holds the item, variant, quantity, unit of measure, lot and serial. The line
+  above about rolling those contents up through nesting is what remains.
 - **Getting-started in the customer language** — the language has not been confirmed.
 - ~~**SSCC generation.**~~ **Delivered** by `FEAT-LBL-001` — see
   [../FEAT-LBL-001-Labelling/technical-documentation.md](../FEAT-LBL-001-Labelling/technical-documentation.md).

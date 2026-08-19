@@ -70,7 +70,12 @@ two measurements you are looking at.
 **Already promised** reads zero unless your setup says to take planned work into account.
 
 If **In the bin now** does not match what you can see in the aisle, the method is the first thing to
-check.
+check, and the unit of measure is the second.
+
+**You can write a rule in any unit.** A rule in pallets is measured in pallets even when the stock is
+held as loose pieces, and a bin holding both a pallet and some loose pieces is added up correctly
+rather than treated as two of something. That relies on the item having a pieces-per-pallet conversion
+set up — see below.
 
 ## Run replenishment
 
@@ -124,8 +129,9 @@ location — nothing detects that.
 Releasing a wave does not replenish for it. Somebody chooses **Replenish for this wave**, or the
 scheduled run catches it.
 
-It assumes the minimum, the maximum and the measurement are all in the same unit. If you keep the bin
-in pallets but the system counts pieces, the rule will be wrong and nothing will warn you.
+If you write a rule in a unit you have not set up for that item — a pallet with no pieces-per-pallet on
+record — the rule is measured in the item's base unit instead, and nothing warns you. Check **In the
+bin now** against the aisle when you first write a rule in anything other than the base unit.
 
 ## Load sample data
 

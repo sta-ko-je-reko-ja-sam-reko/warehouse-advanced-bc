@@ -213,9 +213,11 @@ left in place after somebody switches the feature off stops rather than quietly 
 - **No labour measures.** `FEAT-LAB-001` already works out measured time against standards, and
   jobs-per-hour belongs here, but it would be the first measure to read a second app feature's
   derived figures rather than raw events.
-- **No cues and no role centre.** The app ships no role centre to put them on. Cue tiles over these
-  measures are the obvious segment 2, and the pattern for them
-  (`_patterns/role-center-cues.md`) needs a page background task rather than a FlowField.
+- **No cues, though there is now a role centre to put them on.** `FEAT-CORE-001` ships one, and this
+  feature deliberately contributes no tile to it: a cue is a count of *things that need a person
+  today*, and a KPI is a reading of history. Whether a measure belongs on a home page as a figure
+  rather than a count is a real question and it has not been answered — `_patterns/role-center-cues.md`
+  is the pattern if it ever is.
 - **No trend or chart anywhere.** Snapshots are a list; comparing more than two periods means
   exporting them.
 - **Getting-started in the customer language** — the language has not been confirmed.

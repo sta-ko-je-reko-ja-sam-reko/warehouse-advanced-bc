@@ -165,6 +165,7 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Repl. Demand Filters" = X,
         codeunit "WHA Repl. Scheduler" = X,
         codeunit "WHA Repl Activity Cues" = X,
+        codeunit "WHA Repl. Unit Convert" = X,
         codeunit "WHA Repl. Bin Content" = X,
         codeunit "WHA Repl. Handling Units" = X,
         codeunit "WHA Repl. Feature Setup" = X,

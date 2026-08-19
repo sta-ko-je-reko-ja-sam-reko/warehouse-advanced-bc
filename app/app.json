@@ -3,16 +3,16 @@
   "name": "Warehouse Advanced",
   "publisher": "Default Publisher",
   "brief": "Advanced warehouse management for Dynamics 365 Business Central.",
-  "description": "Extends standard Business Central warehousing with capabilities normally only found in dedicated WMS platforms: handling units, mobile device workflows, wave planning, labour management, slotting, dock and yard control, and packing.",
+  "description": "Extends standard Business Central warehousing with capabilities normally only found in dedicated WMS platforms.",
   "version": "1.0.0.0",
-  "privacyStatement": "",
-  "EULA": "",
-  "help": "",
+  "privacyStatement": "https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc/blob/main/app/docs/privacy-statement.md",
+  "EULA": "https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc",
+  "help": "https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc/blob/main/app/docs/README.md",
   "url": "https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc",
-  "logo": "",
+  "logo": "img/AppLogo.png",
   "dependencies": [],
   "screenshots": [],
-  "platform": "28.0.0.0",
+  "platform": "1.0.0.0",
   "application": "28.1.0.0",
   "idRanges": [
     {
@@ -27,9 +27,11 @@
   },
   "runtime": "17.0",
   "target": "Cloud",
+  "ruleset": "../.bc-conventions/ruleset.json",
   "features": [
     "TranslationFile",
-    "NoImplicitWith"
+    "NoImplicitWith",
+    "NoPromotedActionProperties"
   ],
-  "contextSensitiveHelpUrl": ""
+  "contextSensitiveHelpUrl": "https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc/blob/main/app/docs/README.md"
 }

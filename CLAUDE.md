@@ -2,23 +2,60 @@
 
 Guidance for working in this repository.
 
+## Authoritative rules live elsewhere — read them first
+
+**This project MUST follow the conventions in the private `bc-dev-templates` repo.** They are
+wired in at `.bc-conventions/` (gitignored — see "Shared conventions" below) and they
+**override anything in this file** if the two ever disagree.
+
+Scenario: **greenfield** (`bc-greenfield-template`) — a brand-new app with no NAV ancestor.
+Qguar is a third-party WMS, not a Navision solution, so the NAV→BC migration machinery does
+not apply. Shared AL guides and the ruleset come from `bc-customer-project-template`.
+
+Before authoring any object, read:
+
+| Need | File |
+|---|---|
+| Coding standards (naming, namespaces, cops, labels) | `.bc-conventions/instructions/02-al-coding-standards.md` |
+| Folder + file naming | `.bc-conventions/instructions/03-source-folder-layout.md` |
+| Per-object-type authoring guide | `.bc-conventions/al-object-types/<type>.md` |
+| Feature setup + `Enabled` toggle | `.bc-conventions/al-object-types/_patterns/feature-setup-and-toggle.md` |
+| Assisted setup hub + wizard | `.bc-conventions/al-object-types/_patterns/assisted-setup-orchestration.md` |
+| Polymorphic table logic (**mandatory**) | `.bc-conventions/al-object-types/_patterns/polymorphic-table-logic.md` |
+| Greenfield feature workflow | `bc-greenfield-template/instructions/02-feature-workflow.md` |
+
 ## What this is
 
-An AL extension for Dynamics 365 Business Central that adds warehouse capabilities BC does
-not have in the standard app. It exists as part of a project replacing an existing **Qguar**
-WMS integration for a customer, with further automation planned on top.
+An AL extension for Dynamics 365 Business Central adding warehouse capabilities BC does not
+have in the standard app. Part of a project replacing an existing **Qguar** WMS integration
+for a customer, with further automation planned on top.
 
 ## Non-negotiable context
 
-**`docs/modules.md` is a hypothesis, not confirmed scope.** The 15 modules listed there
-describe what a tier-1 WMS typically has and BC typically lacks. They are *not* derived
-from the customer's live Qguar installation. Do not build a module because it appears in
-that table — `docs/gap-analysis.md` is the process for turning it into real scope. Building
-to the full table is the single most likely way this project ends up several times larger
-than it needs to be.
+**`app/docs/modules.md` is a hypothesis, not confirmed scope.** The 15 modules describe what
+a tier-1 WMS typically has and BC typically lacks. They are *not* derived from the customer's
+live Qguar installation. Do not build a module because it appears in that table —
+`app/docs/gap-analysis.md` is the process for turning it into real scope. Feature folders are
+created when a feature is actually scoped, never up front.
 
-Do not name Qguar in public-facing repo content (README, package metadata, published docs).
-It is another vendor's registered product; referring to it in internal docs is fine.
+Do not name Qguar in public-facing repo content. It is another vendor's registered product.
+
+## Shared conventions (`.bc-conventions/`)
+
+`bc-dev-templates` is **private**; this repo is **public**. The conventions are therefore
+**not committed** — `.bc-conventions/` is gitignored and wired in locally as a directory
+junction:
+
+```powershell
+cmd /c mklink /J .bc-conventions C:\Users\P16v\Documents\bc-dev-templates\bc-customer-project-template
+```
+
+A junction rather than a copy, so the rules track the templates repo instead of drifting.
+
+**Consequence, by deliberate choice:** a fresh clone of this public repo **will not build** —
+`app.json` sets `"ruleset": "../.bc-conventions/ruleset.json"` and that path will not resolve
+until the private repo is cloned and junctioned. Anyone building this (including CI) needs
+access to `bc-dev-templates`.
 
 ## Environment
 
@@ -30,30 +67,28 @@ It is another vendor's registered product; referring to it in internal docs is f
 | Dev endpoint | port 7049, **NavUserPassword** (`"authentication": "UserPassword"`) |
 | Production | BC online, **W1** |
 | Distribution | **Per-tenant extension (PTE)** — not AppSource |
+| Affix | `WHA` |
+| Object IDs | app `50000..50999`, test `51000..51999` |
 
 The container is US while production is W1. Low risk for warehouse objects, but rebuild the
 container from a W1 artifact before working on posting or documents.
 
+Note the shared `ruleset.json` was authored for **OnPrem** partner extensions (it hides
+AS0013/AS0053/AS0084 on that basis). This app targets **Cloud** as a PTE. The suppressions
+remain harmless, but revisit them if the app ever moves toward AppSource.
+
 ### Determining a container's auth mode
 
 Do not infer it from `GET /BC/dev/metadata` — that endpoint answers **anonymously** and
-returns 200 regardless. Read the `WWW-Authenticate` header from an endpoint that genuinely
-requires auth:
+returns 200 regardless. Read `WWW-Authenticate` from an endpoint that requires auth:
 
 ```powershell
 $req = [System.Net.HttpWebRequest]::Create("http://mrt28:7048/BC/api/v2.0/companies")
 try { $req.GetResponse() } catch { $_.Exception.Response.Headers['WWW-Authenticate'] }
 ```
 
-`Basic realm=""` → NavUserPassword, so use `"authentication": "UserPassword"`.
-`Negotiate` or `NTLM` → Windows, so use `"authentication": "Windows"`.
-
-A mismatch surfaces as `Failed to establish SignalR hub connection ... 401 (Unauthorized)`
-when starting a debug session.
-
-Because distribution is PTE, the `50000..50999` range and the `WHA` affix need no
-registration with Microsoft. The affix is kept regardless — it prevents collision with other
-extensions installed in the customer's tenant.
+`Basic realm` means NavUserPassword; `Negotiate` or `NTLM` means Windows. A mismatch surfaces
+as `Failed to establish SignalR hub connection ... 401 (Unauthorized)`.
 
 ## Opening the project
 
@@ -71,17 +106,34 @@ Get-ChildItem "$art\us\Extensions" -Filter "*.app" |
   Copy-Item -Destination app\.alpackages\
 ```
 
-## Code conventions
+## Code conventions (summary — the authority is `.bc-conventions/`)
 
-- One object per file, named `<ObjectName>.<ObjectType>.al`
-  (e.g. `WHAHandlingUnit.Table.al`, `WHAHandlingUnitMgt.Codeunit.al`)
-- Affix **`WHA`** on every object, field, and extension — enforced by `app/AppSourceCop.json`
-- Source is flat within each `app/src/<Module>/` folder, matching Base Application convention
-- Object IDs are pre-allocated per module in `docs/modules.md`. Take IDs from your module's
-  block only; the allocation exists so parallel work cannot collide.
-- Cross-module calls go through a module's public codeunit, never directly to its tables
-- Analysers CodeCop, UICop, AppSourceCop and PerTenantExtensionCop all run; keep the build
-  analyser-clean
+- **Source layout:** `app/src/Core/`, `app/src/PermissionSet/`, `app/src/<Feature>/`, each
+  feature with `tables/ pages/ codeunits/ enums/ interfaces/ tableextensions/` subfolders.
+- **File name = object name with the affix STRIPPED**, spaces and `-`/`.` removed, then
+  `.<ObjectType>.al`. `table "WHA Handling Unit"` becomes `HandlingUnit.Table.al`. Use the
+  *abbreviated* object name if you abbreviated it — mismatching trips AA0215/LC0015.
+- **Namespace on line 1 of every file:** `namespace WarehouseAdvanced.<Feature>;` then
+  `using` for every other namespace referenced, **sorted alphabetically** (AA0477). Adding a
+  namespace kills global lookup — Microsoft objects then need a `using` too.
+- **Affix `WHA`** on every object and every field added to a standard table.
+- **Object names max 30 chars; `permissionset` names max 20 chars** (compiler error beyond).
+  Descriptive wording goes in the `Caption`.
+- **Polymorphic table logic is mandatory.** No business logic in a table trigger, a
+  `tableextension` trigger, or a subscriber body — each delegates one line to a swappable
+  interface implementation.
+- **Every field:** `Caption` + `ToolTip` (author the ToolTip on the **table field**, not the
+  page field). Every table: `DataClassification`, PK key named `PK`, `Clustered = true`.
+- **Every page:** `ApplicationArea`, explicit `UsageCategory`. Enablement UI (setup page,
+  wizard) is `ApplicationArea = All`; operational UI takes the feature's dedicated area.
+- **Codeunits:** default cross-object procedures to `internal`; `///` docs on public and
+  internal ones. **No inline comments anywhere in AL.** `SetLoadFields` before every
+  `Get`/`Find*`.
+- **Labels** for all user-visible strings, suffixed `Msg`/`Err`/`Qst`/`Txt`/`Lbl`/`Tok`, with
+  a `Comment` naming every placeholder.
+- **Errors as errors:** AA0008, AA0073, AA0137, AA0139, AA0217, AA0233, AL0606. Zero-error
+  builds. Disable a rule in the ruleset with a `justification` — never disable an analyzer.
+- **Every new object goes into a permission set as it is created.**
 
 ## Git workflow
 
@@ -89,7 +141,7 @@ Get-ChildItem "$art\us\Extensions" -Filter "*.app" |
 GH006. All changes go through a feature branch and a PR.
 
 - 0 approving reviews required, so the repo owner can merge their own PR
-- Linear history is required: merge with **squash or rebase**, never a merge commit
+- Linear history required: merge with **squash or rebase**, never a merge commit
 - Force pushes and branch deletion on `main` are blocked
 
 Push restrictions on who may merge are an org-only GitHub feature; this is a personal repo,
@@ -101,18 +153,16 @@ Global git config on this machine is kept empty. Identity and the `gh` credentia
 set in this repo's `.git/config` only. Consequences:
 
 - A fresh clone has no identity — the first commit fails with `Author identity unknown`
-  until `git config user.name` / `user.email` are set locally
-- Never run `gh auth setup-git` without moving what it writes into the repo; it plants
-  entries in global config
-- The `credential.https://github.com.helper` key needs **two** entries — an empty one to
-  reset inherited helpers, then the gh one — because system config sets
-  `credential.helper = manager`
+- Never run `gh auth setup-git` without moving what it writes into the repo
+- `credential.https://github.com.helper` needs **two** entries — an empty one to reset
+  inherited helpers, then the gh one — because system config sets `credential.helper = manager`
 
 ## Known outstanding items
 
-- `publisher` is `"Default Publisher"` in both manifests and must be changed before real
-  objects accumulate
-- No LICENSE file; a public repo without one grants no rights to anyone
-- Cutover model (big bang vs. parallel run with Qguar) is undecided
-- The planned automation "on top of" the WMS has not been specified — whether it consumes
-  the `Integration` module's API surface or drives the UI is unknown
+- `publisher` is `"Default Publisher"` in both manifests
+- No LICENSE file; `app.json` `EULA` points at the repo root as a stand-in
+- `app/docs/privacy-statement.md` is a placeholder
+- `app/img/AppLogo.png` is a generated placeholder, not real branding
+- No CI: `.github/workflows/` is empty, and CI would need private `bc-dev-templates` access
+- Cutover model (big bang vs. parallel run with Qguar) undecided
+- The planned automation "on top of" the WMS is unspecified

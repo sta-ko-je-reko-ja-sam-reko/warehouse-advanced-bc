@@ -11,17 +11,42 @@
 
 ## Folder convention
 
-Source lives under `app/src/<Module>/`, flat within each module (the convention used by
-Microsoft's own Base Application). One object per file:
+Governed by the shared conventions in `.bc-conventions/instructions/03-source-folder-layout.md`
+and the greenfield structure. Source lives under `app/src/<Feature>/`, with object-type
+subfolders inside each feature:
 
 ```
-<ObjectName>.<ObjectType>.al      e.g. WHAHandlingUnit.Table.al
-                                       WHAHandlingUnitCard.Page.al
-                                       WHAHandlingUnitMgt.Codeunit.al
+app/src/
+├── Core/                  foundation + assisted setup (always present)
+│   ├── tables/  pages/  codeunits/  enums/  interfaces/  tableextensions/
+├── PermissionSet/         permission set objects for the whole app
+└── <Feature>/             one folder per shipped feature, same subfolder shape
 ```
+
+Feature folders are created **when a feature is actually scoped**, not up front — the table
+below is a candidate list, not a build order.
+
+**File name = the object name with the affix removed** and all spaces and special
+characters stripped, then `.<ObjectType>.al`. Enforced by CodeCop AA0215 and LinterCop
+LC0015:
+
+```
+table     "WHA Handling Unit"      -> HandlingUnit.Table.al
+page      "WHA Handling Unit Card" -> HandlingUnitCard.Page.al
+codeunit  "WHA Handling Unit Mgt." -> HandlingUnitMgt.Codeunit.al
+permissionset "WHA WHSE - Read"    -> WHSERead.PermissionSet.al
+```
+
+The file name follows the **actual** object name including any abbreviation made to fit the
+30-character cap — abbreviating the object but spelling the file out is the most common
+AA0215/LC0015 trip-up.
+
+Every object declares `namespace WarehouseAdvanced.<Feature>;` as its first line, with a
+`using` for every other namespace it references, sorted alphabetically (AA0477).
 
 All object names, fields, and extension objects carry the affix `WHA` — enforced by
-`app/AppSourceCop.json`.
+`app/AppSourceCop.json`. `permissionset` names are capped at **20 characters** including
+the affix.
 
 ## Object ID allocation
 

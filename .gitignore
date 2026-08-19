@@ -39,3 +39,11 @@ TestResults.xml
 # OS noise
 Thumbs.db
 desktop.ini
+
+# Shared BC conventions (private repo bc-dev-templates, wired in as a junction).
+# MUST stay ignored - warehouse-advanced-bc is public and bc-dev-templates is not.
+# See README "Shared conventions" for how to recreate it.
+.bc-conventions/
+
+# Generated translation base file
+Translations/*.g.xlf

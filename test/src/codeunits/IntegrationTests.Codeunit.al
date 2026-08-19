@@ -682,6 +682,25 @@ codeunit 51002 "WHA Integration Tests"
         Assert.AreEqual(1, IntegrationMessage.Count(), 'One location on one day should produce one statement.');
     end;
 
+    [Test]
+    procedure TheScheduledRunStopsWhenTheFeatureIsOff()
+    var
+        Setup: Record "WHA Integration Setup";
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
+    begin
+        // [SCENARIO] A job queue entry left behind after somebody switches the feature off stops rather
+        // than carrying on. Every other scheduled run in this app guards the same way; this one did not.
+        EnsureIntegrationSetup(false);
+        Setup.Get();
+        Setup.Validate("WHA Enabled", false);
+        Setup.Modify(true);
+
+        asserterror MessageMgt.Run();
+
+        Setup.Validate("WHA Enabled", true);
+        Setup.Modify(true);
+    end;
+
     local procedure OutboundCount(MessageType: Enum "WHA Int. Message Type"; ExternalId: Code[50]): Integer
     var
         IntegrationMessage: Record "WHA Integration Message";

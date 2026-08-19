@@ -27,6 +27,11 @@ You only need to do this once, and you need administrator rights.
    - **Bins** takes everything Business Central believes is in a bin at that location.
    - **Handling units** takes everything the pallets standing there say they hold. Use this if you
      want to know whether a pallet holds what its label claims.
+   - **Bins by lot** takes the same bins, but splits each one by lot and serial number. **Use this if
+     you count goods that carry a lot or a serial number** — a correction to tracked goods has to name
+     the lot, and the plain **Bins** selection cannot, because a bin can hold several. It leaves out a
+     lot that has already left the bin, so the sheet lists what is there rather than everything that
+     ever was.
 3. **Count blind** — leave this on. The person counting does not see what was expected until the sheet
    has been counted. A counter who can see the expected number tends to write it down.
 4. **Tolerance quantity** and **Tolerance percent** — how far a count may differ before somebody has
@@ -137,9 +142,11 @@ so what was found survives.
 
 ## What counting does not do yet
 
-- **It cannot correct a lot- or serial-tracked item counted by bin.** A correction to tracked goods
-  has to name the lot, and counting by bin cannot know which one — bins hold several. Count tracked
-  goods with the **Handling units** selection, which takes the lot from the pallet.
+- **It does not stop you choosing the wrong selection for tracked goods.** Counting them with plain
+  **Bins** still produces a sheet that cannot be corrected, because those lines carry no lot. Use
+  **Bins by lot** or **Handling units** for tracked goods; nothing warns you if you do not.
+- **It does not know about package numbers.** Goods tracked by package have the same problem one level
+  down: the sheet splits by lot and serial, and not by package.
 - **It does not choose what to count.** Nothing works out which aisle is due; you decide the slice and
   the sheet gathers it.
 - **You cannot count on the handheld.** Counts are entered on the sheet.

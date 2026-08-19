@@ -529,6 +529,107 @@ codeunit 51008 "WHA Counting Tests"
         Assert.ExpectedError('can no longer be changed');
     end;
 
+    [Test]
+    procedure FillingByLotPutsOneLineOnEachLot()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        BinLotSelection: Codeunit "WHA Count Bin Lot Selection";
+        Selection: Enum "WHA Count Selection";
+        Added: Integer;
+    begin
+        // [SCENARIO] A bin holding two lots of the same item produces two lines, each naming its lot.
+        // The bins selection cannot do this — bin content adds the lots together — and a line with no
+        // lot is a line the item journal will refuse for a tracked item.
+        EnsureLocation(CopyStr(LocationTok, 1, 10));
+        EnsureItem();
+        WarehouseStock('LOT-A', '', 25);
+        WarehouseStock('LOT-B', '', 15);
+
+        CreateSheet(CountSheet, 'CNT-LOT-1', Selection::WHABinContentByLot, false);
+        Added := BinLotSelection.Fill(CountSheet);
+
+        Assert.AreEqual(2, Added, 'Two lots in the bin should produce two lines.');
+
+        Assert.IsTrue(FindLineFor(CountSheetLine, CountSheet."No.", 'LOT-A', ''), 'The sheet should carry a line for the first lot.');
+        Assert.AreEqual(25, CountSheetLine."Expected Quantity", 'The line should expect what the warehouse entries for that lot add up to.');
+
+        Assert.IsTrue(FindLineFor(CountSheetLine, CountSheet."No.", 'LOT-B', ''), 'The sheet should carry a line for the second lot.');
+        Assert.AreEqual(15, CountSheetLine."Expected Quantity", 'Each lot should be counted on its own line.');
+    end;
+
+    [Test]
+    procedure FillingByLotAddsUpTheEntriesOfOneLot()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        BinLotSelection: Codeunit "WHA Count Bin Lot Selection";
+        Selection: Enum "WHA Count Selection";
+    begin
+        // [SCENARIO] Stock arrives and leaves in pieces. What the sheet expects is the sum of the
+        // entries, not the last one, and not a row per movement.
+        EnsureLocation(CopyStr(LocationTok, 1, 10));
+        EnsureItem();
+        WarehouseStock('LOT-C', '', 40);
+        WarehouseStock('LOT-C', '', -12);
+
+        CreateSheet(CountSheet, 'CNT-LOT-2', Selection::WHABinContentByLot, false);
+        BinLotSelection.Fill(CountSheet);
+
+        Assert.IsTrue(FindLineFor(CountSheetLine, CountSheet."No.", 'LOT-C', ''), 'The lot should be on the sheet.');
+
+        Assert.AreEqual(28, CountSheetLine."Expected Quantity", 'The expected quantity should be what the entries add up to.');
+    end;
+
+    [Test]
+    procedure FillingByLotLeavesOutALotThatHasGone()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        BinLotSelection: Codeunit "WHA Count Bin Lot Selection";
+        Selection: Enum "WHA Count Selection";
+    begin
+        // [SCENARIO] A lot that came and went nets to zero. It is not in the bin, and putting it on the
+        // sheet would send somebody to look for something nobody claims is there — which is the
+        // opposite of what the bins selection does with an empty bin, and deliberately so.
+        EnsureLocation(CopyStr(LocationTok, 1, 10));
+        EnsureItem();
+        WarehouseStock('LOT-D', '', 10);
+        WarehouseStock('LOT-D', '', -10);
+        WarehouseStock('LOT-E', '', 5);
+
+        CreateSheet(CountSheet, 'CNT-LOT-3', Selection::WHABinContentByLot, false);
+        BinLotSelection.Fill(CountSheet);
+
+        Assert.IsFalse(FindLineFor(CountSheetLine, CountSheet."No.", 'LOT-D', ''), 'A lot that has left the bin should not be on the sheet.');
+        Assert.IsTrue(FindLineFor(CountSheetLine, CountSheet."No.", 'LOT-E', ''), 'A lot that is still there should be.');
+    end;
+
+    [Test]
+    procedure FillingByLotKeepsSerialNumbersApart()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        BinLotSelection: Codeunit "WHA Count Bin Lot Selection";
+        Selection: Enum "WHA Count Selection";
+        Added: Integer;
+    begin
+        // [SCENARIO] Serial numbers split a line the same way lots do. One serial per line is the only
+        // shape a serial-tracked adjustment can be posted in.
+        EnsureLocation(CopyStr(LocationTok, 1, 10));
+        EnsureItem();
+        WarehouseStock('', 'SER-1', 1);
+        WarehouseStock('', 'SER-2', 1);
+
+        CreateSheet(CountSheet, 'CNT-LOT-4', Selection::WHABinContentByLot, false);
+        Added := BinLotSelection.Fill(CountSheet);
+
+        Assert.AreEqual(2, Added, 'Two serial numbers should produce two lines.');
+
+        Assert.IsTrue(FindLineFor(CountSheetLine, CountSheet."No.", '', 'SER-1'), 'The sheet should carry a line for the first serial number.');
+        Assert.AreEqual(1, CountSheetLine."Expected Quantity", 'A serial-numbered line should expect one.');
+    end;
+
     local procedure ConfigureCounting(ToleranceQuantity: Decimal; TolerancePercent: Decimal)
     var
         Setup: Record "WHA Count Setup";
@@ -656,4 +757,40 @@ codeunit 51008 "WHA Counting Tests"
         HandlingUnitLine.Quantity := Quantity;
         HandlingUnitLine.Insert(true);
     end;
+
+    local procedure FindLineFor(var CountSheetLine: Record "WHA Count Sheet Line"; SheetNo: Code[20]; LotNo: Code[50]; SerialNo: Code[50]): Boolean
+    begin
+        CountSheetLine.Reset();
+        CountSheetLine.SetRange("Sheet No.", SheetNo);
+        if not CountSheetLine.FindSet() then
+            exit(false);
+
+        repeat
+            if (CountSheetLine."Lot No." = LotNo) and (CountSheetLine."Serial No." = SerialNo) then
+                exit(true);
+        until CountSheetLine.Next() = 0;
+
+        exit(false);
+    end;
+
+    local procedure WarehouseStock(LotNo: Code[50]; SerialNo: Code[50]; Quantity: Decimal)
+    var
+        WarehouseEntry: Record "Warehouse Entry";
+        NextEntryNo: Integer;
+    begin
+        if WarehouseEntry.FindLast() then
+            NextEntryNo := WarehouseEntry."Entry No.";
+
+        WarehouseEntry.Init();
+        WarehouseEntry."Entry No." := NextEntryNo + 1;
+        WarehouseEntry."Location Code" := CopyStr(LocationTok, 1, 10);
+        WarehouseEntry."Bin Code" := CopyStr(BinTok, 1, 20);
+        WarehouseEntry."Item No." := CopyStr(ItemTok, 1, 20);
+        WarehouseEntry."Lot No." := LotNo;
+        WarehouseEntry."Serial No." := SerialNo;
+        WarehouseEntry.Quantity := Quantity;
+        WarehouseEntry."Registering Date" := WorkDate();
+        WarehouseEntry.Insert();
+    end;
+
 }

@@ -125,6 +125,8 @@ first one meant it.
 | `WHA Demo Count` | codeunit | 50504 | `app/src/Counting/codeunits/DemoCount.Codeunit.al` |
 | `WHA Count Bin Selection` | codeunit | 50505 | `app/src/Counting/codeunits/CountBinSelection.Codeunit.al` |
 | `WHA Count HU Selection` | codeunit | 50506 | `app/src/Counting/codeunits/CountHUSelection.Codeunit.al` |
+| `WHA Count Bin Lot Selection` | codeunit | 50509 | `app/src/Counting/codeunits/CountBinLotSelection.Codeunit.al` |
+| `WHA Whse Stock By Lot` | query | 50509 | `app/src/Counting/queries/WhseStockByLot.Query.al` |
 | `WHA Count Posting` | codeunit | 50507 | `app/src/Counting/codeunits/CountPosting.Codeunit.al` |
 | `WHA Count Appl. Area Setup` | tableextension | 50500 | `app/src/Counting/tableextensions/CountApplAreaSetup.TableExt.al` |
 | `WHA Count Setup` | page | 50500 | `app/src/Counting/pages/CountSetup.Page.al` |
@@ -157,7 +159,7 @@ produce different shapes of line — one per item in a bin, one per handling uni
 cannot express the choice. What a selection is *not* allowed to do is write the line itself: it calls
 `AddLine` on the sheet logic, which owns the guard that a sheet can only be filled while it is open.
 
-Two ship:
+Three ship:
 
 - **Bins** (default) — every item Business Central believes is in a bin at the location. A bin content
   of zero is still counted: a bin the system thinks is empty is worth confirming, and one that turns
@@ -165,6 +167,16 @@ Two ship:
 - **Handling units** — every line of every unit standing at the location, with the unit number on the
   line. This is what a licence-plate warehouse counts: not what is in the bin, but whether the pallet
   holds what its label claims.
+- **Bins by lot** — the same bins, split by lot and serial number. It reads **warehouse entries**
+  rather than bin content, because bin content aggregates across lots: it can say a bin holds 40 but
+  never that the 40 is 25 of one lot and 15 of another. This is the selection a warehouse with tracked
+  items has to use, and the reason is in *Adjusting* below — a difference with no lot on it cannot be
+  posted.
+
+  It differs from the bins selection in one way worth knowing: **a lot that nets to zero is left off
+  the sheet.** Bin content is a record that persists at zero and is worth confirming; a lot that came
+  and went is not in the bin at all, and listing every lot that ever passed through would bury the
+  count in rows nobody claims are there.
 
 `WHA Count Selection` is extensible, so ABC velocity, "bins not counted since", or by-zone is an
 `enumextension` value and one codeunit.
@@ -249,9 +261,14 @@ posting: without them, a difference on a tracked item cannot be adjusted at all.
 selection fills them from the unit's own lines through `SetLineDetails`, which also carries the
 description across — one call where segment 1 had a local that only did the description.
 
-The bin selection leaves them blank, and correctly: bin content is aggregated across lots, so there is
-no single lot to name. Counting a tracked item by bin therefore still cannot be posted. That is a real
-gap and it is listed in *Not done*, not papered over by guessing a lot.
+The bins selection leaves them blank, and correctly: bin content is aggregated across lots, so there
+is no single lot to name.
+
+~~Counting a tracked item by bin therefore still cannot be posted.~~ **The bins-by-lot selection
+closes this.** It reads warehouse entries and groups by bin, item, variant, unit of measure, lot and
+serial, so every line it makes carries the lot the adjustment needs. The bins selection is unchanged
+and still cannot post a tracked item — that is now a choice between two selections rather than a hole,
+and the selection's own `Describe` text says which to use.
 
 ## Role centre activities
 
@@ -337,11 +354,11 @@ Two things stay out of the automated suite and belong in the integration test pl
 
 ## Not done
 
-- **A tracked item counted by bin cannot be posted.** Bin content is aggregated across lots, so the
-  bins selection has no single lot to put on the line, and the item journal will refuse a tracked item
-  without one. Counting a lot-tracked item works today only through the handling unit selection. The
-  honest fix is a selection that fills from bin content *by lot*, which is a third selection rather
-  than a change to either existing one.
+- ~~**A tracked item counted by bin cannot be posted.**~~ **Delivered** — *Bins by lot* is the third
+  selection this entry asked for. Two things it did not settle: **package numbers** are not read, so a
+  warehouse tracking by package has the same problem one level down; and nothing *stops* somebody
+  choosing the bins selection for a tracked item, because whether that is a mistake depends on
+  what they are counting.
 - **Nothing has been posted for real.** The posting path is covered by unit tests against a recorder
   and by nothing else: no ledger entry has ever been written by this code. See
   [../inventory-posting.md](../inventory-posting.md) for what that leaves untested, including directed

@@ -16,4 +16,9 @@ enum 50501 "WHA Count Selection" implements "WHA ICountSelection"
         Caption = 'Handling units';
         Implementation = "WHA ICountSelection" = "WHA Count HU Selection";
     }
+    value(2; WHABinContentByLot)
+    {
+        Caption = 'Bins by lot';
+        Implementation = "WHA ICountSelection" = "WHA Count Bin Lot Selection";
+    }
 }

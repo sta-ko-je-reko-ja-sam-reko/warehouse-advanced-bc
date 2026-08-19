@@ -14,28 +14,32 @@ codeunit 50254 "WHA Repl. Bin Content" implements "WHA IReplMethod"
     /// works from. A warehouse that posts its movements should use this and no other.
     /// </summary>
     /// <param name="ReplenishmentRule">The rule whose bin is being measured.</param>
-    /// <returns>The quantity bin content holds for the rule's item.</returns>
+    /// <returns>The quantity bin content holds for the rule's item, in the rule's own unit of measure.</returns>
+    /// <remarks>
+    /// Every bin content row for the item is counted, whatever unit it is held in, and the total is
+    /// converted into the rule's unit at the end. Filtering to the rule's unit instead — which is what
+    /// this did before — hid stock rather than mis-added it: a rule written in pallets simply could not
+    /// see the pieces in its own bin, and reported the face empty while somebody was picking from it.
+    /// </remarks>
     procedure Measure(var ReplenishmentRule: Record "WHA Replenishment Rule"): Decimal
     var
         BinContent: Record "Bin Content";
-        Total: Decimal;
+        UnitConvert: Codeunit "WHA Repl. Unit Convert";
+        BaseTotal: Decimal;
     begin
-        BinContent.SetLoadFields("Location Code", "Bin Code", "Item No.", "Variant Code");
         BinContent.SetRange("Location Code", ReplenishmentRule."Location Code");
         BinContent.SetRange("Bin Code", ReplenishmentRule."Bin Code");
         BinContent.SetRange("Item No.", ReplenishmentRule."Item No.");
         BinContent.SetRange("Variant Code", ReplenishmentRule."Variant Code");
-        if ReplenishmentRule."Unit of Measure Code" <> '' then
-            BinContent.SetRange("Unit of Measure Code", ReplenishmentRule."Unit of Measure Code");
         if not BinContent.FindSet() then
             exit(0);
 
         repeat
-            BinContent.CalcFields(Quantity);
-            Total += BinContent.Quantity;
+            BinContent.CalcFields("Quantity (Base)");
+            BaseTotal += BinContent."Quantity (Base)";
         until BinContent.Next() = 0;
 
-        exit(Total);
+        exit(UnitConvert.FromBase(ReplenishmentRule."Item No.", ReplenishmentRule."Unit of Measure Code", BaseTotal));
     end;
 
     /// <summary>

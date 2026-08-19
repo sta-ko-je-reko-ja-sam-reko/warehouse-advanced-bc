@@ -182,6 +182,27 @@ timetable here would be a worse copy of one that already exists.
 Segment 1 recorded "nothing schedules the run" as a gap. It was never missing logic — only a runnable
 object for an administrator to point at.
 
+## Units of measure
+
+A rule names a unit; the stock it measures may be held in another. Segment 1 did not reconcile the two,
+and the two methods failed differently:
+
+- **Handling units** added every line's quantity together whatever unit each was in. A unit holding the
+  same item as a pallet on one line and as loose pieces on another produced a total **in no unit at
+  all**, and nothing said so.
+- **Bin content** filtered to the rule's own unit, which did not mis-add anything — it **hid stock**. A
+  rule written in pallets could not see the pieces in its own bin, reported the face empty, and raised
+  work while somebody was picking from it.
+
+Both now convert through the item's **base** unit — `WHA Repl. Unit Convert` reads
+`Item Unit of Measure."Qty. per Unit of Measure"` — and the total is expressed in the rule's unit at
+the end, so a minimum in pallets is compared with a measurement in pallets.
+
+**A unit with no conversion on record answers one rather than raising.** That is a deliberate choice
+about an unattended run: an error would stop every other rule in it over one item's missing setup, and
+a rule measured in the wrong unit is at least visible on the rule card where a run that never happened
+is not. It is listed in *Not done* for that reason.
+
 ## Methods — where the number comes from
 
 `WHA IReplMethod` has two procedures: `Measure`, which answers what is in the bin, and `Describe`,
@@ -263,7 +284,10 @@ so it seeds nothing at all rather than something wrong on a company with no bins
 
 ## Tests
 
-`WHA Replenishment Tests` (codeunit 51007), 19 tests.
+`WHA Replenishment Tests` (codeunit 51007), 23 tests. Four cover units of measure: a pallet line and a
+loose-pieces line on one unit are not added together; a rule written in pallets is measured in pallets;
+stock held in another unit is seen rather than ignored; and a unit nobody set up falls back to base
+instead of stopping the run.
 
 **Segment 1**, 12 tests: a bin below its minimum asks for enough to fill
 it to the maximum, with the right bins, type and quantity; a bin with enough asks for nothing; the same
@@ -298,7 +322,8 @@ not covered by an automated test yet, and that is a known hole rather than an ov
   a one-line call, and it is deliberately not made until Phase 0 says whether this warehouse would want
   it.
 - **No check on the source bin.** See above.
-- **No unit of measure conversion.** The minimum, the maximum and the measurement are all assumed to
-  be in the rule's unit. A rule in pallets over a bin content in pieces will be wrong, and nothing
-  currently says so.
+- **A unit of measure nobody set up falls back to base.** `WHA Repl. Unit Convert` answers one when an
+  item has no conversion on record, rather than raising. A run is scheduled and unattended, so erroring
+  would stop every other rule over one item's missing setup — but it does mean a rule can quietly be
+  measured in the wrong unit, and only the rule card would show it.
 - **Getting-started in the customer language** — the language has not been confirmed.

@@ -37,6 +37,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | **A correctness fix and two stale claims.** Replenishment measured mixed units of measure as one number and hid stock held in another; both are fixed and converted through the item's base unit. Two *Not done* lists had gone out of date — analytics said the app ships no role centre, handling units said it holds no contents |
 | Delivered | `FEAT-CORE-001` — **documentation, back-filled.** The foundation shipped in PRs #5–#7 with none, and was the only feature without a docs folder. Four tests added for the enum mechanism that everything else in the app depends on |
 | Delivered | `FEAT-CORE-001` — **the role centre**: a home page owned by the foundation whose tiles are contributed by the features themselves, through an extensible enum. Core names no feature. Nine features contribute; five deliberately do not |
 | Delivered | `FEAT-INT-001` segment 2 — retention: the message log offered to Business Central's own retention policy framework, rather than a bespoke clean-up this feature would have imitated badly |
@@ -376,6 +377,22 @@ warehouse documents, what links a vehicle visit to a put-away). Continuing to bu
 mean guessing at one of those, and every feature built that way adds unvalidated behaviour without
 reducing the risk that Phase 0 invalidates it.
 
+### A pattern worth naming: *Not done* lists go stale
+
+Three times now a *Not done* item has described a limitation that had already been fixed —
+replenishment's "nothing schedules it", analytics' "the app ships no role centre", handling units' "the
+unit holds no item quantities yet". Each was true when written and false by the time somebody read it,
+because the segment that fixed it updated its **own** feature's list and not the one that referenced it
+from elsewhere.
+
+That is a documentation failure with a real cost: these lists are the closest thing the project has to
+a backlog, and a stale one either hides work that is done or hides work that is not. **The check is
+cheap and nobody was doing it** — reading every feature's *Not done* list, not only the one being
+worked on, before claiming anything about what remains.
+
+The same sweep found the replenishment unit-of-measure hazard, which had been sitting in its own list
+since segment 1 described it accurately and nobody acted on it.
+
 ### What back-filling the foundation's documentation found
 
 Writing it required reading every Core object, which is not the same as reading the code while writing
@@ -491,7 +508,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 292 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 296 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

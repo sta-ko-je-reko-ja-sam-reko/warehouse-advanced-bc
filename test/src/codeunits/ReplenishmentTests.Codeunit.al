@@ -10,6 +10,7 @@ codeunit 51007 "WHA Replenishment Tests"
         PickBinTok: Label 'PICK-01', Locked = true;
         BulkBinTok: Label 'BULK-01', Locked = true;
         ItemTok: Label 'WHA-REPL-IT', Locked = true;
+        PalletUomTok: Label 'WHAPAL', Locked = true;
         NoSeriesTok: Label 'WHA-RTEST', Locked = true;
 
     [Test]
@@ -367,6 +368,76 @@ codeunit 51007 "WHA Replenishment Tests"
         Assert.AreEqual(0, ReplenishmentMgt.Run(CopyStr(LocationTok, 1, 10)), 'That pick is drawing from the bulk bin, not this pick face.');
     end;
 
+    [Test]
+    procedure APalletAndLoosePiecesAreNotAddedTogether()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] A handling unit can hold the same item as a pallet on one line and as loose pieces on
+        // another. Adding those two numbers gave a total in no unit at all, and nothing said so.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        EnsurePalletUnit(12);
+        StockInBinAs('WHA-RP-U1', CopyStr(PickBinTok, 1, 20), 2, CopyStr(PalletUomTok, 1, 10));
+        AddLineTo('WHA-RP-U1', 6, '');
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), CopyStr(PickBinTok, 1, 20), 10, 100);
+
+        Assert.AreEqual(30, ReplenishmentMgt.Measure(ReplenishmentRule), 'Two pallets of twelve and six loose pieces is thirty pieces, not eight of something.');
+    end;
+
+    [Test]
+    procedure ARuleWrittenInPalletsIsMeasuredInPallets()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] A minimum of two pallets has to be compared with a measurement in pallets. Measuring
+        // in pieces and comparing with a minimum in pallets is how a full bin looks empty.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        EnsurePalletUnit(12);
+        StockInBinAs('WHA-RP-U2', CopyStr(PickBinTok, 1, 20), 36, '');
+        CreateRuleInUnit(ReplenishmentRule, CopyStr(PickBinTok, 1, 20), 2, 5, CopyStr(PalletUomTok, 1, 10));
+
+        Assert.AreEqual(3, ReplenishmentMgt.Measure(ReplenishmentRule), 'Thirty-six pieces at twelve to a pallet is three pallets.');
+    end;
+
+    [Test]
+    procedure StockInAnotherUnitIsSeenRatherThanIgnored()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] The old behaviour filtered the measurement to the rule's own unit, so a rule written
+        // in pallets could not see the pieces in its own bin. It reported the face empty and raised work
+        // while somebody was picking from it.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        EnsurePalletUnit(12);
+        StockInBinAs('WHA-RP-U3', CopyStr(PickBinTok, 1, 20), 24, '');
+        CreateRuleInUnit(ReplenishmentRule, CopyStr(PickBinTok, 1, 20), 1, 5, CopyStr(PalletUomTok, 1, 10));
+
+        Assert.AreEqual(0, ReplenishmentMgt.Shortfall(ReplenishmentRule), 'Two pallets'' worth of loose pieces satisfies a minimum of one pallet.');
+    end;
+
+    [Test]
+    procedure AUnitNobodySetUpIsTreatedAsBaseRatherThanStoppingTheRun()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [SCENARIO] A replenishment run is scheduled and unattended. Erroring on one item's missing unit
+        // of measure setup would stop every other rule in the run, and a rule measured in the wrong unit
+        // is at least visible on the rule card where a run that never happened is not.
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        StockInBinAs('WHA-RP-U4', CopyStr(PickBinTok, 1, 20), 9, '');
+        CreateRuleInUnit(ReplenishmentRule, CopyStr(PickBinTok, 1, 20), 1, 5, 'NOSUCHUOM');
+
+        Assert.AreEqual(9, ReplenishmentMgt.Measure(ReplenishmentRule), 'An unknown unit falls back to base instead of stopping the run.');
+    end;
+
     local procedure ConfigureReplenishment(ReleaseWork: Boolean)
     var
         Setup: Record "WHA Repl. Setup";
@@ -567,5 +638,59 @@ codeunit 51007 "WHA Replenishment Tests"
         Wave."No." := WaveNo;
         Wave."Location Code" := CopyStr(LocationTok, 1, 10);
         Wave.Insert(true);
+    end;
+
+    local procedure EnsurePalletUnit(PiecesPerPallet: Decimal)
+    var
+        ItemUnitOfMeasure: Record "Item Unit of Measure";
+    begin
+        if ItemUnitOfMeasure.Get(CopyStr(ItemTok, 1, 20), CopyStr(PalletUomTok, 1, 10)) then
+            exit;
+
+        ItemUnitOfMeasure.Init();
+        ItemUnitOfMeasure."Item No." := CopyStr(ItemTok, 1, 20);
+        ItemUnitOfMeasure.Code := CopyStr(PalletUomTok, 1, 10);
+        ItemUnitOfMeasure."Qty. per Unit of Measure" := PiecesPerPallet;
+        ItemUnitOfMeasure.Insert(true);
+    end;
+
+    local procedure StockInBinAs(UnitNo: Code[20]; BinCode: Code[20]; Quantity: Decimal; UnitOfMeasureCode: Code[10])
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+    begin
+        HandlingUnit.Init();
+        HandlingUnit."No." := UnitNo;
+        HandlingUnit."Location Code" := CopyStr(LocationTok, 1, 10);
+        HandlingUnit."Bin Code" := BinCode;
+        HandlingUnit.Insert(true);
+
+        AddLineTo(UnitNo, Quantity, UnitOfMeasureCode);
+    end;
+
+    local procedure AddLineTo(UnitNo: Code[20]; Quantity: Decimal; UnitOfMeasureCode: Code[10])
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := UnitNo;
+        HandlingUnitLine."Item No." := CopyStr(ItemTok, 1, 20);
+        HandlingUnitLine."Unit of Measure Code" := UnitOfMeasureCode;
+        HandlingUnitLine.Quantity := Quantity;
+        HandlingUnitLine.Insert(true);
+    end;
+
+    local procedure CreateRuleInUnit(var ReplenishmentRule: Record "WHA Replenishment Rule"; BinCode: Code[20]; Minimum: Decimal; Maximum: Decimal; UnitOfMeasureCode: Code[10])
+    var
+        Method: Enum "WHA Repl. Method";
+    begin
+        ReplenishmentRule.Init();
+        ReplenishmentRule."Location Code" := CopyStr(LocationTok, 1, 10);
+        ReplenishmentRule."Item No." := CopyStr(ItemTok, 1, 20);
+        ReplenishmentRule."Bin Code" := BinCode;
+        ReplenishmentRule."Unit of Measure Code" := UnitOfMeasureCode;
+        ReplenishmentRule.Validate(Method, Method::WHAHandlingUnits);
+        ReplenishmentRule.Validate("Maximum Quantity", Maximum);
+        ReplenishmentRule.Validate("Minimum Quantity", Minimum);
+        ReplenishmentRule.Insert(true);
     end;
 }

@@ -17,12 +17,18 @@ codeunit 50255 "WHA Repl. Handling Units" implements "WHA IReplMethod"
     /// pick face empty and the rule satisfied.
     /// </summary>
     /// <param name="ReplenishmentRule">The rule whose bin is being measured.</param>
-    /// <returns>The quantity the units in the bin hold of the rule's item.</returns>
+    /// <returns>The quantity the units in the bin hold of the rule's item, in the rule's own unit of measure.</returns>
+    /// <remarks>
+    /// Each unit's lines are converted to the item's base unit before they are added up, because a
+    /// handling unit may hold the same item as a pallet on one line and as loose pieces on another.
+    /// Adding those two numbers together — which is what this did before — produced a total in no unit
+    /// at all, and nothing said so.
+    /// </remarks>
     procedure Measure(var ReplenishmentRule: Record "WHA Replenishment Rule"): Decimal
     var
         HandlingUnit: Record "WHA Handling Unit";
-        HandlingUnitLine: Record "WHA Handling Unit Line";
-        Total: Decimal;
+        UnitConvert: Codeunit "WHA Repl. Unit Convert";
+        BaseTotal: Decimal;
     begin
         HandlingUnit.SetLoadFields("No.");
         HandlingUnit.SetRange("Location Code", ReplenishmentRule."Location Code");
@@ -32,14 +38,30 @@ codeunit 50255 "WHA Repl. Handling Units" implements "WHA IReplMethod"
             exit(0);
 
         repeat
-            HandlingUnitLine.SetRange("Handling Unit No.", HandlingUnit."No.");
-            HandlingUnitLine.SetRange("Item No.", ReplenishmentRule."Item No.");
-            HandlingUnitLine.SetRange("Variant Code", ReplenishmentRule."Variant Code");
-            HandlingUnitLine.CalcSums(Quantity);
-            Total += HandlingUnitLine.Quantity;
+            BaseTotal += BaseHeldBy(HandlingUnit, ReplenishmentRule);
         until HandlingUnit.Next() = 0;
 
-        exit(Total);
+        exit(UnitConvert.FromBase(ReplenishmentRule."Item No.", ReplenishmentRule."Unit of Measure Code", BaseTotal));
+    end;
+
+    local procedure BaseHeldBy(var HandlingUnit: Record "WHA Handling Unit"; var ReplenishmentRule: Record "WHA Replenishment Rule"): Decimal
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        UnitConvert: Codeunit "WHA Repl. Unit Convert";
+        BaseTotal: Decimal;
+    begin
+        HandlingUnitLine.SetLoadFields(Quantity, "Unit of Measure Code");
+        HandlingUnitLine.SetRange("Handling Unit No.", HandlingUnit."No.");
+        HandlingUnitLine.SetRange("Item No.", ReplenishmentRule."Item No.");
+        HandlingUnitLine.SetRange("Variant Code", ReplenishmentRule."Variant Code");
+        if not HandlingUnitLine.FindSet() then
+            exit(0);
+
+        repeat
+            BaseTotal += UnitConvert.ToBase(ReplenishmentRule."Item No.", HandlingUnitLine."Unit of Measure Code", HandlingUnitLine.Quantity);
+        until HandlingUnitLine.Next() = 0;
+
+        exit(BaseTotal);
     end;
 
     /// <summary>

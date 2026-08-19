@@ -72,6 +72,14 @@ idea what a good number is for your warehouse, and it will not pretend to.
 
 Capturing the same period twice replaces the figures rather than keeping two answers.
 
+## Have it captured for you
+
+Ask an administrator to create a **job queue entry** for codeunit **WHA KPI Scheduler**. Each run
+keeps a snapshot of every measure for the period in your analytics setup, so the history builds itself
+and a trend is something you can read rather than something you had to remember to record.
+
+A **Location code** filter on the entry captures one site; leave it empty for the whole company.
+
 ## What analytics does not do yet
 
 - **There is no dock-to-stock figure.** Nothing connects a put-away to the lorry that brought the
@@ -79,8 +87,9 @@ Capturing the same period twice replaces the figures rather than keeping two ans
   of it: how long a vehicle is on site, and how long put-away work waits.
 - **There are no targets.** Nothing is ever red for being a bad number, only for moving the wrong
   way.
-- **Nothing captures figures for you.** Ask an administrator to schedule it if you want a snapshot
-  every week without remembering to take one.
+- **A missed capture is a gap for ever.** A scheduled capture keeps figures for the period ending
+  today. If the schedule breaks for a week, that week is simply missing and nothing fills it in
+  afterwards.
 - **Nothing about people.** How long the work takes against how long it should is in labour
   management, not here.
 - **No charts and no home-page tiles.** Snapshots are a list; to draw a trend, export it.

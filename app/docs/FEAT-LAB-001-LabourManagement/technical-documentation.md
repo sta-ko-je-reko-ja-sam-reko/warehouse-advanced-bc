@@ -90,6 +90,7 @@ per day and per location per day are a `CalcSums` rather than a scan.
 | `WHA Demo Labour` | codeunit | 50355 | `app/src/LabourManagement/codeunits/DemoLabour.Codeunit.al` |
 | `WHA Std. Fixed Plus Unit` | codeunit | 50356 | `app/src/LabourManagement/codeunits/StdFixedPlusUnit.Codeunit.al` |
 | `WHA Std. Fixed Only` | codeunit | 50357 | `app/src/LabourManagement/codeunits/StdFixedOnly.Codeunit.al` |
+| `WHA Labour Scheduler` | codeunit | 50358 | `app/src/LabourManagement/codeunits/LabourScheduler.Codeunit.al` |
 | `WHA Lab. Appl. Area Setup` | tableextension | 50350 | `app/src/LabourManagement/tableextensions/LabApplAreaSetup.TableExt.al` |
 | `WHA Labour Setup` | page | 50350 | `app/src/LabourManagement/pages/LabourSetup.Page.al` |
 | `WHA Labour Standards` | page | 50351 | `app/src/LabourManagement/pages/LabourStandards.Page.al` |
@@ -188,7 +189,9 @@ correct rather than a failure. `Import()` also builds the `WHA-LAB` RapidStart p
 
 ## Tests
 
-`WHA Labour Tests` (codeunit 51010), 13 tests: finished work becomes recorded time with the right
+`WHA Labour Tests` (codeunit 51010), 15 tests. Two cover the scheduled run: it turns finished work
+into measured time, and it refuses when labour management is switched off. The other 13: finished work
+becomes recorded time with the right
 minutes and the right person; the same job is never counted twice; work nobody held is not recorded; a
 standard of two minutes plus half a minute a unit makes ten units a seven-minute job and fourteen
 minutes half the expected pace; a standard written for a location beats the general one; the
@@ -196,6 +199,24 @@ per-job-only basis ignores what was handled; a blocked standard records the time
 a job too long to believe is recorded but not measured; time with no job is recorded as time off the
 jobs; indirect time needs a person and some minutes; a standard of no time at all is refused; a run
 only takes work from the location it was given; and demo idempotency.
+
+
+## Scheduling is the job queue's, not ours
+
+`WHA Labour Scheduler` is a `TableNo`-bound codeunit whose `OnRun` does the generation. A job queue entry points at it,
+and Business Central decides when and how often — the entry's own `Location Code` filter narrows the
+run.
+
+The run is bounded by nothing but the work itself: it reads every completed job and skips the ones
+that already carry an entry. That is idempotent, which is what makes it safe to schedule, and it is
+also why the cost grows with the history — see *Not done*.
+
+**Nothing in this feature stores a recurrence.** BC already schedules, logs failures, retries and
+handles time zones; a *run at 06:00 daily* field here would be a worse copy of one that already
+exists. What the feature owns is *what* to run; *when* belongs to the platform.
+
+The first line of the run is the same `CheckEnabled` guard every write path uses, so a job queue entry
+left in place after somebody switches the feature off stops rather than quietly carrying on.
 
 ## Not done
 
@@ -206,7 +227,9 @@ only takes work from the location it was given; and demo idempotency.
 - **Indirect time is typed in.** There is no clock-on for a break and nothing on the handheld, so
   indirect time is only as complete as somebody's diligence — and the incomplete case makes the
   warehouse look **better** than it is, which is the direction that misleads.
-- **Nothing schedules the generation.** A job queue entry has to be created by an administrator.
+- **The scheduled run is unbounded.** It reads every completed job and skips the ones that already
+  have an entry, which is safe to repeat and costs more each time the history grows. A period to look
+  back over would bound it, and there is nowhere to put one until somebody asks for it.
 - **No standards by item or by zone.** A standard is per task type and location. Picking a pallet of
   bricks and a box of envelopes are the same job to this feature.
 - **Getting-started in the customer language** — the language has not been confirmed.

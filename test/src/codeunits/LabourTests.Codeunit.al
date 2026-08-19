@@ -268,6 +268,43 @@ codeunit 51010 "WHA Labour Tests"
         Assert.AreEqual(CountAfterFirstRun, LabourStandard.Count(), 'A second import should not create more standards.');
     end;
 
+    [Test]
+    procedure TheScheduledGenerationTurnsFinishedWorkIntoTime()
+    var
+        LabourEntry: Record "WHA Labour Entry";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskType: Enum "WHA Warehouse Task Type";
+    begin
+        // [SCENARIO] Segment 1 recorded that nothing schedules the generation. It was never missing logic,
+        // only a runnable object for a job queue entry to point at.
+        ConfigureLabour(0);
+        EnableLabour();
+        CreateFinishedTask(WarehouseTask, 'WHA-LB-S1', TaskType::WHAPick, 5, 30);
+
+        LabourEntry.Reset();
+        Codeunit.Run(Codeunit::"WHA Labour Scheduler", LabourEntry);
+
+        LabourEntry.Reset();
+        LabourEntry.SetRange("Task No.", 'WHA-LB-S1');
+        Assert.IsFalse(LabourEntry.IsEmpty(), 'The scheduled run should have turned the finished job into measured time.');
+    end;
+
+    [Test]
+    procedure TheScheduledGenerationRefusesWhenLabourIsSwitchedOff()
+    var
+        LabourEntry: Record "WHA Labour Entry";
+    begin
+        // [SCENARIO] A job queue entry left in place after somebody switched the feature off must not keep
+        // working.
+        ConfigureLabour(0);
+        DisableLabour();
+        LabourEntry.Reset();
+
+        asserterror Codeunit.Run(Codeunit::"WHA Labour Scheduler", LabourEntry);
+
+        Assert.ExpectedError('not enabled');
+    end;
+
     local procedure ConfigureLabour(MaxJobMinutes: Decimal)
     var
         Setup: Record "WHA Labour Setup";
@@ -354,5 +391,24 @@ codeunit 51010 "WHA Labour Tests"
         Location.Init();
         Location.Code := LocationCode;
         Location.Insert();
+    end;
+
+    local procedure EnableLabour()
+    begin
+        SetLabourEnabled(true);
+    end;
+
+    local procedure DisableLabour()
+    begin
+        SetLabourEnabled(false);
+    end;
+
+    local procedure SetLabourEnabled(Enabled: Boolean)
+    var
+        Setup: Record "WHA Labour Setup";
+    begin
+        Setup.Get();
+        Setup."WHA Enabled" := Enabled;
+        Setup.Modify(true);
     end;
 }

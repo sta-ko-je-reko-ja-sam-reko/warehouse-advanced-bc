@@ -215,8 +215,8 @@ ever existed*: a cancelled job leaves the bin free to ask again.
 - **It does not check that the source bin has anything in it.** A rule pointing at an empty bulk bin
   raises work an operator cannot do. They report it short, which is what the short-pick path in
   `FEAT-TASK-001` exists for.
-- **It does not run itself.** Nothing schedules it; **Replenish now** on the rule list, the API
-  action, or a job queue entry does.
+- **It does not run itself.** Something has to call it: **Replenish now** on the rule list, the API
+  action, **Replenish for this wave** on a wave, or a job queue entry pointed at `WHA Repl. Scheduler`.
 
 ## Enablement
 

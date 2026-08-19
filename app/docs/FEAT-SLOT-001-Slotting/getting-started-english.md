@@ -93,7 +93,22 @@ Once a proposal has been answered it cannot be answered again or deleted.
   aisle as one operation.
 - **It does not know about seasons.** One period, one class — an item that only sells in December is
   class C in June and nothing points that out.
-- **Nothing runs it for you.** Ask an administrator to schedule it if you want it to happen by itself.
+- **A schedule needs one entry per location.** See below — a run has to be told which site it is for,
+  so a company analysing three sites needs three job queue entries.
+
+## Have it run by itself
+
+Ask an administrator to create a **job queue entry** for codeunit **WHA Slotting Scheduler**, and to
+put a **Location code** filter on it naming the site to analyse. When and how often it runs is set on
+the job queue entry, because that is where Business Central keeps schedules.
+
+**The filter is not optional.** Analysing a location replaces everything the app knows about it, so a
+run that swept every site would wipe the classes of any warehouse that simply had a quiet period. A
+run with no location named refuses and says so. If you analyse more than one site, create one entry
+per site.
+
+Each run re-measures the location and then makes its proposals, exactly as **Analyse** and **Propose**
+do by hand.
 
 ## Load sample data
 

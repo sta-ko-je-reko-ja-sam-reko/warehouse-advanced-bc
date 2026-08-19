@@ -37,6 +37,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | Scheduling for `FEAT-SLOT-001`, `FEAT-LAB-001` and `FEAT-KPI-001` — the last piece of catalogue work that needed nothing from Phase 0. Every recurring run in the app can now be given to the job queue |
 | Delivered | `FEAT-REPL-001` segment 2 — looking ahead: a bin weighed against what is already promised out of it, pre-replenishment for one wave, and a codeunit a job queue can call |
 | Delivered | `FEAT-WAVE-001` segment 2 — templates and workload: a reusable wave definition, a scheduled run for the job queue to call, and a cap measured in **minutes of work** rather than a count of jobs. The first time one feature's engineered standards are used to *plan* rather than to measure |
 | Delivered | `FEAT-TASK-001` segment 3 — the source document: work raised from a standard warehouse receipt or shipment, and a job that knows which order it is serving. The first `pageextension` in the app. **The link runs one way** — completing a task tells the document nothing |
@@ -326,12 +327,27 @@ pieces of work needing no customer facts at all:
 - **A scheduling gap named identically by four features.** `FEAT-REPL-001`, `FEAT-SLOT-001`,
   `FEAT-LAB-001` and `FEAT-KPI-001` each recorded "a job queue entry has to be created by an
   administrator" — and none of them had a runnable codeunit for one to point at, so the work could not
-  be scheduled at all. Replenishment's is built. **Slotting, labour and analytics still cannot be
-  scheduled**, and each is one small codeunit of the same shape.
+  be scheduled at all. **All four are now built**, and with wave management's that is every recurring
+  run in the app.
+
+  The four are near-identical by design — a `TableNo` binding so the entry's own `Location Code`
+  filter narrows the run, a `CheckEnabled` guard so an entry left behind after somebody switches a
+  feature off stops rather than carrying on, and no recurrence stored anywhere. **Slotting is the one
+  that is not identical**, and it is the interesting one: `Analyse` clears everything known about a
+  location before it gathers, so a run that swept every location would wipe the classes of any site
+  that merely had a quiet period. Its scheduler therefore **refuses a blank location filter** rather
+  than inventing a sweep with a destructive edge. One entry per site is more setup; it is also the
+  only honest shape.
 
 The lesson is not that the register matters less. It is that "blocked on Phase 0" was asserted about
 eleven features after reading three, and the two cheapest wins in the app were sitting in the other
 eight. Read the whole list before concluding it is empty.
+
+**With both of them delivered, the list really is empty now.** Everything remaining in the catalogue
+needs a customer fact (label stock and printers, item dimensions, what a packer verifies against, a
+bin capacity model) or a scope decision (writing back to warehouse documents, what links a vehicle
+visit to a put-away). Continuing to build would mean guessing at one of those, and every feature built
+this way adds unvalidated behaviour without reducing the risk that Phase 0 invalidates it.
 
 ### What replenishment's second segment argued
 
@@ -380,7 +396,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 275 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 282 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

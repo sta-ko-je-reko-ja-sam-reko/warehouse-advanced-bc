@@ -127,6 +127,16 @@ Get-ChildItem "$art\us\Extensions" -Filter "*.app" |
 - **Polymorphic table logic is mandatory.** No business logic in a table trigger, a
   `tableextension` trigger, or a subscriber body — each delegates one line to a swappable
   interface implementation.
+- **No custom event publishers in this app.** Do not add `[IntegrationEvent]` or
+  `[BusinessEvent]`. Extension happens through **interface implementations**, not events: an
+  extensible `enum … implements "<Interface>"` with a `DefaultImplementation`, where each value
+  binds its own implementation. A dependent app extends the app by adding an `enumextension`
+  value with its own implementation — never by subscribing to our event.
+  The single exception the polymorphic pattern allows is an `OnResolve…` publisher whose only
+  purpose is to let a dependent app **substitute a default interface implementation** where no
+  setup field or reliable early call site exists. Nothing else justifies a publisher.
+  (Subscribing to *Microsoft's* publishers is unaffected — that is how we react to base app
+  events, and those subscriber bodies still delegate one line to an interface.)
 - **Every field:** `Caption` + `ToolTip` (author the ToolTip on the **table field**, not the
   page field). Every table: `DataClassification`, PK key named `PK`, `Clustered = true`.
 - **Every page:** `ApplicationArea`, explicit `UsageCategory`. Enablement UI (setup page,

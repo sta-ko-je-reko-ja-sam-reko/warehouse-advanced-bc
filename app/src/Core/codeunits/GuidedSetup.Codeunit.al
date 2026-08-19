@@ -20,7 +20,8 @@ codeunit 50002 "WHA Guided Setup"
         HandlingUnitEndingNoTok: Label 'HU999999', Locked = true;
 
     /// <summary>
-    /// Fills the step buffer with every registered setup step and computes each step's status.
+    /// Fills the step buffer with the foundation step plus every feature that registers one, then
+    /// computes each step's status.
     /// </summary>
     /// <param name="TempSetupStep">The temporary buffer to populate. Existing rows are discarded.</param>
     internal procedure PopulateSteps(var TempSetupStep: Record "WHA Setup Step" temporary)
@@ -29,7 +30,7 @@ codeunit 50002 "WHA Guided Setup"
         TempSetupStep.DeleteAll();
 
         AddFoundationStep(TempSetupStep);
-        OnRegisterSetupSteps(TempSetupStep);
+        AddFeatureSteps(TempSetupStep);
 
         ComputeStatuses(TempSetupStep);
 
@@ -53,17 +54,20 @@ codeunit 50002 "WHA Guided Setup"
     /// session, because the hub owns the single deferred restart.
     /// </summary>
     /// <param name="TempSetupStep">The step the choices belong to.</param>
+    /// <param name="Enable">Whether the feature should be switched on.</param>
     /// <param name="CreateNoSeries">Whether to create and assign the feature's number series.</param>
     /// <param name="ImportDemoData">Whether to load the feature's sample data.</param>
-    internal procedure ApplyWizardChoices(var TempSetupStep: Record "WHA Setup Step" temporary; CreateNoSeries: Boolean; ImportDemoData: Boolean)
+    internal procedure ApplyWizardChoices(var TempSetupStep: Record "WHA Setup Step" temporary; Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     var
         FeatureMgt: Codeunit "WHA Feature Mgt.";
+        FeatureSetup: Interface "WHA IFeatureSetup";
     begin
-        if CreateNoSeries then
-            EnsureHandlingUnitNoSeries();
-
-        if ImportDemoData then
-            ImportDemoDataForStep(TempSetupStep);
+        if TempSetupStep."Has Toggle" then begin
+            FeatureSetup := TempSetupStep.Feature;
+            FeatureSetup.ApplyChoices(Enable, CreateNoSeries, ImportDemoData);
+        end else
+            if CreateNoSeries then
+                EnsureHandlingUnitNoSeries();
 
         FeatureMgt.RefreshExperienceAreas();
     end;
@@ -111,6 +115,17 @@ codeunit 50002 "WHA Guided Setup"
         TempSetupStep.Description := CopyStr(FoundationStepDescriptionLbl, 1, MaxStrLen(TempSetupStep.Description));
         TempSetupStep."Setup Page ID" := Page::"WHA Warehouse Setup";
         TempSetupStep.Insert(true);
+    end;
+
+    local procedure AddFeatureSteps(var TempSetupStep: Record "WHA Setup Step" temporary)
+    var
+        FeatureSetup: Interface "WHA IFeatureSetup";
+        Ordinal: Integer;
+    begin
+        foreach Ordinal in Enum::"WHA Feature".Ordinals() do begin
+            FeatureSetup := Enum::"WHA Feature".FromInteger(Ordinal);
+            FeatureSetup.RegisterStep(TempSetupStep);
+        end;
     end;
 
     local procedure ComputeStatuses(var TempSetupStep: Record "WHA Setup Step" temporary)
@@ -187,18 +202,4 @@ codeunit 50002 "WHA Guided Setup"
         NoSeriesLine.Insert(true);
     end;
 
-    local procedure ImportDemoDataForStep(var TempSetupStep: Record "WHA Setup Step" temporary)
-    begin
-        if TempSetupStep."Step No." = 0 then
-            exit;
-    end;
-
-    /// <summary>
-    /// Raised when the guided setup builds its step list. Subscribe to add a feature's step to the buffer.
-    /// </summary>
-    /// <param name="TempSetupStep">The buffer to add a step to.</param>
-    [IntegrationEvent(false, false)]
-    local procedure OnRegisterSetupSteps(var TempSetupStep: Record "WHA Setup Step" temporary)
-    begin
-    end;
 }

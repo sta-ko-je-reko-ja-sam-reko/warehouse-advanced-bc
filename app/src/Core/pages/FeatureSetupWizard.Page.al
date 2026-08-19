@@ -187,6 +187,6 @@ page 50002 "WHA Feature Setup Wizard"
     var
         GuidedSetup: Codeunit "WHA Guided Setup";
     begin
-        GuidedSetup.ApplyWizardChoices(TempSetupStep, DoCreateNoSeries, DoImportDemoData);
+        GuidedSetup.ApplyWizardChoices(TempSetupStep, DoEnable, DoCreateNoSeries, DoImportDemoData);
     end;
 }

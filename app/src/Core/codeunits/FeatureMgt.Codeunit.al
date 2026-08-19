@@ -17,13 +17,16 @@ codeunit 50001 "WHA Feature Mgt."
     /// <param name="Feature">The feature to test.</param>
     /// <returns>True when the feature is enabled.</returns>
     /// <remarks>
-    /// No toggleable features have shipped yet, so this always returns false. Each feature adds its own
-    /// branch here (reading its setup table's Enabled flag) as it is built. The flag is safe to cache for
-    /// the session because changing it restarts the session.
+    /// Resolved through the feature enum's interface implementation, so a feature answers for itself and
+    /// no branch is added here as features ship. The flag is safe to cache for the session because
+    /// changing it restarts the session.
     /// </remarks>
     procedure IsEnabled(Feature: Enum "WHA Feature"): Boolean
+    var
+        FeatureSetup: Interface "WHA IFeatureSetup";
     begin
-        exit(false);
+        FeatureSetup := Feature;
+        exit(FeatureSetup.IsEnabled());
     end;
 
     /// <summary>

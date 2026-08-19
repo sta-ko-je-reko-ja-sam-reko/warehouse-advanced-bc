@@ -36,6 +36,19 @@ codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
     end;
 
     /// <summary>
+    /// Validates a change to the wave number series.
+    /// </summary>
+    /// <param name="WarehouseSetup">The setup record being validated.</param>
+    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
+    procedure Validate_WaveNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup")
+    begin
+        if WarehouseSetup."Wave Nos." = xWarehouseSetup."Wave Nos." then
+            exit;
+
+        CheckSeriesExists(WarehouseSetup."Wave Nos.");
+    end;
+
+    /// <summary>
     /// Ensures the single setup record exists, creating it if it does not.
     /// </summary>
     /// <param name="WarehouseSetup">The setup record to materialise.</param>
@@ -57,12 +70,14 @@ codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
     var
         WarehouseSetup: Record "WHA Warehouse Setup";
     begin
-        WarehouseSetup.SetLoadFields("Handling Unit Nos.", "Warehouse Task Nos.");
+        WarehouseSetup.SetLoadFields("Handling Unit Nos.", "Warehouse Task Nos.", "Wave Nos.");
         if not WarehouseSetup.Get() then
             exit(false);
         if WarehouseSetup."Handling Unit Nos." = '' then
             exit(false);
-        exit(WarehouseSetup."Warehouse Task Nos." <> '');
+        if WarehouseSetup."Warehouse Task Nos." = '' then
+            exit(false);
+        exit(WarehouseSetup."Wave Nos." <> '');
     end;
 
     local procedure CheckSeriesExists(SeriesCode: Code[20])

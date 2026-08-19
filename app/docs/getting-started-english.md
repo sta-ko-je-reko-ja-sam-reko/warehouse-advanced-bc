@@ -27,6 +27,8 @@ product does not include.
   urgency, hand the next one to whoever asks for work, and see who did what and when.
 - [Handheld](FEAT-RF-001-MobileDevice/getting-started-english.md) — the scanner screen the floor
   actually uses: sign in, take the next job, scan your way through it.
+- [Wave management](FEAT-WAVE-001-WaveManagement/getting-started-english.md) — gather work into a
+  batch and send it to the floor together, so a round starts and finishes as a round.
 
 ### Talking to other systems
 

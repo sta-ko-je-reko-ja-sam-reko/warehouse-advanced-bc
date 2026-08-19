@@ -90,6 +90,11 @@ page 50203 "WHA API Warehouse Task"
                 {
                     Caption = 'Due date';
                 }
+                field(waveNumber; Rec."Wave No.")
+                {
+                    Caption = 'Wave number';
+                    Editable = false;
+                }
                 field(assignedToUserId; Rec."Assigned To User ID")
                 {
                     Caption = 'Assigned to user ID';

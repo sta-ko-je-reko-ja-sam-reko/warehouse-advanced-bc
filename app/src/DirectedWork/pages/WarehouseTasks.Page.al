@@ -55,6 +55,9 @@ page 50202 "WHA Warehouse Tasks"
                 field("Short Reason"; Rec."Short Reason")
                 {
                 }
+                field("Wave No."; Rec."Wave No.")
+                {
+                }
                 field("Assigned To User ID"; Rec."Assigned To User ID")
                 {
                 }

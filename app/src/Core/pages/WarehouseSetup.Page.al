@@ -25,6 +25,9 @@ page 50000 "WHA Warehouse Setup"
                 field("Warehouse Task Nos."; Rec."Warehouse Task Nos.")
                 {
                 }
+                field("Wave Nos."; Rec."Wave Nos.")
+                {
+                }
             }
         }
     }

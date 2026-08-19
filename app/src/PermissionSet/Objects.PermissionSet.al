@@ -4,6 +4,7 @@ using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.MobileDevice;
+using WarehouseAdvanced.WaveManagement;
 
 permissionset 50000 "WHA Objects"
 {
@@ -80,5 +81,19 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA RF Feature Setup" = X,
         codeunit "WHA RF App Area Sub." = X,
         codeunit "WHA Demo RF Device" = X,
-        page "WHA API Demo RF Device" = X;
+        page "WHA API Demo RF Device" = X,
+        table "WHA Wave Setup" = X,
+        table "WHA Wave" = X,
+        page "WHA Wave Setup" = X,
+        page "WHA Waves" = X,
+        page "WHA Wave Card" = X,
+        page "WHA API Wave" = X,
+        codeunit "WHA Wave Logic" = X,
+        codeunit "WHA Wave Default Strategy" = X,
+        codeunit "WHA Wave Due Strategy" = X,
+        codeunit "WHA Wave Strategy Filters" = X,
+        codeunit "WHA Wave Feature Setup" = X,
+        codeunit "WHA Wave App Area Sub." = X,
+        codeunit "WHA Demo Wave" = X,
+        page "WHA API Demo Wave" = X;
 }

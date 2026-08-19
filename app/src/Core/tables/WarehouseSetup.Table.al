@@ -38,6 +38,18 @@ table 50000 "WHA Warehouse Setup"
                 Logic().Validate_WarehouseTaskNos(Rec, xRec);
             end;
         }
+        field(30; "Wave Nos."; Code[20])
+        {
+            Caption = 'Wave nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to waves.';
+            TableRelation = "No. Series";
+
+            trigger OnValidate()
+            begin
+                Logic().Validate_WaveNos(Rec, xRec);
+            end;
+        }
     }
 
     keys

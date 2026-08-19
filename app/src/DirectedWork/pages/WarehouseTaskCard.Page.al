@@ -76,6 +76,9 @@ page 50201 "WHA Warehouse Task Card"
                 field("Due Date"; Rec."Due Date")
                 {
                 }
+                field("Wave No."; Rec."Wave No.")
+                {
+                }
                 field("Assigned To User ID"; Rec."Assigned To User ID")
                 {
                 }

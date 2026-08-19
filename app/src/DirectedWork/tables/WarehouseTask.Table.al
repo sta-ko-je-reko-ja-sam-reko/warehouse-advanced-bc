@@ -5,6 +5,7 @@ using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 using System.Security.AccessControl;
 using WarehouseAdvanced.HandlingUnit;
+using WarehouseAdvanced.WaveManagement;
 
 table 50201 "WHA Warehouse Task"
 {
@@ -151,6 +152,14 @@ table 50201 "WHA Warehouse Task"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies the date the work is needed by. Tasks of the same priority are offered in due date order.';
         }
+        field(33; "Wave No."; Code[20])
+        {
+            Caption = 'Wave no.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the wave this job was gathered into, if any. Work in a wave reaches the floor together.';
+            TableRelation = "WHA Wave"."No.";
+            Editable = false;
+        }
         field(40; "Assigned To User ID"; Code[50])
         {
             Caption = 'Assigned to user ID';
@@ -199,6 +208,12 @@ table 50201 "WHA Warehouse Task"
         {
         }
         key(HandlingUnit; "Handling Unit No.")
+        {
+        }
+        key(Wave; "Wave No.", Status)
+        {
+        }
+        key(Due; "Due Date", Priority)
         {
         }
     }

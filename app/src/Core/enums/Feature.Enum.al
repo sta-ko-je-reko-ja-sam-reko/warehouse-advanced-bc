@@ -4,6 +4,7 @@ using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.MobileDevice;
+using WarehouseAdvanced.WaveManagement;
 
 enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
 {
@@ -34,5 +35,10 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Handheld';
         Implementation = "WHA IFeatureSetup" = "WHA RF Feature Setup";
+    }
+    value(5; WHAWaveManagement)
+    {
+        Caption = 'Wave management';
+        Implementation = "WHA IFeatureSetup" = "WHA Wave Feature Setup";
     }
 }

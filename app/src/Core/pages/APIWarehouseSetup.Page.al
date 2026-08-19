@@ -34,6 +34,10 @@ page 50003 "WHA API Warehouse Setup"
                 {
                     Caption = 'Warehouse task number series';
                 }
+                field(waveNumberSeries; Rec."Wave Nos.")
+                {
+                    Caption = 'Wave number series';
+                }
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
                 {
                     Caption = 'Last modified date time';

@@ -7,6 +7,7 @@ using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
+using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.WaveManagement;
 
@@ -38,5 +39,7 @@ permissionset 50001 "WHA Read"
         tabledata "WHA Count Setup" = R,
         tabledata "WHA Count Sheet" = R,
         tabledata "WHA Count Sheet Line" = R,
+        tabledata "WHA Quality Hold Setup" = R,
+        tabledata "WHA Quality Hold" = R,
         tabledata "WHA Demo Data" = R;
 }

@@ -7,6 +7,7 @@ using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
+using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.WaveManagement;
 
@@ -64,5 +65,10 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Counting';
         Implementation = "WHA IFeatureSetup" = "WHA Count Feature Setup";
+    }
+    value(10; WHAQualityHold)
+    {
+        Caption = 'Quality hold';
+        Implementation = "WHA IFeatureSetup" = "WHA QC Feature Setup";
     }
 }

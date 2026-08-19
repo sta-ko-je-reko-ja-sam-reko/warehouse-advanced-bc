@@ -7,6 +7,7 @@ using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
+using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.WaveManagement;
 
@@ -155,5 +156,21 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Count Feature Setup" = X,
         codeunit "WHA Count App Area Sub." = X,
         codeunit "WHA Demo Count" = X,
-        page "WHA API Demo Count" = X;
+        page "WHA API Demo Count" = X,
+        table "WHA Quality Hold Setup" = X,
+        table "WHA Quality Hold" = X,
+        page "WHA Quality Hold Setup" = X,
+        page "WHA Quality Holds" = X,
+        page "WHA Quality Hold Card" = X,
+        page "WHA API Quality Hold" = X,
+        codeunit "WHA Quality Hold Logic" = X,
+        codeunit "WHA Quality Hold Mgt." = X,
+        codeunit "WHA Disp. Pending" = X,
+        codeunit "WHA Disp. Release" = X,
+        codeunit "WHA Disp. Rework" = X,
+        codeunit "WHA Disp. Scrap" = X,
+        codeunit "WHA QC Feature Setup" = X,
+        codeunit "WHA QC App Area Sub." = X,
+        codeunit "WHA Demo Quality Hold" = X,
+        page "WHA API Demo Quality Hold" = X;
 }

@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.DockYard;
 
+using Microsoft.Foundation.NoSeries;
+
 table 50450 "WHA Dock Setup"
 {
     Caption = 'Dock and yard setup';
@@ -43,6 +45,13 @@ table 50450 "WHA Dock Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies how long after its booked time a vehicle that has not arrived counts as late. It changes what is highlighted, never what is allowed.';
             MinValue = 0;
+        }
+        field(90; "Dock Appointment Nos."; Code[20])
+        {
+            Caption = 'Dock appointment nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to dock appointments.';
+            TableRelation = "No. Series";
         }
     }
 

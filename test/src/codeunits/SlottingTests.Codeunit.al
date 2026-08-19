@@ -376,7 +376,7 @@ codeunit 51011 "WHA Slotting Tests"
     var
         NoSeries: Record "No. Series";
         NoSeriesLine: Record "No. Series Line";
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        TaskSetup: Record "WHA Warehouse Task Setup";
     begin
         if not NoSeries.Get('WHA-STEST') then begin
             NoSeries.Init();
@@ -392,15 +392,15 @@ codeunit 51011 "WHA Slotting Tests"
             NoSeriesLine.Insert(true);
         end;
 
-        WarehouseSetup.Reset();
-        if not WarehouseSetup.Get() then begin
-            WarehouseSetup.Init();
-            WarehouseSetup.Insert(true);
+        TaskSetup.Reset();
+        if not TaskSetup.Get() then begin
+            TaskSetup.Init();
+            TaskSetup.Insert(true);
         end;
-        if WarehouseSetup."Warehouse Task Nos." <> '' then
+        if TaskSetup."Warehouse Task Nos." <> '' then
             exit;
 
-        WarehouseSetup.Validate("Warehouse Task Nos.", 'WHA-STEST');
-        WarehouseSetup.Modify(true);
+        TaskSetup.Validate("Warehouse Task Nos.", 'WHA-STEST');
+        TaskSetup.Modify(true);
     end;
 }

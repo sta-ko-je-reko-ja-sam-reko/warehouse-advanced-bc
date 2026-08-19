@@ -47,7 +47,7 @@ and the life cycle. **Segment 1 does not adjust inventory** — see *Not done*.
 
 | Field | Type | Notes |
 |---|---|---|
-| `No.` | `Code[20]` | Primary key, from the foundation number series |
+| `No.` | `Code[20]` | Primary key, from this feature's own number series |
 | `Description` | `Text[100]` | The aisle or the round the sheet covers |
 | `Location Code` | `Code[10]` | The location being counted. **Required before filling** |
 | `Status` | `Enum "WHA Count Status"` | Open / Counting / Counted / Closed / Cancelled. Not editable |
@@ -124,7 +124,7 @@ first one meant it.
 | `WHA Counting Tests` | codeunit | 51008 | `test/src/codeunits/CountingTests.Codeunit.al` |
 
 All in namespace `WarehouseAdvanced.Counting`, from the reserved block `50500..50549`. Core gained a
-`WHA Feature` enum value and a fourth number series (see *Enablement*).
+`WHA Feature` enum value; the count sheet numbering lives on this feature's own setup.
 
 ## Selections — what a sheet counts
 
@@ -192,9 +192,10 @@ Per `_patterns/feature-setup-and-toggle.md`: `WHA Feature` gained `WHACounting` 
 through this feature's own tableextension; the setup page is `ApplicationArea = All` while the count
 pages carry `WHACounting`. Every API write path and bound action calls `CheckEnabled`.
 
-**The foundation now creates four number series** (`WHA-HU`, `WHA-TASK`, `WHA-WAVE`, `WHA-COUNT`) and
-`IsComplete` checks all four, so a company that ran the foundation step before this feature shipped
-shows it as *not started* again until it is re-run. Re-running is idempotent.
+**The count sheet number series lives on this feature's own setup**
+(`WHA Count Setup."Count Sheet Nos."`), with the feature's own application area, and this feature's
+guided-setup step creates `WHA-COUNT` when numbering is asked for. The foundation neither creates it
+nor checks it.
 
 ## MCP configuration
 

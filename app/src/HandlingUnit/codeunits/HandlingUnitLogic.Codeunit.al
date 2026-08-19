@@ -1,14 +1,13 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
 using Microsoft.Foundation.NoSeries;
-using WarehouseAdvanced.Core;
 
 codeunit 50050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
 {
     Access = Public;
 
     var
-        NoSeriesMissingErr: Label 'Set the handling unit number series in the warehouse advanced setup before creating handling units.';
+        NoSeriesMissingErr: Label 'Set the handling unit number series on the handling unit setup page before creating handling units.';
         SelfParentErr: Label 'A handling unit cannot be placed inside itself.';
         CycleErr: Label 'Handling unit %1 cannot be placed inside %2, because %2 is already inside %1.', Comment = '%1 = the handling unit being changed, %2 = the proposed parent handling unit';
         NestingNotAllowedErr: Label 'Nesting is switched off in the handling unit setup, so %1 cannot be placed inside another handling unit.', Comment = '%1 = the handling unit being changed';
@@ -21,19 +20,19 @@ codeunit 50050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
     /// <param name="HandlingUnit">The handling unit being inserted.</param>
     procedure Trigger_OnInsert(var HandlingUnit: Record "WHA Handling Unit")
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        Setup: Record "WHA Handling Unit Setup";
         NoSeries: Codeunit "No. Series";
     begin
         if HandlingUnit."No." <> '' then
             exit;
 
-        WarehouseSetup.SetLoadFields("Handling Unit Nos.");
-        if not WarehouseSetup.Get() then
+        Setup.SetLoadFields("Handling Unit Nos.");
+        if not Setup.Get() then
             Error(NoSeriesMissingErr);
-        if WarehouseSetup."Handling Unit Nos." = '' then
+        if Setup."Handling Unit Nos." = '' then
             Error(NoSeriesMissingErr);
 
-        HandlingUnit."No." := NoSeries.GetNextNo(WarehouseSetup."Handling Unit Nos.");
+        HandlingUnit."No." := NoSeries.GetNextNo(Setup."Handling Unit Nos.");
     end;
 
     /// <summary>

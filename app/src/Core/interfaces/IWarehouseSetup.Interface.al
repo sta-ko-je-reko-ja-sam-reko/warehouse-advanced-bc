@@ -3,49 +3,16 @@ namespace WarehouseAdvanced.Core;
 interface "WHA IWarehouseSetup"
 {
     /// <summary>
-    /// Validates a change to the handling unit number series.
-    /// </summary>
-    /// <param name="WarehouseSetup">The setup record being validated.</param>
-    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
-    procedure Validate_HandlingUnitNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup");
-
-    /// <summary>
-    /// Validates a change to the warehouse task number series.
-    /// </summary>
-    /// <param name="WarehouseSetup">The setup record being validated.</param>
-    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
-    procedure Validate_WarehouseTaskNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup");
-
-    /// <summary>
-    /// Validates a change to the wave number series.
-    /// </summary>
-    /// <param name="WarehouseSetup">The setup record being validated.</param>
-    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
-    procedure Validate_WaveNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup");
-
-    /// <summary>
-    /// Validates a change to the count sheet number series.
-    /// </summary>
-    /// <param name="WarehouseSetup">The setup record being validated.</param>
-    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
-    procedure Validate_CountSheetNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup");
-
-    /// <summary>
-    /// Validates a change to the dock appointment number series.
-    /// </summary>
-    /// <param name="WarehouseSetup">The setup record being validated.</param>
-    /// <param name="xWarehouseSetup">The setup record as it was before the change.</param>
-    procedure Validate_DockAppointmentNos(var WarehouseSetup: Record "WHA Warehouse Setup"; xWarehouseSetup: Record "WHA Warehouse Setup");
-
-    /// <summary>
     /// Ensures the single setup record exists, creating it if it does not.
     /// </summary>
     /// <param name="WarehouseSetup">The setup record to materialise.</param>
     procedure EnsureExists(var WarehouseSetup: Record "WHA Warehouse Setup");
 
     /// <summary>
-    /// Determines whether the foundation setup has been completed.
+    /// Determines whether the foundation setup has been completed. The foundation holds no feature
+    /// settings - each feature owns its own, numbering included - so the only thing it can be asked is
+    /// whether the record every feature builds on exists.
     /// </summary>
-    /// <returns>True when every prerequisite the guided setup checks for is populated.</returns>
+    /// <returns>True when the foundation setup record is present.</returns>
     procedure IsComplete(): Boolean;
 }

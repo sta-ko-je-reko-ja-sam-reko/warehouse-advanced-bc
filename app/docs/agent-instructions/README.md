@@ -11,7 +11,6 @@ configuration. One configuration ↔ one agent ↔ one file.
 
 | MCP configuration (in BC) | API group | Instructions | Paste into |
 |---|---|---|---|
-| `Warehouse Advanced - Core` | `core` | [WarehouseAdvanced-Core.md](WarehouseAdvanced-Core.md) | The agent bound to the Core configuration |
 | `Warehouse Advanced - Handling Units` | `handlingUnit` | [WarehouseAdvanced-HandlingUnits.md](WarehouseAdvanced-HandlingUnits.md) | The agent bound to the Handling Units configuration |
 | `Warehouse Advanced - Demo Handling Units` | `demoHandlingUnit` | [WarehouseAdvanced-Demo-HandlingUnits.md](WarehouseAdvanced-Demo-HandlingUnits.md) | The agent bound to the Demo Handling Units configuration |
 | `Warehouse Advanced - Directed Work` | `directedWork` | [WarehouseAdvanced-DirectedWork.md](WarehouseAdvanced-DirectedWork.md) | The agent bound to the Directed Work configuration |
@@ -66,5 +65,6 @@ file is updated in the same change. Adding a configuration means adding a file a
 
 `_patterns/mcp-configuration-instructions.md` places these at
 `docs/FEAT-<MCP>/agent-instructions/`, assuming one feature owns the MCP surface. Here the
-configurations are **per module** — the foundation owns one, each feature owns its own — so no
-single `FEAT-` folder is their home. They live at the docs root instead, with the index above.
+configurations are **per feature** — one each, and the foundation owns none, because it holds no data
+worth exposing — so no single `FEAT-` folder is their home. They live at the docs root instead, with
+the index above.

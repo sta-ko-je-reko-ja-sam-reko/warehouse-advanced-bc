@@ -26,6 +26,12 @@ table 50001 "WHA Setup Step"
             DataClassification = SystemMetadata;
             ToolTip = 'Specifies whether the step configures a feature that can be switched on and off. Foundation steps are always on.';
         }
+        field(4; "Has No. Series"; Boolean)
+        {
+            Caption = 'Has number series';
+            DataClassification = SystemMetadata;
+            ToolTip = 'Specifies whether the feature numbers anything of its own. The wizard only offers to create numbering for the features that have some, and the foundation knows nothing about which series those are.';
+        }
         field(10; Name; Text[100])
         {
             Caption = 'Feature';

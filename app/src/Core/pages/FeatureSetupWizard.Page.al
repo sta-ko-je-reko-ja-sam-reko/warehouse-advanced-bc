@@ -52,6 +52,7 @@ page 50002 "WHA Feature Setup Wizard"
                 {
                     Caption = 'Create and assign number series';
                     ToolTip = 'Specifies whether the number series this feature needs is created and assigned automatically.';
+                    Visible = HasNoSeries;
                 }
                 field(OptionDemoData; DoImportDemoData)
                 {
@@ -139,6 +140,7 @@ page 50002 "WHA Feature Setup Wizard"
         FeatureName: Text[100];
         FeatureDescription: Text[250];
         HasToggle: Boolean;
+        HasNoSeries: Boolean;
         DoEnable: Boolean;
         DoCreateNoSeries: Boolean;
         DoImportDemoData: Boolean;
@@ -163,8 +165,9 @@ page 50002 "WHA Feature Setup Wizard"
         FeatureName := SetupStep.Name;
         FeatureDescription := SetupStep.Description;
         HasToggle := SetupStep."Has Toggle";
+        HasNoSeries := SetupStep."Has No. Series";
         DoEnable := SetupStep.Enabled;
-        DoCreateNoSeries := not SetupStep."Has Toggle";
+        DoCreateNoSeries := SetupStep."Has No. Series";
         DoImportDemoData := false;
     end;
 

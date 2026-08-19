@@ -42,6 +42,15 @@ page 50150 "WHA Wave Setup"
                     ApplicationArea = WHAWaveManagement;
                 }
             }
+            group(Numbering)
+            {
+                Caption = 'Numbering';
+
+                field("Wave Nos."; Rec."Wave Nos.")
+                {
+                    ApplicationArea = WHAWaveManagement;
+                }
+            }
         }
     }
 

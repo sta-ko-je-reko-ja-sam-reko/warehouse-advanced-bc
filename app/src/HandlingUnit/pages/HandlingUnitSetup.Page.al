@@ -38,6 +38,15 @@ page 50050 "WHA Handling Unit Setup"
                     ApplicationArea = WHAHandlingUnits;
                 }
             }
+            group(Numbering)
+            {
+                Caption = 'Numbering';
+
+                field("Handling Unit Nos."; Rec."Handling Unit Nos.")
+                {
+                    ApplicationArea = WHAHandlingUnits;
+                }
+            }
         }
     }
 

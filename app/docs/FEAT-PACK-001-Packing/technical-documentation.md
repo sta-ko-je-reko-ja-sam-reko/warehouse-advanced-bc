@@ -123,7 +123,7 @@ app-area subscriber sets it from `Enabled`; the setup page is `ApplicationArea =
 and session pages carry `WHAPacking`. The API pages guard their write triggers with `CheckEnabled`.
 
 **No number series of its own.** The carton is numbered as the handling unit it is, from the
-foundation series; the session is numbered by the platform. Adding a fourth foundation series for a
+handling unit series, which now lives on the handling unit setup; the session is numbered by the platform. Adding a series of its own for a
 record nobody quotes would have been ceremony.
 
 ## MCP configuration

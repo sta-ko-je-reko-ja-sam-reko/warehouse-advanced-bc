@@ -1,7 +1,6 @@
 namespace WarehouseAdvanced.WaveManagement;
 
 using Microsoft.Foundation.NoSeries;
-using WarehouseAdvanced.Core;
 using WarehouseAdvanced.DirectedWork;
 
 codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
@@ -9,7 +8,7 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
     Access = Public;
 
     var
-        NoSeriesMissingErr: Label 'Set the wave number series in the warehouse advanced setup before creating waves.';
+        NoSeriesMissingErr: Label 'Set the wave number series on the wave setup page before creating waves.';
         NotOpenErr: Label 'Wave %1 is %2, so its work can no longer be changed.', Comment = '%1 = the wave number, %2 = the current status';
         ReleaseNotAllowedErr: Label 'Only an open wave can be released. Wave %1 is %2.', Comment = '%1 = the wave number, %2 = the current status';
         EmptyWaveErr: Label 'Wave %1 holds no work, so there is nothing to release.', Comment = '%1 = the wave number';
@@ -273,15 +272,15 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
 
     local procedure NextWaveNo(): Code[20]
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        Setup: Record "WHA Wave Setup";
         NoSeries: Codeunit "No. Series";
     begin
-        WarehouseSetup.SetLoadFields("Wave Nos.");
-        if not WarehouseSetup.Get() then
+        Setup.SetLoadFields("Wave Nos.");
+        if not Setup.Get() then
             Error(NoSeriesMissingErr);
-        if WarehouseSetup."Wave Nos." = '' then
+        if Setup."Wave Nos." = '' then
             Error(NoSeriesMissingErr);
 
-        exit(NoSeries.GetNextNo(WarehouseSetup."Wave Nos."));
+        exit(NoSeries.GetNextNo(Setup."Wave Nos."));
     end;
 }

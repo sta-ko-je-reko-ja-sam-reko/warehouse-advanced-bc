@@ -31,8 +31,8 @@ different configuration and a different agent handle those.
 ## What this tool does NOT do
 
 - **It does not switch packing on.** An administrator does that in the guided setup, and it restarts
-  their session. Handling units must be on too, with the foundation number series created — a carton
-  is a handling unit and needs a number.
+  their session. Handling units must be on too, with its own number series created — a carton is a
+  handling unit and needs a number.
 - It does not pack anything else, and no agent can. Packing happens at the bench.
 - It does not remove sample data. A closed packing session cannot be deleted at all.
 

@@ -6,21 +6,16 @@ codeunit 50006 "WHA MCP Setup"
 {
     Access = Internal;
 
-    var
-        CoreConfigNameTok: Label 'Warehouse Advanced - Core', Locked = true;
-        CoreConfigDescLbl: Label 'Foundation setup tools for warehouse advanced. Read the Warehouse Advanced Core agent instructions before use.';
-
     /// <summary>
-    /// Creates or refreshes every MCP configuration the app owns: the foundation configuration, plus
-    /// one per feature. Idempotent, so it is safe to run on both install and upgrade.
+    /// Creates or refreshes every MCP configuration the app owns, one per feature. The foundation owns
+    /// none: it holds no data worth exposing, because every setting belongs to the feature that uses it.
+    /// Idempotent, so it is safe to run on both install and upgrade.
     /// </summary>
     internal procedure EnsureConfigurations()
     var
         FeatureSetup: Interface "WHA IFeatureSetup";
         Ordinal: Integer;
     begin
-        EnsureCoreConfiguration();
-
         foreach Ordinal in Enum::"WHA Feature".Ordinals() do begin
             FeatureSetup := Enum::"WHA Feature".FromInteger(Ordinal);
             FeatureSetup.RegisterMcpConfiguration();
@@ -78,14 +73,5 @@ codeunit 50006 "WHA MCP Setup"
         MCPConfig: Codeunit "MCP Config";
     begin
         MCPConfig.ActivateConfiguration(ConfigId, true);
-    end;
-
-    local procedure EnsureCoreConfiguration()
-    var
-        ConfigId: Guid;
-    begin
-        ConfigId := EnsureConfiguration(CoreConfigNameTok, CoreConfigDescLbl);
-        EnsureApiTool(ConfigId, Page::"WHA API Warehouse Setup", false, true, false);
-        Activate(ConfigId);
     end;
 }

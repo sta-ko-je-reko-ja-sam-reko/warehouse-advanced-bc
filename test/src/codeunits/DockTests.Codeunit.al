@@ -301,6 +301,23 @@ codeunit 51012 "WHA Dock Tests"
     end;
 
     [Test]
+    procedure TheFeatureCreatesTheNumberingItNeeds()
+    var
+        Setup: Record "WHA Dock Setup";
+        NoSeries: Record "No. Series";
+        DockFeatureSetup: Codeunit "WHA Dock Feature Setup";
+    begin
+        // [SCENARIO] Numbering belongs to the feature that uses it, not to a shared foundation table. A
+        // yard that is never switched on should never have been asked about a series it does not need,
+        // and switching it on should not send somebody off to a different page to finish the job.
+        DockFeatureSetup.ApplyChoices(true, true, false);
+
+        Setup.Get();
+        Assert.AreNotEqual('', Setup."Dock Appointment Nos.", 'Enabling the feature with numbering asked for should fill in its own series.');
+        Assert.IsTrue(NoSeries.Get(Setup."Dock Appointment Nos."), 'The series it names should have been created.');
+    end;
+
+    [Test]
     procedure DemoImportIsIdempotent()
     var
         DockAppointment: Record "WHA Dock Appointment";
@@ -400,7 +417,7 @@ codeunit 51012 "WHA Dock Tests"
     var
         NoSeries: Record "No. Series";
         NoSeriesLine: Record "No. Series Line";
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        Setup: Record "WHA Dock Setup";
     begin
         if not NoSeries.Get('WHA-DTEST') then begin
             NoSeries.Init();
@@ -416,15 +433,15 @@ codeunit 51012 "WHA Dock Tests"
             NoSeriesLine.Insert(true);
         end;
 
-        WarehouseSetup.Reset();
-        if not WarehouseSetup.Get() then begin
-            WarehouseSetup.Init();
-            WarehouseSetup.Insert(true);
+        Setup.Reset();
+        if not Setup.Get() then begin
+            Setup.Init();
+            Setup.Insert(true);
         end;
-        if WarehouseSetup."Dock Appointment Nos." <> '' then
+        if Setup."Dock Appointment Nos." <> '' then
             exit;
 
-        WarehouseSetup.Validate("Dock Appointment Nos.", 'WHA-DTEST');
-        WarehouseSetup.Modify(true);
+        Setup.Validate("Dock Appointment Nos.", 'WHA-DTEST');
+        Setup.Modify(true);
     end;
 }

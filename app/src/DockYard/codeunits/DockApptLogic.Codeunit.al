@@ -1,14 +1,13 @@
 namespace WarehouseAdvanced.DockYard;
 
 using Microsoft.Foundation.NoSeries;
-using WarehouseAdvanced.Core;
 
 codeunit 50451 "WHA Dock Appt. Logic" implements "WHA IDockAppointment"
 {
     Access = Public;
 
     var
-        NoSeriesMissingErr: Label 'Set the dock appointment number series in the warehouse advanced setup before booking anything in.';
+        NoSeriesMissingErr: Label 'Set the dock appointment number series on the dock and yard setup page before booking anything in.';
         DeleteNotAllowedErr: Label 'Appointment %1 is %2, so it cannot be deleted. Once a vehicle has been on site, when it came and when it left is the only record of what the yard did that day.', Comment = '%1 = the appointment number, %2 = the current status';
 
     /// <summary>
@@ -60,15 +59,15 @@ codeunit 50451 "WHA Dock Appt. Logic" implements "WHA IDockAppointment"
 
     local procedure NextAppointmentNo(): Code[20]
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        Setup: Record "WHA Dock Setup";
         NoSeries: Codeunit "No. Series";
     begin
-        WarehouseSetup.SetLoadFields("Dock Appointment Nos.");
-        if not WarehouseSetup.Get() then
+        Setup.SetLoadFields("Dock Appointment Nos.");
+        if not Setup.Get() then
             Error(NoSeriesMissingErr);
-        if WarehouseSetup."Dock Appointment Nos." = '' then
+        if Setup."Dock Appointment Nos." = '' then
             Error(NoSeriesMissingErr);
 
-        exit(NoSeries.GetNextNo(WarehouseSetup."Dock Appointment Nos."));
+        exit(NoSeries.GetNextNo(Setup."Dock Appointment Nos."));
     end;
 }

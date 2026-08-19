@@ -638,26 +638,32 @@ codeunit 51002 "WHA Integration Tests"
 
     local procedure EnsureTaskNumbering()
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
-        SetupLogic: Codeunit "WHA Warehouse Setup Logic";
+        TaskSetup: Record "WHA Warehouse Task Setup";
     begin
         EnsureNoSeries(CopyStr(TaskSeriesTok, 1, 20), 'TSK00001', 'TSK99999');
 
-        SetupLogic.EnsureExists(WarehouseSetup);
-        WarehouseSetup.Validate("Warehouse Task Nos.", TaskSeriesTok);
-        WarehouseSetup.Modify(true);
+        TaskSetup.Reset();
+        if not TaskSetup.Get() then begin
+            TaskSetup.Init();
+            TaskSetup.Insert(true);
+        end;
+        TaskSetup.Validate("Warehouse Task Nos.", TaskSeriesTok);
+        TaskSetup.Modify(true);
     end;
 
     local procedure EnsureUnitNumbering()
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
-        SetupLogic: Codeunit "WHA Warehouse Setup Logic";
+        HandlingUnitSetup: Record "WHA Handling Unit Setup";
     begin
         EnsureNoSeries(CopyStr(UnitSeriesTok, 1, 20), 'THU00001', 'THU99999');
 
-        SetupLogic.EnsureExists(WarehouseSetup);
-        WarehouseSetup.Validate("Handling Unit Nos.", UnitSeriesTok);
-        WarehouseSetup.Modify(true);
+        HandlingUnitSetup.Reset();
+        if not HandlingUnitSetup.Get() then begin
+            HandlingUnitSetup.Init();
+            HandlingUnitSetup.Insert(true);
+        end;
+        HandlingUnitSetup.Validate("Handling Unit Nos.", UnitSeriesTok);
+        HandlingUnitSetup.Modify(true);
     end;
 
     local procedure EnsureNoSeries(SeriesCode: Code[20]; StartingNo: Code[20]; EndingNo: Code[20])

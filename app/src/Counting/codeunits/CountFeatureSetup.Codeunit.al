@@ -9,6 +9,10 @@ codeunit 50502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
     var
         StepNameLbl: Label 'Counting';
         StepDescriptionLbl: Label 'Count part of the warehouse while it keeps working. A sheet says what to count, the floor counts it without seeing what was expected, and anything that comes out wrong by more than you allow has to be looked at before the sheet is closed.';
+        NoSeriesCodeTok: Label 'WHA-COUNT', Locked = true;
+        NoSeriesDescLbl: Label 'Warehouse advanced count sheets';
+        StartingNoTok: Label 'CS000001', Locked = true;
+        EndingNoTok: Label 'CS999999', Locked = true;
         McpConfigNameTok: Label 'Warehouse Advanced - Counting', Locked = true;
         McpConfigDescLbl: Label 'Count sheet tools. Read the Warehouse Advanced Counting agent instructions before use.';
         DemoMcpConfigNameTok: Label 'Warehouse Advanced - Demo Counting', Locked = true;
@@ -24,6 +28,7 @@ codeunit 50502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
         TempSetupStep."Step No." := 100;
         TempSetupStep.Feature := TempSetupStep.Feature::WHACounting;
         TempSetupStep."Has Toggle" := true;
+        TempSetupStep."Has No. Series" := true;
         TempSetupStep.Name := CopyStr(StepNameLbl, 1, MaxStrLen(TempSetupStep.Name));
         TempSetupStep.Description := CopyStr(StepDescriptionLbl, 1, MaxStrLen(TempSetupStep.Description));
         TempSetupStep."Setup Page ID" := Page::"WHA Count Setup";
@@ -49,7 +54,7 @@ codeunit 50502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
     /// single deferred restart.
     /// </summary>
     /// <param name="Enable">Whether counting should be switched on.</param>
-    /// <param name="CreateNoSeries">Ignored. The count sheet number series belongs to the foundation step.</param>
+    /// <param name="CreateNoSeries">Whether to create the number series that numbers count sheets, and assign it to this feature's own setup.</param>
     /// <param name="ImportDemoData">Whether to load sample count sheets.</param>
     procedure ApplyChoices(Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     var
@@ -59,6 +64,9 @@ codeunit 50502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
 
         Setup.Validate("WHA Enabled", Enable);
         Setup.Modify(true);
+
+        if CreateNoSeries then
+            EnsureNoSeries(Setup);
 
         if ImportDemoData then
             ImportSampleSheets();
@@ -88,6 +96,17 @@ codeunit 50502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
     begin
         RegisterFunctionalConfiguration();
         RegisterDemoConfiguration();
+    end;
+
+    local procedure EnsureNoSeries(var Setup: Record "WHA Count Setup")
+    var
+        NoSeriesMgt: Codeunit "WHA No. Series Mgt.";
+    begin
+        if Setup."Count Sheet Nos." <> '' then
+            exit;
+
+        Setup.Validate("Count Sheet Nos.", NoSeriesMgt.EnsureSeries(NoSeriesCodeTok, NoSeriesDescLbl, StartingNoTok, EndingNoTok));
+        Setup.Modify(true);
     end;
 
     local procedure RegisterFunctionalConfiguration()

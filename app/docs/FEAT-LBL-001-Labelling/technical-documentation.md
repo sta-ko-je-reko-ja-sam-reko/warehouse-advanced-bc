@@ -140,7 +140,7 @@ code fields carry `WHALabelling`. The API action calls `CheckEnabled`.
 
 **No number series.** Label codes are counted by this feature's own setup, because a code has to
 have a shape GS1 recognises — a `No. Series` cannot express "pad to seventeen digits then compute a
-checksum". This is the first feature to number something without the foundation series, and it is
+checksum". This is the first feature to number something without a number series at all, and it is
 the right exception rather than a shortcut.
 
 ## MCP configuration

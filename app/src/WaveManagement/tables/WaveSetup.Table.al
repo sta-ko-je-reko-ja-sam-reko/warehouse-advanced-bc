@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.WaveManagement;
 
+using Microsoft.Foundation.NoSeries;
+
 table 50150 "WHA Wave Setup"
 {
     Caption = 'Wave setup';
@@ -36,6 +38,13 @@ table 50150 "WHA Wave Setup"
             Caption = 'Gather work that is not released yet';
             DataClassification = CustomerContent;
             ToolTip = 'Specifies whether a wave may gather jobs that are still drafts and release them with the wave. Leave this off to gather only work that has already been approved for the floor.';
+        }
+        field(90; "Wave Nos."; Code[20])
+        {
+            Caption = 'Wave nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to waves.';
+            TableRelation = "No. Series";
         }
     }
 

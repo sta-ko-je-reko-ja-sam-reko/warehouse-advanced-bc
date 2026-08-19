@@ -18,7 +18,7 @@ moved, stored and shipped as one thing.
 
 This feature adds that unit:
 
-1. A handling unit is created and receives a number from the foundation number series.
+1. A handling unit is created and receives a number from this feature's own number series.
 2. It is given a location and, optionally, a bin.
 3. It may be placed inside another handling unit. Moving the outer unit moves everything within it.
 4. It carries an SSCC for labelling and for identifying the unit to trading partners.
@@ -43,7 +43,7 @@ Nesting is configurable — it can be switched off entirely, or limited to a max
 
 | Field | Type | Notes |
 |---|---|---|
-| `No.` | `Code[20]` | Primary key, assigned from the foundation number series |
+| `No.` | `Code[20]` | Primary key, assigned from this feature's own number series |
 | `SSCC` | `Code[20]` | Serial shipping container code; secondary key for lookup |
 | `Description` | `Text[100]` | |
 | `Location Code` | `Code[10]` | `TableRelation = Location`. Changing it clears `Bin Code` |
@@ -57,10 +57,14 @@ Keys: `PK` on `No.` (clustered), plus `Parent No.`, `Location Code + Bin Code`, 
 
 ### Number series
 
-The handling unit number series lives on the **foundation** setup (`WHA Warehouse Setup."Handling
-Unit Nos."`), not on this feature's setup. Foundation owns cross-cutting numbering, and the guided
-setup's foundation step is what creates the `WHA-HU` series. Inserting a handling unit with no
-number errors if that series is unset.
+The handling unit number series lives on **this feature's own setup**
+(`WHA Handling Unit Setup."Handling Unit Nos."`), with the feature's own application area, and the
+feature's guided-setup step creates the `WHA-HU` series when numbering is asked for. Inserting a
+handling unit with no number errors if that series is unset.
+
+It used to live on the foundation setup, on the argument that numbering is cross-cutting. It is not:
+only the feature that numbers something knows it needs a series, and putting it in Core meant Core
+learned the name of every feature that had one.
 
 ### `WHA Handling Unit Line`
 
@@ -117,7 +121,7 @@ All table triggers and field validations delegate a single line to `Logic()`, re
 
 | Operation | Behaviour |
 |---|---|
-| `Trigger_OnInsert` | Assigns the number from the foundation series; errors if it is unset |
+| `Trigger_OnInsert` | Assigns the number from this feature's series; errors if it is unset |
 | `Trigger_OnDelete` | Refuses to delete a unit that still holds nested units |
 | `Validate_LocationCode` | Clears the bin when the location actually changes |
 | `Validate_ParentNo` | Rejects self-parenting, cycles, nesting when disabled, and exceeding max depth |

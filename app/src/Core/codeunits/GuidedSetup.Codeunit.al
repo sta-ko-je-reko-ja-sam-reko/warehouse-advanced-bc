@@ -1,6 +1,5 @@
 namespace WarehouseAdvanced.Core;
 
-using Microsoft.Foundation.NoSeries;
 using System.Environment.Configuration;
 using System.Media;
 
@@ -13,27 +12,7 @@ codeunit 50002 "WHA Guided Setup"
         AssistedSetupShortTitleLbl: Label 'Warehouse Advanced';
         AssistedSetupDescriptionLbl: Label 'Work through the warehouse advanced features in order. Enable the features you need and give each one the settings it requires.';
         FoundationStepNameLbl: Label 'Foundation';
-        FoundationStepDescriptionLbl: Label 'Number series and shared settings that every warehouse advanced feature builds on. Always active.';
-        HandlingUnitNoSeriesCodeTok: Label 'WHA-HU', Locked = true;
-        HandlingUnitNoSeriesDescLbl: Label 'Warehouse advanced handling units';
-        HandlingUnitStartingNoTok: Label 'HU000001', Locked = true;
-        HandlingUnitEndingNoTok: Label 'HU999999', Locked = true;
-        WarehouseTaskNoSeriesCodeTok: Label 'WHA-TASK', Locked = true;
-        WarehouseTaskNoSeriesDescLbl: Label 'Warehouse advanced tasks';
-        WarehouseTaskStartingNoTok: Label 'WT000001', Locked = true;
-        WarehouseTaskEndingNoTok: Label 'WT999999', Locked = true;
-        WaveNoSeriesCodeTok: Label 'WHA-WAVE', Locked = true;
-        WaveNoSeriesDescLbl: Label 'Warehouse advanced waves';
-        WaveStartingNoTok: Label 'WV000001', Locked = true;
-        WaveEndingNoTok: Label 'WV999999', Locked = true;
-        CountSheetNoSeriesCodeTok: Label 'WHA-COUNT', Locked = true;
-        CountSheetNoSeriesDescLbl: Label 'Warehouse advanced count sheets';
-        CountSheetStartingNoTok: Label 'CS000001', Locked = true;
-        CountSheetEndingNoTok: Label 'CS999999', Locked = true;
-        DockAppointmentNoSeriesCodeTok: Label 'WHA-DOCK', Locked = true;
-        DockAppointmentNoSeriesDescLbl: Label 'Warehouse advanced dock appointments';
-        DockAppointmentStartingNoTok: Label 'DA000001', Locked = true;
-        DockAppointmentEndingNoTok: Label 'DA999999', Locked = true;
+        FoundationStepDescriptionLbl: Label 'The record every warehouse advanced feature builds on. Always active, and there is nothing to fill in: each feature keeps its own settings, its own numbering included.';
 
     /// <summary>
     /// Fills the step buffer with the foundation step plus every feature that registers one, then
@@ -71,7 +50,7 @@ codeunit 50002 "WHA Guided Setup"
     /// </summary>
     /// <param name="TempSetupStep">The step the choices belong to.</param>
     /// <param name="Enable">Whether the feature should be switched on.</param>
-    /// <param name="CreateNoSeries">Whether to create and assign the feature's number series.</param>
+    /// <param name="CreateNoSeries">Whether the feature should create and assign the numbering it needs. Features that number nothing ignore it.</param>
     /// <param name="ImportDemoData">Whether to load the feature's sample data.</param>
     internal procedure ApplyWizardChoices(var TempSetupStep: Record "WHA Setup Step" temporary; Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     var
@@ -82,8 +61,7 @@ codeunit 50002 "WHA Guided Setup"
             FeatureSetup := TempSetupStep.Feature;
             FeatureSetup.ApplyChoices(Enable, CreateNoSeries, ImportDemoData);
         end else
-            if CreateNoSeries then
-                EnsureFoundationNoSeries();
+            EnsureFoundation();
 
         FeatureMgt.RefreshExperienceAreas();
     end;
@@ -179,55 +157,11 @@ codeunit 50002 "WHA Guided Setup"
         exit(SetupLogic.IsComplete());
     end;
 
-    local procedure EnsureFoundationNoSeries()
+    local procedure EnsureFoundation()
     var
         WarehouseSetup: Record "WHA Warehouse Setup";
         SetupLogic: Codeunit "WHA Warehouse Setup Logic";
     begin
-        CreateNoSeriesIfMissing(HandlingUnitNoSeriesCodeTok, HandlingUnitNoSeriesDescLbl, HandlingUnitStartingNoTok, HandlingUnitEndingNoTok);
-        CreateNoSeriesIfMissing(WarehouseTaskNoSeriesCodeTok, WarehouseTaskNoSeriesDescLbl, WarehouseTaskStartingNoTok, WarehouseTaskEndingNoTok);
-        CreateNoSeriesIfMissing(WaveNoSeriesCodeTok, WaveNoSeriesDescLbl, WaveStartingNoTok, WaveEndingNoTok);
-        CreateNoSeriesIfMissing(CountSheetNoSeriesCodeTok, CountSheetNoSeriesDescLbl, CountSheetStartingNoTok, CountSheetEndingNoTok);
-        CreateNoSeriesIfMissing(DockAppointmentNoSeriesCodeTok, DockAppointmentNoSeriesDescLbl, DockAppointmentStartingNoTok, DockAppointmentEndingNoTok);
-
         SetupLogic.EnsureExists(WarehouseSetup);
-
-        if WarehouseSetup."Handling Unit Nos." = '' then
-            WarehouseSetup.Validate("Handling Unit Nos.", HandlingUnitNoSeriesCodeTok);
-        if WarehouseSetup."Warehouse Task Nos." = '' then
-            WarehouseSetup.Validate("Warehouse Task Nos.", WarehouseTaskNoSeriesCodeTok);
-        if WarehouseSetup."Wave Nos." = '' then
-            WarehouseSetup.Validate("Wave Nos.", WaveNoSeriesCodeTok);
-        if WarehouseSetup."Count Sheet Nos." = '' then
-            WarehouseSetup.Validate("Count Sheet Nos.", CountSheetNoSeriesCodeTok);
-        if WarehouseSetup."Dock Appointment Nos." = '' then
-            WarehouseSetup.Validate("Dock Appointment Nos.", DockAppointmentNoSeriesCodeTok);
-
-        WarehouseSetup.Modify(true);
     end;
-
-    local procedure CreateNoSeriesIfMissing(SeriesCode: Text; SeriesDescription: Text; StartingNo: Text; EndingNo: Text)
-    var
-        NoSeries: Record "No. Series";
-        NoSeriesLine: Record "No. Series Line";
-    begin
-        NoSeries.SetLoadFields(Code);
-        if NoSeries.Get(CopyStr(SeriesCode, 1, MaxStrLen(NoSeries.Code))) then
-            exit;
-
-        Clear(NoSeries);
-        NoSeries.Init();
-        NoSeries.Code := CopyStr(SeriesCode, 1, MaxStrLen(NoSeries.Code));
-        NoSeries.Description := CopyStr(SeriesDescription, 1, MaxStrLen(NoSeries.Description));
-        NoSeries."Default Nos." := true;
-        NoSeries.Insert(true);
-
-        NoSeriesLine.Init();
-        NoSeriesLine."Series Code" := NoSeries.Code;
-        NoSeriesLine."Line No." := 10000;
-        NoSeriesLine."Starting No." := CopyStr(StartingNo, 1, MaxStrLen(NoSeriesLine."Starting No."));
-        NoSeriesLine."Ending No." := CopyStr(EndingNo, 1, MaxStrLen(NoSeriesLine."Ending No."));
-        NoSeriesLine.Insert(true);
-    end;
-
 }

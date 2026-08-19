@@ -48,9 +48,15 @@ the two chosen so far were chosen precisely because they are the least likely to
 
 Core carries no per-feature knowledge: a feature ships by adding a `WHA Feature` enum value bound
 to its own `WHA IFeatureSetup` implementation, and the wizard, the guided setup list, the MCP
-registration and the deferred session restart pick it up with no Core change. Adding directed work
-changed Core only where the feature genuinely needed foundation support — a second number series on
-`WHA Warehouse Setup`.
+registration and the deferred session restart pick it up with no Core change.
+
+**That claim was not quite true until recently.** Five features kept their number series on
+`WHA Warehouse Setup`, which meant Core knew five features by name across five files, the foundation
+step read as *not started* whenever a new one shipped, and numbering for a switched-off feature was
+visible on a page with no application area. Numbering now lives on each feature's own setup, with the
+feature's own area, created by its own guided-setup step through the `CreateNoSeries` hook
+`WHA IFeatureSetup` always had and nothing used. Core kept only the generic ability to make a series
+(`WHA No. Series Mgt.`) and no longer knows which features have one.
 
 ## 2. Phase 0 — the capability register (gates everything)
 

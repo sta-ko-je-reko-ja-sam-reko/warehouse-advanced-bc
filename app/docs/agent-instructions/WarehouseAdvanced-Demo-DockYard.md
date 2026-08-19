@@ -29,8 +29,9 @@ demonstration and evaluation.
 
 - **It does not switch dock and yard on.** That is done by an administrator in the guided setup, and
   it restarts their session.
-- **It does not create the number series bookings need.** That belongs to the foundation step of the
-  guided setup, and without it the import cannot book anything.
+- **It does not create the number series bookings need.** That belongs to the dock and yard step of
+  the guided setup, which creates it when the feature is switched on, and without it the import cannot
+  book anything.
 - It does not remove sample data. A visit that has happened cannot be deleted at all.
 
 ## When to refuse or check first

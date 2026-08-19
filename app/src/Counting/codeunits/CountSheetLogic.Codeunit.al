@@ -1,14 +1,13 @@
 namespace WarehouseAdvanced.Counting;
 
 using Microsoft.Foundation.NoSeries;
-using WarehouseAdvanced.Core;
 
 codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
 {
     Access = Public;
 
     var
-        NoSeriesMissingErr: Label 'Set the count sheet number series in the warehouse advanced setup before creating count sheets.';
+        NoSeriesMissingErr: Label 'Set the count sheet number series on the counting setup page before creating count sheets.';
         NotOpenErr: Label 'Count sheet %1 is %2, so what it covers can no longer be changed.', Comment = '%1 = the count sheet number, %2 = the current status';
         LocationMissingErr: Label 'Give count sheet %1 a location before filling it, so it counts one part of the warehouse.', Comment = '%1 = the count sheet number';
         StartNotAllowedErr: Label 'Only an open count sheet can be sent out to be counted. Count sheet %1 is %2.', Comment = '%1 = the count sheet number, %2 = the current status';
@@ -245,15 +244,15 @@ codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
 
     local procedure NextSheetNo(): Code[20]
     var
-        WarehouseSetup: Record "WHA Warehouse Setup";
+        Setup: Record "WHA Count Setup";
         NoSeries: Codeunit "No. Series";
     begin
-        WarehouseSetup.SetLoadFields("Count Sheet Nos.");
-        if not WarehouseSetup.Get() then
+        Setup.SetLoadFields("Count Sheet Nos.");
+        if not Setup.Get() then
             Error(NoSeriesMissingErr);
-        if WarehouseSetup."Count Sheet Nos." = '' then
+        if Setup."Count Sheet Nos." = '' then
             Error(NoSeriesMissingErr);
 
-        exit(NoSeries.GetNextNo(WarehouseSetup."Count Sheet Nos."));
+        exit(NoSeries.GetNextNo(Setup."Count Sheet Nos."));
     end;
 }

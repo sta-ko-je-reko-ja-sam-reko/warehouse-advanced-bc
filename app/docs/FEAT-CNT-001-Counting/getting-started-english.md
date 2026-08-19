@@ -14,15 +14,10 @@ You only need to do this once, and you need administrator rights.
 
 1. Choose the search icon, enter **Warehouse Advanced Setup**, and choose the related link.
 2. Choose **Guided setup**.
-3. Choose the **Foundation** row and make sure **Create and assign number series** is on. Count sheets
-   are numbered from a series created there.
-4. Back in the feature list, choose the **Counting** row, then **Next**.
-5. Switch on **Enable this feature**, then **Next** and **Finish**.
-6. Close the feature list. Your session restarts so the change takes effect.
-
-> If you set the app up before counting was added, the **Foundation** row shows as **Not started**
-> again, because it now creates a fourth number series. Run it once more; nothing you already set up
-> is changed.
+3. Choose the **Counting** row, then **Next**.
+4. Switch on **Enable this feature**, leave **Create and assign number series** on, then **Next** and
+   **Finish**. Count sheets are numbered from a series this step creates for you.
+5. Close the feature list. Your session restarts so the change takes effect.
 
 ## Choose how counting behaves
 

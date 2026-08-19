@@ -9,6 +9,10 @@ codeunit 50151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
     var
         StepNameLbl: Label 'Wave management';
         StepDescriptionLbl: Label 'Gather warehouse work into waves and send each one to the floor as a batch, so a shift, a departure or a round of picking starts and finishes together.';
+        NoSeriesCodeTok: Label 'WHA-WAVE', Locked = true;
+        NoSeriesDescLbl: Label 'Warehouse advanced waves';
+        StartingNoTok: Label 'WV000001', Locked = true;
+        EndingNoTok: Label 'WV999999', Locked = true;
         McpConfigNameTok: Label 'Warehouse Advanced - Wave Management', Locked = true;
         McpConfigDescLbl: Label 'Wave tools. Read the Warehouse Advanced Wave Management agent instructions before use.';
         DemoMcpConfigNameTok: Label 'Warehouse Advanced - Demo Wave Management', Locked = true;
@@ -24,6 +28,7 @@ codeunit 50151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
         TempSetupStep."Step No." := 60;
         TempSetupStep.Feature := TempSetupStep.Feature::WHAWaveManagement;
         TempSetupStep."Has Toggle" := true;
+        TempSetupStep."Has No. Series" := true;
         TempSetupStep.Name := CopyStr(StepNameLbl, 1, MaxStrLen(TempSetupStep.Name));
         TempSetupStep.Description := CopyStr(StepDescriptionLbl, 1, MaxStrLen(TempSetupStep.Description));
         TempSetupStep."Setup Page ID" := Page::"WHA Wave Setup";
@@ -49,7 +54,7 @@ codeunit 50151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
     /// owns the single deferred restart.
     /// </summary>
     /// <param name="Enable">Whether wave management should be switched on.</param>
-    /// <param name="CreateNoSeries">Ignored. The wave number series belongs to the foundation step.</param>
+    /// <param name="CreateNoSeries">Whether to create the number series that numbers waves, and assign it to this feature's own setup.</param>
     /// <param name="ImportDemoData">Whether to load sample waves.</param>
     procedure ApplyChoices(Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     var
@@ -59,6 +64,9 @@ codeunit 50151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
 
         Setup.Validate("WHA Enabled", Enable);
         Setup.Modify(true);
+
+        if CreateNoSeries then
+            EnsureNoSeries(Setup);
 
         if ImportDemoData then
             ImportSampleWaves();
@@ -86,6 +94,17 @@ codeunit 50151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
     begin
         RegisterFunctionalConfiguration();
         RegisterDemoConfiguration();
+    end;
+
+    local procedure EnsureNoSeries(var Setup: Record "WHA Wave Setup")
+    var
+        NoSeriesMgt: Codeunit "WHA No. Series Mgt.";
+    begin
+        if Setup."Wave Nos." <> '' then
+            exit;
+
+        Setup.Validate("Wave Nos.", NoSeriesMgt.EnsureSeries(NoSeriesCodeTok, NoSeriesDescLbl, StartingNoTok, EndingNoTok));
+        Setup.Modify(true);
     end;
 
     local procedure RegisterFunctionalConfiguration()

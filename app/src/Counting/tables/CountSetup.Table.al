@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.Counting;
 
+using Microsoft.Foundation.NoSeries;
+
 table 50500 "WHA Count Setup"
 {
     Caption = 'Counting setup';
@@ -52,6 +54,13 @@ table 50500 "WHA Count Setup"
             Caption = 'Approve differences above tolerance';
             DataClassification = CustomerContent;
             ToolTip = 'Specifies whether a count sheet can only be closed once somebody has approved every line that differs by more than the tolerance. Leave this on unless the warehouse has another way of reviewing differences.';
+        }
+        field(90; "Count Sheet Nos."; Code[20])
+        {
+            Caption = 'Count sheet nos.';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the number series used to assign numbers to count sheets.';
+            TableRelation = "No. Series";
         }
     }
 

@@ -62,7 +62,7 @@ the customer may not even want a dependency of the task queue.
 
 | Field | Type | Notes |
 |---|---|---|
-| `Entry No.` | `Integer` | Primary key, `AutoIncrement`. A hold is an event, so it is numbered by the platform rather than by a foundation series — the same choice `WHA Pack Session` made |
+| `Entry No.` | `Integer` | Primary key, `AutoIncrement`. A hold is an event, so it is numbered by the platform rather than by a number series — the same choice `WHA Pack Session` made |
 | `Handling Unit No.` | `Code[20]` | What was stopped |
 | `Location Code`, `Bin Code` | | **A snapshot** taken when the hold was placed. It does not follow the unit afterwards, because it records where the problem was found |
 | `Reason` | `Enum "WHA Hold Reason"` | Why it was stopped |
@@ -163,7 +163,7 @@ Per `_patterns/feature-setup-and-toggle.md`: `WHA Feature` gained `WHAQualityHol
 through this feature's own tableextension; the setup page is `ApplicationArea = All` while the hold
 pages carry `WHAQualityHold`.
 
-**No new number series**, so the foundation step is untouched by this feature.
+**No number series of its own**, because a hold is an event and the platform numbers it.
 
 ## MCP configuration
 

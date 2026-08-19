@@ -45,7 +45,7 @@ started.
 
 | Field | Type | Notes |
 |---|---|---|
-| `No.` | `Code[20]` | Primary key, from the foundation number series |
+| `No.` | `Code[20]` | Primary key, from this feature's own number series |
 | `Description` | `Text[100]` | The shift or departure this wave is for |
 | `Location Code` | `Code[10]` | The part of the warehouse it gathers from. **Required before filling** |
 | `Status` | `Enum "WHA Wave Status"` | Open / Released / Completed / Cancelled. Not editable |
@@ -160,9 +160,9 @@ Per `_patterns/feature-setup-and-toggle.md`: `WHA Feature` gained `WHAWaveManage
 from `Enabled`; the setup page is `ApplicationArea = All` while the wave pages carry
 `WHAWaveManagement`. Every API write path and bound action calls `CheckEnabled`.
 
-**The foundation now creates three number series** (`WHA-HU`, `WHA-TASK`, `WHA-WAVE`) and
-`IsComplete` checks all three, so a company that ran the foundation step before this feature shipped
-shows it as *not started* again until it is re-run. Re-running is idempotent.
+**The wave number series lives on this feature's own setup** (`WHA Wave Setup."Wave Nos."`), with
+the feature's own application area, and this feature's guided-setup step creates `WHA-WAVE` when
+numbering is asked for. The foundation neither creates it nor checks it.
 
 ## MCP configuration
 

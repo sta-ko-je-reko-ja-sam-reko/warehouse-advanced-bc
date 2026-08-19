@@ -27,6 +27,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-INT-001` segment 1 — integration message spine, handler dispatch, two inbound and two outbound message types. **Built on assumed contracts** — see below |
 | Delivered | `FEAT-RF-001` segments 1-2 — handheld screen, device register, a swappable scan-through flow, and the short pick. **Not yet seen by an operator** |
 | Delivered | `FEAT-TASK-001` segment 2 — partial completion: a job finished with less than it asked for, and why |
+| Delivered | `FEAT-WAVE-001` segment 1 — waves: gathering work by a swappable strategy, releasing it as a batch, and closing it |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
@@ -179,7 +180,7 @@ Wave A    FEAT-HU-001      handling units            ← delivered
 Wave B    FEAT-TASK-001    directed work             ← segment 1 delivered
           FEAT-RF-001      mobile device             ← segment 1 delivered; needs operator review
 
-Wave C    FEAT-WAVE-001    wave management
+Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
           FEAT-PACK-001    packing
           FEAT-LBL-001     labelling
 
@@ -227,20 +228,27 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
+1. **Run the test suite once.** 108 automated tests exist across five codeunits and **not one has
+   ever been executed** — they are compile-verified only, because publishing to the dev container
+   needs credentials that are not in the repo. Until they have run green once, every claim this
+   project makes about its own behaviour rests on the compiler agreeing the code parses.
+2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
-   also overdue: two features have been built from the hypothesis, and each further one raises the
-   cost of a register that contradicts it.
-2. **Decide the cutover model** (§6) — it changes sequencing and the difficulty of
+   badly overdue: **five features** have been built from the hypothesis, and each further one raises
+   the cost of a register that contradicts it.
+3. **Run the operator review** for `FEAT-RF-001`, per
+   [FEAT-RF-001-MobileDevice/operator-review.md](FEAT-RF-001-MobileDevice/operator-review.md). The
+   handheld has never been seen by anyone who would use it.
+4. **Decide the cutover model** (§6) — it changes sequencing and the difficulty of
    `FEAT-INT-001`.
-3. ~~**Get the current interface specification.**~~ **There is none.** Confirmed with the customer:
+5. ~~**Get the current interface specification.**~~ **There is none.** Confirmed with the customer:
    no written contract exists for the interface being replaced, and none can be produced. This was
    accepted as a standing condition, and `FEAT-INT-001` was built on assumed contracts rather than
    waiting. What remains is to establish the five inputs listed at the end of
    [FEAT-INT-001-Integration/technical-documentation.md](FEAT-INT-001-Integration/technical-documentation.md)
    — the real message set, payload shapes, transport, volumes, and the cutover model — by observing
    the live traffic and interviewing the people who run it, since no document will supply them.
-4. **Rewrite [modules.md](modules.md) and §4 of this document** from the signed register.
+6. **Rewrite [modules.md](modules.md) and §4 of this document** from the signed register.
 
 Until step 1 produces something, further AL beyond the delivered Core module is building
 against a guess.

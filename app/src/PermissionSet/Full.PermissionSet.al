@@ -4,6 +4,7 @@ using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.MobileDevice;
+using WarehouseAdvanced.WaveManagement;
 
 permissionset 50002 "WHA Full"
 {
@@ -22,5 +23,7 @@ permissionset 50002 "WHA Full"
         tabledata "WHA Integration Message" = RIMD,
         tabledata "WHA RF Setup" = RIMD,
         tabledata "WHA RF Device" = RIMD,
+        tabledata "WHA Wave Setup" = RIMD,
+        tabledata "WHA Wave" = RIMD,
         tabledata "WHA Demo Data" = RIMD;
 }

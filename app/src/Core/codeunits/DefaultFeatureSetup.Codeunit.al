@@ -32,4 +32,11 @@ codeunit 50005 "WHA Default Feature Setup" implements "WHA IFeatureSetup"
     procedure ApplyChoices(Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     begin
     end;
+
+    /// <summary>
+    /// Registers nothing. A feature value with no implementation exposes no API surface.
+    /// </summary>
+    procedure RegisterMcpConfiguration()
+    begin
+    end;
 }

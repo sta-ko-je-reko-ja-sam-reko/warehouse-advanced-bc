@@ -114,6 +114,25 @@ Per `_patterns/feature-setup-and-toggle.md`:
 - The API page guards `OnInsertRecord`/`OnModifyRecord`/`OnDeleteRecord` with `CheckEnabled`, because
   application areas do not reach the API path. Reads stay open.
 
+## MCP configuration
+
+The API page is exposed to agents through its own MCP configuration, created and activated on
+install and upgrade:
+
+| Configuration | API group | Tool | Agent may |
+|---|---|---|---|
+| `Warehouse Advanced - Handling Units` | `handlingUnit` | `WHA API Handling Unit` | read, create, modify, delete |
+
+Registration goes through `WHA IFeatureSetup.RegisterMcpConfiguration`, so the feature owns its
+configuration and Core needs no per-feature knowledge. `WHA MCP Setup` supplies the idempotent
+helpers (`EnsureConfiguration`, `EnsureApiTool`, `Activate`), all keyed on the configuration name,
+so repeated install/upgrade runs neither duplicate nor reset anything.
+
+Business Central has no field that carries agent instructions, so they ship as a companion document:
+[../agent-instructions/WarehouseAdvanced-HandlingUnits.md](../agent-instructions/WarehouseAdvanced-HandlingUnits.md).
+**Changing the tools in this configuration is not done until that file is updated in the same
+change.**
+
 ## Tests
 
 `WHA Handling Unit Tests` (codeunit 51000) covers the segment's logic directly, with no database
@@ -133,7 +152,9 @@ tests that accompany the contents segment.
 ## Not done
 
 - **Contents.** The unit holds no item quantities yet.
-- **Demo data**, the `[ServiceEnabled] ImportDemoData` API, its MCP configuration, and the RapidStart
-  package. `ApplyChoices` accepts the sample-data opt-in and currently does nothing with it.
+- **Demo data**, the `[ServiceEnabled] ImportDemoData` API, its **own** demo MCP configuration, and
+  the RapidStart package. `ApplyChoices` accepts the sample-data opt-in and currently does nothing
+  with it. Note the functional MCP configuration below is separate — the demo importer gets its own,
+  so importers can be routed to a different agent.
 - **Getting-started in the customer language** — the language has not been confirmed.
 - **SSCC generation.** The field exists; generating a valid GS1 check digit belongs to `FEAT-LBL-001`.

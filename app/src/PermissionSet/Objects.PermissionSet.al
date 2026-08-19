@@ -20,6 +20,7 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Guided Setup" = X,
         codeunit "WHA Install" = X,
         codeunit "WHA Upgrade" = X,
+        codeunit "WHA MCP Setup" = X,
         table "WHA Handling Unit Setup" = X,
         table "WHA Handling Unit" = X,
         page "WHA Handling Unit Setup" = X,

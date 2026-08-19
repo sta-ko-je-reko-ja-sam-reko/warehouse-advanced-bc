@@ -9,6 +9,8 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
     var
         StepNameLbl: Label 'Handling units';
         StepDescriptionLbl: Label 'Track pallets and containers as numbered units, so a whole unit can be moved, nested inside another, and labelled with an SSCC.';
+        McpConfigNameTok: Label 'Warehouse Advanced - Handling Units', Locked = true;
+        McpConfigDescLbl: Label 'Handling unit tools. Read the Warehouse Advanced Handling Units agent instructions before use.';
 
     /// <summary>
     /// Adds the handling unit step to the guided setup list.
@@ -73,6 +75,19 @@ codeunit 50051 "WHA HU Feature Setup" implements "WHA IFeatureSetup"
         Setup.Init();
         Setup."Allow Nesting" := true;
         Setup.Insert(true);
+    end;
+
+    /// <summary>
+    /// Creates or refreshes the handling unit MCP configuration and its API tool.
+    /// </summary>
+    procedure RegisterMcpConfiguration()
+    var
+        MCPSetup: Codeunit "WHA MCP Setup";
+        ConfigId: Guid;
+    begin
+        ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
+        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Handling Unit", true, true, true);
+        MCPSetup.Activate(ConfigId);
     end;
 
     local procedure ImportSampleUnits()

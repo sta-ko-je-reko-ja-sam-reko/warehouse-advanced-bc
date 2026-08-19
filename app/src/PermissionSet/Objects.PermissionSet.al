@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.HandlingUnit;
+
 permissionset 50000 "WHA Objects"
 {
     Assignable = false;
@@ -17,5 +19,14 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Feature Mgt." = X,
         codeunit "WHA Guided Setup" = X,
         codeunit "WHA Install" = X,
-        codeunit "WHA Upgrade" = X;
+        codeunit "WHA Upgrade" = X,
+        table "WHA Handling Unit Setup" = X,
+        table "WHA Handling Unit" = X,
+        page "WHA Handling Unit Setup" = X,
+        page "WHA Handling Unit Card" = X,
+        page "WHA Handling Units" = X,
+        page "WHA API Handling Unit" = X,
+        codeunit "WHA Handling Unit Logic" = X,
+        codeunit "WHA HU Feature Setup" = X,
+        codeunit "WHA HU App Area Sub." = X;
 }

@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.HandlingUnit;
+
 enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
 {
     Caption = 'Warehouse advanced feature';
@@ -9,5 +11,10 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     value(0; WHANone)
     {
         Caption = 'None';
+    }
+    value(1; WHAHandlingUnits)
+    {
+        Caption = 'Handling units';
+        Implementation = "WHA IFeatureSetup" = "WHA HU Feature Setup";
     }
 }

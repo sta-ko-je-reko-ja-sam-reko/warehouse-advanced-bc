@@ -17,4 +17,7 @@ product does not include.
 
 ## Features
 
-_None yet. Links appear here as features ship._
+### Warehouse structure
+
+- [Handling units](FEAT-HU-001-HandlingUnits/getting-started-english.md) — track a pallet, cage or
+  carton as one numbered thing, put one inside another, and label it for your customers.

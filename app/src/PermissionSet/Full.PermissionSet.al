@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.HandlingUnit;
+
 permissionset 50002 "WHA Full"
 {
     Assignable = true;
@@ -7,5 +9,7 @@ permissionset 50002 "WHA Full"
     IncludedPermissionSets = "WHA Objects";
 
     Permissions =
-        tabledata "WHA Warehouse Setup" = RIMD;
+        tabledata "WHA Warehouse Setup" = RIMD,
+        tabledata "WHA Handling Unit Setup" = RIMD,
+        tabledata "WHA Handling Unit" = RIMD;
 }

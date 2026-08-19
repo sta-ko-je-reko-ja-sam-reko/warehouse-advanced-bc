@@ -31,6 +31,9 @@ page 50000 "WHA Warehouse Setup"
                 field("Count Sheet Nos."; Rec."Count Sheet Nos.")
                 {
                 }
+                field("Dock Appointment Nos."; Rec."Dock Appointment Nos.")
+                {
+                }
             }
         }
     }

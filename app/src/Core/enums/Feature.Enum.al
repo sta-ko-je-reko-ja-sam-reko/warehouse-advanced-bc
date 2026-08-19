@@ -1,7 +1,9 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.Analytics;
 using WarehouseAdvanced.Counting;
 using WarehouseAdvanced.DirectedWork;
+using WarehouseAdvanced.DockYard;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
@@ -82,5 +84,15 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Slotting';
         Implementation = "WHA IFeatureSetup" = "WHA Slot. Feature Setup";
+    }
+    value(13; WHADockYard)
+    {
+        Caption = 'Dock and yard';
+        Implementation = "WHA IFeatureSetup" = "WHA Dock Feature Setup";
+    }
+    value(14; WHAAnalytics)
+    {
+        Caption = 'Analytics';
+        Implementation = "WHA IFeatureSetup" = "WHA KPI Feature Setup";
     }
 }

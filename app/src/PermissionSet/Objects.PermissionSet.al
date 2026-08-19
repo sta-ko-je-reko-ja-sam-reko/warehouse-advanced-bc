@@ -1,7 +1,9 @@
 namespace WarehouseAdvanced.Core;
 
+using WarehouseAdvanced.Analytics;
 using WarehouseAdvanced.Counting;
 using WarehouseAdvanced.DirectedWork;
+using WarehouseAdvanced.DockYard;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
@@ -207,5 +209,43 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Slot. Feature Setup" = X,
         codeunit "WHA Slot. App Area Sub." = X,
         codeunit "WHA Demo Slotting" = X,
-        page "WHA API Demo Slotting" = X;
+        page "WHA API Demo Slotting" = X,
+        table "WHA Dock Setup" = X,
+        table "WHA Dock Door" = X,
+        table "WHA Yard Position" = X,
+        table "WHA Dock Appointment" = X,
+        page "WHA Dock Setup" = X,
+        page "WHA Dock Doors" = X,
+        page "WHA Yard Positions" = X,
+        page "WHA Dock Appointments" = X,
+        page "WHA Dock Appointment Card" = X,
+        page "WHA API Dock Door" = X,
+        page "WHA API Yard Position" = X,
+        page "WHA API Dock Appointment" = X,
+        codeunit "WHA Dock Mgt." = X,
+        codeunit "WHA Dock Appt. Logic" = X,
+        codeunit "WHA Door First Free" = X,
+        codeunit "WHA Door Least Busy" = X,
+        codeunit "WHA Dock Feature Setup" = X,
+        codeunit "WHA Dock App Area Sub." = X,
+        codeunit "WHA Demo Dock" = X,
+        page "WHA API Demo Dock" = X,
+        table "WHA Analytics Setup" = X,
+        table "WHA KPI Snapshot" = X,
+        page "WHA Analytics Setup" = X,
+        page "WHA Warehouse KPIs" = X,
+        page "WHA KPI Snapshots" = X,
+        page "WHA API KPI Snapshot" = X,
+        query "WHA Task Throughput" = X,
+        codeunit "WHA KPI Mgt." = X,
+        codeunit "WHA KPI Snapshot Logic" = X,
+        codeunit "WHA KPI Tasks Completed" = X,
+        codeunit "WHA KPI Put-away Lead" = X,
+        codeunit "WHA KPI Pick Short Rate" = X,
+        codeunit "WHA KPI Trailer Turnaround" = X,
+        codeunit "WHA KPI Door Wait" = X,
+        codeunit "WHA KPI Feature Setup" = X,
+        codeunit "WHA KPI App Area Sub." = X,
+        codeunit "WHA Demo Analytics" = X,
+        page "WHA API Demo Analytics" = X;
 }

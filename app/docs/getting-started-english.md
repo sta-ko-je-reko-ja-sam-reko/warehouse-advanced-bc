@@ -50,6 +50,13 @@ product does not include.
   actually takes against how long you think it should, and how much of the day is not spent on jobs.
 - [Slotting](FEAT-SLOT-001-Slotting/getting-started-english.md) — which items your people walk to most,
   and which of them are sitting in the wrong bin.
+- [Analytics](FEAT-KPI-001-Analytics/getting-started-english.md) — five numbers about how the warehouse
+  is running, worked out from the work your own people have already done.
+
+### The yard
+
+- [Dock and yard](FEAT-DOCK-001-DockYard/getting-started-english.md) — book vehicles onto doors before
+  they turn up, know which trailer is standing where, and keep the times a visit really took.
 
 ### Talking to other systems
 

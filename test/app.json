@@ -1,0 +1,52 @@
+{
+  "id": "2cfcbab8-f5fa-4e6e-a88c-1abb530c267f",
+  "name": "Warehouse Advanced Tests",
+  "publisher": "Default Publisher",
+  "brief": "Automated tests for the Warehouse Advanced app.",
+  "description": "Test suite for Warehouse Advanced. Not intended for production deployment.",
+  "version": "1.0.0.0",
+  "dependencies": [
+    {
+      "id": "b454ccc5-1c9b-4009-bbf5-b40521d385b2",
+      "name": "Warehouse Advanced",
+      "publisher": "Default Publisher",
+      "version": "1.0.0.0"
+    },
+    {
+      "id": "dd0be2ea-f733-4d65-bb34-a28f4624fb14",
+      "name": "Library Assert",
+      "publisher": "Microsoft",
+      "version": "28.0.0.0"
+    },
+    {
+      "id": "e7320ebb-08b3-4406-b1ec-b4927d3e280b",
+      "name": "Any",
+      "publisher": "Microsoft",
+      "version": "28.0.0.0"
+    },
+    {
+      "id": "5d86850b-0d76-4eca-bd7b-951ad998e997",
+      "name": "Tests-TestLibraries",
+      "publisher": "Microsoft",
+      "version": "28.0.0.0"
+    }
+  ],
+  "platform": "28.0.0.0",
+  "application": "28.1.0.0",
+  "idRanges": [
+    {
+      "from": 51000,
+      "to": 51999
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "runtime": "17.0",
+  "target": "Cloud",
+  "features": [
+    "NoImplicitWith"
+  ]
+}

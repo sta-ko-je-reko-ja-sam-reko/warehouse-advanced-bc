@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Local container",
+      "request": "launch",
+      "type": "al",
+      "environmentType": "OnPrem",
+      "server": "http://YOUR-CONTAINER-HOST",
+      "serverInstance": "BC",
+      "authentication": "Windows",
+      "tenant": "default",
+      "port": 7049,
+      "schemaUpdateMode": "Synchronize",
+      "breakOnError": "All",
+      "breakOnRecordWrite": "None",
+      "launchBrowser": true
+    },
+    {
+      "name": "Cloud sandbox",
+      "request": "launch",
+      "type": "al",
+      "environmentType": "Sandbox",
+      "environmentName": "YOUR-SANDBOX-NAME",
+      "startupObjectId": 22,
+      "startupObjectType": "Page",
+      "schemaUpdateMode": "Synchronize",
+      "breakOnError": "All",
+      "launchBrowser": true
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "b454ccc5-1c9b-4009-bbf5-b40521d385b2",
+  "name": "Warehouse Advanced",
+  "publisher": "Default Publisher",
+  "brief": "Advanced warehouse management for Dynamics 365 Business Central.",
+  "description": "Extends standard Business Central warehousing with capabilities normally only found in dedicated WMS platforms: handling units, mobile device workflows, wave planning, labour management, slotting, dock and yard control, and packing.",
+  "version": "1.0.0.0",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc",
+  "logo": "",
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "28.0.0.0",
+  "application": "28.1.0.0",
+  "idRanges": [
+    {
+      "from": 50000,
+      "to": 50999
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "runtime": "17.0",
+  "target": "Cloud",
+  "features": [
+    "TranslationFile",
+    "NoImplicitWith"
+  ],
+  "contextSensitiveHelpUrl": ""
+}

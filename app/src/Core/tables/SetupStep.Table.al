@@ -5,7 +5,6 @@ table 50001 "WHA Setup Step"
     Caption = 'Warehouse advanced setup step';
     TableType = Temporary;
     DataClassification = SystemMetadata;
-    Access = Internal;
 
     fields
     {

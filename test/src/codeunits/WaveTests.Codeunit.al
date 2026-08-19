@@ -355,6 +355,222 @@ codeunit 51004 "WHA Wave Tests"
         Assert.AreEqual(CountAfterFirstRun, Wave.Count(), 'A second import should not create more waves.');
     end;
 
+    [Test]
+    procedure ATemplateBuildsAWaveAndFillsIt()
+    var
+        WaveTemplate: Record "WHA Wave Template";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+        Status: Enum "WHA Wave Status";
+    begin
+        // [SCENARIO] The point of a template is that the same wave can be built again tomorrow without
+        // anybody remembering what yesterday's settings were.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        CreateReleasedTask(WarehouseTask, 'WV-T-01', CopyStr(LocationTok, 1, 10), 10);
+        CreateTemplate(WaveTemplate, 'WV-TMPL-1', 5, 0, false);
+
+        Assert.AreEqual(1, WaveTemplateLogic.CreateWave(WaveTemplate, Wave), 'The template should have gathered the one job that was waiting.');
+
+        Assert.AreEqual(CopyStr('WV-TMPL-1', 1, 20), Wave."Template Code", 'The wave should name the template that built it.');
+        Assert.AreEqual(CopyStr(LocationTok, 1, 10), Wave."Location Code", 'The wave takes the template''s location.');
+        Assert.AreEqual(Status::WHAOpen, Wave.Status, 'This template does not release, so the wave waits for somebody.');
+        Assert.AreEqual(Wave."No.", WaveTemplate."Last Wave No.", 'The template should remember what it built.');
+    end;
+
+    [Test]
+    procedure ATemplateThatReleasesSendsTheWaveStraightToTheFloor()
+    var
+        WaveTemplate: Record "WHA Wave Template";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+        Status: Enum "WHA Wave Status";
+    begin
+        // [SCENARIO] A round that runs unattended every morning has to reach the floor without anybody
+        // pressing anything, and that is a choice made per template rather than for the whole warehouse.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        CreateReleasedTask(WarehouseTask, 'WV-T-02', CopyStr(LocationTok, 1, 10), 10);
+        CreateTemplate(WaveTemplate, 'WV-TMPL-2', 5, 0, true);
+
+        WaveTemplateLogic.CreateWave(WaveTemplate, Wave);
+
+        Assert.AreEqual(Status::WHAReleased, Wave.Status, 'The template said to release it.');
+    end;
+
+    [Test]
+    procedure ATemplateThatFindsNoWorkLeavesNoWaveBehind()
+    var
+        WaveTemplate: Record "WHA Wave Template";
+        Wave: Record "WHA Wave";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+    begin
+        // [SCENARIO] A scheduled round that runs every morning on a quiet day must not leave an empty
+        // wave behind. An empty wave every morning is noise, and noise is what makes people stop reading
+        // the list.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        CreateTemplate(WaveTemplate, 'WV-TMPL-3', 5, 0, false);
+
+        Assert.AreEqual(0, WaveTemplateLogic.CreateWave(WaveTemplate, Wave), 'There was nothing to gather.');
+
+        Assert.AreEqual('', WaveTemplate."Last Wave No.", 'No wave was left behind, so there is none to name.');
+        Assert.AreNotEqual(0DT, WaveTemplate."Last Run At", 'The template still ran, and that is worth recording.');
+    end;
+
+    [Test]
+    procedure ABlockedTemplateBuildsNothing()
+    var
+        WaveTemplate: Record "WHA Wave Template";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+    begin
+        // [SCENARIO] Blocking is how a template is taken out of use, because deleting one would leave the
+        // waves it already built naming nothing.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        CreateReleasedTask(WarehouseTask, 'WV-T-04', CopyStr(LocationTok, 1, 10), 10);
+        CreateTemplate(WaveTemplate, 'WV-TMPL-4', 5, 0, false);
+        WaveTemplate.Validate(Blocked, true);
+        WaveTemplate.Modify(true);
+
+        asserterror WaveTemplateLogic.CreateWave(WaveTemplate, Wave);
+
+        Assert.ExpectedError('is blocked');
+    end;
+
+    [Test]
+    procedure ATemplateThatHasBuiltWavesCannotBeDeleted()
+    var
+        WaveTemplate: Record "WHA Wave Template";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+    begin
+        // [SCENARIO] The waves a template built name it. Deleting the template would leave them pointing
+        // at nothing, so it is blocked instead.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        CreateReleasedTask(WarehouseTask, 'WV-T-05', CopyStr(LocationTok, 1, 10), 10);
+        CreateTemplate(WaveTemplate, 'WV-TMPL-5', 5, 0, false);
+        WaveTemplateLogic.CreateWave(WaveTemplate, Wave);
+
+        asserterror WaveTemplate.Delete(true);
+
+        Assert.ExpectedError('cannot be deleted');
+    end;
+
+    [Test]
+    procedure TheScheduledRunBuildsOnlyTheTemplatesMarkedForIt()
+    var
+        ScheduledTemplate: Record "WHA Wave Template";
+        ManualTemplate: Record "WHA Wave Template";
+        FirstTask: Record "WHA Warehouse Task";
+        SecondTask: Record "WHA Warehouse Task";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+    begin
+        // [SCENARIO] A template somebody runs by hand must not also fire on the schedule. The two are
+        // different intentions and the flag is what separates them.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        CreateReleasedTask(FirstTask, 'WV-T-06', CopyStr(LocationTok, 1, 10), 10);
+        CreateReleasedTask(SecondTask, 'WV-T-07', CopyStr(LocationTok, 1, 10), 20);
+        CreateTemplate(ScheduledTemplate, 'WV-TMPL-6', 1, 0, false);
+        ScheduledTemplate.Validate(Scheduled, true);
+        ScheduledTemplate.Modify(true);
+        CreateTemplate(ManualTemplate, 'WV-TMPL-7', 1, 0, false);
+
+        Assert.AreEqual(1, WaveTemplateLogic.RunScheduled(''), 'Only the scheduled template should have built a wave.');
+
+        ManualTemplate.Get('WV-TMPL-7');
+        Assert.AreEqual('', ManualTemplate."Last Wave No.", 'The template nobody scheduled should not have run.');
+    end;
+
+    [Test]
+    procedure AWaveMeasuresItsWorkAgainstTheLabourStandards()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+        Measured: Boolean;
+    begin
+        // [SCENARIO] A count of jobs is a poor proxy for a shift's work. Twenty pallet moves and twenty
+        // piece picks are not the same afternoon, and the labour standards already know the difference.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        WriteStandard(6);
+        CreateReleasedTask(WarehouseTask, 'WV-T-08', CopyStr(LocationTok, 1, 10), 10);
+        CreateWave(Wave, 'WV-EST-1', CopyStr(LocationTok, 1, 10), 5);
+        WaveLogic.Fill(Wave);
+
+        Assert.AreEqual(6, WaveLogic.EstimateMinutes(Wave, Measured), 'One job at six minutes is six minutes of work.');
+        Assert.IsTrue(Measured, 'A standard applied, so the answer means something.');
+    end;
+
+    [Test]
+    procedure AWaveWithNoStandardsSaysItsAnswerIsNotMeasured()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+        Measured: Boolean;
+    begin
+        // [SCENARIO] Zero minutes because nobody wrote a standard is not the same as zero minutes because
+        // there is no work, and a wave that could not tell them apart would be lying.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        ClearStandards();
+        CreateReleasedTask(WarehouseTask, 'WV-T-09', CopyStr(LocationTok, 1, 10), 10);
+        CreateWave(Wave, 'WV-EST-2', CopyStr(LocationTok, 1, 10), 5);
+        WaveLogic.Fill(Wave);
+
+        Assert.AreEqual(0, WaveLogic.EstimateMinutes(Wave, Measured), 'Nothing measured the work.');
+        Assert.IsFalse(Measured, 'The wave should say plainly that nothing measured it.');
+    end;
+
+    [Test]
+    procedure AWaveStopsGatheringWhenItHasAShiftsWorth()
+    var
+        Wave: Record "WHA Wave";
+        FirstTask: Record "WHA Warehouse Task";
+        SecondTask: Record "WHA Warehouse Task";
+        ThirdTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [SCENARIO] The cap that matters is how much work a shift can finish, not how many lines it has.
+        // Ten minutes of allowance takes two six-minute jobs and stops.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        WriteStandard(6);
+        CreateReleasedTask(FirstTask, 'WV-T-10', CopyStr(LocationTok, 1, 10), 10);
+        CreateReleasedTask(SecondTask, 'WV-T-11', CopyStr(LocationTok, 1, 10), 20);
+        CreateReleasedTask(ThirdTask, 'WV-T-12', CopyStr(LocationTok, 1, 10), 30);
+        CreateWaveWithMinutes(Wave, 'WV-EST-3', CopyStr(LocationTok, 1, 10), 25, 10);
+
+        Assert.AreEqual(2, WaveLogic.Fill(Wave), 'Ten minutes takes the first job and one more, then stops.');
+    end;
+
+    [Test]
+    procedure AJobBiggerThanTheWholeAllowanceIsStillGathered()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [SCENARIO] One job that takes longer than the whole allowance would otherwise never be gathered
+        // by any wave, and would sit on the queue for ever. An empty wave is worse than a full one.
+        ConfigureWaves(false);
+        EnsureWaveNumbering();
+        WriteStandard(30);
+        CreateReleasedTask(WarehouseTask, 'WV-T-13', CopyStr(LocationTok, 1, 10), 10);
+        CreateWaveWithMinutes(Wave, 'WV-EST-4', CopyStr(LocationTok, 1, 10), 25, 5);
+
+        Assert.AreEqual(1, WaveLogic.Fill(Wave), 'The first job goes in however long it takes.');
+    end;
+
     local procedure ConfigureWaves(IncludeUnreleased: Boolean)
     var
         Setup: Record "WHA Wave Setup";
@@ -421,5 +637,70 @@ codeunit 51004 "WHA Wave Tests"
         Location.Init();
         Location.Code := LocationCode;
         Location.Insert();
+    end;
+
+    local procedure EnsureWaveNumbering()
+    var
+        Setup: Record "WHA Wave Setup";
+        NoSeriesMgt: Codeunit "WHA No. Series Mgt.";
+    begin
+        Setup.Reset();
+        if not Setup.Get() then begin
+            Setup.Init();
+            Setup.Insert(true);
+        end;
+        if Setup."Wave Nos." <> '' then
+            exit;
+
+        Setup.Validate("Wave Nos.", NoSeriesMgt.EnsureSeries('WHA-TSTWAVE', 'Warehouse advanced test waves', 'WV000001', 'WV999999'));
+        Setup.Modify(true);
+    end;
+
+    local procedure CreateTemplate(var WaveTemplate: Record "WHA Wave Template"; TemplateCode: Code[20]; MaxTasks: Integer; MaxMinutes: Decimal; ReleaseAutomatically: Boolean)
+    begin
+        if WaveTemplate.Get(TemplateCode) then
+            WaveTemplate.Delete(false);
+
+        WaveTemplate.Init();
+        WaveTemplate."Code" := TemplateCode;
+        WaveTemplate.Validate("Location Code", CopyStr(LocationTok, 1, 10));
+        WaveTemplate.Validate("Max Tasks", MaxTasks);
+        WaveTemplate.Validate("Max Minutes", MaxMinutes);
+        WaveTemplate.Validate("Release Automatically", ReleaseAutomatically);
+        WaveTemplate.Insert(true);
+    end;
+
+    local procedure CreateWaveWithMinutes(var Wave: Record "WHA Wave"; WaveNo: Code[20]; LocationCode: Code[10]; MaxTasks: Integer; MaxMinutes: Decimal)
+    begin
+        Wave.Init();
+        Wave."No." := WaveNo;
+        Wave."Location Code" := LocationCode;
+        Wave."Max Tasks" := MaxTasks;
+        Wave."Max Minutes" := MaxMinutes;
+        Wave.Insert(true);
+    end;
+
+    local procedure WriteStandard(MinutesPerJob: Decimal)
+    var
+        LabourStandard: Record "WHA Labour Standard";
+        TaskType: Enum "WHA Warehouse Task Type";
+        Basis: Enum "WHA Labour Standard Basis";
+    begin
+        ClearStandards();
+
+        LabourStandard.Init();
+        LabourStandard."Location Code" := CopyStr(LocationTok, 1, 10);
+        LabourStandard."Task Type" := TaskType::WHAPutAway;
+        LabourStandard.Validate(Basis, Basis::WHAFixedOnly);
+        LabourStandard.Validate("Minutes Per Job", MinutesPerJob);
+        LabourStandard.Insert(true);
+    end;
+
+    local procedure ClearStandards()
+    var
+        LabourStandard: Record "WHA Labour Standard";
+    begin
+        LabourStandard.Reset();
+        LabourStandard.DeleteAll(false);
     end;
 }

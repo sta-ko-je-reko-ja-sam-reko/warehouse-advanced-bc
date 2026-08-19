@@ -33,6 +33,14 @@ table 50150 "WHA Wave Setup"
             ToolTip = 'Specifies how many jobs a wave takes when it is filled, unless the wave itself says otherwise. A wave bigger than a shift can finish is a wave nobody trusts.';
             MinValue = 0;
         }
+        field(31; "Default Max Minutes"; Decimal)
+        {
+            Caption = 'Default max minutes of work per wave';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies how much work, measured in minutes, a wave takes when it is filled, unless the wave itself says otherwise. It is worked out from the labour standards, so it limits nothing until somebody has written them. Zero means the job count is the only limit.';
+            DecimalPlaces = 0 : 2;
+            MinValue = 0;
+        }
         field(40; "Include Unreleased Work"; Boolean)
         {
             Caption = 'Gather work that is not released yet';

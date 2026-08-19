@@ -20,10 +20,32 @@ everything for a departure, or a round of picking — instead of trickling out o
 - **strategy** — how it chooses work: `WHAMostUrgent` (priority, then due date) or `WHADueFirst`
   (due date only, whatever the priority).
 - **maxTasks** — how many jobs it takes when filled. Zero uses the setup default.
+- **maxMinutes** — how much *work* it takes when filled, in minutes, worked out from the labour
+  standards. Zero uses the setup default. **This does nothing in a company with no labour standards**,
+  and a zero here is not a claim that the wave is empty.
 - **status** — read only: `WHAOpen`, `WHAReleased`, `WHACompleted`, `WHACancelled`.
 - **taskCount** and **completedTaskCount** — read only, and always current. `completedTaskCount`
   includes cancelled jobs, because the question is what is still outstanding.
+- **templateCode** — read only. The template that built the wave; empty on one somebody created by
+  hand.
 - **releasedDateTime**, **completedDateTime** — read only.
+
+**`waveTemplates`** — the standing definitions. **Read only for you**, with one action.
+
+- **code**, **description**, **locationCode**, **strategy**, **maxTasks**, **maxMinutes** — what every
+  wave built from this template looks like.
+- **releaseAutomatically** — whether its waves go to the floor unattended.
+- **scheduled** — whether the job queue run includes it.
+- **blocked** — out of use.
+- **lastRunDateTime**, **lastWaveNumber** — what happened last time. **A `lastRunDateTime` that moves
+  while `lastWaveNumber` stays empty means the template keeps finding nothing**, which is worth
+  raising: a renamed location or a strategy that no longer matches anything looks exactly like this.
+- **`buildWave`** — build a wave from the template now.
+
+**You may run a template; you may not change one.** Building a wave from it carries out a decision
+somebody already made. Changing its cap, its strategy or whether it releases unattended changes every
+wave it will ever build — that is a standing instruction to the warehouse, not today's planning, and
+it belongs to a person.
 
 ### The four actions
 
@@ -57,6 +79,10 @@ everything for a departure, or a round of picking — instead of trickling out o
 - Withdrawing a wave whose reason has gone away.
 
 ## When not to use this
+
+- **Do not tell a user their wave holds a shift's work unless `maxMinutes` or the wave's estimate was
+  actually measured.** A wave in a company with no labour standards reports zero minutes because
+  nothing measured it, not because there is nothing to do.
 
 - **Do not fill and release in one breath without showing the user what was gathered.** Filling is
   a proposal; releasing sends people to do it. Report what the wave took — how many jobs, of what

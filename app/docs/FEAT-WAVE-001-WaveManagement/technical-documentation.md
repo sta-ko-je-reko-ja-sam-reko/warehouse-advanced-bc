@@ -33,6 +33,9 @@ started.
 ### Delivered so far
 
 **Segment 1** — the wave entity, two strategies, filling, releasing, completion and cancellation.
+**Segment 2** — templates and workload: a reusable definition that builds the same wave again
+tomorrow, a scheduled run for a job queue to call, and a cap measured in **minutes of work** rather
+than in a count of jobs.
 
 ## Data model
 
@@ -40,6 +43,7 @@ started.
 |---|---|---|
 | `WHA Wave Setup` | 50150 | Single-record feature setup |
 | `WHA Wave` | 50151 | One batch of work |
+| `WHA Wave Template` | 50152 | A reusable definition of a wave, and the thing a schedule runs |
 
 ### `WHA Wave`
 
@@ -51,6 +55,8 @@ started.
 | `Status` | `Enum "WHA Wave Status"` | Open / Released / Completed / Cancelled. Not editable |
 | `Strategy` | `Enum "WHA Wave Strategy"` | How it decides what belongs to it |
 | `Max Tasks` | `Integer` | How many jobs it takes when filled. Zero uses the setup default |
+| `Max Minutes` | `Decimal` | How much **work** it takes when filled, from the labour standards. Zero uses the setup default |
+| `Template Code` | `Code[20]` | The template that built it. Empty on a wave somebody created by hand |
 | `Released At` / `Completed At` | `DateTime` | Stamped by the life cycle |
 | `Task Count` / `Completed Task Count` | `Integer` | FlowFields over the tasks pointing at this wave |
 
@@ -69,7 +75,21 @@ answers is "what is still outstanding", and a withdrawn job is not.
 | `Enabled` | The feature toggle |
 | `Default Strategy` | What a new wave uses unless it says otherwise |
 | `Default Max Tasks` | Ships as 25. A wave bigger than a shift can finish is a wave nobody trusts |
+| `Default Max Minutes` | Ships as zero, which means the job count is the only limit |
 | `Include Unreleased Work` | Whether a wave may gather **drafts** and release them with the wave — see below |
+
+### `WHA Wave Template`
+
+| Field | Notes |
+|---|---|
+| `Code`, `Description` | What the template is, and how every wave it builds is described |
+| `Location Code` | Required. A template covers one location, like the waves it builds |
+| `Strategy`, `Max Tasks`, `Max Minutes` | Copied onto every wave it builds |
+| `Release Automatically` | Whether the wave reaches the floor without anybody pressing anything |
+| `Scheduled` | Whether the scheduled run includes it |
+| `Blocked` | Out of use. A template finished with is blocked, never deleted |
+| `Last Run At`, `Last Wave No.` | What happened last time. `Last Wave No.` stays empty when a run found nothing |
+| `Wave Count` | FlowField over the waves that name it |
 
 ## Objects
 
@@ -88,6 +108,13 @@ answers is "what is still outstanding", and a withdrawn job is not.
 | `WHA Wave Default Strategy` | codeunit | 50154 | `app/src/WaveManagement/codeunits/WaveDefaultStrategy.Codeunit.al` |
 | `WHA Wave Due Strategy` | codeunit | 50155 | `app/src/WaveManagement/codeunits/WaveDueStrategy.Codeunit.al` |
 | `WHA Wave Strategy Filters` | codeunit | 50156 | `app/src/WaveManagement/codeunits/WaveStrategyFilters.Codeunit.al` |
+| `WHA Wave Template` | table | 50152 | `app/src/WaveManagement/tables/WaveTemplate.Table.al` |
+| `WHA IWaveTemplate` | interface | — | `app/src/WaveManagement/interfaces/IWaveTemplate.Interface.al` |
+| `WHA Wave Template Logic` | codeunit | 50157 | `app/src/WaveManagement/codeunits/WaveTemplateLogic.Codeunit.al` |
+| `WHA Wave Scheduler` | codeunit | 50158 | `app/src/WaveManagement/codeunits/WaveScheduler.Codeunit.al` |
+| `WHA Wave Templates` | page | 50155 | `app/src/WaveManagement/pages/WaveTemplates.Page.al` |
+| `WHA Wave Template Card` | page | 50156 | `app/src/WaveManagement/pages/WaveTemplateCard.Page.al` |
+| `WHA API Wave Template` | page | 50157 | `app/src/WaveManagement/pages/APIWaveTemplate.Page.al` |
 | `WHA Wave Appl. Area Setup` | tableextension | 50150 | `app/src/WaveManagement/tableextensions/WaveApplAreaSetup.TableExt.al` |
 | `WHA Wave Setup` | page | 50150 | `app/src/WaveManagement/pages/WaveSetup.Page.al` |
 | `WHA Waves` | page | 50151 | `app/src/WaveManagement/pages/Waves.Page.al` |
@@ -99,6 +126,58 @@ answers is "what is still outstanding", and a withdrawn job is not.
 All in namespace `WarehouseAdvanced.WaveManagement`, from the reserved block `50150..50199`.
 Directed work gained `Wave No.` and two keys; foundation gained the `Wave Nos.` series; Core gained
 a `WHA Feature` enum value.
+
+**Segment 2 added a second cross-feature read: wave management now reads labour management.** The
+direction is one way — labour knows nothing about waves — and it is a *read of data*, not a call into
+a feature: `WHA Labour Mgt.ExpectedMinutes` looks up a standard and applies it. A company that never
+switched labour management on has no standards, every estimate is zero, and the wave falls back to
+counting jobs exactly as segment 1 did. That is why the wave does not check whether labour management
+is enabled: the data answers the question honestly on its own.
+
+## Templates — the same wave again tomorrow
+
+A wave was a one-off. `WHA Wave Template` is the definition: this location, this strategy, this cap,
+released or held. `CreateWave` builds a wave from it, fills it, and releases it when the template says
+so.
+
+Three decisions in it are worth arguing with:
+
+- **A run that gathers nothing leaves no wave behind.** The wave is created, filled, found empty, and
+  deleted; `Last Run At` is still stamped so it is clear the template ran. A scheduled round that
+  produced an empty wave every quiet morning would fill the list with noise, and noise is what makes
+  people stop reading it.
+- **A template that has built waves cannot be deleted, only blocked.** The waves it built name it, and
+  a wave pointing at a template that no longer exists is worse than a blocked row nobody uses.
+- **`Release Automatically` is per template, not per warehouse.** An unattended morning round and a
+  round somebody reviews before it goes out are different intentions, and a single setup flag could
+  not express both.
+
+### Scheduling is the job queue's, not ours
+
+`WHA Wave Scheduler` is a `TableNo`-bound codeunit whose `OnRun` calls `RunScheduled`. A job queue
+entry points at it, and Business Central decides when and how often — the entry's own `Location Code`
+filter narrows the run to one location.
+
+**Nothing in this feature stores a recurrence.** BC already knows how to schedule things, has a UI
+for it, logs failures and handles time zones; a `Run at 06:00 daily` field here would be a worse
+version of all of that, and one somebody would eventually have to reconcile with the job queue anyway.
+What the feature owns is *what* to build; *when* belongs to the platform.
+
+## Workload — minutes, not lines
+
+`Max Tasks` counts jobs, and a count is a poor proxy for a shift: twenty pallet moves and twenty piece
+picks are not the same afternoon. Segment 2 adds `Max Minutes`, worked out from the labour standards
+that `FEAT-LAB-001` already holds — the first time one feature's engineered standards are used to plan
+rather than to measure.
+
+`Fill` applies both caps and stops at whichever binds first. Two details matter:
+
+- **A job bigger than the whole allowance is still gathered, if the wave is empty.** Otherwise a
+  thirty-minute job in a warehouse with a twenty-five-minute cap would never be gathered by any wave
+  and would sit on the queue for ever. The first job always goes in; the cap governs everything after.
+- **Zero minutes because nobody wrote a standard is not zero minutes of work.** `EstimateMinutes`
+  returns a `Measured` flag alongside the number, and the wave card shows it. A wave whose work
+  nothing measured says so, rather than presenting a confident zero.
 
 ## Strategies — a filter and a sort, nothing else
 
@@ -169,35 +248,61 @@ numbering is asked for. The foundation neither creates it nor checks it.
 | Configuration | API group | Tool | Agent may |
 |---|---|---|---|
 | `Warehouse Advanced - Wave Management` | `waveManagement` | `WHA API Wave` | read, create, modify, and run fill / release / complete / cancel — **not delete** |
+| `Warehouse Advanced - Wave Management` | `waveManagement` | `WHA API Wave Template` | **read only**, and run `buildWave` |
 | `Warehouse Advanced - Demo Wave Management` | `demoWaveManagement` | `WHA API Demo Wave` | run `importDemoData` only |
 
 Unlike the handheld, an agent **may** release a wave: that is a planning decision made at a desk
 from information the agent can see, not a claim about where somebody was standing.
 
+**Templates are read-only to an agent, but it may run one.** Building a wave from a template is a
+decision somebody already made when they wrote the template; changing what a template does — the cap,
+the strategy, whether it releases unattended — changes every wave it will ever build, and that is a
+standing instruction to the warehouse rather than a day's planning.
+
 ## Demo data
 
 `WHA Demo Wave` seeds three waves under fixed numbers `DEMO-WAVE-001..003`: one open and filled, one
-filled and released, and one created but never used. It gathers from a location that already has
-released work, so the sample waves are not empty on a company that has run the directed work sample
-data first. `Import()` also builds the `WHA-WAVE` RapidStart package.
+filled and released, and one created but never used, plus one template `DEMO-MORNING` that builds the
+morning round. It gathers from a location that already has released work, so the sample waves are not
+empty on a company that has run the directed work sample data first. `Import()` also builds the
+`WHA-WAVE` RapidStart package, which now carries the template table as well.
+
+The sample template is **not** marked for the scheduled run. Sample data that starts building waves by
+itself once somebody wires up a job queue entry is worse than sample data with a gap in it.
 
 ## Tests
 
-`WHA Wave Tests` (codeunit 51004), 17 tests: filling takes the most urgent work first and stops at
-the cap; work at other locations, drafts, and work already in a wave are left alone; drafts are
-gathered and released when the setup allows it; an empty wave cannot be released; a released wave
-cannot be changed or deleted; taking work out of a wave leaves the job itself alone; a wave with
-work outstanding cannot be completed but closes when its work is done; cancelling withdraws
-unstarted work; deleting an open wave frees its work; the due-first strategy takes different work
-from the default; and demo idempotency.
+`WHA Wave Tests` (codeunit 51004), 27 tests.
+
+**Segment 1**, 17 tests: filling takes the most urgent work first and stops at the cap; work at other
+locations, drafts, and work already in a wave are left alone; drafts are gathered and released when
+the setup allows it; an empty wave cannot be released; a released wave cannot be changed or deleted;
+taking work out of a wave leaves the job itself alone; a wave with work outstanding cannot be
+completed but closes when its work is done; cancelling withdraws unstarted work; deleting an open wave
+frees its work; the due-first strategy takes different work from the default; and demo idempotency.
+
+**Segment 2**, 10 tests: a template builds a wave, fills it and is remembered by it; a template that
+releases sends the wave straight to the floor; a template that finds no work leaves no wave behind but
+still records that it ran; a blocked template builds nothing; a template that has built waves cannot
+be deleted; the scheduled run builds only the templates marked for it; a wave measures its work
+against the labour standards; a wave with no standards says plainly that its answer is not measured; a
+wave stops gathering when it has a shift's worth of minutes; and a job bigger than the whole allowance
+is still gathered rather than stranded.
 
 ## Not done
 
-- **Wave templates.** The catalogue names them. A wave is created by hand each time — there is no
-  "every morning, this location, this strategy, this cap" definition, and no scheduling.
-- **Workload balancing.** Also in the catalogue, also absent. Nothing spreads a wave's work across
-  operators or estimates whether a wave is a shift's worth of work; `Max Tasks` is a count, and a
-  count is a poor proxy for effort.
+- **Workload is measured, not balanced.** A wave now knows how much work it holds; nothing spreads
+  that work across operators. Balancing needs to know who is on shift and what they are already
+  holding, which is a roster the app does not have and should not invent.
+- **The estimate is only as good as the standards.** `Max Minutes` does nothing at all until somebody
+  has written labour standards, and a warehouse that has not will see a cap that never binds. The wave
+  card says so rather than letting a silent zero look like an answer.
+- **Nothing warns that a template is producing nothing.** A template whose location has been renamed,
+  or whose strategy no longer matches any work, quietly returns zero every morning. `Last Run At`
+  moves and `Last Wave No.` stays empty, and reading that is a person's job.
+- **The scheduled run is all or nothing per template.** There is no "only on weekdays" or "only after
+  the morning receipt has been put away" — those are job queue entries or a condition nobody has
+  specified yet.
 - **Automatic completion.** See above — deliberate, but it means the list needs running or a job
   queue entry to stay honest.
 - **No wave on the handheld.** An operator is handed work by the queue and never sees which wave it

@@ -37,6 +37,10 @@ page 50150 "WHA Wave Setup"
                 {
                     ApplicationArea = WHAWaveManagement;
                 }
+                field("Default Max Minutes"; Rec."Default Max Minutes")
+                {
+                    ApplicationArea = WHAWaveManagement;
+                }
                 field("Include Unreleased Work"; Rec."Include Unreleased Work")
                 {
                     ApplicationArea = WHAWaveManagement;

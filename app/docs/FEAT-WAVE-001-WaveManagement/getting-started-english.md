@@ -31,6 +31,41 @@ to gather.
    it can be put in a wave. Switch it on if the wave *is* the approval, in which case releasing the
    wave is what sends its jobs to the floor.
 
+## Build the same wave every day
+
+Typing the same wave every morning is how the settings drift. A **wave template** is that wave written
+down once.
+
+1. Choose the search icon, enter **Wave templates**, and choose the related link.
+2. Choose **New** and give it a **Code** and a **Description** — the description is what every wave it
+   builds is called.
+3. Choose the **Location code**, the **Strategy**, and how much work a wave should take:
+   - **Max jobs** — how many jobs, as before.
+   - **Max minutes of work** — how much *work*, which is usually the better question. It only does
+     something once somebody has written labour standards; until then leave it at zero.
+4. **Release the wave when it is built** — leave this off if somebody should look at what was gathered
+   before it goes to the floor.
+5. **What that builds** underneath spells out what you have set up, as one sentence.
+
+Choose **Build a wave** to run it now. You are told which wave was built and how much it gathered. If
+there was nothing to gather, **no wave is created** — an empty wave every morning is just noise.
+
+### Run it on a schedule
+
+Tick **Include in the scheduled run** on the templates that should run unattended, then ask an
+administrator to create a **job queue entry** for codeunit **WHA Wave Scheduler**. When and how often
+it runs is set on the job queue entry, because that is where Business Central keeps schedules — this
+feature does not have its own timetable to fall out of step with it.
+
+**Run the scheduled templates** on the template list does the same thing by hand, so you can see what
+the schedule will do before you set it up.
+
+### Finishing with a template
+
+Tick **Blocked**. A blocked template builds nothing, by hand or on a schedule. **You cannot delete a
+template that has built waves** — those waves name it, and deleting it would leave them pointing at
+nothing.
+
 ## Create and fill a wave
 
 1. Choose the search icon, enter **Waves**, and choose the related link.
@@ -83,9 +118,28 @@ Sample waves — one being built, one released, one never used — can be loaded
 feature on. Switch on **Load sample data** on the same step as **Enable this feature**. Load the
 directed work sample data first, or there is no work for the sample waves to gather.
 
+A sample template, **DEMO-MORNING**, is loaded with them. It is deliberately **not** marked for the
+scheduled run, so it will not start building waves by itself if you later set up a job queue entry.
+
+## How much work is in a wave
+
+Open a wave and look at **Minutes of work gathered**. It is worked out from your labour standards —
+what each kind of job at that location is expected to take — so it answers the question a job count
+cannot: is this a shift's worth?
+
+**Measured by a standard** tells you whether to believe it. If it is off, nobody has written a
+standard for this work, the minutes read zero, and the wave is limited by its job count alone. Zero
+minutes because nothing measured the work is not the same as no work.
+
+If a wave has **Max minutes of work** set, filling stops once it has that much. One exception: if the
+very first job on its own takes longer than the whole allowance, it is still taken — otherwise a long
+job would never be gathered by any wave and would sit on the queue for ever.
+
 ## What is not here yet
 
-There are no wave templates: you create each wave by hand, and nothing runs "every morning at six".
-Nothing balances a wave across your operators or tells you whether a wave is a shift's worth of
-work — **Max jobs** counts jobs, and jobs are not all the same size. Operators are not told which
-wave their job came from.
+A wave now knows how much work it holds, but nothing **balances** that work across your operators —
+the app does not know who is on shift or what they are already carrying. Nothing warns you that a
+template has stopped producing waves; if its location was renamed or its strategy no longer matches
+anything, it quietly finds nothing every morning and you have to notice. The scheduled run is all or
+nothing per template — there is no "weekdays only". Operators are still not told which wave their job
+came from.

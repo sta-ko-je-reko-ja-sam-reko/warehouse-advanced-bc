@@ -2,6 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using Microsoft.Foundation.NoSeries;
 using WarehouseAdvanced.DirectedWork;
+using WarehouseAdvanced.LabourManagement;
 
 codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
 {
@@ -32,7 +33,7 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
         if Wave."No." = '' then
             Wave."No." := NextWaveNo();
 
-        Setup.SetLoadFields("Default Strategy", "Default Max Tasks");
+        Setup.SetLoadFields("Default Strategy", "Default Max Tasks", "Default Max Minutes");
         if not Setup.Get() then
             exit;
 
@@ -40,6 +41,8 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
             Wave.Strategy := Setup."Default Strategy";
         if Wave."Max Tasks" = 0 then
             Wave."Max Tasks" := Setup."Default Max Tasks";
+        if Wave."Max Minutes" = 0 then
+            Wave."Max Minutes" := Setup."Default Max Minutes";
     end;
 
     /// <summary>
@@ -74,6 +77,8 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
         Strategy: Interface "WHA IWaveStrategy";
         Added: Integer;
         Room: Integer;
+        MinutesRoom: Decimal;
+        TaskMinutes: Decimal;
     begin
         CheckOpen(Wave);
         if Wave."Location Code" = '' then
@@ -83,6 +88,9 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
         if Room <= 0 then
             exit(0);
 
+        MinutesRoom := MinutesLeft(Wave);
+        Added := 0;
+
         Strategy := Wave.Strategy;
         if not Strategy.SelectCandidates(Wave, WarehouseTask) then
             exit(0);
@@ -90,12 +98,47 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
             exit(0);
 
         repeat
+            TaskMinutes := TaskMinutesOf(WarehouseTask);
+            if IsOverMinutes(Wave, Added, MinutesRoom, TaskMinutes) then
+                exit(Added);
+
             WarehouseTask."Wave No." := Wave."No.";
             WarehouseTask.Modify(true);
+            MinutesRoom -= TaskMinutes;
             Added += 1;
         until (Added >= Room) or (WarehouseTask.Next() = 0);
 
         exit(Added);
+    end;
+
+    /// <summary>
+    /// Works out how long the work already in a wave should take, from the labour standards.
+    /// </summary>
+    /// <param name="Wave">The wave to measure.</param>
+    /// <param name="Measured">Receives whether any standard applied at all.</param>
+    /// <returns>The expected time in minutes.</returns>
+    procedure EstimateMinutes(var Wave: Record "WHA Wave"; var Measured: Boolean): Decimal
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        LabourMgt: Codeunit "WHA Labour Mgt.";
+        TaskMeasured: Boolean;
+        Total: Decimal;
+    begin
+        Measured := false;
+
+        WarehouseTask.SetLoadFields("Task Type", "Location Code", Quantity);
+        WarehouseTask.SetCurrentKey("Wave No.", Status);
+        WarehouseTask.SetRange("Wave No.", Wave."No.");
+        if not WarehouseTask.FindSet() then
+            exit(0);
+
+        repeat
+            Total += LabourMgt.ExpectedMinutes(WarehouseTask."Task Type", WarehouseTask."Location Code", PlannedQuantity(WarehouseTask), TaskMeasured);
+            if TaskMeasured then
+                Measured := true;
+        until WarehouseTask.Next() = 0;
+
+        exit(Total);
     end;
 
     /// <summary>
@@ -252,6 +295,42 @@ codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
         WarehouseTask.SetCurrentKey("Wave No.", Status);
         WarehouseTask.SetRange("Wave No.", Wave."No.");
         exit(Wave."Max Tasks" - WarehouseTask.Count());
+    end;
+
+    local procedure MinutesLeft(var Wave: Record "WHA Wave"): Decimal
+    var
+        Measured: Boolean;
+    begin
+        if Wave."Max Minutes" <= 0 then
+            exit(0);
+        exit(Wave."Max Minutes" - EstimateMinutes(Wave, Measured));
+    end;
+
+    local procedure IsOverMinutes(var Wave: Record "WHA Wave"; Added: Integer; MinutesRoom: Decimal; TaskMinutes: Decimal): Boolean
+    begin
+        if Wave."Max Minutes" <= 0 then
+            exit(false);
+        if TaskMinutes <= 0 then
+            exit(false);
+        if TaskMinutes <= MinutesRoom then
+            exit(false);
+
+        exit(Added > 0);
+    end;
+
+    local procedure TaskMinutesOf(var WarehouseTask: Record "WHA Warehouse Task"): Decimal
+    var
+        LabourMgt: Codeunit "WHA Labour Mgt.";
+        Measured: Boolean;
+    begin
+        exit(LabourMgt.ExpectedMinutes(WarehouseTask."Task Type", WarehouseTask."Location Code", PlannedQuantity(WarehouseTask), Measured));
+    end;
+
+    local procedure PlannedQuantity(var WarehouseTask: Record "WHA Warehouse Task"): Decimal
+    begin
+        if WarehouseTask.Quantity > 0 then
+            exit(WarehouseTask.Quantity);
+        exit(1);
     end;
 
     local procedure IsGatherable(var WarehouseTask: Record "WHA Warehouse Task"): Boolean

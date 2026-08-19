@@ -53,6 +53,22 @@ table 50151 "WHA Wave"
             ToolTip = 'Specifies how many jobs this wave takes when it is filled. Zero uses the number from the wave setup.';
             MinValue = 0;
         }
+        field(32; "Max Minutes"; Decimal)
+        {
+            Caption = 'Max minutes of work';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies how much work, measured in minutes, this wave takes when it is filled. It is worked out from the labour standards, so it limits nothing until somebody has written them. Zero uses the number from the wave setup.';
+            DecimalPlaces = 0 : 2;
+            MinValue = 0;
+        }
+        field(33; "Template Code"; Code[20])
+        {
+            Caption = 'Template code';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies the wave template this wave was built from. It stays empty on a wave somebody created by hand.';
+            TableRelation = "WHA Wave Template"."Code";
+            Editable = false;
+        }
         field(40; "Released At"; DateTime)
         {
             Caption = 'Released at';
@@ -92,6 +108,9 @@ table 50151 "WHA Wave"
             Clustered = true;
         }
         key(Placement; "Location Code", Status)
+        {
+        }
+        key(Template; "Template Code")
         {
         }
     }

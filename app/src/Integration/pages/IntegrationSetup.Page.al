@@ -37,6 +37,10 @@ page 50650 "WHA Integration Setup"
                 {
                     ApplicationArea = WHAIntegration;
                 }
+                field("Release Requested Work"; Rec."Release Requested Work")
+                {
+                    ApplicationArea = WHAIntegration;
+                }
                 field("Max Retry Count"; Rec."Max Retry Count")
                 {
                     ApplicationArea = WHAIntegration;

@@ -385,6 +385,114 @@ codeunit 51002 "WHA Integration Tests"
     end;
 
     [Test]
+    procedure RequestedWorkIsHeldWhenTheSetupSaysSo()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        IntegrationMessage: Record "WHA Integration Message";
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
+        MessageType: Enum "WHA Int. Message Type";
+        EntryNo: Integer;
+    begin
+        // [SCENARIO] A warehouse that wants to check requested work before it reaches the floor gets a
+        // draft task, not a released one. The message still succeeds — holding is not failing.
+        EnsureIntegrationSetup(false);
+        EnsureTaskNumbering();
+        EnsureLocation();
+        EnsureItem();
+        HoldRequestedWork();
+
+        EntryNo := MessageMgt.CreateInbound(MessageType::WHAWarehouseTaskRequest, 'REQ-HOLD', '', TaskRequestPayload('WHAPick', 5));
+        IntegrationMessage.Get(EntryNo);
+
+        Assert.IsTrue(MessageMgt.Process(IntegrationMessage), 'Holding requested work should still apply the message.');
+
+        WarehouseTask.SetRange(Quantity, 5);
+        Assert.IsTrue(WarehouseTask.FindFirst(), 'The request should still have created a warehouse task.');
+        Assert.AreEqual(WarehouseTask.Status::WHACreated, WarehouseTask.Status, 'Requested work should be held as a draft when the setup says so.');
+    end;
+
+    [Test]
+    procedure AMessageCanOverrideTheHoldDecision()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        IntegrationMessage: Record "WHA Integration Message";
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
+        MessageType: Enum "WHA Int. Message Type";
+        EntryNo: Integer;
+    begin
+        // [SCENARIO] A partner system that distinguishes urgent work from work to be checked can say so
+        // per message, and that beats the standing setting.
+        EnsureIntegrationSetup(false);
+        EnsureTaskNumbering();
+        EnsureLocation();
+        EnsureItem();
+        HoldRequestedWork();
+
+        EntryNo := MessageMgt.CreateInbound(MessageType::WHAWarehouseTaskRequest, 'REQ-OVERRIDE', '', ReleaseOverridePayload(true));
+        IntegrationMessage.Get(EntryNo);
+
+        Assert.IsTrue(MessageMgt.Process(IntegrationMessage), 'The request should be applied.');
+
+        WarehouseTask.SetRange(Quantity, 6);
+        Assert.IsTrue(WarehouseTask.FindFirst(), 'The request should have created a warehouse task.');
+        Assert.AreEqual(WarehouseTask.Status::WHAReleased, WarehouseTask.Status, 'A message asking for release should beat the standing setting.');
+    end;
+
+    [Test]
+    procedure AMessageCanAskForWorkToBeHeld()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        IntegrationMessage: Record "WHA Integration Message";
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
+        MessageType: Enum "WHA Int. Message Type";
+        EntryNo: Integer;
+    begin
+        // [SCENARIO] And the other way round: a warehouse that normally releases everything still honours
+        // a message that asks for this one to be checked first.
+        EnsureIntegrationSetup(false);
+        EnsureTaskNumbering();
+        EnsureLocation();
+        EnsureItem();
+
+        EntryNo := MessageMgt.CreateInbound(MessageType::WHAWarehouseTaskRequest, 'REQ-HOLDONE', '', ReleaseOverridePayload(false));
+        IntegrationMessage.Get(EntryNo);
+
+        Assert.IsTrue(MessageMgt.Process(IntegrationMessage), 'The request should be applied.');
+
+        WarehouseTask.SetRange(Quantity, 6);
+        Assert.IsTrue(WarehouseTask.FindFirst(), 'The request should have created a warehouse task.');
+        Assert.AreEqual(WarehouseTask.Status::WHACreated, WarehouseTask.Status, 'A message asking to be held should not reach the floor.');
+    end;
+
+    [Test]
+    procedure RequestWithoutALocationIsRefused()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        IntegrationMessage: Record "WHA Integration Message";
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
+        MessageType: Enum "WHA Int. Message Type";
+        EntryNo: Integer;
+    begin
+        // [SCENARIO] Completeness is checked by the handler, not by the release that used to follow it.
+        // Work with nowhere to happen is refused even when requested work is held rather than released.
+        EnsureIntegrationSetup(false);
+        EnsureTaskNumbering();
+        EnsureItem();
+        HoldRequestedWork();
+
+        EntryNo := MessageMgt.CreateInbound(MessageType::WHAWarehouseTaskRequest, 'REQ-NOWHERE', '', '{"taskType":"WHAPick","itemNumber":"WHA-INT-ITEM","quantity":9}');
+        IntegrationMessage.Get(EntryNo);
+
+        Assert.IsFalse(MessageMgt.Process(IntegrationMessage), 'A request with no location should be refused.');
+
+        IntegrationMessage.Get(EntryNo);
+        Assert.ExpectedMessage('which location', IntegrationMessage."Error Message");
+
+        WarehouseTask.SetRange(Quantity, 9);
+        Assert.IsTrue(WarehouseTask.IsEmpty(), 'A refused request should leave no task behind.');
+    end;
+
+    [Test]
     procedure DemoImportIsIdempotent()
     var
         IntegrationMessage: Record "WHA Integration Message";
@@ -451,6 +559,21 @@ codeunit 51002 "WHA Integration Tests"
         exit(PayloadText);
     end;
 
+    local procedure ReleaseOverridePayload(Release: Boolean): Text
+    var
+        PayloadObject: JsonObject;
+        PayloadText: Text;
+    begin
+        PayloadObject.Add('taskType', 'WHAMovement');
+        PayloadObject.Add('description', 'Release decided by the message');
+        PayloadObject.Add('locationCode', LocationTok);
+        PayloadObject.Add('itemNumber', ItemTok);
+        PayloadObject.Add('quantity', 6);
+        PayloadObject.Add('release', Release);
+        PayloadObject.WriteTo(PayloadText);
+        exit(PayloadText);
+    end;
+
     local procedure ReceiptPayload(): Text
     var
         PayloadObject: JsonObject;
@@ -483,8 +606,34 @@ codeunit 51002 "WHA Integration Tests"
 
         Setup."Partner System" := 'TESTHOST';
         Setup.Validate("Auto Process Inbound", AutoProcess);
+        Setup.Validate("Release Requested Work", true);
         Setup.Validate("Max Retry Count", 0);
         Setup.Modify(true);
+
+        EnsureTasksAreNotAutoReleased();
+    end;
+
+    local procedure HoldRequestedWork()
+    var
+        Setup: Record "WHA Integration Setup";
+    begin
+        Setup.Get();
+        Setup.Validate("Release Requested Work", false);
+        Setup.Modify(true);
+    end;
+
+    local procedure EnsureTasksAreNotAutoReleased()
+    var
+        TaskSetup: Record "WHA Warehouse Task Setup";
+    begin
+        TaskSetup.Reset();
+        if not TaskSetup.Get() then begin
+            TaskSetup.Init();
+            TaskSetup.Insert(true);
+        end;
+
+        TaskSetup.Validate("Auto Release Tasks", false);
+        TaskSetup.Modify(true);
     end;
 
     local procedure EnsureTaskNumbering()

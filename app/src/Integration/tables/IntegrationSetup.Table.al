@@ -30,6 +30,12 @@ table 50650 "WHA Integration Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies whether an inbound message is applied as soon as it arrives. Leave this off to review messages before they change anything, and process them from the message list or on a schedule.';
         }
+        field(35; "Release Requested Work"; Boolean)
+        {
+            Caption = 'Release requested work';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether work the partner system asks for goes straight to the floor. Turn this off to hold requested work as a draft for someone here to check before it is released. A single message can say otherwise for itself.';
+        }
         field(40; "Max Retry Count"; Integer)
         {
             Caption = 'Max retry count';

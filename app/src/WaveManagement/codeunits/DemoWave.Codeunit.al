@@ -14,11 +14,13 @@ codeunit 50153 "WHA Demo Wave"
         MorningDescLbl: Label 'Morning pick round';
         AfternoonDescLbl: Label 'Afternoon departure';
         EmptyDescLbl: Label 'Evening round - nothing gathered yet';
+        TemplateCodeTok: Label 'DEMO-MORNING', Locked = true;
+        TemplateDescLbl: Label 'Morning pick round, built every day';
 
     /// <summary>
     /// Seeds sample waves: one still being built, one filled and released to the floor, and one that was
-    /// created and never used. Idempotent — re-running creates nothing new. Also builds this feature's
-    /// RapidStart configuration package.
+    /// created and never used, plus one wave template that builds the morning round. Idempotent —
+    /// re-running creates nothing new. Also builds this feature's RapidStart configuration package.
     /// </summary>
     procedure Import()
     var
@@ -30,6 +32,7 @@ codeunit 50153 "WHA Demo Wave"
         CreateOpenWave();
         CreateReleasedWave();
         CreateEmptyWave();
+        CreateTemplate();
 
         CreateConfigPackage();
     end;
@@ -72,6 +75,25 @@ codeunit 50153 "WHA Demo Wave"
         Strategy: Enum "WHA Wave Strategy";
     begin
         if InsertWave(Wave, 'DEMO-WAVE-003', EmptyDescLbl, Strategy::WHAMostUrgent, 0) then;
+    end;
+
+    local procedure CreateTemplate()
+    var
+        WaveTemplate: Record "WHA Wave Template";
+        Strategy: Enum "WHA Wave Strategy";
+    begin
+        if WaveTemplate.Get(CopyStr(TemplateCodeTok, 1, MaxStrLen(WaveTemplate."Code"))) then
+            exit;
+        if FirstLocation() = '' then
+            exit;
+
+        WaveTemplate.Init();
+        WaveTemplate."Code" := CopyStr(TemplateCodeTok, 1, MaxStrLen(WaveTemplate."Code"));
+        WaveTemplate.Validate(Description, CopyStr(TemplateDescLbl, 1, MaxStrLen(WaveTemplate.Description)));
+        WaveTemplate.Validate("Location Code", FirstLocation());
+        WaveTemplate.Validate(Strategy, Strategy::WHAMostUrgent);
+        WaveTemplate.Validate("Max Tasks", 5);
+        WaveTemplate.Insert(true);
     end;
 
     local procedure InsertWave(var Wave: Record "WHA Wave"; WaveNo: Code[20]; WaveDescription: Text[100]; WaveStrategy: Enum "WHA Wave Strategy"; MaxTasks: Integer): Boolean
@@ -118,5 +140,6 @@ codeunit 50153 "WHA Demo Wave"
 
         ConfigPackageMgt.InsertPackage(ConfigPackage, PackageCodeTok, CopyStr(PackageNameLbl, 1, 50), true);
         ConfigPackageMgt.InsertPackageTable(ConfigPackageTable, PackageCodeTok, Database::"WHA Wave");
+        ConfigPackageMgt.InsertPackageTable(ConfigPackageTable, PackageCodeTok, Database::"WHA Wave Template");
     end;
 }

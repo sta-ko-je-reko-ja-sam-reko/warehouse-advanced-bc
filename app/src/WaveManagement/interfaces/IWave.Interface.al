@@ -25,6 +25,16 @@ interface "WHA IWave"
     procedure Fill(var Wave: Record "WHA Wave"): Integer;
 
     /// <summary>
+    /// Works out how long the work already in a wave should take, from the labour standards. A wave is a
+    /// promise that a shift can finish something, and a count of jobs is a poor proxy for that promise —
+    /// twenty pallet moves and twenty piece picks are not the same afternoon.
+    /// </summary>
+    /// <param name="Wave">The wave to measure.</param>
+    /// <param name="Measured">Receives whether any standard applied at all. False means the answer is zero because nobody has written standards, not because there is no work.</param>
+    /// <returns>The expected time in minutes.</returns>
+    procedure EstimateMinutes(var Wave: Record "WHA Wave"; var Measured: Boolean): Decimal;
+
+    /// <summary>
     /// Puts one task into a wave.
     /// </summary>
     /// <param name="Wave">The wave to add to.</param>

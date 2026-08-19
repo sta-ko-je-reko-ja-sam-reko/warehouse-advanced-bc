@@ -37,11 +37,12 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | `FEAT-WAVE-001` segment 2 — templates and workload: a reusable wave definition, a scheduled run for the job queue to call, and a cap measured in **minutes of work** rather than a count of jobs. The first time one feature's engineered standards are used to *plan* rather than to measure |
 | Delivered | `FEAT-TASK-001` segment 3 — the source document: work raised from a standard warehouse receipt or shipment, and a job that knows which order it is serving. The first `pageextension` in the app. **The link runs one way** — completing a task tells the document nothing |
 | Delivered | `FEAT-CNT-001` and `FEAT-QC-001` segment 2 — **posting**: a shared engine, chosen per feature, that turns a counted difference into an adjustment and a scrapped pallet into a write-off. Built once, in a module that is deliberately **not a feature** — see [inventory-posting.md](inventory-posting.md). **No ledger entry has ever been written by it** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
-| Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of eleven features — much of it blocked on customer facts rather than on engineering |
+| Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of ten features — nearly all of it blocked on customer facts rather than on engineering |
 
 **What is delivered was built from §4, not from a capability register.** Every shipped feature
 carries that caveat in its own technical documentation. Phase 0 can still invalidate them, and
@@ -197,7 +198,7 @@ Wave A    FEAT-HU-001      handling units            ← delivered
 Wave B    FEAT-TASK-001    directed work             ← segment 3 delivered; fed by receipts and shipments
           FEAT-RF-001      mobile device             ← segment 2 delivered; needs operator review
 
-Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
+Wave C    FEAT-WAVE-001    wave management           ← segment 2 delivered; templates and a workload cap
           FEAT-PACK-001    packing                   ← segment 1 delivered
           FEAT-LBL-001     labelling                 ← segment 1 delivered
 
@@ -264,6 +265,8 @@ suggests. Reading what all three of its features left open:
 - **Packing** cannot cartonise without item dimensions "nobody has confirmed this customer maintains",
   and cannot turn verification into a comparison without something to compare against.
 - **Wave management** could take templates and scheduling today, and that is genuinely all of it.
+  ~~Could.~~ **Delivered** — and it turned out to be worth more than the wave order suggested, because
+  the workload cap it needed was already sitting in labour management. See below.
 
 **Most of what is left in the catalogue is blocked on Phase 0, not on engineering.** That is a
 different problem from the one this plan was written to sequence, and it is the strongest argument the
@@ -289,6 +292,26 @@ Three things about it are worth carrying forward:
   completing it writes nothing back. Closing that loop means writing `Qty. to Receive` or
   `Qty. to Ship` from a warehouse app, which is the point at which this stops being an overlay and
   starts driving standard posting. That is a scope decision, not a task.
+
+Wave management's second segment then made a point the plan had not anticipated. Its two catalogue
+gaps were *templates* and *workload balancing*, and the second looked like it needed something nobody
+had built — until it turned out that `FEAT-LAB-001` already held engineered standards for exactly this
+work. A wave can now be capped in **minutes** instead of in lines, and no new estimation model was
+invented to do it.
+
+**That is the first time one feature's data has been used to plan rather than to measure**, and it is
+the argument for the Wave E features paying for themselves. Slotting and labour management were
+described as adding "no new warehouse operation at all"; this is the return on that. Two properties
+were preserved deliberately: the dependency runs one way (labour knows nothing about waves), and it is
+a read of *data* rather than a call into a feature — a company that never switched labour management
+on has no standards, every estimate is zero, and the wave falls back to counting jobs exactly as it
+did before.
+
+Scheduling was the other half, and the decision there was to **not build one**. `WHA Wave Scheduler`
+is a codeunit a job queue entry points at; the feature stores no recurrence. Business Central already
+schedules things, logs failures and handles time zones, and a `Run at 06:00 daily` field here would
+have been a worse version of all of it that somebody would eventually have to reconcile with the job
+queue anyway.
 
 Each feature runs the greenfield loop — intake → design → document → implement → test →
 deliver — **in segments**, with a test and a documentation update shipping alongside each
@@ -321,7 +344,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 258 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 268 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

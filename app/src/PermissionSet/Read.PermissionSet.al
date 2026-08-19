@@ -34,6 +34,7 @@ permissionset 50001 "WHA Read"
         tabledata "WHA RF Device" = R,
         tabledata "WHA Wave Setup" = R,
         tabledata "WHA Wave" = R,
+        tabledata "WHA Wave Template" = R,
         tabledata "WHA Label Setup" = R,
         tabledata "WHA Pack Setup" = R,
         tabledata "WHA Pack Station" = R,

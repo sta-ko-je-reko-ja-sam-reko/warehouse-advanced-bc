@@ -34,6 +34,7 @@ permissionset 50002 "WHA Full"
         tabledata "WHA RF Device" = RIMD,
         tabledata "WHA Wave Setup" = RIMD,
         tabledata "WHA Wave" = RIMD,
+        tabledata "WHA Wave Template" = RIMD,
         tabledata "WHA Label Setup" = RIMD,
         tabledata "WHA Pack Setup" = RIMD,
         tabledata "WHA Pack Station" = RIMD,

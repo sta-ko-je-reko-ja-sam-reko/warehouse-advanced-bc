@@ -48,6 +48,25 @@ page 50152 "WHA Wave Card"
                 field("Max Tasks"; Rec."Max Tasks")
                 {
                 }
+                field("Max Minutes"; Rec."Max Minutes")
+                {
+                }
+                field(EstimatedMinutes; EstimatedMinutes)
+                {
+                    Caption = 'Minutes of work gathered';
+                    ToolTip = 'Specifies how long the work in this wave should take according to the labour standards. It reads zero when nobody has written a standard for this kind of work, which is not the same as a wave with nothing in it.';
+                    DecimalPlaces = 0 : 2;
+                    Editable = false;
+                }
+                field(EffortMeasured; EffortMeasured)
+                {
+                    Caption = 'Measured by a standard';
+                    ToolTip = 'Specifies whether any labour standard applied to the work in this wave. When this is off, the minutes above are zero because nothing measured the work, and the wave is limited by its job count alone.';
+                    Editable = false;
+                }
+                field("Template Code"; Rec."Template Code")
+                {
+                }
             }
             group(Progress)
             {
@@ -154,17 +173,25 @@ page 50152 "WHA Wave Card"
     trigger OnAfterGetRecord()
     begin
         DescribeStrategy();
+        MeasureEffort();
     end;
 
     var
         WaveLogic: Codeunit "WHA Wave Logic";
         StrategyDescription: Text;
+        EstimatedMinutes: Decimal;
+        EffortMeasured: Boolean;
         FilledMsg: Label '%1 job(s) gathered into the wave.', Comment = '%1 = how many jobs were added';
 
     local procedure ApplyFill()
     begin
         Message(FilledMsg, WaveLogic.Fill(Rec));
         CurrPage.Update(false);
+    end;
+
+    local procedure MeasureEffort()
+    begin
+        EstimatedMinutes := WaveLogic.EstimateMinutes(Rec, EffortMeasured);
     end;
 
     local procedure DescribeStrategy()

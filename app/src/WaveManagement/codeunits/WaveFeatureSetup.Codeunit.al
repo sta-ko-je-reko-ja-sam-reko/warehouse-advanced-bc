@@ -114,6 +114,7 @@ codeunit 50151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
         MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Wave", true, true, false);
+        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Wave Template", false, false, false);
         MCPSetup.Activate(ConfigId);
     end;
 

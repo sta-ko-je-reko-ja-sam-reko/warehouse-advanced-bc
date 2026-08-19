@@ -1,0 +1,340 @@
+# FEAT-INT-001 - Integration Surface
+
+## Source/legacy reference
+
+N/A (greenfield).
+
+> ## The contract in this document is a guess
+>
+> **No interface specification was available.** The customer does not have one, and the third-party
+> WMS being replaced is not the source of a written contract we can read. The message types, the
+> field names, the JSON shapes and the exchange pattern below were **designed from what a warehouse
+> interface normally carries**, not from anything the customer's systems actually send today.
+>
+> This is a deliberate, agreed decision, not an oversight. What it means in practice:
+>
+> - **Assume every payload shape below is wrong in the details.** Field names will differ, extra
+>   fields will be required, and at least one message type we did not think of will be needed.
+> - **The feature is built so that being wrong is cheap.** The parts that are guesses are isolated
+>   in one place — the handler codeunits and their JSON — and the parts that are not guesses (the
+>   message spine, the life cycle, retries, duplicate suppression, the audit trail) are independent
+>   of them. Replacing a payload shape is one codeunit; adding a message type is an `enumextension`
+>   value plus one codeunit, and **no existing object changes**.
+> - **Nothing here talks to another system over the wire.** There is no URL, no credential and no
+>   transport, because none is known. The partner system posts into an API and collects from an
+>   outbox. When the real transport is known it becomes its own segment, and it will not disturb
+>   anything below.
+>
+> The things to establish before this is more than a scaffold are listed under
+> "What has to come from the customer" at the end.
+
+## Business process
+
+The warehouse does not run alone. Something upstream tells it what has arrived and what needs to
+happen; the warehouse tells that something what it did. This feature is that conversation, recorded
+as messages so that both halves are auditable:
+
+1. The partner system **posts an inbound message** — a receipt notification, or a request for work.
+2. The message is **applied** to the app's own data: a handling unit appears, or a warehouse task is
+   created and released to the floor. It is applied on arrival, or left waiting for review, as the
+   setup decides.
+3. A message that cannot be applied **fails with its reason recorded** and nothing half-done left
+   behind. It can be corrected and tried again.
+4. As work finishes, the app **fills an outbox** — a confirmation for every completed warehouse
+   task, a despatch notification for every shipped handling unit.
+5. The partner system **collects** those messages and **acknowledges** them, which is what stops
+   them being offered again.
+
+### Delivered so far
+
+**Segment 1** — the message spine, the handler dispatch, and four message types: two inbound, two
+outbound.
+
+## Data model
+
+| Table | ID | Purpose |
+|---|---|---|
+| `WHA Integration Setup` | 50650 | Single-record feature setup |
+| `WHA Integration Message` | 50651 | Every message in or out, with its body and what became of it |
+
+### `WHA Integration Message`
+
+| Field | Type | Notes |
+|---|---|---|
+| `Entry No.` | `Integer` | Primary key, `AutoIncrement` — the platform numbers messages, not a number series |
+| `Direction` | `Enum "WHA Int. Direction"` | Inbound / Outbound |
+| `Message Type` | `Enum "WHA Int. Message Type"` | Extensible, and it **is** the dispatch — see below |
+| `Partner System` | `Code[20]` | Which system this belongs to. Defaulted from the setup |
+| `External Id` | `Code[50]` | How the other side identifies the subject. **This is what makes the interface safe to retry** |
+| `Correlation Id` | `Code[50]` | Ties an answer back to the request that asked for it |
+| `Status` | `Enum "WHA Int. Message Status"` | New / Processed / Failed / Cancelled. Not editable |
+| `Error Message` | `Text[250]` | Why it failed, in the words the app itself used |
+| `Retry Count` | `Integer` | How many attempts have been made |
+| `Payload` | `Blob` | The body, as JSON, exactly as sent or built |
+| `Received At` / `Processed At` | `DateTime` | Stamped by the spine |
+| `Record ID` | `RecordId` | What the message created, changed, or was built from |
+
+Keys: `PK` on `Entry No.` (clustered), plus `Queue` (`Direction`, `Status`, `Message Type`),
+`External` (`Message Type`, `External Id`) and `Correlation` (`Correlation Id`).
+
+**The `External` key is the load-bearing one.** Both idempotency rules read it:
+
+- *Inbound:* a message whose `External Id` already appears on a **processed inbound** message of the
+  same type is refused. The partner system can resend anything, at any time, without creating the
+  work twice.
+- *Outbound:* a completed task or shipped unit is only put in the outbox if there is no **outbound**
+  message of that type carrying its number. **The outbox is the state** — no "sent" flag exists on
+  the warehouse task or the handling unit, so nothing has to be kept in step.
+
+`Payload` is a `Blob` rather than a `Text` field: message bodies outgrow 2048 characters as soon as
+a receipt carries a few lines, and the body must be kept **exactly** as it arrived to be worth
+anything in a dispute. Read and write it through `WHA Int. Message Mgt.`, never directly.
+
+### `WHA Integration Setup`
+
+| Field | Notes |
+|---|---|
+| `Enabled` | The feature toggle |
+| `Partner System` | Stamped on every message. Ships as `HOST` |
+| `Process inbound messages on arrival` | Off means messages queue for review or for a scheduled run |
+| `Max Retry Count` | How many times a failed inbound message is tried again by the queue run. Zero means never |
+
+## Objects
+
+| Object | Type | ID | File |
+|---|---|---|---|
+| `WHA Integration Setup` | table | 50650 | `app/src/Integration/tables/IntegrationSetup.Table.al` |
+| `WHA Integration Message` | table | 50651 | `app/src/Integration/tables/IntegrationMessage.Table.al` |
+| `WHA Int. Direction` | enum | 50650 | `app/src/Integration/enums/IntDirection.Enum.al` |
+| `WHA Int. Message Status` | enum | 50651 | `app/src/Integration/enums/IntMessageStatus.Enum.al` |
+| `WHA Int. Message Type` | enum | 50652 | `app/src/Integration/enums/IntMessageType.Enum.al` |
+| `WHA IIntegrationMessage` | interface | — | `app/src/Integration/interfaces/IIntegrationMessage.Interface.al` |
+| `WHA IIntMessageHandler` | interface | — | `app/src/Integration/interfaces/IIntMessageHandler.Interface.al` |
+| `WHA Integration Msg. Logic` | codeunit | 50650 | `app/src/Integration/codeunits/IntegrationMsgLogic.Codeunit.al` |
+| `WHA Int. Feature Setup` | codeunit | 50651 | `app/src/Integration/codeunits/IntFeatureSetup.Codeunit.al` |
+| `WHA Int. App Area Sub.` | codeunit | 50652 | `app/src/Integration/codeunits/IntAppAreaSub.Codeunit.al` |
+| `WHA Int. Message Mgt.` | codeunit | 50653 | `app/src/Integration/codeunits/IntMessageMgt.Codeunit.al` |
+| `WHA Int. Unhandled Message` | codeunit | 50654 | `app/src/Integration/codeunits/IntUnhandledMessage.Codeunit.al` |
+| `WHA Int. Task Request` | codeunit | 50655 | `app/src/Integration/codeunits/IntTaskRequest.Codeunit.al` |
+| `WHA Int. Task Confirm` | codeunit | 50656 | `app/src/Integration/codeunits/IntTaskConfirm.Codeunit.al` |
+| `WHA Int. HU Received` | codeunit | 50657 | `app/src/Integration/codeunits/IntHUReceived.Codeunit.al` |
+| `WHA Int. HU Shipped` | codeunit | 50658 | `app/src/Integration/codeunits/IntHUShipped.Codeunit.al` |
+| `WHA Demo Integration` | codeunit | 50659 | `app/src/Integration/codeunits/DemoIntegration.Codeunit.al` |
+| `WHA Int. Message Runner` | codeunit | 50660 | `app/src/Integration/codeunits/IntMessageRunner.Codeunit.al` |
+| `WHA Int. Appl. Area Setup` | tableextension | 50650 | `app/src/Integration/tableextensions/IntApplAreaSetup.TableExt.al` |
+| `WHA Integration Setup` | page | 50650 | `app/src/Integration/pages/IntegrationSetup.Page.al` |
+| `WHA Integration Messages` | page | 50651 | `app/src/Integration/pages/IntegrationMessages.Page.al` |
+| `WHA Integration Message Card` | page | 50652 | `app/src/Integration/pages/IntegrationMessageCard.Page.al` |
+| `WHA API Integration Message` | page | 50653 | `app/src/Integration/pages/APIIntegrationMessage.Page.al` |
+| `WHA API Demo Integration` | page | 50654 | `app/src/Integration/pages/APIDemoIntegration.Page.al` |
+| `WHA Integration Tests` | codeunit | 51002 | `test/src/codeunits/IntegrationTests.Codeunit.al` |
+
+All in namespace `WarehouseAdvanced.Integration`, from the reserved block `50650..50699`.
+Core changed only by gaining a `WHA Feature` enum value.
+
+## The dispatch — why a wrong guess is cheap
+
+`WHA Int. Message Type` is an **extensible enum that implements `WHA IIntMessageHandler`**, with
+`WHA Int. Unhandled Message` as its `DefaultImplementation`. Each value binds its own handler:
+
+```
+WHAHandlingUnitReceived   → WHA Int. HU Received     (inbound)
+WHAWarehouseTaskRequest   → WHA Int. Task Request    (inbound)
+WHAWarehouseTaskConfirmed → WHA Int. Task Confirm    (outbound)
+WHAHandlingUnitShipped    → WHA Int. HU Shipped      (outbound)
+```
+
+The interface has two methods, which is the whole contract a message type has to satisfy:
+
+| Method | Meaning |
+|---|---|
+| `HandleInbound` | Apply this message to our data. Raise an error to reject it |
+| `CollectOutbound` | Add outbox messages for anything the partner has not been told about |
+
+The spine never branches on message type. `Process` resolves the handler from the enum;
+`SweepOutbound` walks **every** ordinal of the enum and asks each one to collect. So:
+
+- **Adding a message type** = one `enumextension` value + one codeunit implementing two methods. No
+  existing object is touched, including by a dependent app that we do not ship.
+- **Changing a payload shape** = editing one handler. The spine, the API, the retry behaviour, the
+  duplicate rules and the audit trail are untouched.
+- **A type nobody handles** fails with *"Nothing in this app knows how to apply a message of type
+  X"* rather than being silently dropped — that is the default implementation earning its place.
+
+There are **no event publishers**, per the app's standing rule. Outbound messages are produced by a
+**sweep**, not by a hook in the directed-work or handling-unit code: those features do not know this
+one exists. It also means outbound production is idempotent and restartable, and that a message
+missed while the feature was off is picked up the next time the sweep runs.
+
+## Message shapes — the guesses
+
+All bodies are JSON objects. Dates are `YYYY-MM-DD`; date-times are ISO 8601.
+
+### Inbound — `WHAWarehouseTaskRequest`
+
+```json
+{
+  "taskType": "WHAPick",
+  "description": "Pick for order 4711",
+  "locationCode": "BLUE",
+  "fromBinCode": "B-01-0001",
+  "toBinCode": "STAGE-01",
+  "handlingUnitNumber": "HU000042",
+  "itemNumber": "1896-S",
+  "variantCode": "",
+  "quantity": 12,
+  "priority": 10,
+  "dueDate": "2026-08-20"
+}
+```
+
+Either `handlingUnitNumber` or `itemNumber` must be present, or the message is refused. The task is
+created **and released**, so an incomplete request fails loudly instead of leaving a draft nobody
+looks at. `taskType` is the enum value name; an unknown one is named back in the error.
+
+### Inbound — `WHAHandlingUnitReceived`
+
+```json
+{
+  "sscc": "380123456789012340",
+  "description": "Euro pallet - electronics",
+  "locationCode": "BLUE",
+  "binCode": "",
+  "lines": [
+    { "itemNumber": "1896-S", "variantCode": "", "quantity": 6, "lotNumber": "", "serialNumber": "" }
+  ]
+}
+```
+
+**The unit is numbered by this app**, from the foundation number series. The partner's identifier
+stays on the message as `External Id`; it is not written onto the handling unit. If the customer
+needs the partner's own pallet ID stored on the unit and searchable, that is a field on
+`WHA Handling Unit` and a decision for the register — not something to invent here.
+
+### Outbound — `WHAWarehouseTaskConfirmed`
+
+Written for every task that reaches *Completed*. `External Id` is the task number.
+
+```json
+{
+  "number": "WT000012", "taskType": "WHAPick", "status": "WHACompleted",
+  "description": "...", "locationCode": "BLUE", "fromBinCode": "B-01-0001", "toBinCode": "STAGE-01",
+  "handlingUnitNumber": "HU000042", "itemNumber": "1896-S", "variantCode": "",
+  "quantity": 12, "unitOfMeasureCode": "PCS", "assignedToUserId": "MARK",
+  "startedDateTime": "2026-08-19T09:12:44Z", "completedDateTime": "2026-08-19T09:31:02Z"
+}
+```
+
+### Outbound — `WHAHandlingUnitShipped`
+
+Written for every handling unit whose status is *Shipped*, with its contents as they left.
+`External Id` is the unit number.
+
+```json
+{
+  "number": "HU000042", "sscc": "380123456789012340", "description": "...",
+  "locationCode": "BLUE", "binCode": "", "parentNumber": "", "status": "WHAShipped",
+  "lines": [ { "lineNumber": 10000, "itemNumber": "1896-S", "variantCode": "", "description": "...",
+               "quantity": 6, "unitOfMeasureCode": "PCS", "lotNumber": "", "serialNumber": "" } ]
+}
+```
+
+## Failure handling
+
+`Process` runs the handler through `WHA Int. Message Runner`, a codeunit with
+`TableNo = "WHA Integration Message"`. That is deliberate and is the only reason the failure
+behaviour works: a `Codeunit.Run` that errors **rolls back everything the handler did**, so a
+receipt that creates a unit and then fails on its third line leaves no unit behind. The error text
+is then written onto the message in the outer transaction.
+
+| | |
+|---|---|
+| Success | `Status` → Processed, `Processed At` stamped, `Error Message` cleared |
+| Failure | `Status` → Failed, `Error Message` set from `GetLastErrorText`, `Retry Count` + 1, all data changes rolled back |
+| Retry | The queue run tries failed messages again while `Retry Count` is below `Max Retry Count` |
+
+A message that has not been dealt with **cannot be deleted** — it has to be cancelled, which keeps
+the record that it arrived. That is the difference between an audit trail and a log.
+
+## Running it
+
+| Path | What runs |
+|---|---|
+| Job queue | Codeunit `WHA Int. Message Mgt.` — its `OnRun` processes the inbound queue, then fills the outbox |
+| UI | *Integration messages* → **Process all waiting**, **Fill the outbox**, or per-message **Process** / **Acknowledge** / **Cancel** |
+| API | `POST` a message, then `process`, `acknowledge` or `cancel` as bound actions |
+
+There is no scheduled job queue entry created on install. Whether this runs every minute or on
+demand depends on volumes nobody has measured yet — see below.
+
+## Enablement
+
+Per `_patterns/feature-setup-and-toggle.md`: `WHA Feature` gained `WHAIntegration` bound to
+`WHA Int. Feature Setup` (guided setup step 40); `Application Area Setup` gained `WHA Integration`
+through this feature's own tableextension; the app-area subscriber sets it from `Enabled` with
+`SkipOnMissingLicense`/`SkipOnMissingPermission` both `true`; the setup page is `ApplicationArea =
+All` while the message pages carry `WHAIntegration`. Every write path **and every bound action** on
+the API page calls `CheckEnabled`, because application areas do not reach the API.
+
+## MCP configuration
+
+| Configuration | API group | Tool | Agent may |
+|---|---|---|---|
+| `Warehouse Advanced - Integration` | `integration` | `WHA API Integration Message` | read, create, modify, and run process / acknowledge / cancel — **not delete** |
+| `Warehouse Advanced - Demo Integration` | `demoIntegration` | `WHA API Demo Integration` | run `importDemoData` only |
+
+Delete is withheld on purpose: an agent tidying up an inbox is exactly the failure mode this feature
+exists to prevent. Agent instructions:
+[../agent-instructions/WarehouseAdvanced-Integration.md](../agent-instructions/WarehouseAdvanced-Integration.md)
+and [../agent-instructions/WarehouseAdvanced-Demo-Integration.md](../agent-instructions/WarehouseAdvanced-Demo-Integration.md).
+
+## Demo data
+
+`WHA Demo Integration` seeds five messages under fixed external identifiers `DEMO-INT-*`: a receipt
+waiting to be applied, a work request that is applied, a request that is cancelled, a malformed
+request that fails **with a real error message**, and an outbound confirmation waiting to be
+collected. Between them they cover both directions and all four statuses.
+
+The sample messages are driven through the **real** spine — `CreateInbound`, `Process`, `Cancel` —
+never by writing `Status` directly, so the failure example shows an error the app genuinely
+produces. It loads what it can: on a company with no location or item, the request messages fail
+rather than being skipped, which is itself an honest demonstration.
+
+`Import()` also builds the `WHA-INT` RapidStart package, containing `WHA Integration Message` only.
+
+## Tests
+
+`WHA Integration Tests` (codeunit 51002), 17 tests: payload round-trip; arrival stamping; unknown
+type and outbound-only type refused with readable reasons; a request creating and releasing a task
+and pointing at it; incomplete and unknown-type requests refused with nothing left behind; the same
+request applied only once; a receipt creating a unit with its contents; the outbound sweep reporting
+a completed task exactly once across repeated sweeps; the confirmation payload carrying the task;
+acknowledge closing an outbound message; process and acknowledge refusing each other's direction;
+cancel keeping the message; a waiting message refusing deletion; auto-process on arrival; and demo
+idempotency.
+
+## What has to come from the customer
+
+Everything here is replaceable once these are known. In rough order of how much they change:
+
+1. **The real message set.** Which events cross the boundary at all — is stock counted on our side
+   or theirs, who owns the item master, does anything ask for a *cancellation* of work already sent?
+2. **The real payload shapes**, including the identifiers the partner uses. Every field name above
+   is provisional.
+3. **The transport and its direction.** Does the partner post to us, do we post to them, is there a
+   file drop or a queue in between? Only the *outbox* half is assumed here, and only because it is
+   the half that survives being wrong.
+4. **Volumes.** Messages per hour decides whether this runs on a job queue every minute, whether
+   `Process` stays synchronous, and whether the message table needs a retention policy.
+5. **The cutover model.** A parallel run means both systems hold stock at once, and this feature
+   grows a reconciliation problem that a big-bang cutover does not have. That decision changes this
+   feature more than any other.
+
+## Not done
+
+- **No transport.** No HTTP, no credential store, no endpoint master data. Deliberate: see above.
+- **No retention or archiving.** The message table grows without limit.
+- **No message for stock adjustments, counts, or master data.** Nothing was known about them.
+- **No cancellation of already-sent work.** A partner withdrawing a task it requested has no
+  message; today someone cancels the task in the UI.
+- **Getting-started in the customer language** — the language has not been confirmed.

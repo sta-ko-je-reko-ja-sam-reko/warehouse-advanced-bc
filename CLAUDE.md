@@ -195,5 +195,10 @@ set in this repo's `.git/config` only. Consequences:
 - `app/docs/privacy-statement.md` is the draft content for the privacy page
 - `app/img/AppLogo.png` is a generated placeholder, not real branding
 - No CI: `.github/workflows/` is empty, and CI would need private `bc-dev-templates` access
+- **No interface specification exists for the system being replaced, and none can be produced.**
+  Confirmed with the customer. `FEAT-INT-001` was therefore built on assumed contracts — see the
+  boxed note at the top of `app/docs/FEAT-INT-001-Integration/technical-documentation.md`. Treat
+  every payload shape in that feature as provisional, and keep new guesses inside the handler
+  codeunits where they are cheap to replace. Do not add a message type by touching existing objects.
 - Cutover model (big bang vs. parallel run with Qguar) undecided
 - The planned automation "on top of" the WMS is unspecified

@@ -1,13 +1,16 @@
 ### AL / Dynamics 365 Business Central ###
 
 # VS Code: share settings + launch template, keep personal launch config local.
-# NOTE: must be ".vscode/*" (not ".vscode/") — git will not descend into an
-# ignored *directory*, so the negations below would never be evaluated.
-.vscode/*
-!.vscode/settings.json
-!.vscode/launch.json.template
-!.vscode/extensions.json
-!.vscode/tasks.json
+# Two things matter in these patterns:
+#   1. "*" not "/" at the end — git does not descend into an ignored *directory*,
+#      so ".vscode/" would make the negations below unreachable.
+#   2. Leading "**/" — a pattern containing a slash is anchored to this file's
+#      directory, so plain ".vscode/*" would miss app/.vscode and test/.vscode.
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/launch.json.template
+!**/.vscode/extensions.json
+!**/.vscode/tasks.json
 
 # Cache folder
 .alcache/

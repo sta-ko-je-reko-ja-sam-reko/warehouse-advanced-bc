@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "name": "app",
+      "path": "app"
+    },
+    {
+      "name": "test",
+      "path": "test"
+    },
+    {
+      "name": "docs",
+      "path": "docs"
+    }
+  ],
+  "settings": {
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.eol": "\r\n"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-dynamics-smb.al"
+    ]
+  }
+}

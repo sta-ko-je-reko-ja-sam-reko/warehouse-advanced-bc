@@ -17,16 +17,29 @@ the customer's live WMS usage before implementation — see
 ## Repository layout
 
 ```
-app/                    Main extension
+warehouse-advanced-bc.code-workspace   Open THIS in VS Code, not the repo folder
+app/                    Main extension — an AL project root
   app.json              Manifest — object range 50000..50999, target Cloud
   AppSourceCop.json     Affix enforcement (WHA)
+  .vscode/              AL settings + launch config (launch.json is local-only)
   src/<Module>/         Source, flat per functional module
   permissions/          Permission set objects
   translations/         .xlf translation files
-test/                   Test extension, object range 51000..51999
+test/                   Test extension — an AL project root
+  app.json              Manifest — object range 51000..51999
+  .vscode/              AL settings
 docs/                   Module map and gap analysis
-.vscode/                Shared editor settings; launch.json is local-only
 ```
+
+### Why `.vscode` lives in `app/` and not at the repo root
+
+The AL extension only activates for a folder that has `app.json` **at its root**. This repo
+keeps `app/` and `test/` as two separate AL projects, so the repo root is not an AL project
+and opening it directly gives you no AL commands at all — no symbol download, no F5.
+
+`warehouse-advanced-bc.code-workspace` solves this by registering `app/` and `test/` as
+workspace folders in their own right, so AL activates for each while you still see the
+whole repo in one window.
 
 Object IDs are pre-allocated per module so parallel work cannot collide. The allocation
 table is in [docs/modules.md](docs/modules.md).
@@ -39,7 +52,13 @@ table is in [docs/modules.md](docs/modules.md).
 | AL runtime | 17.0 |
 | AL extension | ms-dynamics-smb.al 17.0 |
 | Dev container | Docker, sandbox artifact, **US** localisation |
+| Production | BC online, **W1** (no country localisation) |
+| Distribution | **Per-tenant extension (PTE)** — not AppSource |
 | Target | `Cloud` — production runs on BC online |
+
+The dev container is US while production is W1. Warehouse objects overlap heavily so the
+practical risk is low, but the container should be rebuilt from a W1 artifact before work
+on modules that touch posting or documents.
 
 `app.json` declares `"target": "Cloud"` so that cloud-unsafe constructs fail at compile
 time on the local container rather than at deployment.
@@ -49,13 +68,16 @@ time on the local container rather than at deployment.
 ```powershell
 git clone https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc.git
 cd warehouse-advanced-bc
-copy .vscode\launch.json.template .vscode\launch.json   # then edit for your container
+copy app\.vscode\launch.json.template app\.vscode\launch.json   # edit for your container
+git config user.name  "Your Name"          # config here is repo-local by design,
+git config user.email "you@example.com"    # so a fresh clone starts with no identity
 ```
 
-Open the folder in VS Code, run **AL: Download Symbols**, then **F5**.
+Open **`warehouse-advanced-bc.code-workspace`** in VS Code — not the repo folder. Then run
+**AL: Download Symbols** against the `app` folder and press **F5**.
 
-`.vscode/launch.json` is gitignored — it holds host-specific detail. Keep the template in
-sync when the shape of the config changes.
+`app/.vscode/launch.json` is gitignored — it holds host-specific detail. Keep
+`launch.json.template` in sync when the shape of the config changes.
 
 ## Conventions
 

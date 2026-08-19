@@ -46,12 +46,25 @@ A signed-off capability register: one row per Qguar capability, its bucket, and 
 **Build** rows a target module. That register supersedes the candidate table in
 `modules.md`, which should then be rewritten to match it.
 
+## Decisions taken
+
+- **Distribution: per-tenant extension (PTE).** Not AppSource. The `50000..50999` range
+  and the `WHA` affix therefore stand as-is — no ID range or affix registration with
+  Microsoft is required. The affix is kept anyway: it prevents collision with other
+  extensions installed in the same tenant, which is a real risk in a customer environment,
+  not just an AppSource formality.
+- **Production localisation: W1.** No country localisation.
+
 ## Open questions
 
-- [ ] Which BC localisation is the production tenant? The dev container is **US**, which
-      will not surface localisation-specific behaviour if production is European.
-- [ ] Is the app a per-tenant extension (PTE) or destined for AppSource? This decides
-      whether the `50000..50999` range and `WHA` affix stand as-is.
 - [ ] What is the cutover model — big bang, or does the new app run alongside Qguar?
 - [ ] Which automation is planned "on top of" the WMS solution, and does it consume the
       `Integration` module's API surface or drive the UI?
+- [ ] What is the real publisher name? Both manifests still say `"Default Publisher"`.
+
+## Known environment mismatch
+
+The dev container is built from a **US** sandbox artifact, but production is **W1**. For
+warehouse objects the overlap is high and the risk is low, so this is not urgent — but it
+is not zero either, and the honest fix is to rebuild the container from a W1 artifact
+before serious work on modules that touch posting or documents.

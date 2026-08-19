@@ -51,6 +51,13 @@ as messages so that both halves are auditable:
 **Segment 1** — the message spine, the handler dispatch, and four message types: two inbound, two
 outbound.
 
+**Segment 2** — retention: the message log offered to Business Central's own retention policy
+framework.
+
+**Segment 3** — the message set widened to **twelve types**, six each way, from evidence by
+analogy rather than from a customer fact. See *Segment 3 — the message set, widened by analogy*
+below for where the evidence came from and what it is worth.
+
 ## Data model
 
 | Table | ID | Purpose |
@@ -100,6 +107,9 @@ anything in a dispute. Read and write it through `WHA Int. Message Mgt.`, never 
 | `Process inbound messages on arrival` | Off means messages queue for review or for a scheduled run |
 | `Release requested work` | On sends requested work straight to the floor; off holds it as a draft for someone here to check. A message may override it for itself |
 | `Max Retry Count` | How many times a failed inbound message is tried again by the queue run. Zero means never |
+| `Posting Method` | What an inbound inventory adjustment does to stock: nothing, a journal line somebody posts, or straight to the ledger. Same choice, and the same engine, as counting and quality hold |
+| `Item Journal Template Name` / `Item Journal Batch Name` | Where an adjustment is written. Only read when the method writes journal lines |
+| `Posting Reason Code` | Stamped on the entries an adjustment makes, so they can be told apart later |
 
 ## Objects
 
@@ -122,6 +132,15 @@ anything in a dispute. Read and write it through `WHA Int. Message Mgt.`, never 
 | `WHA Int. HU Received` | codeunit | 50657 | `app/src/Integration/codeunits/IntHUReceived.Codeunit.al` |
 | `WHA Int. HU Shipped` | codeunit | 50658 | `app/src/Integration/codeunits/IntHUShipped.Codeunit.al` |
 | `WHA Demo Integration` | codeunit | 50659 | `app/src/Integration/codeunits/DemoIntegration.Codeunit.al` |
+| `WHA Int. Receipt Release` | codeunit | 50664 | `app/src/Integration/codeunits/IntReceiptRelease.Codeunit.al` |
+| `WHA Int. Shipment Release` | codeunit | 50665 | `app/src/Integration/codeunits/IntShipmentRelease.Codeunit.al` |
+| `WHA Int. Inventory Adjust` | codeunit | 50666 | `app/src/Integration/codeunits/IntInventoryAdjust.Codeunit.al` |
+| `WHA Int. Count Request` | codeunit | 50667 | `app/src/Integration/codeunits/IntCountRequest.Codeunit.al` |
+| `WHA Int. Receipt Completed` | codeunit | 50668 | `app/src/Integration/codeunits/IntReceiptCompleted.Codeunit.al` |
+| `WHA Int. Shipment Completed` | codeunit | 50669 | `app/src/Integration/codeunits/IntShipmentCompleted.Codeunit.al` |
+| `WHA Int. Count Result` | codeunit | 50670 | `app/src/Integration/codeunits/IntCountResult.Codeunit.al` |
+| `WHA Int. Stock Position` | codeunit | 50671 | `app/src/Integration/codeunits/IntStockPosition.Codeunit.al` |
+| `WHA HU Stock By Location` | query | 50672 | `app/src/Integration/queries/HUStockByLocation.Query.al` |
 | `WHA Int. Message Runner` | codeunit | 50660 | `app/src/Integration/codeunits/IntMessageRunner.Codeunit.al` |
 | `WHA Int. Retention` | codeunit | 50661 | `app/src/Integration/codeunits/IntRetention.Codeunit.al` |
 | `WHA Int. Reten. Sub.` | codeunit | 50662 | `app/src/Integration/codeunits/IntRetenSub.Codeunit.al` |
@@ -271,6 +290,111 @@ Written for every handling unit whose status is *Shipped*, with its contents as 
                "quantity": 6, "unitOfMeasureCode": "PCS", "lotNumber": "", "serialNumber": "" } ]
 }
 ```
+
+## Segment 3 — the message set, widened by analogy
+
+Segment 1 shipped four message types and said plainly that at least one more would be needed and
+nobody knew which. Segment 3 is the attempt to find out **without** a customer fact, by reading a
+different interface that already works.
+
+### Where the evidence came from
+
+A separate, unrelated connector integrates Business Central with a external warehouse execution
+system. It is in production, it is documented, and its integration types are a real answer to the
+question *what does a BC-side warehouse interface actually have to carry*. Seventeen of them exist.
+They are not this customer's contract, and nothing here should be read as if they were — but they
+are much better than the blank page segment 1 was written against.
+
+Those seventeen are recorded as candidate rows in
+[gap-analysis.md](../gap-analysis.md), marked **evidence by analogy**.
+
+### The direction flips, and that is the whole insight
+
+In that connector, **Business Central is the host** and the warehouse system is external: BC pushes
+a receipt out to the warehouse, and the warehouse tells BC what it received.
+
+Here the arrangement is inverted. **This app is the warehouse, inside BC.** Every message therefore
+turns around:
+
+| There | Here |
+|---|---|
+| BC sends a warehouse receipt to the warehouse system | The partner asks **us** to release a receipt to the floor |
+| The warehouse system reports the lines it received | **We** report that the receipt is put away |
+| BC sends item and unit-of-measure master data out | **Nothing.** Both ends are the same database |
+| BC pulls inventory adjustments in | The partner sends **us** an adjustment |
+| BC pulls a count session in from the warehouse | **We** report what our own count found |
+
+The third row is the one worth pausing on. Master-data synchronisation is roughly a fifth of that
+connector's object count, and here it is **not a gap and not a feature** — it is a consequence of
+running in the same database as the items. A capability register that ranks by effort spent
+elsewhere would have put it near the top.
+
+### The twelve types
+
+| Type | Direction | What it does |
+|---|---|---|
+| `WHAHandlingUnitReceived` | in | Creates a handling unit and its contents |
+| `WHAWarehouseTaskRequest` | in | Creates one warehouse task |
+| `WHAWarehouseReceiptRelease` | in | Raises put-away work for a standard warehouse receipt |
+| `WHAWarehouseShipmentRelease` | in | Raises pick work for a standard warehouse shipment |
+| `WHAInventoryAdjustment` | in | Corrects stock through the shared posting engine |
+| `WHACountRequest` | in | Raises a count sheet for a location and fills it |
+| `WHAWarehouseTaskConfirmed` | out | One completed task, and what was short |
+| `WHAHandlingUnitShipped` | out | One despatched handling unit |
+| `WHAWarehouseReceiptDone` | out | A receipt whose put-away work is finished |
+| `WHAWarehouseShipmentDone` | out | A shipment whose pick work is finished |
+| `WHACountResult` | out | A closed count sheet and what it found |
+| `WHAStockPosition` | out | One statement per location per day, of what is on handling units |
+
+### Addressed by identity, not by schema
+
+Three of the four new inbound types **read no payload at all.** The receipt release, the shipment
+release and the count request each take their subject from the message's `External Id` — the
+receipt number, the shipment number, the location code — and the body may be empty.
+
+That is deliberate, and it is the segment's main design decision. Every payload shape in this
+feature is a guess; a message that needs no payload cannot have a wrong one. It also comes free
+with the idempotency the spine already had, because `External Id` is exactly what the duplicate
+check reads: releasing warehouse receipt `WR-1001` twice is refused by the same rule that refuses a
+duplicated task request.
+
+Only the inventory adjustment has to carry a body, because item, quantity and location cannot be
+recovered from an identifier. Six fields, and no more than six.
+
+### What each new type actually does
+
+- **Release a receipt or a shipment** — calls `WHA Task Source Mgt.`, the same entry point the
+  action on the warehouse document uses. The partner system pressing the button remotely and a
+  person pressing it on the document run identical code, which is why this needed no new task
+  logic at all.
+- **Inventory adjustment** — builds a `WHA Posting Request` and hands it to `WHA Posting Mgt.`
+  with the method named in the integration setup. What reaches the ledger is therefore a
+  *configuration* question, exactly as it is for counting and quality hold: record nothing, write
+  a journal line for somebody to review, or post straight through. The default is the middle one,
+  and the argument is in [inventory-posting.md](../inventory-posting.md).
+- **Count request** — creates a count sheet and fills it through the counting feature's own
+  selection. It refuses when counting is switched off rather than creating an orphan sheet.
+- **Receipt and shipment completed** — report a document once, and only when **no work against it
+  is still open**. A half-picked shipment says nothing. The rule is deliberately not "the last
+  task completed", because a task cancelled after the fact would otherwise leave a document that
+  never gets reported.
+- **Count result** — reports a sheet when it **closes**, not when it is counted, because closing
+  is the moment a difference stops being an observation.
+- **Stock position** — one statement per location per day. It counts **what this app recorded on
+  handling units** and nothing else. It is not a reading of the item ledger, and on a warehouse
+  that holds stock this app never put on a unit, the two will disagree. Sending it is how that
+  disagreement gets noticed, which is the whole purpose of a reconciliation message.
+
+### What it is still not
+
+- **Still no transport.** Twelve types, no URL, no credential, no token. The partner posts into an
+  API page and collects from the outbox, exactly as in segment 1.
+- **No EDI.** Despatch advice, orders and receiving advice are absent, and mapping to a standard
+  document format is a different problem from carrying a message.
+- **No automation control.** Conveyors, sorters, cranes and vehicles need latencies and failure
+  semantics a message log does not have.
+- **Every payload is still a guess** — a smaller and better-informed one, from a system that is
+  not this customer's.
 
 ## Failure handling
 
@@ -425,7 +549,9 @@ somebody creates one. A fresh installation deletes nothing.
 - **No policy is created for you.** The table is offered to the framework; an administrator still has
   to set the period. Until they do, the log grows exactly as it did before — this makes the clean-up
   *possible*, not automatic.
-- **No message for stock adjustments, counts, or master data.** Nothing was known about them.
+- **No master-data message, and none is coming.** Items and units of measure are in the same
+  database as this app. What an external warehouse system needs synchronised, this one can read.
+- **No EDI, and no automation control.** Both are named in the register; neither is a message type.
 - **No cancellation of already-sent work.** A partner withdrawing a task it requested has no
   message; today someone cancels the task in the UI.
 - **Getting-started in the customer language** — the language has not been confirmed.

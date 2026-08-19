@@ -272,13 +272,59 @@ local customisations nobody wrote down, and none of those can be in a list writt
 |---|---|---|---|---|
 | Message spine with handler dispatch | None | Delivered | | |
 | Message log retention | Retention policy framework | Delivered | | |
-| The four message types built so far | — | Delivered **on assumed contracts** | | |
+| The message types built so far | — | **Twelve**, delivered on assumed contracts. Four from segment 1, eight from the analogy in §14a | | |
 | The real contract of the interface being replaced | — | **Unknown, and no specification exists** | | |
 | EDI documents (despatch advice, orders, receiving advice) | None | None | | |
 | Conveyor, sorter, crane, AGV control | None | None | | |
 | Scale, weighbridge, print server, PLC endpoints | None | None | | |
 | API surface for downstream automation | Standard APIs | An API page per persisted table | | |
 | The automation planned "on top of" the WMS | — | Unspecified; an open question below | | |
+
+#### 14a. Evidence by analogy — a BC-side warehouse interface that already works
+
+Every other row in this register was written from the outside. These were not.
+
+A separate, unrelated connector integrates Business Central with an external warehouse execution
+system. It runs in production, it is documented, and it exposes **seventeen integration types**.
+That is a real answer to *what does a BC-side warehouse interface have to carry* — from a system
+that is **not this customer's**, which is exactly how much it is worth: better than a blank page,
+and no substitute for the discovery in §2. Bucket them like any other row, and expect some to
+drop.
+
+**Read the direction before reading the rows.** In that connector Business Central is the host and
+the warehouse is external. Here the app *is* the warehouse, inside BC, so almost every message
+turns around: what that system *sends to* the warehouse, this one *receives*, and vice versa.
+
+| Capability (as that connector names it) | Direction here | Standard BC today | This app today | Bucket | Target |
+|---|---|---|---|---|---|
+| Send Items | — | Item master | **Not applicable.** Both ends are the same database | | |
+| Send Item Mapping | — | Item master | **Not applicable.** Nothing to map between | | |
+| Get Units of Measure | — | Unit of measure master | **Not applicable.** Same database | | |
+| Send Warehouse Receipt / Receipt Line | Inbound | Warehouse receipt | Delivered — release a receipt to the floor | | |
+| Process Warehouse Receipt Line | Internal | Warehouse receipt lines | Delivered — put-away tasks, raised by the release | | |
+| Complete Warehouse Receipt | Outbound | Posting the receipt | Delivered — reported when no work is still open | | |
+| Send Warehouse Shipment / Shipment Line | Inbound | Warehouse shipment | Delivered — release a shipment to the floor | | |
+| Process Warehouse Shipment Line | Internal | Warehouse shipment lines | Delivered — pick tasks, raised by the release | | |
+| Complete Warehouse Shipment | Outbound | Posting the shipment | Delivered — reported when no work is still open | | |
+| Get Inventory Adjustments | Inbound | Item journal | Delivered — through the shared posting engine | | |
+| Get Inventory Reconciliation (+ lines) | Outbound | Physical inventory journal | Delivered as its inverse — this app counts, and reports what it found | | |
+| Send Inv Mvm Header / Line | Outbound | None | Delivered as a per-location stock statement | | |
+| Get Token | — | OAuth | **None, and out of scope for a message type.** Transport, not content | | |
+
+**What the analogy could not settle**, and what a real register still has to:
+
+- **Whether the counterpart wants documents or work.** The releases assume it names a warehouse
+  receipt or shipment that already exists in BC. A counterpart that expects to *create* the
+  document is a different interface.
+- **Whether adjustments may post.** The method is configurable and defaults to a journal line
+  somebody reviews. A counterpart that expects its correction to be in the ledger immediately will
+  find it is not.
+- **What a stock statement should count.** This app's statement counts what it recorded on
+  handling units, not the item ledger. Which of the two the counterpart reconciles against is a
+  customer fact, and picking wrong makes every statement look wrong.
+- **Everything about transport.** Seventeen types over there are carried by an endpoint table, a
+  token codeunit and job queue entries. Here there is still no wire.
+
 
 ### 15. Adjacent modules the incumbent may licence
 

@@ -46,6 +46,27 @@ page 50650 "WHA Integration Setup"
                     ApplicationArea = WHAIntegration;
                 }
             }
+            group(Adjustments)
+            {
+                Caption = 'Adjustments';
+
+                field("Posting Method"; Rec."Posting Method")
+                {
+                    ApplicationArea = WHAIntegration;
+                }
+                field("Item Journal Template Name"; Rec."Item Journal Template Name")
+                {
+                    ApplicationArea = WHAIntegration;
+                }
+                field("Item Journal Batch Name"; Rec."Item Journal Batch Name")
+                {
+                    ApplicationArea = WHAIntegration;
+                }
+                field("Posting Reason Code"; Rec."Posting Reason Code")
+                {
+                    ApplicationArea = WHAIntegration;
+                }
+            }
         }
     }
 

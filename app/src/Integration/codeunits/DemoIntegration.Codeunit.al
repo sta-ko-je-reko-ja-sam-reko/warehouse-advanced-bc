@@ -19,6 +19,9 @@ codeunit 50659 "WHA Demo Integration"
         ReceiptDescLbl: Label 'Pallet from the partner system';
         RequestDescLbl: Label 'Pick requested by the partner system';
         CancelledDescLbl: Label 'Move requested, then withdrawn by the partner system';
+        ReceiptReleaseIdTok: Label 'WH-RCPT-1001', Locked = true;
+        ShipmentReleaseIdTok: Label 'WH-SHPT-2001', Locked = true;
+        AdjustmentIdTok: Label 'DEMO-INT-ADJUST-001', Locked = true;
 
     /// <summary>
     /// Seeds sample integration messages that show both directions, every status a message can reach,
@@ -37,6 +40,9 @@ codeunit 50659 "WHA Demo Integration"
         CreateRejectedMessage();
         CreateCancelledMessage();
         CreateOutboundMessage();
+        CreateDocumentReleases();
+        CreateAdjustmentMessage();
+        CreateCountRequestMessage();
 
         CreateConfigPackage();
     end;
@@ -113,6 +119,49 @@ codeunit 50659 "WHA Demo Integration"
             exit;
 
         MessageMgt.CreateOutbound(MessageType::WHAWarehouseTaskConfirmed, CopyStr(ConfirmExternalIdTok, 1, 50), ConfirmPayload(), EmptyRecordId);
+    end;
+
+    local procedure CreateDocumentReleases()
+    var
+        MessageType: Enum "WHA Int. Message Type";
+    begin
+        InsertInbound(MessageType::WHAWarehouseReceiptRelease, CopyStr(ReceiptReleaseIdTok, 1, 50), EmptyPayload());
+        InsertInbound(MessageType::WHAWarehouseShipmentRelease, CopyStr(ShipmentReleaseIdTok, 1, 50), EmptyPayload());
+    end;
+
+    local procedure CreateAdjustmentMessage()
+    var
+        MessageType: Enum "WHA Int. Message Type";
+    begin
+        InsertInbound(MessageType::WHAInventoryAdjustment, CopyStr(AdjustmentIdTok, 1, 50), AdjustmentPayload());
+    end;
+
+    local procedure CreateCountRequestMessage()
+    var
+        MessageType: Enum "WHA Int. Message Type";
+    begin
+        InsertInbound(MessageType::WHACountRequest, CopyStr(FirstLocation(), 1, 50), EmptyPayload());
+    end;
+
+    local procedure EmptyPayload(): Text
+    var
+        PayloadObject: JsonObject;
+        PayloadText: Text;
+    begin
+        PayloadObject.WriteTo(PayloadText);
+        exit(PayloadText);
+    end;
+
+    local procedure AdjustmentPayload(): Text
+    var
+        PayloadObject: JsonObject;
+        PayloadText: Text;
+    begin
+        PayloadObject.Add('itemNumber', FirstItem());
+        PayloadObject.Add('locationCode', FirstLocation());
+        PayloadObject.Add('quantity', -1);
+        PayloadObject.WriteTo(PayloadText);
+        exit(PayloadText);
     end;
 
     local procedure InsertInbound(MessageType: Enum "WHA Int. Message Type"; ExternalId: Code[50]; PayloadText: Text): Integer

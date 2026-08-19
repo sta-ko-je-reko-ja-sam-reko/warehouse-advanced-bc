@@ -53,9 +53,13 @@ cmd /c mklink /J .bc-conventions C:\Users\P16v\Documents\bc-dev-templates\bc-cus
 A junction rather than a copy, so the rules track the templates repo instead of drifting.
 
 **Consequence, by deliberate choice:** a fresh clone of this public repo **will not build** —
-`app.json` sets `"ruleset": "../.bc-conventions/ruleset.json"` and that path will not resolve
-until the private repo is cloned and junctioned. Anyone building this (including CI) needs
-access to `bc-dev-templates`.
+`app/.vscode/settings.json` sets `"al.ruleSetPath": "../.bc-conventions/ruleset.json"` and that
+path will not resolve until the private repo is cloned and junctioned. Anyone building this
+(including CI) needs access to `bc-dev-templates`.
+
+Note the ruleset is configured through the **`al.ruleSetPath` setting**, not through an
+`app.json` property. `"ruleset"` is not valid in `app.json` on AL runtime 17 — the compiler
+rejects it with `AL0124`. The `bc-dev-templates` bootstrap instruction is wrong on this point.
 
 ## Environment
 
@@ -67,6 +71,7 @@ access to `bc-dev-templates`.
 | Dev endpoint | port 7049, **NavUserPassword** (`"authentication": "UserPassword"`) |
 | Production | BC online, **W1** |
 | Distribution | **Per-tenant extension (PTE)** — not AppSource |
+| Publisher | `matr` |
 | Affix | `WHA` |
 | Object IDs | app `50000..50999`, test `51000..51999` |
 
@@ -159,9 +164,11 @@ set in this repo's `.git/config` only. Consequences:
 
 ## Known outstanding items
 
-- `publisher` is `"Default Publisher"` in both manifests
-- No LICENSE file; `app.json` `EULA` points at the repo root as a stand-in
-- `app/docs/privacy-statement.md` is a placeholder
+- Manifest URLs point at **dmom.ai** (`/privacy`, `/eula`, `/help`). **None of those pages
+  exist yet** — there is no site on the domain. AppSourceCop only validates URL shape, so the
+  build passes, but the links are dead until the pages are published.
+- No LICENSE file, so there is no EULA text behind `https://dmom.ai/eula`
+- `app/docs/privacy-statement.md` is the draft content for the privacy page
 - `app/img/AppLogo.png` is a generated placeholder, not real branding
 - No CI: `.github/workflows/` is empty, and CI would need private `bc-dev-templates` access
 - Cutover model (big bang vs. parallel run with Qguar) undecided

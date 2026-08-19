@@ -1,7 +1,7 @@
 {
   "id": "2cfcbab8-f5fa-4e6e-a88c-1abb530c267f",
   "name": "Warehouse Advanced Tests",
-  "publisher": "Default Publisher",
+  "publisher": "matr",
   "brief": "Automated tests for the Warehouse Advanced app.",
   "description": "Test suite for Warehouse Advanced. Not intended for production deployment.",
   "version": "1.0.0.0",
@@ -9,7 +9,7 @@
     {
       "id": "b454ccc5-1c9b-4009-bbf5-b40521d385b2",
       "name": "Warehouse Advanced",
-      "publisher": "Default Publisher",
+      "publisher": "matr",
       "version": "1.0.0.0"
     },
     {
@@ -46,7 +46,6 @@
   },
   "runtime": "17.0",
   "target": "Cloud",
-  "ruleset": "../.bc-conventions/ruleset.json",
   "features": [
     "NoImplicitWith",
     "NoPromotedActionProperties"

@@ -1,5 +1,7 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
+using WarehouseAdvanced.Labelling;
+
 page 50051 "WHA Handling Unit Card"
 {
     PageType = Card;
@@ -72,6 +74,21 @@ page 50051 "WHA Handling Unit Card"
     {
         area(Navigation)
         {
+            action(AssignLabel)
+            {
+                Caption = 'Assign label code';
+                ToolTip = 'Specifies the action that gives this unit the code that goes on its label, in the format the labelling setup names.';
+                Image = BarCode;
+                ApplicationArea = WHALabelling;
+                AccessByPermission = tabledata "WHA Label Setup" = R;
+
+                trigger OnAction()
+                var
+                    LabelMgt: Codeunit "WHA Label Mgt.";
+                begin
+                    LabelMgt.AssignTo(Rec);
+                end;
+            }
             action(NestedUnits)
             {
                 Caption = 'Nested units';
@@ -88,6 +105,9 @@ page 50051 "WHA Handling Unit Card"
                 Caption = 'Process';
 
                 actionref(NestedUnitsRef; NestedUnits)
+                {
+                }
+                actionref(AssignLabelRef; AssignLabel)
                 {
                 }
             }

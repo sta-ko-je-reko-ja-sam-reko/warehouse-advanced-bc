@@ -3,6 +3,7 @@ namespace WarehouseAdvanced.Core;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
+using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.WaveManagement;
 
@@ -40,5 +41,10 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Wave management';
         Implementation = "WHA IFeatureSetup" = "WHA Wave Feature Setup";
+    }
+    value(6; WHALabelling)
+    {
+        Caption = 'Labelling';
+        Implementation = "WHA IFeatureSetup" = "WHA Label Feature Setup";
     }
 }

@@ -28,6 +28,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-RF-001` segments 1-2 — handheld screen, device register, a swappable scan-through flow, and the short pick. **Not yet seen by an operator** |
 | Delivered | `FEAT-TASK-001` segment 2 — partial completion: a job finished with less than it asked for, and why |
 | Delivered | `FEAT-WAVE-001` segment 1 — waves: gathering work by a swappable strategy, releasing it as a batch, and closing it |
+| Delivered | `FEAT-LBL-001` segment 1 — label codes: GS1 SSCC with its check digit, or a sequential licence plate. Closes the gap `FEAT-HU-001` left open |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
@@ -182,7 +183,7 @@ Wave B    FEAT-TASK-001    directed work             ← segment 1 delivered
 
 Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
           FEAT-PACK-001    packing
-          FEAT-LBL-001     labelling
+          FEAT-LBL-001     labelling                 ← segment 1 delivered
 
 Wave D    FEAT-REPL-001    replenishment
           FEAT-CNT-001     counting

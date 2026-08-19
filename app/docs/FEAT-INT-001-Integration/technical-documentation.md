@@ -123,6 +123,8 @@ anything in a dispute. Read and write it through `WHA Int. Message Mgt.`, never 
 | `WHA Int. HU Shipped` | codeunit | 50658 | `app/src/Integration/codeunits/IntHUShipped.Codeunit.al` |
 | `WHA Demo Integration` | codeunit | 50659 | `app/src/Integration/codeunits/DemoIntegration.Codeunit.al` |
 | `WHA Int. Message Runner` | codeunit | 50660 | `app/src/Integration/codeunits/IntMessageRunner.Codeunit.al` |
+| `WHA Int. Retention` | codeunit | 50661 | `app/src/Integration/codeunits/IntRetention.Codeunit.al` |
+| `WHA Int. Reten. Sub.` | codeunit | 50662 | `app/src/Integration/codeunits/IntRetenSub.Codeunit.al` |
 | `WHA Int. Appl. Area Setup` | tableextension | 50650 | `app/src/Integration/tableextensions/IntApplAreaSetup.TableExt.al` |
 | `WHA Integration Setup` | page | 50650 | `app/src/Integration/pages/IntegrationSetup.Page.al` |
 | `WHA Integration Messages` | page | 50651 | `app/src/Integration/pages/IntegrationMessages.Page.al` |
@@ -331,7 +333,9 @@ rather than being skipped, which is itself an honest demonstration.
 
 ## Tests
 
-`WHA Integration Tests` (codeunit 51002), 17 tests: payload round-trip; arrival stamping; unknown
+`WHA Integration Tests` (codeunit 51002), 20 tests. Three cover retention: the message log is offered
+to the framework, the retention clock runs from when a message was processed, and a policy shorter
+than the minimum this feature insists on is refused. The other 17: payload round-trip; arrival stamping; unknown
 type and outbound-only type refused with readable reasons; a request creating and releasing a task
 and pointing at it; incomplete and unknown-type requests refused with nothing left behind; the same
 request applied only once; a receipt creating a unit with its contents; the outbound sweep reporting
@@ -364,10 +368,46 @@ Everything here is replaceable once these are known. In rough order of how much 
    grows a reconciliation problem that a big-bang cutover does not have. That decision changes this
    feature more than any other.
 
+## Retention — the one table that grows on its own
+
+Every other table in this app is bounded by a business event: a wave closes, a count sheet is filed, a
+hold is released. **The message log is not.** A partner sending a thousand messages a day adds a
+thousand rows a day, each carrying a payload blob, and nothing in the business process ever removes
+one. On a per-tenant extension against BC online that is a bill, and eventually a limit.
+
+The answer is deliberately **not** a clean-up of this feature's own. A bespoke one would have needed a
+setup field, a scheduler, a batch size, a log and a permission — all of which the platform already
+has, with a UI and an audit trail this feature would only imitate badly.
+
+`WHA Int. Retention` offers `WHA Integration Message` to the standard **retention policy** framework
+through a subscriber to `Reten. Pol. Allowed Tables.OnRefreshAllowedTables`. From then on an
+administrator sets a policy on the standard *Retention Policies* page, alongside every other one, and
+Business Central's own job does the deleting.
+
+Three choices inside that registration are this feature's, and each is a judgement:
+
+- **The clock runs from `Processed At`, not from `Received At`.** A message that sat unprocessed for a
+  month has not been *kept* for a month — nobody has read it yet. Ageing from arrival would delete the
+  backlog fastest at exactly the moment somebody started looking at it.
+- **The default filter covers processed messages only.** A failed or cancelled message is evidence,
+  and a policy that swept it up by default would remove the record of the failure along with it. An
+  administrator can widen the filter; they have to mean it.
+- **A mandatory minimum of seven days.** The framework refuses any policy shorter. This log is what an
+  argument with a partner is settled from, and a policy that could clear it within a day would take
+  the evidence away before anybody noticed there was a dispute.
+
+Nothing is registered as *enabled*: the table becomes eligible for a policy, and no policy exists until
+somebody creates one. A fresh installation deletes nothing.
+
 ## Not done
 
 - **No transport.** No HTTP, no credential store, no endpoint master data. Deliberate: see above.
-- **No retention or archiving.** The message table grows without limit.
+- **No archiving, only deletion.** A retention policy removes expired messages; nothing copies them
+  anywhere first. A warehouse that has to keep a year of interface traffic for audit needs to export
+  it before the policy runs, and nothing reminds them.
+- **No policy is created for you.** The table is offered to the framework; an administrator still has
+  to set the period. Until they do, the log grows exactly as it did before — this makes the clean-up
+  *possible*, not automatic.
 - **No message for stock adjustments, counts, or master data.** Nothing was known about them.
 - **No cancellation of already-sent work.** A partner withdrawing a task it requested has no
   message; today someone cancels the task in the UI.

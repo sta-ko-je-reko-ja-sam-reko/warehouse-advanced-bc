@@ -37,6 +37,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-SLOT-001` segment 1 — slotting: ABC velocity from the app's own pick history, and proposals for items sitting in a worse bin than their class deserves |
 | Delivered | `FEAT-DOCK-001` segment 1 — dock and yard: doors, yard positions, and a vehicle visit booked, checked in, brought to a door and sent away. The only feature that depends on nothing else in the app |
 | Delivered | `FEAT-KPI-001` segment 1 — analytics: five measures over what the app already recorded, kept as snapshots so one period can be compared with another. **No dock-to-stock** — nothing links a put-away to the vehicle that brought the goods |
+| Delivered | `FEAT-INT-001` segment 2 — retention: the message log offered to Business Central's own retention policy framework, rather than a bespoke clean-up this feature would have imitated badly |
 | Delivered | Scheduling for `FEAT-SLOT-001`, `FEAT-LAB-001` and `FEAT-KPI-001` — the last piece of catalogue work that needed nothing from Phase 0. Every recurring run in the app can now be given to the job queue |
 | Delivered | `FEAT-REPL-001` segment 2 — looking ahead: a bin weighed against what is already promised out of it, pre-replenishment for one wave, and a codeunit a job queue can call |
 | Delivered | `FEAT-WAVE-001` segment 2 — templates and workload: a reusable wave definition, a scheduled run for the job queue to call, and a cap measured in **minutes of work** rather than a count of jobs. The first time one feature's engineered standards are used to *plan* rather than to measure |
@@ -343,11 +344,48 @@ The lesson is not that the register matters less. It is that "blocked on Phase 0
 eleven features after reading three, and the two cheapest wins in the app were sitting in the other
 eight. Read the whole list before concluding it is empty.
 
-**With both of them delivered, the list really is empty now.** Everything remaining in the catalogue
-needs a customer fact (label stock and printers, item dimensions, what a packer verifies against, a
-bin capacity model) or a scope decision (writing back to warehouse documents, what links a vehicle
-visit to a put-away). Continuing to build would mean guessing at one of those, and every feature built
-this way adds unvalidated behaviour without reducing the risk that Phase 0 invalidates it.
+**That claim was then made a second time, and was wrong a second time.** After the schedulers shipped,
+this section said the list "really is empty now". It was not. A further read found `FEAT-INT-001`'s
+message log growing without limit — an operational hazard needing no customer fact whatsoever — and it
+has since been delivered by registering the table with Business Central's own retention policy
+framework.
+
+**The pattern is worth naming, because it happened twice.** Both times the conclusion "there is
+nothing left" was reached by reasoning about the *catalogue* — the fourteen features and their
+segments — and both times what was actually left was not a feature at all. Scheduling was infrastructure
+four features each described as somebody else's job. Retention was a table growing in the background
+that no business event bounds. Neither appears in §4, so neither was found by re-reading §4.
+
+**The list of catalogue work needing no customer facts is empty. The list of non-catalogue work is not,
+and it is not enumerated anywhere.** What is visible from here:
+
+| Not in the catalogue | State |
+|---|---|
+| The app ships **no role centre and no cues** | `FEAT-KPI-001` names cue tiles as its obvious next segment, and `_patterns/role-center-cues.md` has the pattern. It is a UX guess about who uses what, which is why it has not been taken |
+| **No LICENSE**, and `dmom.ai/privacy`, `/eula`, `/help` do not exist | `CLAUDE.md` records all four. AppSourceCop validates URL shape only, so the build passes and the links are dead |
+| **No CI.** `.github/workflows/` is empty | And CI would need access to the private `bc-dev-templates` repo |
+| **`app/img/AppLogo.png` is a generated placeholder** | Not real branding |
+| **Customer-language getting-started files** | Deliberately deferred until a customer is engaged |
+
+Everything remaining **in the catalogue** needs a customer fact (label stock and printers, item
+dimensions, what a packer verifies against, a bin capacity model) or a scope decision (writing back to
+warehouse documents, what links a vehicle visit to a put-away). Continuing to build features would
+mean guessing at one of those, and every feature built that way adds unvalidated behaviour without
+reducing the risk that Phase 0 invalidates it.
+
+### What integration's second segment argued
+
+One thing, and it is the same argument the schedulers made: **when the platform already does something,
+this app should register with it rather than reimplement it.** A bespoke message clean-up would have
+needed a setup field, a scheduler, a batch size, a log and a permission set — all of which the
+retention policy framework has, with a UI administrators already know and an audit trail this feature
+would only have imitated badly.
+
+What the feature *does* own is the three judgements inside the registration, each of which is a
+statement about the business and not about the platform: the retention clock runs from when a message
+was **processed** rather than when it arrived; the default filter covers **processed messages only**,
+because a failed message is evidence; and **nothing may be kept for less than a week**, because the log
+is what an argument with a partner is settled from.
 
 ### What replenishment's second segment argued
 
@@ -396,7 +434,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 282 automated tests exist across fourteen codeunits and **not one has
+1. **Run the test suite once.** 285 automated tests exist across fourteen codeunits and **not one has
    ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

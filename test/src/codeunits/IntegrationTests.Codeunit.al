@@ -511,6 +511,53 @@ codeunit 51002 "WHA Integration Tests"
         Assert.AreEqual(CountAfterFirstRun, IntegrationMessage.Count(), 'A second import should not create more messages.');
     end;
 
+    [Test]
+    procedure TheMessageLogIsOfferedToTheRetentionFramework()
+    var
+        RetenPolAllowedTables: Codeunit "Reten. Pol. Allowed Tables";
+        IntRetention: Codeunit "WHA Int. Retention";
+    begin
+        // [SCENARIO] The message log is the one table in this app that grows without a business event to
+        // bound it. Rather than write a bespoke clean-up, it is offered to the framework Business Central
+        // already has, so an administrator sets a policy in the place they set every other one.
+        IntRetention.RegisterAllowedTable();
+
+        Assert.IsTrue(RetenPolAllowedTables.IsAllowedTable(Database::"WHA Integration Message"), 'A retention policy should be possible for the message log.');
+    end;
+
+    [Test]
+    procedure TheRetentionClockRunsFromWhenAMessageWasProcessed()
+    var
+        IntegrationMessage: Record "WHA Integration Message";
+        RetenPolAllowedTables: Codeunit "Reten. Pol. Allowed Tables";
+        IntRetention: Codeunit "WHA Int. Retention";
+    begin
+        // [SCENARIO] Age is measured from when the app finished with a message, not from when it arrived.
+        // A message that sat unprocessed for a month has not been kept for a month; nobody has read it yet.
+        IntRetention.RegisterAllowedTable();
+
+        Assert.AreEqual(
+            IntegrationMessage.FieldNo("Processed At"),
+            RetenPolAllowedTables.GetDefaultDateFieldNo(Database::"WHA Integration Message"),
+            'The retention clock should run from when the message was processed.');
+    end;
+
+    [Test]
+    procedure AMessageCannotBeConfiguredAwayFasterThanAWeek()
+    var
+        RetenPolAllowedTables: Codeunit "Reten. Pol. Allowed Tables";
+        IntRetention: Codeunit "WHA Int. Retention";
+    begin
+        // [SCENARIO] The log is what an interface argument is settled from. A policy that could delete it
+        // within a day would take the evidence away before anybody noticed there was a dispute.
+        IntRetention.RegisterAllowedTable();
+
+        Assert.AreEqual(
+            IntRetention.MinimumRetentionDays(),
+            RetenPolAllowedTables.GetMandatoryMinimumRetentionDays(Database::"WHA Integration Message"),
+            'The framework should refuse a policy shorter than the minimum this feature insists on.');
+    end;
+
     local procedure OutboundCount(MessageType: Enum "WHA Int. Message Type"; ExternalId: Code[50]): Integer
     var
         IntegrationMessage: Record "WHA Integration Message";

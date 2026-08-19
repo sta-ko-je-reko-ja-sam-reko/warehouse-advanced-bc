@@ -3,6 +3,7 @@ namespace WarehouseAdvanced.Core;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
+using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.WaveManagement;
 
@@ -25,5 +26,6 @@ permissionset 50002 "WHA Full"
         tabledata "WHA RF Device" = RIMD,
         tabledata "WHA Wave Setup" = RIMD,
         tabledata "WHA Wave" = RIMD,
+        tabledata "WHA Label Setup" = RIMD,
         tabledata "WHA Demo Data" = RIMD;
 }

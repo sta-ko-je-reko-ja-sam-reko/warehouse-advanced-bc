@@ -20,6 +20,8 @@ product does not include.
 
 - [Handling units](FEAT-HU-001-HandlingUnits/getting-started-english.md) — track a pallet, cage or
   carton as one numbered thing, put one inside another, and label it for your customers.
+- [Labelling](FEAT-LBL-001-Labelling/getting-started-english.md) — give a handling unit the code that
+  goes on its label: a GS1 SSCC, or a licence plate for use inside your own warehouse.
 
 ### Warehouse execution
 

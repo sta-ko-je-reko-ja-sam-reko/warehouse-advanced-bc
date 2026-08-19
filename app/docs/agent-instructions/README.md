@@ -22,6 +22,8 @@ configuration. One configuration ↔ one agent ↔ one file.
 | `Warehouse Advanced - Demo Mobile Device` | `demoMobileDevice` | [WarehouseAdvanced-Demo-MobileDevice.md](WarehouseAdvanced-Demo-MobileDevice.md) | The agent bound to the Demo Mobile Device configuration |
 | `Warehouse Advanced - Wave Management` | `waveManagement` | [WarehouseAdvanced-WaveManagement.md](WarehouseAdvanced-WaveManagement.md) | The agent bound to the Wave Management configuration |
 | `Warehouse Advanced - Demo Wave Management` | `demoWaveManagement` | [WarehouseAdvanced-Demo-WaveManagement.md](WarehouseAdvanced-Demo-WaveManagement.md) | The agent bound to the Demo Wave Management configuration |
+| `Warehouse Advanced - Labelling` | `labelling` | [WarehouseAdvanced-Labelling.md](WarehouseAdvanced-Labelling.md) | The agent bound to the Labelling configuration |
+| `Warehouse Advanced - Demo Labelling` | `demoLabelling` | [WarehouseAdvanced-Demo-Labelling.md](WarehouseAdvanced-Demo-Labelling.md) | The agent bound to the Demo Labelling configuration |
 
 **Demo importers are deliberately in their own configurations and their own API groups**, so a
 "load sample data" agent can be given the importer *without* also getting the functional write

@@ -3,6 +3,7 @@ namespace WarehouseAdvanced.Core;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
+using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.WaveManagement;
 
@@ -95,5 +96,15 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Wave Feature Setup" = X,
         codeunit "WHA Wave App Area Sub." = X,
         codeunit "WHA Demo Wave" = X,
-        page "WHA API Demo Wave" = X;
+        page "WHA API Demo Wave" = X,
+        table "WHA Label Setup" = X,
+        page "WHA Label Setup" = X,
+        page "WHA API Label" = X,
+        codeunit "WHA Label Mgt." = X,
+        codeunit "WHA SSCC Format" = X,
+        codeunit "WHA Sequential Format" = X,
+        codeunit "WHA Label Feature Setup" = X,
+        codeunit "WHA Label App Area Sub." = X,
+        codeunit "WHA Demo Label" = X,
+        page "WHA API Demo Label" = X;
 }

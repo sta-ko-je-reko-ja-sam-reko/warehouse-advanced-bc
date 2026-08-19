@@ -224,4 +224,7 @@ tests that accompany the contents segment.
 
 - **Contents.** The unit holds no item quantities yet.
 - **Getting-started in the customer language** — the language has not been confirmed.
-- **SSCC generation.** The field exists; generating a valid GS1 check digit belongs to `FEAT-LBL-001`.
+- ~~**SSCC generation.**~~ **Delivered** by `FEAT-LBL-001` — see
+  [../FEAT-LBL-001-Labelling/technical-documentation.md](../FEAT-LBL-001-Labelling/technical-documentation.md).
+  The code is assigned explicitly, from the handling unit card or the labelling API; nothing assigns
+  one on insert, because that would mean handling units depending on labelling.

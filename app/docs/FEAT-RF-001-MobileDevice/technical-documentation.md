@@ -221,6 +221,12 @@ directly with unsaved task records and no database writes:
   [operator-review.md](operator-review.md) is the script for that session: what to set up, what to
   watch, and which finding changes which object. It is written to be run by someone who did not
   build this.
+
+  **The infrastructure excuse is gone.** `tools/rf-simulator/index.html` runs the same step
+  sequence and the same wording in a browser, with no company, no sample data and no container —
+  so the sequence-and-wording half of the review can be run this afternoon. It does not replace the
+  floor session, and the file says so itself. What remains missing is an operator, not a
+  prerequisite. **If the flow below changes, that file is wrong until somebody changes it too.**
 - **Offline tolerance.** The plan's own description of this feature includes an "offline-tolerant
   confirm"; there is none. A handheld that loses connectivity loses its place, and the job stays
   assigned to the operator until they hand it back or pick it up again. Doing this properly means a

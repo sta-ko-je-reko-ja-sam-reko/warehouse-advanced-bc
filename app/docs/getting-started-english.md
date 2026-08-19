@@ -25,3 +25,9 @@ product does not include.
 
 - [Directed work](FEAT-TASK-001-DirectedWork/getting-started-english.md) — queue warehouse jobs by
   urgency, hand the next one to whoever asks for work, and see who did what and when.
+
+### Talking to other systems
+
+- [Integration surface](FEAT-INT-001-Integration/getting-started-english.md) — take in receipts and
+  work requests from the system that feeds the warehouse, and keep confirmations ready for it to
+  collect.

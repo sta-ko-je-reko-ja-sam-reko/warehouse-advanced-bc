@@ -24,6 +24,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-CORE-001` — foundation setup, guided setup hub, per-feature wizard, feature facade, permission sets (17 objects, PRs #5–#7) |
 | Delivered | `FEAT-HU-001` — handling units: the unit, nesting, contents (PRs #11–#12) |
 | Delivered | `FEAT-TASK-001` segment 1 — warehouse tasks: life cycle, priority queue, operator assignment, handling unit move on completion |
+| Delivered | `FEAT-INT-001` segment 1 — integration message spine, handler dispatch, two inbound and two outbound message types. **Built on assumed contracts** — see below |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
@@ -50,7 +51,7 @@ Per [gap-analysis.md](gap-analysis.md). **No feature work starts until this is s
 | Qguar module licence list | Licence file / vendor | What is *paid for* — an upper bound, not usage |
 | Configuration export | Qguar admin | What is *configured* |
 | 12 months of transaction volumes by document type | Qguar database | What is *actually used*, and how hard |
-| Current interface specification | The integration being replaced | The contract the replacement must satisfy |
+| ~~Current interface specification~~ **Observed interface traffic** | Message logs, database, and the people who operate the interface | The contract the replacement must satisfy. **No written specification exists** — this has to be reconstructed from what actually crosses the boundary |
 | Custom report and label inventory | Qguar admin | Output formats that must be reproduced |
 | Floor observation and operator interviews | On-site | Undocumented workarounds — the highest-value input |
 
@@ -141,7 +142,12 @@ Object ID blocks are already reserved per module in [modules.md](modules.md).
 - **Handling units** — most WMS execution semantics assume a license-plate entity. Almost
   every other feature references it. If it turns out the customer does not use pallet IDs,
   large parts of this catalogue collapse, which is itself a very valuable Phase 0 finding.
-- **Integration** — the project exists to replace an interface. That contract has a date.
+- **Integration** — the project exists to replace an interface. **No written specification of that
+  interface exists**, and the customer cannot produce one, so segment 1 was built on assumed
+  contracts with the guesses isolated behind an extensible message-type enum: replacing a payload
+  shape is one codeunit, and adding a message type touches no existing object. The real contract has
+  to be recovered from observed traffic and from the people who run it — which makes it a Phase 0
+  input rather than a document to wait for.
 
 ### The one with a disproportionate risk
 
@@ -159,7 +165,7 @@ Phase 0   Capability register                        ← gates everything below
           └─ FEAT-INT-001 may start in parallel
 
 Wave A    FEAT-HU-001      handling units            ← delivered
-          FEAT-INT-001     integration surface       ← blocked: needs the current interface spec
+          FEAT-INT-001     integration surface       ← segment 1 delivered on assumed contracts
 
 Wave B    FEAT-TASK-001    directed work             ← segment 1 delivered
           FEAT-RF-001      mobile device             ← prototype during Wave A
@@ -218,8 +224,13 @@ feature can ship dark and be switched on per company when the business is ready.
    cost of a register that contradicts it.
 2. **Decide the cutover model** (§6) — it changes sequencing and the difficulty of
    `FEAT-INT-001`.
-3. **Get the current interface specification.** It unblocks `FEAT-INT-001` independently of
-   the register.
+3. ~~**Get the current interface specification.**~~ **There is none.** Confirmed with the customer:
+   no written contract exists for the interface being replaced, and none can be produced. This was
+   accepted as a standing condition, and `FEAT-INT-001` was built on assumed contracts rather than
+   waiting. What remains is to establish the five inputs listed at the end of
+   [FEAT-INT-001-Integration/technical-documentation.md](FEAT-INT-001-Integration/technical-documentation.md)
+   — the real message set, payload shapes, transport, volumes, and the cutover model — by observing
+   the live traffic and interviewing the people who run it, since no document will supply them.
 4. **Rewrite [modules.md](modules.md) and §4 of this document** from the signed register.
 
 Until step 1 produces something, further AL beyond the delivered Core module is building

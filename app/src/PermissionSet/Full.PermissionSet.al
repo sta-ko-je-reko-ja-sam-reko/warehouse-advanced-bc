@@ -2,6 +2,7 @@ namespace WarehouseAdvanced.Core;
 
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
+using WarehouseAdvanced.Integration;
 
 permissionset 50002 "WHA Full"
 {
@@ -16,5 +17,7 @@ permissionset 50002 "WHA Full"
         tabledata "WHA Handling Unit Line" = RIMD,
         tabledata "WHA Warehouse Task Setup" = RIMD,
         tabledata "WHA Warehouse Task" = RIMD,
+        tabledata "WHA Integration Setup" = RIMD,
+        tabledata "WHA Integration Message" = RIMD,
         tabledata "WHA Demo Data" = RIMD;
 }

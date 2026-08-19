@@ -12,7 +12,9 @@ codeunit 50255 "WHA Repl. Handling Units" implements "WHA IReplMethod"
     /// <summary>
     /// Measures the pick bin from the handling units standing in it. For a warehouse whose stock moves
     /// as licence-plated units, this is the number the floor would give you if you asked, and it can
-    /// differ from bin content until the movements are posted.
+    /// differ from bin content until the movements are posted. Only units that are available count: a
+    /// pallet on hold is standing in the bin and cannot be picked from, so counting it would leave the
+    /// pick face empty and the rule satisfied.
     /// </summary>
     /// <param name="ReplenishmentRule">The rule whose bin is being measured.</param>
     /// <returns>The quantity the units in the bin hold of the rule's item.</returns>
@@ -25,7 +27,7 @@ codeunit 50255 "WHA Repl. Handling Units" implements "WHA IReplMethod"
         HandlingUnit.SetLoadFields("No.");
         HandlingUnit.SetRange("Location Code", ReplenishmentRule."Location Code");
         HandlingUnit.SetRange("Bin Code", ReplenishmentRule."Bin Code");
-        HandlingUnit.SetFilter(Status, '<>%1', HandlingUnit.Status::WHAShipped);
+        HandlingUnit.SetFilter(Status, '%1|%2', HandlingUnit.Status::WHAOpen, HandlingUnit.Status::WHAClosed);
         if not HandlingUnit.FindSet() then
             exit(0);
 

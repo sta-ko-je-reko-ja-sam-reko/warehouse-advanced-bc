@@ -12,6 +12,7 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
     var
         NoSeriesMissingErr: Label 'Set the warehouse task number series in the warehouse advanced setup before creating warehouse tasks.';
         ShippedUnitErr: Label 'Handling unit %1 has already been shipped, so no more work can be planned for it.', Comment = '%1 = the handling unit number';
+        UnitNotAvailableErr: Label 'Handling unit %1 is %2, so no work can be planned for it.', Comment = '%1 = the handling unit number, %2 = the status of the handling unit';
         NegativeQuantityErr: Label 'The quantity on a warehouse task cannot be negative.';
         NegativePriorityErr: Label 'The priority of a warehouse task cannot be negative. A lower number is more urgent, so zero is the most urgent value.';
         ReleaseNotAllowedErr: Label 'Only a created warehouse task can be released. Warehouse task %1 is %2.', Comment = '%1 = the warehouse task number, %2 = the current status';
@@ -103,6 +104,8 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
 
         if HandlingUnit.Status = HandlingUnit.Status::WHAShipped then
             Error(ShippedUnitErr, HandlingUnit."No.");
+        if not (HandlingUnit.Status in [HandlingUnit.Status::WHAOpen, HandlingUnit.Status::WHAClosed]) then
+            Error(UnitNotAvailableErr, HandlingUnit."No.", HandlingUnit.Status);
 
         if HandlingUnit."Location Code" = '' then
             exit;

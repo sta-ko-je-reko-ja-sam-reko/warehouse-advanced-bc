@@ -30,6 +30,8 @@ configuration. One configuration ↔ one agent ↔ one file.
 | `Warehouse Advanced - Demo Replenishment` | `demoReplenishment` | [WarehouseAdvanced-Demo-Replenishment.md](WarehouseAdvanced-Demo-Replenishment.md) | The agent bound to the Demo Replenishment configuration |
 | `Warehouse Advanced - Counting` | `counting` | [WarehouseAdvanced-Counting.md](WarehouseAdvanced-Counting.md) | The agent bound to the Counting configuration |
 | `Warehouse Advanced - Demo Counting` | `demoCounting` | [WarehouseAdvanced-Demo-Counting.md](WarehouseAdvanced-Demo-Counting.md) | The agent bound to the Demo Counting configuration |
+| `Warehouse Advanced - Quality Hold` | `qualityHold` | [WarehouseAdvanced-QualityHold.md](WarehouseAdvanced-QualityHold.md) | The agent bound to the Quality Hold configuration |
+| `Warehouse Advanced - Demo Quality Hold` | `demoQualityHold` | [WarehouseAdvanced-Demo-QualityHold.md](WarehouseAdvanced-Demo-QualityHold.md) | The agent bound to the Demo Quality Hold configuration |
 
 **Demo importers are deliberately in their own configurations and their own API groups**, so a
 "load sample data" agent can be given the importer *without* also getting the functional write

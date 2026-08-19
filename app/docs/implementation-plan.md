@@ -32,6 +32,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-PACK-001` segment 1 — the packing bench: open a carton, fill it, check it, close it. The carton is a handling unit |
 | Delivered | `FEAT-REPL-001` segment 1 — replenishment rules: min/max per pick bin, two ways of measuring the bin, and a run that raises the work to top it up |
 | Delivered | `FEAT-CNT-001` segment 1 — count sheets: blind counting, a tolerance, and an approval before a difference is accepted. **Adjusts nothing yet** |
+| Delivered | `FEAT-QC-001` segment 1 — quality hold: stopping a handling unit and everything on it, three dispositions, and an audit trail that cannot be deleted. **Posts nothing** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
@@ -190,7 +191,7 @@ Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
 
 Wave D    FEAT-REPL-001    replenishment             ← segment 1 delivered
           FEAT-CNT-001     counting                  ← segment 1 delivered; posts no adjustment
-          FEAT-QC-001      quality hold
+          FEAT-QC-001      quality hold              ← segment 1 delivered; posts no write-off
 
 Wave E    FEAT-SLOT-001    slotting
           FEAT-LAB-001     labour management
@@ -198,6 +199,15 @@ Wave E    FEAT-SLOT-001    slotting
 
 Wave F    FEAT-KPI-001     analytics
 ```
+
+**Waves A to D are built.** Wave E — slotting, labour management, dock and yard — is not started, and
+`FEAT-SLOT-001` depends on counting, which now exists.
+
+Two features stop deliberately short of the ledger: counting records differences without adjusting
+stock, and quality hold takes goods out of use without writing them off. Both need the item journal,
+dimensions and a W1 container, and both are the same decision taken twice. **Posting is now the
+largest single piece of unbuilt work in the app**, and it is worth planning as one piece rather than
+twice.
 
 `FEAT-DOCK-001` has no dependencies and can move anywhere it fits.
 
@@ -232,14 +242,14 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 166 automated tests exist across nine codeunits and **not one has
+1. **Run the test suite once.** 184 automated tests exist across ten codeunits and **not one has
    ever been executed** — they are compile-verified only, because publishing to the dev container
    needs credentials that are not in the repo. Until they have run green once, every claim this
    project makes about its own behaviour rests on the compiler agreeing the code parses.
 2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
-   badly overdue: **nine features** have been built from the hypothesis — the whole of Waves A to C
-   and two thirds of Wave D — and each further one raises the cost of a register that contradicts it.
+   badly overdue: **ten features** have been built from the hypothesis — the whole of Waves A to D —
+   and each further one raises the cost of a register that contradicts it.
    Replenishment sharpens the point: standard Business Central already replenishes bins through the
    movement worksheet, so a real register may reclassify part of `FEAT-REPL-001` as *configuration*
    rather than *build*.

@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
 using WarehouseAdvanced.Labelling;
+using WarehouseAdvanced.QualityHold;
 
 page 50051 "WHA Handling Unit Card"
 {
@@ -89,6 +90,29 @@ page 50051 "WHA Handling Unit Card"
                     LabelMgt.AssignTo(Rec);
                 end;
             }
+            action(PutOnHold)
+            {
+                Caption = 'Put on hold';
+                ToolTip = 'Specifies the action that stops this unit from being used, and everything nested inside it, until somebody decides what to do with the goods.';
+                Image = Cancel;
+                ApplicationArea = WHAQualityHold;
+                AccessByPermission = tabledata "WHA Quality Hold" = I;
+
+                trigger OnAction()
+                begin
+                    PlaceHold();
+                end;
+            }
+            action(UnitHolds)
+            {
+                Caption = 'Quality holds';
+                ToolTip = 'Specifies the action that shows every hold ever placed on this unit, whether or not it is still on.';
+                Image = List;
+                ApplicationArea = WHAQualityHold;
+                AccessByPermission = tabledata "WHA Quality Hold" = R;
+                RunObject = page "WHA Quality Holds";
+                RunPageLink = "Handling Unit No." = field("No.");
+            }
             action(NestedUnits)
             {
                 Caption = 'Nested units';
@@ -110,7 +134,23 @@ page 50051 "WHA Handling Unit Card"
                 actionref(AssignLabelRef; AssignLabel)
                 {
                 }
+                actionref(PutOnHoldRef; PutOnHold)
+                {
+                }
             }
         }
     }
+
+    var
+        HeldMsg: Label 'Handling unit %1 is on hold under hold %2. Say what happens to the goods, then release it.', Comment = '%1 = the handling unit number, %2 = the entry number of the hold that was placed';
+
+    local procedure PlaceHold()
+    var
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        EntryNo: Integer;
+    begin
+        EntryNo := QualityHoldMgt.Place(Rec, QualityHoldMgt.DefaultReason(), '');
+        CurrPage.Update(false);
+        Message(HeldMsg, Rec."No.", EntryNo);
+    end;
 }

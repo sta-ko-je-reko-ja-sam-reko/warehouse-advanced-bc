@@ -41,6 +41,8 @@ product does not include.
 
 - [Counting](FEAT-CNT-001-Counting/getting-started-english.md) — count a slice of the warehouse while
   the rest of it keeps working, without showing the counter what was expected.
+- [Quality hold](FEAT-QC-001-QualityHold/getting-started-english.md) — stop goods being used until
+  somebody has decided what happens to them, and keep the record of who decided what.
 
 ### Talking to other systems
 

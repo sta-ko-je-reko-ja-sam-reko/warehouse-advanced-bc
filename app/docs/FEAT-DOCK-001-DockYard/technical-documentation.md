@@ -109,6 +109,10 @@ off. That is what makes the yard list answer "where is that trailer" rather than
 | `WHA API Dock Appointment` | page | 50457 | `app/src/DockYard/pages/APIDockAppointment.Page.al` |
 | `WHA API Demo Dock` | page | 50458 | `app/src/DockYard/pages/APIDemoDock.Page.al` |
 | `WHA Dock Tests` | codeunit | 51012 | `test/src/codeunits/DockTests.Codeunit.al` |
+| `WHA Dock Activities Cue` | tableextension | 50451 | `app/src/DockYard/tableextensions/DockActivitiesCue.TableExt.al` |
+| `WHA Dock Activity Provider` | enumextension | 50451 | `app/src/DockYard/enumextensions/DockActivityProvider.EnumExt.al` |
+| `WHA Dock Activity Cues` | codeunit | 50457 | `app/src/DockYard/codeunits/DockActivityCues.Codeunit.al` |
+| `WHA Dock Activities` | pageextension | 50451 | `app/src/DockYard/pageextensions/DockActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.DockYard`, from the reserved block `50450..50499`.
 
@@ -143,6 +147,19 @@ They answer different questions and both are needed:
   checked when a door is assigned, and it ignores departed and cancelled bookings.
 - **The door check at the moment of use** stops a clash *happening anyway* when the first vehicle
   overruns its slot. Only one appointment can be `At the door` on a door at a time.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **vehicles on site and vehicles waiting for a door**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

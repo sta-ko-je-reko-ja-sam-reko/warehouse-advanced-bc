@@ -133,6 +133,10 @@ time and per-step durations; it would be the wrong shape to guess at now.
 | `WHA API Warehouse Task` | page | 50203 | `app/src/DirectedWork/pages/APIWarehouseTask.Page.al` |
 | `WHA API Demo Warehouse Task` | page | 50204 | `app/src/DirectedWork/pages/APIDemoWarehouseTask.Page.al` |
 | `WHA Warehouse Task Tests` | codeunit | 51001 | `test/src/codeunits/WarehouseTaskTests.Codeunit.al` |
+| `WHA Task Activities Cue` | tableextension | 50201 | `app/src/DirectedWork/tableextensions/TaskActivitiesCue.TableExt.al` |
+| `WHA Task Activity Provider` | enumextension | 50200 | `app/src/DirectedWork/enumextensions/TaskActivityProvider.EnumExt.al` |
+| `WHA Task Activity Cues` | codeunit | 50208 | `app/src/DirectedWork/codeunits/TaskActivityCues.Codeunit.al` |
+| `WHA Task Activities` | pageextension | 50202 | `app/src/DirectedWork/pageextensions/TaskActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.DirectedWork`, from the reserved block `50200..50249`.
 
@@ -271,6 +275,19 @@ and the task card says so under **Still wanted**.
 **Nothing acts on that answer yet** — no automatic cancellation, no warning when an operator picks
 the job up. Deciding what should happen to stale work is a question about how much the warehouse
 trusts the link, and that is a conversation to have after the link has run against real documents.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **jobs waiting, jobs being done, and jobs past their date**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

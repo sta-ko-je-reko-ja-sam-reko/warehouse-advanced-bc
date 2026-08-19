@@ -94,6 +94,10 @@ made yet — but the data supports asking the question.
 | `WHA API Pack Session` | page | 50406 | `app/src/Packing/pages/APIPackSession.Page.al` |
 | `WHA API Demo Pack` | page | 50407 | `app/src/Packing/pages/APIDemoPack.Page.al` |
 | `WHA Packing Tests` | codeunit | 51006 | `test/src/codeunits/PackingTests.Codeunit.al` |
+| `WHA Pack Activities Cue` | tableextension | 50401 | `app/src/Packing/tableextensions/PackActivitiesCue.TableExt.al` |
+| `WHA Pack Activity Provider` | enumextension | 50401 | `app/src/Packing/enumextensions/PackActivityProvider.EnumExt.al` |
+| `WHA Pack Activity Cues` | codeunit | 50404 | `app/src/Packing/codeunits/PackActivityCues.Codeunit.al` |
+| `WHA Pack Activities` | pageextension | 50401 | `app/src/Packing/pageextensions/PackActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.Packing`, from the reserved block `50400..50449`.
 Core changed only by gaining a `WHA Feature` enum value.
@@ -114,6 +118,19 @@ Table triggers delegate to `WHA IPackSession`, implemented by `WHA Pack Session 
 
 **Nothing is deleted when packing is abandoned.** A half-packed box exists physically; making its
 contents vanish from the system would leave somebody holding a box the system says is empty.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **cartons being packed**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

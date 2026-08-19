@@ -135,6 +135,10 @@ counting, lives in `app/src/Posting/`, and is described in
 | `WHA Warehouse Task Logic` (Directed work) | Refuses work for a unit that is not open or closed. Does not name a hold |
 | `WHA Repl. Handling Units` (Replenishment) | Measures only units that are open or closed. Does not name a hold |
 | `WHA Handling Unit Card` (Handling units) | **Put on hold** and **Quality holds** actions, carrying this feature's application area and `AccessByPermission`, exactly as labelling's action does |
+| `WHA QC Activities Cue` | tableextension | 50551 | `app/src/QualityHold/tableextensions/QCActivitiesCue.TableExt.al` |
+| `WHA QC Activity Provider` | enumextension | 50551 | `app/src/QualityHold/enumextensions/QCActivityProvider.EnumExt.al` |
+| `WHA QC Activity Cues` | codeunit | 50560 | `app/src/QualityHold/codeunits/QCActivityCues.Codeunit.al` |
+| `WHA QC Activities` | pageextension | 50551 | `app/src/QualityHold/pageextensions/QCActivities.PageExt.al` |
 
 ## Dispositions — one thing each
 
@@ -204,6 +208,19 @@ a journal waiting for somebody.
 
 An empty handling unit scraps cleanly and writes off nothing — there is nothing to write off, and that
 is not an error.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **goods on hold and holds waiting for a decision**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

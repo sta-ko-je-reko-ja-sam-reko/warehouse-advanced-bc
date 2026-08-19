@@ -105,6 +105,10 @@ content while the setup says handling units has to be changed after it is create
 | `WHA API Repl. Rule` | page | 50253 | `app/src/Replenishment/pages/APIReplRule.Page.al` |
 | `WHA API Demo Repl.` | page | 50254 | `app/src/Replenishment/pages/APIDemoRepl.Page.al` |
 | `WHA Replenishment Tests` | codeunit | 51007 | `test/src/codeunits/ReplenishmentTests.Codeunit.al` |
+| `WHA Repl Activities Cue` | tableextension | 50251 | `app/src/Replenishment/tableextensions/ReplActivitiesCue.TableExt.al` |
+| `WHA Repl Activity Provider` | enumextension | 50251 | `app/src/Replenishment/enumextensions/ReplActivityProvider.EnumExt.al` |
+| `WHA Repl Activity Cues` | codeunit | 50262 | `app/src/Replenishment/codeunits/ReplActivityCues.Codeunit.al` |
+| `WHA Repl Activities` | pageextension | 50251 | `app/src/Replenishment/pageextensions/ReplActivities.PageExt.al` |
 
 All in namespace `WarehouseAdvanced.Replenishment`, from the reserved block `50250..50299`. Core
 gained a `WHA Feature` enum value; nothing else outside the feature changed.
@@ -217,6 +221,19 @@ ever existed*: a cancelled job leaves the bin free to ask again.
   `FEAT-TASK-001` exists for.
 - **It does not run itself.** Something has to call it: **Replenish now** on the rule list, the API
   action, **Replenish for this wave** on a wave, or a job queue entry pointed at `WHA Repl. Scheduler`.
+
+## Role centre activities
+
+This feature contributes its own tiles to the warehouse role centre: **replenishment rules that are switched off**. Four objects do it,
+all of them in this feature's own folder — a `tableextension` adding the cue fields, an `enumextension`
+registering the provider, a codeunit that counts, and a `pageextension` that puts the fields on the cue
+part and writes the returned counts back.
+
+**The foundation names none of them.** The seam, and why it is shaped this way, is in
+[../FEAT-CORE-001-Foundation/technical-documentation.md](../FEAT-CORE-001-Foundation/technical-documentation.md).
+
+The count runs in a read-only background session and its first line asks whether this feature is
+switched on. A switched-off feature adds **nothing** rather than a zero, so its tiles never appear.
 
 ## Enablement
 

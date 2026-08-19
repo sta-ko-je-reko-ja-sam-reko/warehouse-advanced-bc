@@ -34,6 +34,13 @@ product does not include.
 
 - [Packing](FEAT-PACK-001-Packing/getting-started-english.md) — pack goods into a carton at a bench,
   check what went in, and close it.
+- [Replenishment](FEAT-REPL-001-Replenishment/getting-started-english.md) — keep the bins people pick
+  from full, by raising the work to top them up before anybody finds them empty.
+
+### Checking what you have
+
+- [Counting](FEAT-CNT-001-Counting/getting-started-english.md) — count a slice of the warehouse while
+  the rest of it keeps working, without showing the counter what was expected.
 
 ### Talking to other systems
 

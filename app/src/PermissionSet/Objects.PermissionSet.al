@@ -5,6 +5,7 @@ using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
+using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50000 "WHA Objects"
@@ -106,5 +107,20 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Label Feature Setup" = X,
         codeunit "WHA Label App Area Sub." = X,
         codeunit "WHA Demo Label" = X,
-        page "WHA API Demo Label" = X;
+        page "WHA API Demo Label" = X,
+        table "WHA Pack Setup" = X,
+        table "WHA Pack Station" = X,
+        table "WHA Pack Session" = X,
+        page "WHA Pack Setup" = X,
+        page "WHA Pack Stations" = X,
+        page "WHA Pack Station Card" = X,
+        page "WHA Packing Station" = X,
+        page "WHA Pack Sessions" = X,
+        page "WHA API Pack Station" = X,
+        page "WHA API Pack Session" = X,
+        codeunit "WHA Pack Session Logic" = X,
+        codeunit "WHA Pack Feature Setup" = X,
+        codeunit "WHA Pack App Area Sub." = X,
+        codeunit "WHA Demo Pack" = X,
+        page "WHA API Demo Pack" = X;
 }

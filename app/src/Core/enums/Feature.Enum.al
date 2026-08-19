@@ -5,6 +5,7 @@ using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
+using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.WaveManagement;
 
 enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
@@ -46,5 +47,10 @@ enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
     {
         Caption = 'Labelling';
         Implementation = "WHA IFeatureSetup" = "WHA Label Feature Setup";
+    }
+    value(7; WHAPacking)
+    {
+        Caption = 'Packing';
+        Implementation = "WHA IFeatureSetup" = "WHA Pack Feature Setup";
     }
 }

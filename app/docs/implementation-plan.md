@@ -29,6 +29,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-TASK-001` segment 2 — partial completion: a job finished with less than it asked for, and why |
 | Delivered | `FEAT-WAVE-001` segment 1 — waves: gathering work by a swappable strategy, releasing it as a batch, and closing it |
 | Delivered | `FEAT-LBL-001` segment 1 — label codes: GS1 SSCC with its check digit, or a sequential licence plate. Closes the gap `FEAT-HU-001` left open |
+| Delivered | `FEAT-PACK-001` segment 1 — the packing bench: open a carton, fill it, check it, close it. The carton is a handling unit |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Everything else in §4 |
@@ -182,7 +183,7 @@ Wave B    FEAT-TASK-001    directed work             ← segment 1 delivered
           FEAT-RF-001      mobile device             ← segment 1 delivered; needs operator review
 
 Wave C    FEAT-WAVE-001    wave management           ← segment 1 delivered
-          FEAT-PACK-001    packing
+          FEAT-PACK-001    packing                   ← segment 1 delivered
           FEAT-LBL-001     labelling                 ← segment 1 delivered
 
 Wave D    FEAT-REPL-001    replenishment
@@ -229,14 +230,14 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 108 automated tests exist across five codeunits and **not one has
+1. **Run the test suite once.** 139 automated tests exist across seven codeunits and **not one has
    ever been executed** — they are compile-verified only, because publishing to the dev container
    needs credentials that are not in the repo. Until they have run green once, every claim this
    project makes about its own behaviour rests on the compiler agreeing the code parses.
 2. **Run Phase 0.** Collect the six inputs in §2 and produce the capability register. This is
    consulting work, not development work, and it is the highest-value thing available. It is now
-   badly overdue: **five features** have been built from the hypothesis, and each further one raises
-   the cost of a register that contradicts it.
+   badly overdue: **seven features** have been built from the hypothesis — the whole of Waves A to C
+   — and each further one raises the cost of a register that contradicts it.
 3. **Run the operator review** for `FEAT-RF-001`, per
    [FEAT-RF-001-MobileDevice/operator-review.md](FEAT-RF-001-MobileDevice/operator-review.md). The
    handheld has never been seen by anyone who would use it.

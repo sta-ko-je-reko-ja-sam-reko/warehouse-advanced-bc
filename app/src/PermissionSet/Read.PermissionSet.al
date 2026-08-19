@@ -5,6 +5,7 @@ using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
+using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50001 "WHA Read"
@@ -27,5 +28,8 @@ permissionset 50001 "WHA Read"
         tabledata "WHA Wave Setup" = R,
         tabledata "WHA Wave" = R,
         tabledata "WHA Label Setup" = R,
+        tabledata "WHA Pack Setup" = R,
+        tabledata "WHA Pack Station" = R,
+        tabledata "WHA Pack Session" = R,
         tabledata "WHA Demo Data" = R;
 }

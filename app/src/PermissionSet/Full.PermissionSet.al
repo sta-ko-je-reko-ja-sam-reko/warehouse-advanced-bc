@@ -5,6 +5,7 @@ using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Integration;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.MobileDevice;
+using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50002 "WHA Full"
@@ -27,5 +28,8 @@ permissionset 50002 "WHA Full"
         tabledata "WHA Wave Setup" = RIMD,
         tabledata "WHA Wave" = RIMD,
         tabledata "WHA Label Setup" = RIMD,
+        tabledata "WHA Pack Setup" = RIMD,
+        tabledata "WHA Pack Station" = RIMD,
+        tabledata "WHA Pack Session" = RIMD,
         tabledata "WHA Demo Data" = RIMD;
 }

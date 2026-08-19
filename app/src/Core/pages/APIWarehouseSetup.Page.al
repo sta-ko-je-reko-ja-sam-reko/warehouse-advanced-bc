@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Core;
 page 50003 "WHA API Warehouse Setup"
 {
     PageType = API;
-    APIPublisher = 'defaultpublisher';
+    APIPublisher = 'matr';
     APIGroup = 'core';
     APIVersion = 'v1.0';
     EntityName = 'warehouseSetup';

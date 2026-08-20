@@ -48,6 +48,28 @@ page 50550 "WHA Quality Hold Setup"
                     ApplicationArea = WHAQualityHold;
                 }
             }
+            group(Stock)
+            {
+                Caption = 'Stock';
+
+                field("Hold Blocks Stock"; Rec."Hold Blocks Stock")
+                {
+                    ApplicationArea = WHAQualityHold;
+
+                    trigger OnValidate()
+                    begin
+                        DescribeHoldStockPolicy();
+                    end;
+                }
+                field(HoldStockPolicyDescription; HoldStockPolicyDescription)
+                {
+                    Caption = 'What that does';
+                    ToolTip = 'Specifies how far a hold reaches into Business Central, in full, so the choice above is made with its consequence in view.';
+                    ApplicationArea = WHAQualityHold;
+                    Editable = false;
+                    MultiLine = true;
+                }
+            }
             group(Posting)
             {
                 Caption = 'Writing off scrapped goods';
@@ -107,6 +129,7 @@ page 50550 "WHA Quality Hold Setup"
         QCFeatureSetup.EnsureSetup(Rec);
         OpeningEnabled := Rec."WHA Enabled";
         DescribePostingMethod();
+        DescribeHoldStockPolicy();
     end;
 
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -123,6 +146,14 @@ page 50550 "WHA Quality Hold Setup"
     var
         OpeningEnabled: Boolean;
         PostingMethodDescription: Text;
+        HoldStockPolicyDescription: Text;
+
+    local procedure DescribeHoldStockPolicy()
+    var
+        HoldStockMgt: Codeunit "WHA Hold Stock Mgt.";
+    begin
+        HoldStockPolicyDescription := HoldStockMgt.Describe(Rec."Hold Blocks Stock");
+    end;
 
     local procedure DescribePostingMethod()
     var

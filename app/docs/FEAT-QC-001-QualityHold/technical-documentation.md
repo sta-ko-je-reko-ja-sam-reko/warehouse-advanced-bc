@@ -291,8 +291,41 @@ what quality hold *asks the ledger for* is asserted exactly, with no items or op
 plan: it needs a company with items and, per `CLAUDE.md`, a W1 container rather than the US one this
 project develops against.
 
+## What a hold does to Business Central
+
+A hold used to be a fact recorded here and nowhere else. Business Central went on offering the goods to
+orders, planning and picks, and only somebody reading this app knew they were quarantined. For a
+warehouse product that is the wrong default in one direction and reaching into a customer's master data
+is the wrong default in the other, so it is a **choice with three answers**, all shipped.
+
+| `Hold Blocks Stock` | What happens | Reaches |
+|---|---|---|
+| **Record the hold and nothing else** *(ships as this)* | Nothing outside this app | — |
+| **Block movement in the bin** | `Bin Content."Block Movement"` set to **All** for the held unit's items in its bin | Everything else standing in that bin |
+| **Block the lot** | `Lot No. Information.Blocked` for each lot on the unit, created if there is none | The same lot in **every bin and every warehouse** in the company |
+
+**Blocked in both directions, not just outbound.** Goods under investigation should not be added to
+either, or the quantity being questioned changes while somebody is questioning it.
+
+**Business Central blocks a bin, not a pallet.** Two pallets of the same item in one bin share one
+block, so lifting asks whether any other live hold still stands on that bin — or, for lots, on that lot
+— and leaves the block alone if one does.
+
+**The block is lifted before the disposition is applied, and that ordering is load-bearing.** Scrapping
+posts a write-off through the shared posting engine; a blocked lot would make Business Central refuse
+that very posting. Lifting first also means no disposition leaves a block behind: what is scrapped is
+written off by posting, and a lot left blocked afterwards would hold back the good stock still under it,
+forever, with nothing in this app pointing at why.
+
 ## Not done
 
+- **Nothing filters reservation or planning directly.** What is blocked is blocked by Business
+  Central's own two mechanisms; this app adds no availability filter of its own, so anything those two
+  do not cover is not covered.
+- **A hold placed before the goods are in a bin blocks nothing.** The bin policy needs a location and a
+  bin on the unit, and the lot policy needs a lot on its lines.
+- **Turning the setting on does not reach holds already standing**, and turning it off does not lift
+  blocks already placed. Only holds placed and released from then on are affected.
 - **Nothing has been written off for real.** The write-off path is covered by unit tests against a
   recorder and by nothing else: no ledger entry has ever been produced by this code. See
   [../inventory-posting.md](../inventory-posting.md) for what that leaves untested. Directed put-away

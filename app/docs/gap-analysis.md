@@ -54,6 +54,12 @@ that draft filled in, corrected, extended, and signed.
 This is the register the section above asks for, pre-populated so the discovery conversation
 starts from a list rather than a blank page.
 
+> **There is no customer.** Confirmed 2026-08-20. This register was written to be filled in against a
+> live installation, and there is not one — the app is a product built from the incumbent's functional
+> footprint. The buckets below cannot be signed off, and a row reading *None* is no longer a question
+> waiting on discovery: it is a product decision waiting on somebody choosing a default. See the
+> *Read this second* box in [implementation-plan.md](implementation-plan.md).
+
 **Read the warning before using it.** The rows are the functional footprint a tier-1 WMS of the
 incumbent's class typically ships, cross-read against what `app/src/` contains today. They are
 **not** derived from the customer's installation, no licence file or configuration export has
@@ -120,7 +126,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | FEFO allocation | Pick according to FEFO | None | | |
 | Minimum remaining shelf life at picking, per customer | None | None | | |
 | Allocation strategy per item or customer | Reservation, picking rules | None | | |
-| Held stock excluded from allocation | Blocked lot | A hold stops the unit; nothing filters allocation | | |
+| Held stock excluded from allocation | Blocked lot | **Delivered**, behind a setting that ships off: a hold can block movement in the bin, or block the lot. Nothing filters *reservation* or planning beyond what those two blocks do | | |
 | Reservation or soft allocation against an order | Reservation entries | Replenishment reads planned picks; reserves nothing | | |
 | Stock ownership / multi-owner segregation | None | None | | |
 | Traceability up and down a lot, for a recall | Item tracing | None | | |

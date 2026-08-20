@@ -40,6 +40,12 @@ table 50550 "WHA Quality Hold Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies whether a hold can only be released once somebody has said what happens to the goods. Leave this on, or a hold can be lifted without anybody deciding anything.';
         }
+        field(45; "Hold Blocks Stock"; Enum "WHA Hold Stock Policy")
+        {
+            Caption = 'What a hold does to stock';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies how far a hold reaches into Business Central. Leave it as it is and the hold is recorded here only, which is what this app has always done; the other values block the bin the goods stand in, or the whole lot they belong to, so Business Central stops offering them to orders and picks.';
+        }
         field(50; "Posting Method"; Enum "WHA Posting Method")
         {
             Caption = 'Write scrapped goods off by';

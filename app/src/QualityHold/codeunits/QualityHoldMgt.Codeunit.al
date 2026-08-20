@@ -40,6 +40,7 @@ codeunit 50551 "WHA Quality Hold Mgt."
 
         EntryNo := InsertHold(HandlingUnit, Reason, HoldDescription, 0);
         StopUnit(HandlingUnit);
+        BlockStock(EntryNo, HandlingUnit);
 
         if HoldsNestedUnits() then
             CascadeToNested(HandlingUnit, EntryNo, Reason, HoldDescription);
@@ -173,9 +174,30 @@ codeunit 50551 "WHA Quality Hold Mgt."
     var
         QCPosting: Codeunit "WHA QC Posting";
     begin
+        UnblockStock(QualityHold);
         ApplyTo(QualityHold, Disposition);
         QCPosting.PostWriteOff(QualityHold, Disposition);
         CloseHold(QualityHold, Disposition);
+    end;
+
+    local procedure BlockStock(EntryNo: Integer; var HandlingUnit: Record "WHA Handling Unit")
+    var
+        QualityHold: Record "WHA Quality Hold";
+        HoldStockMgt: Codeunit "WHA Hold Stock Mgt.";
+    begin
+        if not QualityHold.Get(EntryNo) then
+            exit;
+        HoldStockMgt.Apply(QualityHold, HandlingUnit);
+    end;
+
+    local procedure UnblockStock(var QualityHold: Record "WHA Quality Hold")
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HoldStockMgt: Codeunit "WHA Hold Stock Mgt.";
+    begin
+        if not HandlingUnit.Get(QualityHold."Handling Unit No.") then
+            exit;
+        HoldStockMgt.Lift(QualityHold, HandlingUnit);
     end;
 
     local procedure ApplyTo(var QualityHold: Record "WHA Quality Hold"; Disposition: Enum "WHA Hold Disposition")

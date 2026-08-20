@@ -257,6 +257,7 @@ work from a receipt or shipment at such a location stops with a message naming t
 **A location with Directed Put-away and Pick cannot be used for this feature at all.** Business Central
 turns all four settings on with it and will not let them off. Counting, quality hold and their posting
 still work at such a location.
+
 ## Hold a document until its work is finished
 
 Off unless you turn it on.

@@ -188,6 +188,7 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         if not (WarehouseTask.Status in [WarehouseTask.Status::WHAReleased, WarehouseTask.Status::WHAAssigned]) then
             Error(AssignNotAllowedErr, WarehouseTask."No.", WarehouseTask.Status);
 
+        CheckUserMayBeGivenWork(WarehouseTask);
         CheckUserTaskLimit(WarehouseTask);
 
         WarehouseTask."Assigned At" := CurrentDateTime;
@@ -442,6 +443,13 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         FollowUpTask.Priority := WarehouseTask.Priority;
         FollowUpTask."Due Date" := WarehouseTask."Due Date";
         FollowUpTask.Insert(true);
+    end;
+
+    local procedure CheckUserMayBeGivenWork(var WarehouseTask: Record "WHA Warehouse Task")
+    var
+        WhseAccessMgt: Codeunit "WHA Whse. Access Mgt.";
+    begin
+        WhseAccessMgt.Check(WarehouseTask."Assigned To User ID", WarehouseTask."Location Code");
     end;
 
     local procedure CheckUserTaskLimit(var WarehouseTask: Record "WHA Warehouse Task")

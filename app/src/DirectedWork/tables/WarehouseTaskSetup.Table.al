@@ -59,6 +59,12 @@ table 50200 "WHA Warehouse Task Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies what finishing a job tells Business Central about the goods that moved. Leave it as it is and the app keeps the move to itself, which is what this app has always done; register the movement and Business Central''s own bin content and warehouse entries follow the floor.';
         }
+        field(60; "Who May Be Given Work"; Enum "WHA Whse. Access Policy")
+        {
+            Caption = 'Who may be given work';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies who a warehouse task may be assigned to. Leave it as it is and anybody who can reach the tasks can be given one, which is what this app has always done; restrict it and only somebody Business Central lists as a warehouse employee at that location can be, which is the same rule its own warehouse pages follow.';
+        }
         field(55; "Open Work On Posting"; Enum "WHA Open Work Policy")
         {
             Caption = 'Open work on posting';

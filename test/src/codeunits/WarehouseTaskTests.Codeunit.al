@@ -1358,6 +1358,111 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Assert.AreNotEqual('', BlockOpenWork.Describe(), 'Holding the document should say what it does.');
     end;
 
+    [Test]
+    procedure SomebodyWhoIsNotAWarehouseEmployeeCannotBeGivenWork()
+    var
+        WhseEmployeesOnly: Codeunit "WHA Whse. Employees Only";
+    begin
+        // [SCENARIO] With the restriction on, this app lets the same people work as Business Central's own
+        // warehouse pages do, and refuses plainly rather than opening a dialog nobody on a handheld can
+        // answer.
+        EnsureUser('WHA-OUTSIDER');
+
+        asserterror WhseEmployeesOnly.Check('WHA-OUTSIDER', CopyStr(TestLocationTok, 1, 10));
+
+        Assert.ExpectedError('is not a warehouse employee at location');
+    end;
+
+    [Test]
+    procedure SomebodyWithNoWarehouseAtAllCannotBeGivenWork()
+    var
+        WhseEmployeesOnly: Codeunit "WHA Whse. Employees Only";
+    begin
+        // [SCENARIO] A job that does not say where the work happens is checked against any location,
+        // because somebody with no warehouse at all is wrong however the job ends up.
+        EnsureUser('WHA-NOWHERE-EMP');
+
+        asserterror WhseEmployeesOnly.Check('WHA-NOWHERE-EMP', '');
+
+        Assert.ExpectedError('is not a warehouse employee at any location');
+    end;
+
+    [Test]
+    procedure AWarehouseEmployeeCanBeGivenWorkThere()
+    var
+        WhseEmployeesOnly: Codeunit "WHA Whse. Employees Only";
+    begin
+        // [SCENARIO] The restriction refuses who it should and nobody else.
+        EnsureLocationAndBin();
+        EnsureWarehouseEmployee('WHA-INSIDER', CopyStr(TestLocationTok, 1, 10));
+
+        WhseEmployeesOnly.Check('WHA-INSIDER', CopyStr(TestLocationTok, 1, 10));
+        WhseEmployeesOnly.Check('WHA-INSIDER', '');
+    end;
+
+    [Test]
+    procedure AWarehouseEmployeeSomewhereElseCannotBeGivenWorkHere()
+    var
+        WhseEmployeesOnly: Codeunit "WHA Whse. Employees Only";
+    begin
+        // [SCENARIO] The list is per location, not per person. Somebody who works the other warehouse is
+        // not somebody who works this one.
+        EnsureLocationAndBin();
+        EnsureWarehouseEmployee('WHA-ELSEWHERE', 'WHA-OTHER');
+
+        asserterror WhseEmployeesOnly.Check('WHA-ELSEWHERE', CopyStr(TestLocationTok, 1, 10));
+
+        Assert.ExpectedError('is not a warehouse employee at location');
+    end;
+
+    [Test]
+    procedure NobodyInParticularIsNotRefused()
+    var
+        WhseEmployeesOnly: Codeunit "WHA Whse. Employees Only";
+    begin
+        // [SCENARIO] Taking a job away from somebody leaves it assigned to nobody, and that is not a
+        // person to check.
+        WhseEmployeesOnly.Check('', CopyStr(TestLocationTok, 1, 10));
+    end;
+
+    [Test]
+    procedure LettingAnybodyWorkRefusesNobody()
+    var
+        AnyUserWorks: Codeunit "WHA Any User Works";
+    begin
+        // [SCENARIO] The value a fresh install and every upgrade lands on: the warehouse employee list is
+        // not consulted at all.
+        AnyUserWorks.Check('WHA-OUTSIDER', CopyStr(TestLocationTok, 1, 10));
+    end;
+
+    [Test]
+    procedure EveryAccessPolicyExplainsItself()
+    var
+        AnyUserWorks: Codeunit "WHA Any User Works";
+        WhseEmployeesOnly: Codeunit "WHA Whse. Employees Only";
+    begin
+        // [SCENARIO] Setup shows who the choice lets work before anybody is refused a job.
+        Assert.AreNotEqual('', AnyUserWorks.Describe(), 'Letting anybody work should still say so.');
+        Assert.AreNotEqual('', WhseEmployeesOnly.Describe(), 'Restricting to warehouse employees should say what it does.');
+    end;
+
+    local procedure EnsureWarehouseEmployee(UserName: Code[50]; LocationCode: Code[10])
+    var
+        WarehouseEmployee: Record "Warehouse Employee";
+    begin
+        EnsureUser(UserName);
+
+        WarehouseEmployee.SetRange("User ID", UserName);
+        WarehouseEmployee.SetRange("Location Code", LocationCode);
+        if not WarehouseEmployee.IsEmpty() then
+            exit;
+
+        WarehouseEmployee.Init();
+        WarehouseEmployee."User ID" := UserName;
+        WarehouseEmployee."Location Code" := LocationCode;
+        WarehouseEmployee.Insert(false);
+    end;
+
     local procedure CreateSourcedTask(TaskNo: Code[20]; SourceNo: Code[20]; NewStatus: Enum "WHA Warehouse Task Status")
     var
         WarehouseTask: Record "WHA Warehouse Task";

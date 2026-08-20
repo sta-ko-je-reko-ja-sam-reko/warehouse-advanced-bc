@@ -110,6 +110,7 @@ task with no number errors if that series is unset.
 | `Max Open Tasks Per User` | How many assigned or in-progress tasks one person may hold. Zero means no limit |
 | `Whse. Registration Method` | What finishing a job tells Business Central about the goods that moved. Ships as *Do not tell Business Central*, which is what the app always did. See [warehouse-registration.md](../warehouse-registration.md) |
 | `Open Work On Posting` | What happens when a warehouse receipt or shipment is posted while jobs raised from it are still open. Ships as *Let the document be posted*, which is what the app always did |
+| `Who May Be Given Work` | Whether a task may be assigned to anybody, or only to somebody Business Central lists as a warehouse employee at that location. Ships as *Anybody with permission to use the app*, which is what the app always did |
 
 **No task history table.** The stamps on the task are the audit trail for segment 1. A separate
 history/event table becomes worth its cost when labour management (`FEAT-LAB-001`) needs indirect
@@ -450,6 +451,29 @@ Three properties are deliberate:
 from one that did not — a job finished while the setting was off, or a job with no document behind
 it, both read as blank rather than as false-and-therefore-broken.
 
+## Who may be given work
+
+Business Central keeps a `Warehouse Employee` list — one row per user per location — and its own
+warehouse pages will not let anybody else in. This app kept its own queue and never consulted it, so a
+person could hold and finish a job at a location Business Central would have turned them away from.
+
+`Who May Be Given Work` decides. It ships as **Anybody with permission to use the app**, which is what
+the app has always done, and the other value applies Business Central's rule.
+
+Two things about how it is built:
+
+- **The list is read directly, not through `CheckUserIsWhseEmployeeForLocation`.** Business Central's
+  own check offers to open the Warehouse Employees page and only errors if the answer is no. A dialog is
+  right on a page and wrong everywhere this runs — a handheld, an API call, a job queue — so the rule is
+  applied and the dialog is not.
+- **A job with no location yet is checked against any location.** Somebody who is a warehouse employee
+  nowhere is the wrong person however the job ends up; which location it turns out to be is checked when
+  the job names one.
+
+The check runs on `Assigned To User ID`, which is the one gate every path goes through — the task list,
+the handheld and `Assign` all validate that field. Clearing the field is not a person, so it is not
+checked.
+
 ## Holding the document
 
 Writing back fills in what was handled; it never stopped anybody posting the document anyway. A receipt
@@ -516,6 +540,9 @@ job would be a guess about which of them the warehouse will actually move.
 - **Only two kinds of document.** Internal put-aways, movement worksheet lines, production and
   assembly are not sources. Each is an `enumextension` value and one codeunit, and none of them should
   be written until the capability register says the customer uses them.
+- **Nothing revisits work already assigned.** Turning the restriction on leaves jobs already held by
+  somebody who is not a warehouse employee exactly where they are, and they can still be started and
+  finished. Only a new assignment is checked.
 - **The guard only covers the document sources.** Work typed in by hand names its own location and is
   not checked, and a location whose flags change after work was raised leaves that work standing.
 - **Nothing acts on a stale job.** `SourceIsOpen` can tell that the line behind a task has been dealt

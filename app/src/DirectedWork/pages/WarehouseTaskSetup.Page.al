@@ -51,6 +51,28 @@ page 50200 "WHA Warehouse Task Setup"
                     ApplicationArea = WHADirectedWork;
                 }
             }
+            group(Posting)
+            {
+                Caption = 'Posting';
+
+                field("Open Work On Posting"; Rec."Open Work On Posting")
+                {
+                    ApplicationArea = WHADirectedWork;
+
+                    trigger OnValidate()
+                    begin
+                        DescribeOpenWorkPolicy();
+                    end;
+                }
+                field(OpenWorkPolicyDescription; OpenWorkPolicyDescription)
+                {
+                    Caption = 'What that does';
+                    ToolTip = 'Specifies what posting a warehouse receipt or shipment will do about jobs raised from it that nobody has finished, in full.';
+                    ApplicationArea = WHADirectedWork;
+                    Editable = false;
+                    MultiLine = true;
+                }
+            }
             group(WarehouseRegistration)
             {
                 Caption = 'Warehouse registration';
@@ -102,11 +124,20 @@ page 50200 "WHA Warehouse Task Setup"
     trigger OnAfterGetRecord()
     begin
         DescribeRegistrationMethod();
+        DescribeOpenWorkPolicy();
     end;
 
     var
         OpeningEnabled: Boolean;
         RegistrationMethodDescription: Text;
+        OpenWorkPolicyDescription: Text;
+
+    local procedure DescribeOpenWorkPolicy()
+    var
+        OpenWorkMgt: Codeunit "WHA Open Work Mgt.";
+    begin
+        OpenWorkPolicyDescription := OpenWorkMgt.Describe(Rec."Open Work On Posting");
+    end;
 
     local procedure DescribeRegistrationMethod()
     var

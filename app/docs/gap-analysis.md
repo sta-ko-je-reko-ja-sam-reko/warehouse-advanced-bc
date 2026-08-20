@@ -139,7 +139,8 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Pick to cart, with a trolley position | None | None | | |
 | Pick face against bulk | Bin ranking plus replenishment | Replenishment rules per pick bin | | |
 | Work raised from a production order | Warehouse pick for production | None — the sources are receipt, shipment, manual | | |
-| Completion written back to the source document | Native | Delivered, behind a setting that ships off. Nothing holds the document open while jobs against it are outstanding | | |
+| Completion written back to the source document | Native | Delivered, behind a setting that ships off | | |
+| Document held while its work is unfinished | None | Delivered, behind a setting that ships off. Nothing warns before the refusal | | |
 | Completion reflected in Business Central's own bins | Native, by registering the activity | Delivered, behind a setting that ships off — a finished job registers a warehouse movement, so bin content and warehouse entries follow the floor. **Never yet run against a real bin** | | |
 | Supervisor cancel and re-queue | Delete the line | A status model, but no supervisor console | | |
 

@@ -109,6 +109,7 @@ task with no number errors if that series is unset.
 | `Follow Up Short Picks` | Raises a new task for whatever an operator could not find. Off by default — see below |
 | `Max Open Tasks Per User` | How many assigned or in-progress tasks one person may hold. Zero means no limit |
 | `Whse. Registration Method` | What finishing a job tells Business Central about the goods that moved. Ships as *Do not tell Business Central*, which is what the app always did. See [warehouse-registration.md](../warehouse-registration.md) |
+| `Open Work On Posting` | What happens when a warehouse receipt or shipment is posted while jobs raised from it are still open. Ships as *Let the document be posted*, which is what the app always did |
 
 **No task history table.** The stamps on the task are the audit trail for segment 1. A separate
 history/event table becomes worth its cost when labour management (`FEAT-LAB-001`) needs indirect
@@ -449,6 +450,32 @@ Three properties are deliberate:
 from one that did not — a job finished while the setting was off, or a job with no document behind
 it, both read as blank rather than as false-and-therefore-broken.
 
+## Holding the document
+
+Writing back fills in what was handled; it never stopped anybody posting the document anyway. A receipt
+could be posted while three of its put-aways were still on the floor, and what Business Central then
+believed had been received was whatever happened to be on the document at that moment.
+
+`Open Work On Posting` decides what happens. It ships as **Let the document be posted** — the behaviour
+the app has always had — and the other value holds the document until every job raised from it has been
+finished or cancelled.
+
+Three things about how it is built:
+
+- **It is a subscriber, and the first one this app has on a warehouse publisher.** Everything else this
+  app does inside standard Business Central is a button. Posting is different: there is no moment a user
+  could be asked to press something, and a guard that has to be remembered is not a guard.
+- **The subscriber body is one line.** `Whse.-Post Receipt` and `Whse.-Post Shipment` both publish
+  `OnBeforeRun` with the document line, and each subscriber hands the document straight to
+  `WHA Open Work Mgt.`, which resolves the policy from setup. Neither subscriber knows what any policy
+  does, which is what the polymorphic rule asks for.
+- **A cancelled job is an answer.** Only a job nobody has finished *or* cancelled holds the document;
+  somebody deciding the work is not needed releases it as surely as doing it.
+
+What it does not do: nothing warns while the work is still open, so the first anybody hears about it is
+the refusal at posting. And the whole thing is off unless the feature is enabled — a company not running
+directed work is never held up by a queue it does not use.
+
 ## Item tracking on a job
 
 `Lot No.` and `Serial No.` sit next to the item on the task. Until they existed, a directed pick of a
@@ -480,6 +507,8 @@ job would be a guess about which of them the warehouse will actually move.
   returns an operator's own work first. It does not sequence a pick and a put-away into one trip, and
   it does not know the physical layout of the warehouse. Travel-path sequencing needs a bin
   coordinate or zone-ordering model that does not exist yet.
+- ~~**Nothing holds a document open while jobs against it are outstanding.**~~ **Closed, behind a
+  setting that ships off.** See *Holding the document* below.
 - ~~**The link runs one way only.**~~ **Closed, behind a switch** — see *Writing back* above. What
   remains true: **nothing stops the document being posted while jobs against it are still open.**
   Writing back fills in what was handled; it does not hold the document, and a warehouse that wants

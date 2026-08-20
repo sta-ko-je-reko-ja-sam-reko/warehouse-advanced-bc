@@ -593,7 +593,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 355 automated tests exist across sixteen test codeunits and **not one
+1. **Run the test suite once.** 356 automated tests exist across sixteen test codeunits and **not one
    has ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

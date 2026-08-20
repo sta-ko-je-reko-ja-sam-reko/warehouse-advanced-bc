@@ -265,6 +265,19 @@ a question the document can answer.** Guessing it here would put a wrong bin in 
 which is worse than putting none. Bin choice is what `FEAT-SLOT-001` exists to have an opinion about,
 and this is the seam it will eventually plug into.
 
+### Where the app may raise work at all
+
+Business Central raises put-aways and picks of its own at a location with `Require Put-away` or
+`Require Pick` — posting a receipt there calls `Create Put-away`, and a shipment cannot be posted for
+more than has been picked. Raising warehouse tasks from the same document would put two queues over
+the same goods with neither able to see the other, so both document sources **refuse** such a location
+with an error that names it.
+
+The consequence worth knowing is the one this does not fix: turning on `Directed Put-away and Pick`
+forces all four *Require* flags on, and Business Central will not let them back off. **Directed work
+cannot be used at a directed location.** Counting, quality hold and their posting still can. See
+[../location-configuration.md](../location-configuration.md).
+
 ### A button, not a subscriber
 
 Work is raised by a person pressing **Create warehouse tasks** on the warehouse receipt or shipment.
@@ -474,6 +487,8 @@ job would be a guess about which of them the warehouse will actually move.
 - **Only two kinds of document.** Internal put-aways, movement worksheet lines, production and
   assembly are not sources. Each is an `enumextension` value and one codeunit, and none of them should
   be written until the capability register says the customer uses them.
+- **The guard only covers the document sources.** Work typed in by hand names its own location and is
+  not checked, and a location whose flags change after work was raised leaves that work standing.
 - **Nothing acts on a stale job.** `SourceIsOpen` can tell that the line behind a task has been dealt
   with elsewhere, and nothing cancels, warns or filters on that answer.
 - **Bins are half-filled by design.** A generated put-away knows where to start and not where to

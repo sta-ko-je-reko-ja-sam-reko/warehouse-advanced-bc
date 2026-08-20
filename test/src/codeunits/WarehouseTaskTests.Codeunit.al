@@ -1251,6 +1251,33 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Setup.Modify(true);
     end;
 
+    [Test]
+    procedure WorkIsRefusedWhereBusinessCentralRaisesItsOwn()
+    var
+        Location: Record Location;
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] A location that requires Business Central's own put-away already raises a document
+        // for these lines. Raising ours as well would send an operator to the same bin twice, so it is
+        // refused rather than quietly doubled. See app/docs/location-configuration.md.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-BC', 'PO-1099');
+        AddReceiptLine('WHA-WR-BC', 10000, 6);
+
+        Location.Get(TestLocationTok);
+        Location."Require Put-away" := true;
+        Location.Modify(false);
+
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-BC');
+
+        Location."Require Put-away" := false;
+        Location.Modify(false);
+
+        Assert.ExpectedError('raises warehouse activities of its own');
+    end;
+
     local procedure CreateReceipt(ReceiptNo: Code[20]; OrderNo: Code[20])
     var
         WarehouseReceiptHeader: Record "Warehouse Receipt Header";

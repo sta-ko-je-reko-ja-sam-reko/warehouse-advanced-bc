@@ -125,6 +125,30 @@ codeunit 50802 "WHA Whse. Reg. Mgt."
     end;
 
     /// <summary>
+    /// Answers whether Business Central raises warehouse activities of its own at a location — its own
+    /// put-away and pick documents, with their own lines and their own registering.
+    /// </summary>
+    /// <remarks>
+    /// Where it does, this app must not also raise work for the same goods: neither queue can see the
+    /// other, and an operator would be sent to the same bin twice. A location with directed put-away and
+    /// pick always answers true, because Business Central turns all four *Require* flags on with it and
+    /// will not let them be turned back off.
+    /// </remarks>
+    /// <param name="LocationCode">The location to ask about. Blank counts as raising nothing.</param>
+    /// <returns>True when the location requires Business Central's own put-away or pick.</returns>
+    procedure LocationRaisesOwnActivities(LocationCode: Code[10]): Boolean
+    var
+        Location: Record Location;
+    begin
+        if LocationCode = '' then
+            exit(false);
+        Location.SetLoadFields("Require Put-away", "Require Pick");
+        if not Location.Get(LocationCode) then
+            exit(false);
+        exit(Location."Require Put-away" or Location."Require Pick");
+    end;
+
+    /// <summary>
     /// Refuses a request line that is not a move. Every implementation that records anything calls this
     /// first, so a caller that builds a half-filled line hears about it here rather than three layers
     /// down inside Business Central.

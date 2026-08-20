@@ -59,6 +59,12 @@ table 50200 "WHA Warehouse Task Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies what finishing a job tells Business Central about the goods that moved. Leave it as it is and the app keeps the move to itself, which is what this app has always done; register the movement and Business Central''s own bin content and warehouse entries follow the floor.';
         }
+        field(55; "Open Work On Posting"; Enum "WHA Open Work Policy")
+        {
+            Caption = 'Open work on posting';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies what happens when a warehouse receipt or shipment is posted while jobs raised from it are still open. Leave it as it is and the document posts regardless, which is what this app has always done; hold the document and posting stops until the floor has finished or somebody has cancelled the work.';
+        }
         field(90; "Warehouse Task Nos."; Code[20])
         {
             Caption = 'Warehouse task nos.';

@@ -1278,6 +1278,100 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Assert.ExpectedError('raises warehouse activities of its own');
     end;
 
+    [Test]
+    procedure APostingIsHeldWhileWorkIsStillOpen()
+    var
+        BlockOpenWork: Codeunit "WHA Block Open Work";
+        SourceType: Enum "WHA Task Source";
+        TaskStatus: Enum "WHA Warehouse Task Status";
+    begin
+        // [SCENARIO] Posting the document decides what Business Central believes was received. While a
+        // job against it is still on the floor, that is not what the warehouse has done.
+        CreateSourcedTask('WHA-OPEN-1', 'WHA-DOC-1', TaskStatus::WHAReleased);
+
+        asserterror BlockOpenWork.Check(SourceType::WHAWhseReceipt, 'WHA-DOC-1');
+
+        Assert.ExpectedError('nobody has finished or cancelled');
+    end;
+
+    [Test]
+    procedure AFinishedDocumentIsLetThrough()
+    var
+        BlockOpenWork: Codeunit "WHA Block Open Work";
+        SourceType: Enum "WHA Task Source";
+        TaskStatus: Enum "WHA Warehouse Task Status";
+    begin
+        // [SCENARIO] Work that is done, and work somebody decided was not needed, are both answers. Only
+        // an unanswered job holds the document.
+        CreateSourcedTask('WHA-OPEN-2', 'WHA-DOC-2', TaskStatus::WHACompleted);
+        CreateSourcedTask('WHA-OPEN-3', 'WHA-DOC-2', TaskStatus::WHACancelled);
+
+        BlockOpenWork.Check(SourceType::WHAWhseReceipt, 'WHA-DOC-2');
+    end;
+
+    [Test]
+    procedure ADocumentWithNoWorkAtAllIsLetThrough()
+    var
+        BlockOpenWork: Codeunit "WHA Block Open Work";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] A document this app was never asked about is none of its business.
+        BlockOpenWork.Check(SourceType::WHAWhseReceipt, 'WHA-DOC-NONE');
+        BlockOpenWork.Check(SourceType::WHAWhseReceipt, '');
+    end;
+
+    [Test]
+    procedure OpenWorkOnAnotherDocumentHoldsNothing()
+    var
+        BlockOpenWork: Codeunit "WHA Block Open Work";
+        SourceType: Enum "WHA Task Source";
+        TaskStatus: Enum "WHA Warehouse Task Status";
+    begin
+        // [SCENARIO] The hold is per document, not per warehouse.
+        CreateSourcedTask('WHA-OPEN-4', 'WHA-DOC-4', TaskStatus::WHAReleased);
+
+        BlockOpenWork.Check(SourceType::WHAWhseReceipt, 'WHA-DOC-5');
+    end;
+
+    [Test]
+    procedure LettingTheDocumentThroughHoldsNothingEver()
+    var
+        AllowOpenWork: Codeunit "WHA Allow Open Work";
+        SourceType: Enum "WHA Task Source";
+        TaskStatus: Enum "WHA Warehouse Task Status";
+    begin
+        // [SCENARIO] The value a fresh install and every upgrade lands on: the document posts, and this
+        // app says nothing about it.
+        CreateSourcedTask('WHA-OPEN-5', 'WHA-DOC-6', TaskStatus::WHAReleased);
+
+        AllowOpenWork.Check(SourceType::WHAWhseReceipt, 'WHA-DOC-6');
+    end;
+
+    [Test]
+    procedure EveryOpenWorkPolicyExplainsItself()
+    var
+        AllowOpenWork: Codeunit "WHA Allow Open Work";
+        BlockOpenWork: Codeunit "WHA Block Open Work";
+    begin
+        // [SCENARIO] Setup shows what the choice does before a document is held or let through.
+        Assert.AreNotEqual('', AllowOpenWork.Describe(), 'Letting the document through should still say so.');
+        Assert.AreNotEqual('', BlockOpenWork.Describe(), 'Holding the document should say what it does.');
+    end;
+
+    local procedure CreateSourcedTask(TaskNo: Code[20]; SourceNo: Code[20]; NewStatus: Enum "WHA Warehouse Task Status")
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        SourceType: Enum "WHA Task Source";
+    begin
+        WarehouseTask.Init();
+        WarehouseTask."No." := TaskNo;
+        WarehouseTask."Source Type" := SourceType::WHAWhseReceipt;
+        WarehouseTask."Source No." := SourceNo;
+        WarehouseTask."Source Line No." := 10000;
+        WarehouseTask.Status := NewStatus;
+        WarehouseTask.Insert(false);
+    end;
+
     local procedure CreateReceipt(ReceiptNo: Code[20]; OrderNo: Code[20])
     var
         WarehouseReceiptHeader: Record "Warehouse Receipt Header";

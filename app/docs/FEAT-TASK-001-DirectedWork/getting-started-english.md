@@ -258,9 +258,22 @@ work from a receipt or shipment at such a location stops with a message naming t
 turns all four settings on with it and will not let them off. Counting, quality hold and their posting
 still work at such a location.
 
+## Hold a document until its work is finished
+
+Off unless you turn it on.
+
+1. Choose the search icon, enter **Warehouse task setup**, and choose the related link.
+2. Set **Open work on posting** to **Hold the document until the work is finished**.
+
+From then on, posting a warehouse receipt or shipment stops if jobs raised from it are still open, and
+the message says how many. Finish them, or cancel the ones nobody needs, and the document posts.
+
+Leave it as it is and nothing changes: the document posts whenever somebody posts it, whatever the floor
+is still doing.
+
 ## What is not here yet
 
-**Nothing holds a document open while its work is unfinished.** If you switch on **Write back to the document**, finishing a job fills in what was handled — but a receipt or shipment can still be posted while jobs against it are outstanding, and nothing warns whoever posts it.
+Nothing **warns** you while work is still open. If you have turned on **Open work on posting**, the first anybody hears about it is the refusal when they try to post.
 
 Only warehouse receipts and warehouse shipments raise work. Internal put-aways, movement worksheets,
 production and assembly do not.

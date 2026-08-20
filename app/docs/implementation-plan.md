@@ -57,6 +57,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | **Warehouse registration** — the answer to the question the app had never asked: where does Business Central think the goods are? Until now, finishing a job moved the handling unit in the app's own records and left `Bin Content` and `Warehouse Entry` saying the goods were still in the bin they had left. A finished job is now registered as a warehouse movement through `Whse. Jnl.-Register Line`, the same codeunit the base application registers its own put-aways and picks with. Built once, in a module that is deliberately **not a feature** — see [warehouse-registration.md](warehouse-registration.md). Ships **off**, because turning it on decides who owns bin-level stock. **No warehouse entry has ever been written by it** |
 | Delivered | **Posting at a directed put-away and pick location.** The gap the module above opened and named: an item journal line carries no bin at such a location, so posting alone moved the ledger and left the bins standing. Posting is now written as the two halves it is — a warehouse adjustment through `Whse. Jnl.-Register Line`, then an item journal line with no bin and the `Warehouse Adjustment` marker, exactly the shape *Calculate Whse. Adjustment* produces. **Nothing is written to the adjustment bin**, because both halves are done here and a residual there would be posted a second time by whoever ran that report next. **Never run against a real WMS location** |
 | Delivered | **Which Business Central locations this app is correct on** — [location-configuration.md](location-configuration.md), and a guard that enforces the part that can be enforced. Business Central raises its own put-aways and picks at a location with `Require Put-away` or `Require Pick`, so raising warehouse tasks from the same document sends an operator to the same bin twice; that is now refused with an error naming the location. The finding underneath it is larger than the guard: turning on `Directed Put-away and Pick` **forces all four Require flags on** and will not let them off, so **directed work cannot be used at a directed location at all**. Counting, quality hold and their posting still can |
+| Delivered | **Tracking, checked before it is handed over — and a claim this project had been repeating retracted.** Three documents said a tracked item would be refused by the posting check. Reading `Item Jnl.-Post Line` shows it checks the journal **line's own** lot and serial fields, which the app sets, and that both callers already raise one request line per lot. The real gap was the opposite one: nothing read the item's tracking code, so a line **missing** the tracking its item requires was handed over to fail deep inside Business Central. It is now refused where the sheet is closed, using Business Central's own `GetItemTrackingSetup` so the two answers cannot drift |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of nine features — most of it blocked on customer facts, though **not as much as was claimed a moment ago**: see §5 |
@@ -447,6 +448,18 @@ warehouse documents, what links a vehicle visit to a put-away). Continuing to bu
 mean guessing at one of those, and every feature built that way adds unvalidated behaviour without
 reducing the risk that Phase 0 invalidates it.
 
+### A second pattern: a limitation nobody checked becomes folklore
+
+*Not done* lists going stale is the known failure. Tracking was a different one and a worse one: a
+limitation was **asserted once**, copied into two feature documents, carried through four segments, and
+was never true. Nothing had read `Item Jnl.-Post Line`. It shaped the plan — item tracking was ranked as
+the highest-value remaining work in an audit — and the ranking was wrong.
+
+The cheap defence is the one that caught it: when a claim is about what *Business Central* does, read
+Business Central. The source is in the `.app` in `.alpackages` and takes a minute to extract. A claim
+about the base application with no file and line behind it should be treated as a guess, whoever wrote
+it and however long it has been sitting there.
+
 ### A pattern worth naming: *Not done* lists go stale
 
 Three times now a *Not done* item has described a limitation that had already been fixed —
@@ -580,7 +593,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 355 automated tests exist across sixteen test codeunits and **not one
+1. **Run the test suite once.** 356 automated tests exist across sixteen test codeunits and **not one
    has ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

@@ -669,6 +669,118 @@ codeunit 51008 "WHA Counting Tests"
         CountSheetLogic.Start(CountSheet);
     end;
 
+    [Test]
+    procedure ATrackedItemCountedWithoutALotIsRefused()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+    begin
+        // [SCENARIO] Business Central will not take an adjustment for a lot-tracked item without a lot.
+        // The app knows that before it hands anything over, and says so in its own words rather than
+        // letting the sheet fail to close with an error about a journal line nobody can see.
+        ConfigureCounting(0, 0);
+        ConfigurePosting();
+        Recorder.Forget();
+        TrackItemByLot();
+        CreateCountingSheet(CountSheet, 'CNT-TRK-1', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 7);
+        CountLineLogic.Approve(CountSheetLine);
+        CountSheetLogic.Complete(CountSheet);
+
+        asserterror CountSheetLogic.Close(CountSheet);
+
+        UntrackItem();
+
+        Assert.ExpectedError('tracked by lot');
+    end;
+
+    [Test]
+    procedure ATrackedItemCountedWithALotIsPostedAsBefore()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        TempPostingRequest: Record "WHA Posting Request" temporary;
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+        Recorder: Codeunit "WHA Test Posting Recorder";
+    begin
+        // [SCENARIO] The check refuses what is missing and nothing else. A line that names its lot goes
+        // over exactly as it always did.
+        ConfigureCounting(0, 0);
+        ConfigurePosting();
+        Recorder.Forget();
+        TrackItemByLot();
+        CreateSheet(CountSheet, 'CNT-TRK-2', SelectionBinContent(), false);
+        AddLineWithLot(CountSheet, 'LOT-TRK', 10);
+        CountSheetLogic.Start(CountSheet);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 7);
+        CountLineLogic.Approve(CountSheetLine);
+        CountSheetLogic.Complete(CountSheet);
+
+        CountSheetLogic.Close(CountSheet);
+        UntrackItem();
+
+        Assert.AreEqual(1, Recorder.Recorded(TempPostingRequest), 'A line that names its lot should be handed over.');
+        TempPostingRequest.FindFirst();
+        Assert.AreEqual('LOT-TRK', TempPostingRequest."Lot No.", 'The lot should travel with the adjustment.');
+    end;
+
+    local procedure SelectionBinContent(): Enum "WHA Count Selection"
+    var
+        Selection: Enum "WHA Count Selection";
+    begin
+        exit(Selection::WHABinContent);
+    end;
+
+    local procedure AddLineWithLot(var CountSheet: Record "WHA Count Sheet"; LotNo: Code[50]; ExpectedQuantity: Decimal)
+    var
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        CountSheetLogic.AddLine(CountSheet, CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '', '', ExpectedQuantity);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountSheetLine."Lot No." := LotNo;
+        CountSheetLine.Modify(false);
+    end;
+
+    local procedure TrackItemByLot()
+    var
+        Item: Record Item;
+        ItemTrackingCode: Record "Item Tracking Code";
+    begin
+        EnsureItem();
+
+        if not ItemTrackingCode.Get('WHA-LOT') then begin
+            ItemTrackingCode.Init();
+            ItemTrackingCode.Code := 'WHA-LOT';
+            ItemTrackingCode."Lot Specific Tracking" := true;
+            ItemTrackingCode."Lot Sales Outbound Tracking" := true;
+            ItemTrackingCode."Lot Purchase Inbound Tracking" := true;
+            ItemTrackingCode."Lot Pos. Adjmt. Inb. Tracking" := true;
+            ItemTrackingCode."Lot Neg. Adjmt. Outb. Tracking" := true;
+            ItemTrackingCode.Insert(false);
+        end;
+
+        Item.Get(CopyStr(ItemTok, 1, 20));
+        Item."Item Tracking Code" := ItemTrackingCode.Code;
+        Item.Modify(false);
+    end;
+
+    local procedure UntrackItem()
+    var
+        Item: Record Item;
+    begin
+        if not Item.Get(CopyStr(ItemTok, 1, 20)) then
+            exit;
+        Item."Item Tracking Code" := '';
+        Item.Modify(false);
+    end;
+
     local procedure GetOnlyLine(var CountSheetLine: Record "WHA Count Sheet Line"; SheetNo: Code[20])
     begin
         CountSheetLine.Reset();

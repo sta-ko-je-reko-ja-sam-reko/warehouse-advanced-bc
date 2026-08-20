@@ -1,7 +1,9 @@
 namespace WarehouseAdvanced.Posting;
 
+using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Journal;
 using Microsoft.Inventory.Ledger;
+using Microsoft.Inventory.Tracking;
 using WarehouseAdvanced.Registration;
 
 codeunit 50753 "WHA Posting Mgt."
@@ -13,6 +15,9 @@ codeunit 50753 "WHA Posting Mgt."
         QuantityMissingErr: Label 'The posting request for item %1 has no quantity on it, so there is nothing to post.', Comment = '%1 = the item number';
         PostingDateMissingErr: Label 'The posting request for item %1 has no posting date on it.', Comment = '%1 = the item number';
         DocumentNoMissingErr: Label 'The posting request for item %1 has no document number on it, so the ledger entry could not be traced back to what caused it.', Comment = '%1 = the item number';
+        LotMissingErr: Label 'Item %1 is tracked by lot, so it cannot be posted without one. Whatever raised this line has to say which lot it counted or scrapped.', Comment = '%1 = the item number';
+        SerialMissingErr: Label 'Item %1 is tracked by serial number, so it cannot be posted without one. Whatever raised this line has to say which unit it counted or scrapped.', Comment = '%1 = the item number';
+        SerialQuantityErr: Label 'Serial number %1 of item %2 names one unit, so %3 of it cannot be posted.', Comment = '%1 = the serial number; %2 = the item number; %3 = the quantity on the request line';
 
     /// <summary>
     /// Hands the request to the chosen way of posting. This is the single place a feature calls, so a
@@ -26,7 +31,63 @@ codeunit 50753 "WHA Posting Mgt."
         InvtPosting: Interface "WHA IInvtPosting";
     begin
         InvtPosting := Method;
+        if InvtPosting.WritesToLedger() then
+            CheckTracking(PostingRequest);
         exit(InvtPosting.Post(PostingRequest));
+    end;
+
+    /// <summary>
+    /// Refuses a request Business Central is going to refuse, before it is handed over. The app knows
+    /// which item it is posting and can read that item's tracking code; leaving the answer to
+    /// `Item Jnl.-Post Line` means a count sheet fails to close with an error about a journal line
+    /// nobody can see.
+    /// </summary>
+    /// <remarks>
+    /// The requirement is worked out with Business Central's own `GetItemTrackingSetup`, given the entry
+    /// type and direction this line will be posted under, so the answer here and the answer at posting
+    /// are the same answer rather than two guesses that agree most of the time.
+    ///
+    /// This runs only where the chosen method **writes to the ledger**. A warehouse that has chosen to
+    /// record a count and correct it by hand has not asked the app to have an opinion about lot numbers.
+    /// </remarks>
+    /// <param name="PostingRequest">The lines about to be posted. Read, not modified.</param>
+    internal procedure CheckTracking(var PostingRequest: Record "WHA Posting Request")
+    begin
+        PostingRequest.Reset();
+        if not PostingRequest.FindSet() then
+            exit;
+
+        repeat
+            CheckTrackingLine(PostingRequest);
+        until PostingRequest.Next() = 0;
+    end;
+
+    local procedure CheckTrackingLine(var PostingRequest: Record "WHA Posting Request")
+    var
+        Item: Record Item;
+        ItemTrackingCode: Record "Item Tracking Code";
+        ItemTrackingSetup: Record "Item Tracking Setup";
+        ItemTrackingMgt: Codeunit "Item Tracking Management";
+    begin
+        if (PostingRequest."Serial No." <> '') and (PostingRequest.Quantity <> 1) then
+            Error(SerialQuantityErr, PostingRequest."Serial No.", PostingRequest."Item No.", PostingRequest.Quantity);
+
+        Item.SetLoadFields("Item Tracking Code");
+        if not Item.Get(PostingRequest."Item No.") then
+            exit;
+        if Item."Item Tracking Code" = '' then
+            exit;
+        if not ItemTrackingCode.Get(Item."Item Tracking Code") then
+            exit;
+
+        ItemTrackingMgt.GetItemTrackingSetup(
+            ItemTrackingCode, EntryTypeOf(PostingRequest."Posting Type"),
+            PostingRequest."Posting Type" = PostingRequest."Posting Type"::WHAPositiveAdjustment, ItemTrackingSetup);
+
+        if ItemTrackingSetup."Serial No. Required" and (PostingRequest."Serial No." = '') then
+            Error(SerialMissingErr, PostingRequest."Item No.");
+        if ItemTrackingSetup."Lot No. Required" and (PostingRequest."Lot No." = '') then
+            Error(LotMissingErr, PostingRequest."Item No.");
     end;
 
     /// <summary>

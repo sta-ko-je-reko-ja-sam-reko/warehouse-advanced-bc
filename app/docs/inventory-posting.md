@@ -115,6 +115,26 @@ knowing:
   item tracking switched on. Assigning it directly leaves it in place, and
   `ItemLedgEntry.CopyTrackingFromItemJnlLine` carries it onto the ledger entry.
 
+## Tracking, checked before it is handed over
+
+The app knows which item it is posting and can read that item's tracking code, so it refuses a line
+Business Central is going to refuse — in its own words, at the moment the sheet is closed or the hold
+released, rather than as an error about a journal line nobody can see.
+
+Three things are checked, and only when the chosen method **writes to the ledger**. A warehouse that has
+decided to record a count and correct it by hand has not asked the app to have an opinion about lot
+numbers.
+
+| Refused | Because |
+|---|---|
+| A lot-tracked item with no lot | `Item Jnl.-Post Line` requires one and will not post without it |
+| A serial-tracked item with no serial number | The same |
+| A serial number with a quantity other than one | A serial number names one unit. Business Central enforces this when the field is *validated*; this module assigns it, so nothing would have caught it |
+
+The requirement is worked out with Business Central's own `Item Tracking Management.GetItemTrackingSetup`,
+given the entry type and direction the line will be posted under — so the answer here and the answer at
+posting are the same answer rather than two guesses that agree most of the time.
+
 ## Directed locations — where posting is two halves
 
 At a location with **directed put-away and pick**, an item journal line carries **no bin code at all**.
@@ -178,9 +198,17 @@ accepts the line.
 - ~~**Directed put-away and pick locations are untested and probably do not work.**~~ **Handled — see
   *Directed locations* above.** What remains true is the second half of that sentence: it has never
   been run against one.
-- **Item tracking is carried, not created.** A lot number reaches the ledger entry, but no reservation
-  entry or tracking specification is built. An item whose tracking code demands specific handling will
-  be refused by the posting check, and the count sheet will not close.
+- **Item tracking is carried, not created, and that turns out to be enough.** ~~An item whose tracking
+  code demands specific handling will be refused by the posting check.~~ **That was wrong**, and it was
+  repeated in two feature documents before anybody read the base application: `Item Jnl.-Post Line`
+  checks the **line's own** `Lot No.` and `Serial No.` fields, which this module sets, and the warehouse
+  journal check falls back to the line's quantity against lot-filtered bin content when there is no
+  warehouse tracking line. Both callers already raise **one request line per lot or serial** — a count
+  sheet line, a handling unit line — which is exactly the shape that needs no reservation entry to
+  split it.
+
+  What is genuinely absent: nothing builds a reservation entry or tracking specification, so a **single**
+  request line covering more than one lot cannot be posted. Nothing raises one today.
 - **The directed path has never been run.** Every branch of it was written from the base application's
   own source — `Calculate Whse. Adjustment` for the journal line's shape, `WMS Management` for what the
   warehouse journal check requires — and none of it has touched a real WMS location. That needs zones,

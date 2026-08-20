@@ -298,6 +298,11 @@ project develops against.
   [../inventory-posting.md](../inventory-posting.md) for what that leaves untested. Directed put-away
   and pick locations are now **handled** — the bins are adjusted separately from the ledger, as such a
   location requires — but handled is not the same as proven, and none of it has run against one.
+- ~~**A tracked item will be refused by the posting check.**~~ **That claim was wrong**, and had been
+  repeated here since segment 2 without anybody reading the base application. Business Central checks
+  the journal line''s own lot and serial fields, which this app sets, and this feature already raises one
+  request line per lot. What is new is that the app now refuses a line **missing** the tracking its item
+  requires, before handing anything over — see [../inventory-posting.md](../inventory-posting.md).
 - **A released hold cannot be un-released.** A write-off made in error is corrected in Business
   Central, not by reopening the hold — the hold record is an audit trail and does not go backwards.
 - **Rework writes nothing off, and should not**, but nothing accounts for what rework consumes or

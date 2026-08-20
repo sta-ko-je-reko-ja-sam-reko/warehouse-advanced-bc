@@ -41,6 +41,7 @@ These are not feature documentation and follow no `{MARK}` convention:
 - [modules.md](modules.md) — candidate module map and object ID allocation
 - [gap-analysis.md](gap-analysis.md) — method for turning candidate scope into real scope
 - [inventory-posting.md](inventory-posting.md) — the shared posting engine two features use, and why it is not a feature
+- [warehouse-registration.md](warehouse-registration.md) — how a finished job reaches Business Central's own bins, and why it is not a feature
 
 ## Customer-facing legal text
 

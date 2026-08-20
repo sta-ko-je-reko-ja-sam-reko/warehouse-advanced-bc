@@ -213,12 +213,44 @@ Two things to know:
 Leave it off and nothing changes: the document stays exactly as it was, and somebody fills in the
 quantities the way they do today.
 
+## Let finished work move the stock in Business Central
+
+Off unless you turn it on, and the biggest of the three switches on this page.
+
+1. Choose the search icon, enter **Warehouse task setup**, and choose the related link.
+2. Set **Warehouse registration method** to **Register a warehouse movement**.
+
+The line underneath the field tells you what the choice you are looking at does. Read it before you
+change it.
+
+With it off, finishing a job moves the pallet in the warehouse app and nothing else. Business Central
+still believes the goods are in the bin they left, and somebody keeps the two in step by hand.
+
+With it on, finishing a job registers a warehouse movement in Business Central. **Bin content** and
+**warehouse entries** follow the floor, so a bin content enquiry, an availability check and a
+physical inventory all see what the operator actually did.
+
+Three things to know:
+
+- **It only applies where Business Central keeps bins.** At a location that is not bin mandatory
+  there is nothing to record, and finishing a job behaves exactly as it did before.
+- **A job needs two bins.** Work that takes from a bin and puts into another bin is a movement. A pick
+  that ends at a shipment, or a put-away of goods that have just arrived, is not — that stock is
+  accounted for when the document is posted.
+- **Business Central can refuse.** If the bin does not hold what the job says it moved, the movement
+  is rejected and the job does not finish. That is deliberate: it stops the two records drifting apart
+  silently.
+
 ## What is not here yet
 
 **Nothing holds a document open while its work is unfinished.** If you switch on **Write back to the document**, finishing a job fills in what was handled — but a receipt or shipment can still be posted while jobs against it are outstanding, and nothing warns whoever posts it.
 
 Only warehouse receipts and warehouse shipments raise work. Internal put-aways, movement worksheets,
 production and assembly do not.
+
+Registering a warehouse movement does not touch **item tracking beyond the lot or serial already on
+the pallet**, and it does nothing about expiry dates. It also does not move goods between locations —
+that is a transfer, and this app does not raise one.
 
 Nothing yet plans a route around the warehouse or combines a pick and a put-away into one trip. There
 is no handheld screen for the floor; that comes with the mobile device feature.

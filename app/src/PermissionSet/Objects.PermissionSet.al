@@ -12,6 +12,7 @@ using WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.Packing;
 using WarehouseAdvanced.Posting;
 using WarehouseAdvanced.QualityHold;
+using WarehouseAdvanced.Registration;
 using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.WaveManagement;
@@ -65,6 +66,7 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Task Feature Setup" = X,
         codeunit "WHA Task App Area Sub." = X,
         codeunit "WHA Task Source Mgt." = X,
+        codeunit "WHA Task Whse. Registration" = X,
         codeunit "WHA Task Activity Cues" = X,
         codeunit "WHA Src Manual" = X,
         codeunit "WHA Src Whse. Receipt" = X,
@@ -301,5 +303,9 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Posting Mgt." = X,
         codeunit "WHA No Invt. Posting" = X,
         codeunit "WHA Jnl. Line Posting" = X,
-        codeunit "WHA Direct Posting" = X;
+        codeunit "WHA Direct Posting" = X,
+        table "WHA Whse. Move Request" = X,
+        codeunit "WHA Whse. Reg. Mgt." = X,
+        codeunit "WHA No Whse. Registration" = X,
+        codeunit "WHA Whse. Jnl. Registration" = X;
 }

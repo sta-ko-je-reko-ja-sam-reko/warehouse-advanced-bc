@@ -149,7 +149,10 @@ accepts the line.
 
 - **Directed put-away and pick locations are untested and probably do not work.** Posting an item
   journal line at a location with directed put-away and pick requires a warehouse journal as well;
-  the check refuses the line otherwise. Nothing in this module raises one.
+  the check refuses the line otherwise. Nothing in this module raises one. Its sibling module now
+  does raise warehouse journal lines — see [warehouse-registration.md](warehouse-registration.md) —
+  but for *movements*, not for the adjustment through the adjustment bin that this gap needs. Closing
+  it is the obvious next piece of the same argument.
 - **Item tracking is carried, not created.** A lot number reaches the ledger entry, but no reservation
   entry or tracking specification is built. An item whose tracking code demands specific handling will
   be refused by the posting check, and the count sheet will not close.

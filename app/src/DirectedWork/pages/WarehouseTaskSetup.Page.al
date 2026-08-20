@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.DirectedWork;
 
 using WarehouseAdvanced.Core;
+using WarehouseAdvanced.Registration;
 
 page 50200 "WHA Warehouse Task Setup"
 {
@@ -50,6 +51,28 @@ page 50200 "WHA Warehouse Task Setup"
                     ApplicationArea = WHADirectedWork;
                 }
             }
+            group(WarehouseRegistration)
+            {
+                Caption = 'Warehouse registration';
+
+                field("Whse. Registration Method"; Rec."Whse. Registration Method")
+                {
+                    ApplicationArea = WHADirectedWork;
+
+                    trigger OnValidate()
+                    begin
+                        DescribeRegistrationMethod();
+                    end;
+                }
+                field(RegistrationMethodDescription; RegistrationMethodDescription)
+                {
+                    Caption = 'What that does';
+                    ToolTip = 'Specifies what finishing a job will tell Business Central about the goods that moved, in full, so the choice above is made with its consequence in view.';
+                    ApplicationArea = WHADirectedWork;
+                    Editable = false;
+                    MultiLine = true;
+                }
+            }
             group(Numbering)
             {
                 Caption = 'Numbering';
@@ -76,8 +99,21 @@ page 50200 "WHA Warehouse Task Setup"
         exit(true);
     end;
 
+    trigger OnAfterGetRecord()
+    begin
+        DescribeRegistrationMethod();
+    end;
+
     var
         OpeningEnabled: Boolean;
+        RegistrationMethodDescription: Text;
+
+    local procedure DescribeRegistrationMethod()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        RegistrationMethodDescription := WhseRegMgt.Describe(Rec."Whse. Registration Method");
+    end;
 
     local procedure ApplyEnabledChangeIfNeeded()
     var

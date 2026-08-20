@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.DirectedWork;
 
 using Microsoft.Foundation.NoSeries;
+using WarehouseAdvanced.Registration;
 
 table 50200 "WHA Warehouse Task Setup"
 {
@@ -51,6 +52,12 @@ table 50200 "WHA Warehouse Task Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies how many warehouse tasks one person may hold at a time. Zero means no limit.';
             MinValue = 0;
+        }
+        field(50; "Whse. Registration Method"; Enum "WHA Whse. Reg. Method")
+        {
+            Caption = 'Warehouse registration method';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies what finishing a job tells Business Central about the goods that moved. Leave it as it is and the app keeps the move to itself, which is what this app has always done; register the movement and Business Central''s own bin content and warehouse entries follow the floor.';
         }
         field(90; "Warehouse Task Nos."; Code[20])
         {

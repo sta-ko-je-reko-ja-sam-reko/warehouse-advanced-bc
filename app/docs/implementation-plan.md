@@ -54,6 +54,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | **A browser bench for the handheld** — `tools/rf-simulator/`. The operator review has been the highest-value work on `FEAT-RF-001` since it shipped and has never run, blocked on a company, sample data and a container credential rather than on anybody's time. One self-contained HTML file ports the step sequence, the wording and every refusal from `WHA RF Standard Flow`, so the *sequence-and-wording* half of the review can happen at a desk today. It settles nothing about a scanner in one hand and a pallet in the other, and says so in three places |
 | Delivered | `FEAT-INT-001` segment 3 — **the message set widened from four types to twelve**, from evidence by analogy: a production connector integrating BC with an external warehouse system, read for what a BC-side warehouse interface actually carries. The direction flips, because there BC is the host and here the app *is* the warehouse. Three of the four new inbound types read **no payload at all** — they name their subject in the external ID, so there is no schema in them to guess wrong. Master-data synchronisation, a fifth of that connector, is **not applicable here**: both ends are the same database |
 | Delivered | **The capability register, in draft.** [gap-analysis.md](gap-analysis.md) named a signed-off register as its output and left producing one to a discovery that has never run, so every scope conversation started from a blank page. ~147 rows across 16 operational areas, buckets deliberately empty. `This app today` was checked against `app/src/` rather than taken from §4 below — which is why several catalogue promises read as absent |
+| Delivered | **Warehouse registration** — the answer to the question the app had never asked: where does Business Central think the goods are? Until now, finishing a job moved the handling unit in the app's own records and left `Bin Content` and `Warehouse Entry` saying the goods were still in the bin they had left. A finished job is now registered as a warehouse movement through `Whse. Jnl.-Register Line`, the same codeunit the base application registers its own put-aways and picks with. Built once, in a module that is deliberately **not a feature** — see [warehouse-registration.md](warehouse-registration.md). Ships **off**, because turning it on decides who owns bin-level stock. **No warehouse entry has ever been written by it** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of nine features — most of it blocked on customer facts, though **not as much as was claimed a moment ago**: see §5 |
@@ -265,6 +266,39 @@ What was built is a shared module, `app/src/Posting/`, and the argument for how 
 
 **With posting delivered, the largest unbuilt piece is no longer a piece of code.** It is step 1 of §8:
 none of this has ever run.
+
+### What warehouse registration answered
+
+Posting settled what the app does to the *item* ledger. It left the larger question untouched, and
+reading `app/src/` for the capability register is what surfaced it: **the app moved goods around a
+warehouse and never told Business Central.** A finished job set a new `Bin Code` on the app's own
+handling unit; `Bin Content` and `Warehouse Entry` still said the goods were where they had been.
+Two records, describing the same shelf, diverging from the first move an operator made.
+
+That is not a gap in a feature — it is a decision about who owns bin-level stock, and it was taken:
+**Business Central owns it.** Where it keeps bins, what it believes is what is true, and the app's
+job is to keep it that way. The mechanism is [warehouse-registration.md](warehouse-registration.md).
+
+Three things about it are worth carrying forward:
+
+- **It is the base application's own codeunit, not an imitation of it.** `Whse. Jnl.-Register Line`
+  is what registers a standard put-away, pick and movement, and the journal line handed to it is
+  built field for field from what `Whse.-Activity-Register` builds. Anything that could tell the two
+  apart would be a report that eventually disagrees with itself.
+- **What it refuses is most of its value.** A move is registered only when both ends are known bins at
+  one location. A pick ending at a shipment, a put-away of goods that have just arrived, and a pallet
+  standing at another location all produce nothing — because that stock is accounted for by posting
+  the document or by a transfer, and inventing a one-sided movement here would double-count it.
+- **It ships off, and the ordering of the call is load-bearing.** Off, because turning it on is a
+  customer conversation about who owns the document — the same argument the write-back setting had.
+  The ordering, because the move is handed over before the app moves the pallet: the bin the goods
+  came from is readable then and is not afterwards, and a movement Business Central refuses stops the
+  completion rather than leaving the two records disagreeing.
+
+**What this does not close:** posting still refuses a directed put-away and pick location, because
+that path needs a warehouse adjustment through the adjustment bin rather than an item journal line.
+The two modules now sit next to each other and that gap is the obvious next piece of the same
+argument — but it is a second segment, not this one.
 
 Wave F closed the loop the app has been building towards since directed work: analytics measures
 **nothing but what the app itself recorded**, so every figure it produces is a statement about how
@@ -531,13 +565,18 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 296 automated tests exist across fourteen codeunits and **not one has
-   ever been executed** — they are compile-verified only. Until they have run green once, every claim
+1. **Run the test suite once.** 344 automated tests exist across sixteen test codeunits and **not one
+   has ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 
    This got sharper with segment 2. The app now contains code whose entire purpose is to change what
    Business Central believes is in stock, and it has never changed anything. A test run is no longer
    just overdue housekeeping.
+
+   **Warehouse registration sharpened it again.** There is now a second module whose whole purpose is
+   to write into Business Central's own tables — `Warehouse Entry` and `Bin Content` — through the
+   base application's own registering codeunit, and no warehouse entry has ever been written by it.
+   Both modules are unit-tested against a recorder and neither has been proven against a database.
 
    What is actually in the way, checked rather than assumed:
 

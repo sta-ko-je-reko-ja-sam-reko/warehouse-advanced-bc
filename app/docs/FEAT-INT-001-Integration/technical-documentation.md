@@ -334,7 +334,7 @@ elsewhere would have put it near the top.
 | Type | Direction | What it does |
 |---|---|---|
 | `WHAHandlingUnitReceived` | in | Creates a handling unit and its contents |
-| `WHAWarehouseTaskRequest` | in | Creates one warehouse task |
+| `WHAWarehouseTaskRequest` | in | Creates one warehouse task, and may name the lot or serial it is for |
 | `WHAWarehouseReceiptRelease` | in | Raises put-away work for a standard warehouse receipt |
 | `WHAWarehouseShipmentRelease` | in | Raises pick work for a standard warehouse shipment |
 | `WHAInventoryAdjustment` | in | Corrects stock through the shared posting engine |

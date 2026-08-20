@@ -417,6 +417,31 @@ Three properties are deliberate:
 from one that did not — a job finished while the setting was off, or a job with no document behind
 it, both read as blank rather than as false-and-therefore-broken.
 
+## Item tracking on a job
+
+`Lot No.` and `Serial No.` sit next to the item on the task. Until they existed, a directed pick of a
+tracked item could not say what it picked — which broke traceability, and would have broken posting
+the moment anything downstream tried to adjust from a job.
+
+Three ways they get filled in, and one that is deliberately missing:
+
+- **From the pallet, when the pallet leaves no doubt.** A job naming a handling unit that holds
+  exactly one line for the item takes that line's lot and serial. That is reading a fact, not
+  guessing. A pallet holding two lots of one item fills in nothing, which is the case where guessing
+  would be wrong and the case bin content has always been wrong about.
+- **From the partner system.** A task request may name `lotNumber` and `serialNumber`, so an upstream
+  system can ask for one lot out of a pallet it believes holds several. **What the request asked for
+  wins over what the pallet says** — whoever raised the work may know something the pallet does not.
+- **By hand**, on the job card.
+- **Not by the operator.** Nothing on the handheld asks them to scan a lot. Adding a step to the flow
+  is an operator-review question before it is a build item, and the review has still not happened.
+  Until it does, an item job with no pallet behind it is confirmed without proving what was picked —
+  the same gap the capability register records.
+
+The warehouse document sources fill in neither, and that is not laziness: tracking on a receipt or
+shipment line lives in reservation entries rather than on the line, and picking one out to put on a
+job would be a guess about which of them the warehouse will actually move.
+
 ## Not done
 
 - **Task interleaving by type and travel path.** `GetNextForUser` ranks by priority and due date, and

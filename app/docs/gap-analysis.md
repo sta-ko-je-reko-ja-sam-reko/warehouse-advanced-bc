@@ -114,7 +114,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 
 | Capability | Standard BC today | This app today | Bucket | Target |
 |---|---|---|---|---|
-| Lot or serial captured on directed work | Item tracking on activity lines | **None** — the warehouse task has no tracking fields | | |
+| Lot or serial captured on directed work | Item tracking on activity lines | Fields on the task, filled from an unmixed pallet or by the partner system. **The operator still cannot scan one**, so an item job with no pallet proves nothing | | |
 | Expiry date held on stock | Item tracking, expiration date | **Nothing in the app refers to expiry at all** | | |
 | Shelf-life rules | Strict expiry posting | None | | |
 | FEFO allocation | Pick according to FEFO | None | | |
@@ -356,8 +356,9 @@ Not the largest rows — the ones that **invalidate what is already built** rath
 
 1. **Shelf life and FEFO.** Nothing in the app refers to expiry. If this warehouse handles dated
    stock, allocation, picking, counting and quality all change shape rather than gain a field.
-2. **Lot and serial on directed work.** The task has no tracking fields, so a directed pick of a
-   tracked item cannot say what it picked. That breaks traceability *and* posting.
+2. ~~**Lot and serial on directed work.**~~ **Partly closed.** The fields exist and fill themselves
+   in where the answer is knowable. What remains is the half only the operator can supply: nothing on
+   the handheld asks them to scan a lot, and that is an operator-review question.
 3. **Multi-owner stock.** If inventory here belongs to more than one party, it is a data model
    decision reaching every table in the app, and it cannot be retrofitted cheaply.
 

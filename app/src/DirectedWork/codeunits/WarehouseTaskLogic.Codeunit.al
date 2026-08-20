@@ -40,6 +40,8 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         if WarehouseTask."No." = '' then
             WarehouseTask."No." := NextTaskNo();
 
+        DefaultTrackingFromUnit(WarehouseTask);
+
         Setup.SetLoadFields("Default Priority", "Auto Release Tasks");
         if not Setup.Get() then
             exit;
@@ -364,6 +366,27 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
 
         WarehouseTask."Written Back" := true;
         WarehouseTask.Modify(true);
+    end;
+
+    local procedure DefaultTrackingFromUnit(var WarehouseTask: Record "WHA Warehouse Task")
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        if WarehouseTask."Handling Unit No." = '' then
+            exit;
+        if (WarehouseTask."Lot No." <> '') or (WarehouseTask."Serial No." <> '') then
+            exit;
+
+        HandlingUnitLine.SetLoadFields("Item No.", "Lot No.", "Serial No.");
+        HandlingUnitLine.SetRange("Handling Unit No.", WarehouseTask."Handling Unit No.");
+        if WarehouseTask."Item No." <> '' then
+            HandlingUnitLine.SetRange("Item No.", WarehouseTask."Item No.");
+        if HandlingUnitLine.Count() <> 1 then
+            exit;
+
+        HandlingUnitLine.FindFirst();
+        WarehouseTask."Lot No." := HandlingUnitLine."Lot No.";
+        WarehouseTask."Serial No." := HandlingUnitLine."Serial No.";
     end;
 
     local procedure MoveHandlingUnit(var WarehouseTask: Record "WHA Warehouse Task")

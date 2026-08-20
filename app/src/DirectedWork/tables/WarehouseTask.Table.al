@@ -93,6 +93,18 @@ table 50201 "WHA Warehouse Task"
             ToolTip = 'Specifies the item variant the work moves.';
             TableRelation = "Item Variant".Code where("Item No." = field("Item No."));
         }
+        field(27; "Lot No."; Code[50])
+        {
+            Caption = 'Lot number';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies which lot the work is for. A job that names a lot is a job that must move that lot and no other; a job that names none takes whatever is there.';
+        }
+        field(28; "Serial No."; Code[50])
+        {
+            Caption = 'Serial number';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies which serial number the work is for. A serial number identifies one unit, so a job naming one asks for a quantity of one.';
+        }
         field(23; Quantity; Decimal)
         {
             Caption = 'Quantity';

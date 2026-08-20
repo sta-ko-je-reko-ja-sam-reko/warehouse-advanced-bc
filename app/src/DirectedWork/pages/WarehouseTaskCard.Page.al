@@ -53,6 +53,12 @@ page 50201 "WHA Warehouse Task Card"
                 field("Variant Code"; Rec."Variant Code")
                 {
                 }
+                field("Lot No."; Rec."Lot No.")
+                {
+                }
+                field("Serial No."; Rec."Serial No.")
+                {
+                }
                 field(Quantity; Rec.Quantity)
                 {
                 }

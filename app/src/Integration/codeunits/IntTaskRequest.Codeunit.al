@@ -66,6 +66,9 @@ codeunit 50655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
             Error(LocationMissingErr, EntryNo);
         WarehouseTask.Validate("Location Code", LocationCode);
 
+        WarehouseTask."Lot No." := CopyStr(MessageMgt.JsonText(PayloadObject, 'lotNumber'), 1, MaxStrLen(WarehouseTask."Lot No."));
+        WarehouseTask."Serial No." := CopyStr(MessageMgt.JsonText(PayloadObject, 'serialNumber'), 1, MaxStrLen(WarehouseTask."Serial No."));
+
         HandlingUnitNo := CopyStr(MessageMgt.JsonText(PayloadObject, 'handlingUnitNumber'), 1, MaxStrLen(WarehouseTask."Handling Unit No."));
         ItemNo := CopyStr(MessageMgt.JsonText(PayloadObject, 'itemNumber'), 1, MaxStrLen(WarehouseTask."Item No."));
         if (HandlingUnitNo = '') and (ItemNo = '') then

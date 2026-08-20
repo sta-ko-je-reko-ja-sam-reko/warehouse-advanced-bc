@@ -144,6 +144,8 @@ var WHARFTerminal = (function () {
                 row("From", job.fromBin) +
                 row("To", job.toBin) +
                 row("Unit", job.handlingUnit) +
+                (job.lot ? row("Lot", job.lot) : "") +
+                (job.serial ? row("Serial", job.serial) : "") +
             "</dl>";
 
         el.job.querySelector(".wha-rf-job-no").textContent = job.number || "";

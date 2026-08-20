@@ -5,6 +5,8 @@ report 50510 "WHA Count Sheet Print"
     Caption = 'Count sheet';
     ApplicationArea = WHACounting;
     UsageCategory = ReportsAndAnalysis;
+    DefaultLayout = RDLC;
+    RDLCLayout = './layout/Counting/CountSheetPrint.rdlc';
     AdditionalSearchTerms = 'count sheet, stocktake, physical inventory, blind count';
 
     dataset

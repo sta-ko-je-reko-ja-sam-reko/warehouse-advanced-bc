@@ -5,6 +5,8 @@ report 50057 "WHA Handling Unit Contents"
     Caption = 'Handling unit contents';
     ApplicationArea = WHAHandlingUnits;
     UsageCategory = ReportsAndAnalysis;
+    DefaultLayout = RDLC;
+    RDLCLayout = './layout/HandlingUnit/HandlingUnitContents.rdlc';
     AdditionalSearchTerms = 'pallet contents, packing list, pallet label';
 
     dataset

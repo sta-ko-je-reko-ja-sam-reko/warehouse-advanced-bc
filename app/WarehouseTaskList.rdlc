@@ -1,0 +1,358 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+    </DataSource>
+  </DataSources>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Height>2in</Height>
+        <Style />
+      </Body>
+      <Width>6.5in</Width>
+      <Page>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="ReportCaptionLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ReportCaptionLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ReportCaptionLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="PageCaptionLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>PageCaptionLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>PageCaptionLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="SignedForLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>SignedForLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>SignedForLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CompletedLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>CompletedLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>CompletedLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="No_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>No_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>No_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="TaskType_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>TaskType_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>TaskType_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Description_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Description_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Description_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Status_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Status_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Status_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Priority_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Priority_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Priority_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="DueDate_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>DueDate_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>DueDate_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LocationCode_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>LocationCode_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>LocationCode_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="FromBinCode_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>FromBinCode_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>FromBinCode_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ToBinCode_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ToBinCode_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ToBinCode_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="HandlingUnitNo_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>HandlingUnitNo_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>HandlingUnitNo_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ItemNo_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ItemNo_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ItemNo_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="VariantCode_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>VariantCode_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>VariantCode_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Quantity_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Quantity_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Quantity_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="UnitOfMeasureCode_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>UnitOfMeasureCode_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>UnitOfMeasureCode_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="QuantityHandled_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>QuantityHandled_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>QuantityHandled_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LotNo_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>LotNo_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>LotNo_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="SerialNo_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>SerialNo_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>SerialNo_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="AssignedToUserID_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>AssignedToUserID_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>AssignedToUserID_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="WaveNo_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>WaveNo_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>WaveNo_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="SourceNo_WarehouseTaskCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>SourceNo_WarehouseTaskCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>SourceNo_WarehouseTaskCaption</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Code>Public Function BlankZero(ByVal Value As Decimal)
+    if Value = 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankPos(ByVal Value As Decimal)
+    if Value &gt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankZeroAndPos(ByVal Value As Decimal)
+    if Value &gt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNeg(ByVal Value As Decimal)
+    if Value &lt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNegAndZero(ByVal Value As Decimal)
+    if Value &lt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+</Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>0eeb6585-38ae-40f1-885b-8d50088d51b4</rd:ReportID>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Fields>
+        <Field Name="No_WarehouseTask">
+          <DataField>No_WarehouseTask</DataField>
+        </Field>
+        <Field Name="TaskType_WarehouseTask">
+          <DataField>TaskType_WarehouseTask</DataField>
+        </Field>
+        <Field Name="Description_WarehouseTask">
+          <DataField>Description_WarehouseTask</DataField>
+        </Field>
+        <Field Name="Status_WarehouseTask">
+          <DataField>Status_WarehouseTask</DataField>
+        </Field>
+        <Field Name="Priority_WarehouseTask">
+          <DataField>Priority_WarehouseTask</DataField>
+        </Field>
+        <Field Name="DueDate_WarehouseTask">
+          <DataField>DueDate_WarehouseTask</DataField>
+        </Field>
+        <Field Name="LocationCode_WarehouseTask">
+          <DataField>LocationCode_WarehouseTask</DataField>
+        </Field>
+        <Field Name="FromBinCode_WarehouseTask">
+          <DataField>FromBinCode_WarehouseTask</DataField>
+        </Field>
+        <Field Name="ToBinCode_WarehouseTask">
+          <DataField>ToBinCode_WarehouseTask</DataField>
+        </Field>
+        <Field Name="HandlingUnitNo_WarehouseTask">
+          <DataField>HandlingUnitNo_WarehouseTask</DataField>
+        </Field>
+        <Field Name="ItemNo_WarehouseTask">
+          <DataField>ItemNo_WarehouseTask</DataField>
+        </Field>
+        <Field Name="VariantCode_WarehouseTask">
+          <DataField>VariantCode_WarehouseTask</DataField>
+        </Field>
+        <Field Name="Quantity_WarehouseTask">
+          <DataField>Quantity_WarehouseTask</DataField>
+        </Field>
+        <Field Name="Quantity_WarehouseTaskFormat">
+          <DataField>Quantity_WarehouseTaskFormat</DataField>
+        </Field>
+        <Field Name="UnitOfMeasureCode_WarehouseTask">
+          <DataField>UnitOfMeasureCode_WarehouseTask</DataField>
+        </Field>
+        <Field Name="QuantityHandled_WarehouseTask">
+          <DataField>QuantityHandled_WarehouseTask</DataField>
+        </Field>
+        <Field Name="QuantityHandled_WarehouseTaskFormat">
+          <DataField>QuantityHandled_WarehouseTaskFormat</DataField>
+        </Field>
+        <Field Name="LotNo_WarehouseTask">
+          <DataField>LotNo_WarehouseTask</DataField>
+        </Field>
+        <Field Name="SerialNo_WarehouseTask">
+          <DataField>SerialNo_WarehouseTask</DataField>
+        </Field>
+        <Field Name="AssignedToUserID_WarehouseTask">
+          <DataField>AssignedToUserID_WarehouseTask</DataField>
+        </Field>
+        <Field Name="WaveNo_WarehouseTask">
+          <DataField>WaveNo_WarehouseTask</DataField>
+        </Field>
+        <Field Name="SourceNo_WarehouseTask">
+          <DataField>SourceNo_WarehouseTask</DataField>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+    </DataSet>
+  </DataSets>
+</Report>

@@ -1,0 +1,370 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+    </DataSource>
+  </DataSources>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Height>2in</Height>
+        <Style />
+      </Body>
+      <Width>6.5in</Width>
+      <Page>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="ReportCaptionLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ReportCaptionLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ReportCaptionLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="PageCaptionLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>PageCaptionLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>PageCaptionLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ExpectedQuantityLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ExpectedQuantityLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ExpectedQuantityLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BlindCountLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>BlindCountLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>BlindCountLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CountedByLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>CountedByLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>CountedByLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CountedOnLbl">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>CountedOnLbl</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>CountedOnLbl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="No_CountSheetCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>No_CountSheetCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>No_CountSheetCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Description_CountSheetCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Description_CountSheetCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Description_CountSheetCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LocationCode_CountSheetCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>LocationCode_CountSheetCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>LocationCode_CountSheetCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Status_CountSheetCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Status_CountSheetCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Status_CountSheetCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Blind_CountSheetCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Blind_CountSheetCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Blind_CountSheetCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="DueDate_CountSheetCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>DueDate_CountSheetCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>DueDate_CountSheetCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="AssignedToUserID_CountSheetCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>AssignedToUserID_CountSheetCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>AssignedToUserID_CountSheetCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LineNo_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>LineNo_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>LineNo_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BinCode_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>BinCode_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>BinCode_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ItemNo_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ItemNo_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ItemNo_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Description_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Description_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Description_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="VariantCode_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>VariantCode_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>VariantCode_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="UnitOfMeasureCode_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>UnitOfMeasureCode_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>UnitOfMeasureCode_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LotNo_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>LotNo_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>LotNo_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="SerialNo_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>SerialNo_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>SerialNo_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="HandlingUnitNo_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>HandlingUnitNo_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>HandlingUnitNo_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CountedQuantity_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>CountedQuantity_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>CountedQuantity_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Counted_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Counted_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Counted_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Variance_CountSheetLineCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Variance_CountSheetLineCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Variance_CountSheetLineCaption</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Code>Public Function BlankZero(ByVal Value As Decimal)
+    if Value = 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankPos(ByVal Value As Decimal)
+    if Value &gt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankZeroAndPos(ByVal Value As Decimal)
+    if Value &gt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNeg(ByVal Value As Decimal)
+    if Value &lt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNegAndZero(ByVal Value As Decimal)
+    if Value &lt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+</Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>0eeb6585-38ae-40f1-885b-8d50088d51b4</rd:ReportID>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Fields>
+        <Field Name="No_CountSheet">
+          <DataField>No_CountSheet</DataField>
+        </Field>
+        <Field Name="Description_CountSheet">
+          <DataField>Description_CountSheet</DataField>
+        </Field>
+        <Field Name="LocationCode_CountSheet">
+          <DataField>LocationCode_CountSheet</DataField>
+        </Field>
+        <Field Name="Status_CountSheet">
+          <DataField>Status_CountSheet</DataField>
+        </Field>
+        <Field Name="Blind_CountSheet">
+          <DataField>Blind_CountSheet</DataField>
+        </Field>
+        <Field Name="DueDate_CountSheet">
+          <DataField>DueDate_CountSheet</DataField>
+        </Field>
+        <Field Name="AssignedToUserID_CountSheet">
+          <DataField>AssignedToUserID_CountSheet</DataField>
+        </Field>
+        <Field Name="LineNo_CountSheetLine">
+          <DataField>LineNo_CountSheetLine</DataField>
+        </Field>
+        <Field Name="BinCode_CountSheetLine">
+          <DataField>BinCode_CountSheetLine</DataField>
+        </Field>
+        <Field Name="ItemNo_CountSheetLine">
+          <DataField>ItemNo_CountSheetLine</DataField>
+        </Field>
+        <Field Name="Description_CountSheetLine">
+          <DataField>Description_CountSheetLine</DataField>
+        </Field>
+        <Field Name="VariantCode_CountSheetLine">
+          <DataField>VariantCode_CountSheetLine</DataField>
+        </Field>
+        <Field Name="UnitOfMeasureCode_CountSheetLine">
+          <DataField>UnitOfMeasureCode_CountSheetLine</DataField>
+        </Field>
+        <Field Name="LotNo_CountSheetLine">
+          <DataField>LotNo_CountSheetLine</DataField>
+        </Field>
+        <Field Name="SerialNo_CountSheetLine">
+          <DataField>SerialNo_CountSheetLine</DataField>
+        </Field>
+        <Field Name="HandlingUnitNo_CountSheetLine">
+          <DataField>HandlingUnitNo_CountSheetLine</DataField>
+        </Field>
+        <Field Name="ExpectedQuantity_CountSheetLine">
+          <DataField>ExpectedQuantity_CountSheetLine</DataField>
+        </Field>
+        <Field Name="ExpectedQuantity_CountSheetLineFormat">
+          <DataField>ExpectedQuantity_CountSheetLineFormat</DataField>
+        </Field>
+        <Field Name="CountedQuantity_CountSheetLine">
+          <DataField>CountedQuantity_CountSheetLine</DataField>
+        </Field>
+        <Field Name="CountedQuantity_CountSheetLineFormat">
+          <DataField>CountedQuantity_CountSheetLineFormat</DataField>
+        </Field>
+        <Field Name="Counted_CountSheetLine">
+          <DataField>Counted_CountSheetLine</DataField>
+        </Field>
+        <Field Name="Variance_CountSheetLine">
+          <DataField>Variance_CountSheetLine</DataField>
+        </Field>
+        <Field Name="Variance_CountSheetLineFormat">
+          <DataField>Variance_CountSheetLineFormat</DataField>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+    </DataSet>
+  </DataSets>
+</Report>

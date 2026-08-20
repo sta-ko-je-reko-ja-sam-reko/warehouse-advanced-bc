@@ -5,6 +5,8 @@ report 50218 "WHA Warehouse Task List"
     Caption = 'Warehouse task list';
     ApplicationArea = WHADirectedWork;
     UsageCategory = ReportsAndAnalysis;
+    DefaultLayout = RDLC;
+    RDLCLayout = './layout/DirectedWork/WarehouseTaskList.rdlc';
     AdditionalSearchTerms = 'pick list, put-away list, work list, job list';
 
     dataset

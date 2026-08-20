@@ -46,6 +46,23 @@ page 50200 "WHA Warehouse Task Setup"
                 {
                     ApplicationArea = WHADirectedWork;
                 }
+                field("Who May Be Given Work"; Rec."Who May Be Given Work")
+                {
+                    ApplicationArea = WHADirectedWork;
+
+                    trigger OnValidate()
+                    begin
+                        DescribeAccessPolicy();
+                    end;
+                }
+                field(AccessPolicyDescription; AccessPolicyDescription)
+                {
+                    Caption = 'What that does';
+                    ToolTip = 'Specifies who a warehouse task may be given to under the choice above, in full.';
+                    ApplicationArea = WHADirectedWork;
+                    Editable = false;
+                    MultiLine = true;
+                }
                 field("Write Back To Document"; Rec."Write Back To Document")
                 {
                     ApplicationArea = WHADirectedWork;
@@ -125,12 +142,21 @@ page 50200 "WHA Warehouse Task Setup"
     begin
         DescribeRegistrationMethod();
         DescribeOpenWorkPolicy();
+        DescribeAccessPolicy();
     end;
 
     var
         OpeningEnabled: Boolean;
         RegistrationMethodDescription: Text;
         OpenWorkPolicyDescription: Text;
+        AccessPolicyDescription: Text;
+
+    local procedure DescribeAccessPolicy()
+    var
+        WhseAccessMgt: Codeunit "WHA Whse. Access Mgt.";
+    begin
+        AccessPolicyDescription := WhseAccessMgt.Describe(Rec."Who May Be Given Work");
+    end;
 
     local procedure DescribeOpenWorkPolicy()
     var

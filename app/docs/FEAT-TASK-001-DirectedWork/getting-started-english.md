@@ -258,6 +258,22 @@ work from a receipt or shipment at such a location stops with a message naming t
 turns all four settings on with it and will not let them off. Counting, quality hold and their posting
 still work at such a location.
 
+## Let only warehouse employees be given work
+
+Off unless you turn it on.
+
+1. Choose the search icon, enter **Warehouse task setup**, and choose the related link.
+2. Set **Who may be given work** to **Only warehouse employees at that location**.
+
+Business Central keeps a list of who works in which warehouse, on the **Warehouse Employees** page. With
+this on, a job can only be given to somebody on that list for the location the job happens at — the same
+rule Business Central''s own warehouse pages follow. Anybody else is refused, with a message saying who
+and where.
+
+Leave it as it is and the list is not consulted: anybody who can reach the tasks can be given one.
+
+Turning it on does not revisit work somebody already holds. Only jobs assigned from then on are checked.
+
 ## Hold a document until its work is finished
 
 Off unless you turn it on.

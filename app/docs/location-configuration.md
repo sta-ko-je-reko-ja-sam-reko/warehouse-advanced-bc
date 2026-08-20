@@ -70,9 +70,11 @@ whether it should is a scope question the capability register has never been ask
 
 ## What is not checked
 
-- **Warehouse employees.** Business Central requires a `Warehouse Employee` record per user per
-  location before that user may work in its warehouse pages. This app checks nothing of the sort: an
-  operator can hold and finish warehouse tasks at a location Business Central would not let them into.
+- ~~**Warehouse employees.**~~ **Now checkable**, behind *Who may be given work* on the warehouse task
+  setup, which ships off. With it on, a job can only be assigned to somebody on Business Central's
+  `Warehouse Employee` list for that location. Left off, the list is not consulted and an operator can
+  hold work at a location Business Central would not let them into. Turning it on does not revisit work
+  already assigned.
 - **Anything at all about a location created after the fact.** The guard runs when work is raised from
   a document. Turning `Require Pick` on afterwards leaves the tasks already raised standing, and
   nothing revisits them.

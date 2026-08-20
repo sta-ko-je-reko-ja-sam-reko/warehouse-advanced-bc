@@ -346,7 +346,7 @@ turns around: what that system *sends to* the warehouse, this one *receives*, an
 |---|---|---|---|---|
 | Feature toggles and guided setup | Assisted setup | Delivered | | |
 | Permission sets | Native | Delivered, per object as it is created | | |
-| Rights per zone or per task type | Permission sets, warehouse employee | None | | |
+| Rights per zone or per task type | Permission sets, warehouse employee | Per **location**, behind a setting that ships off: a job can be restricted to somebody on Business Central's warehouse employee list for that location. Nothing per zone or per task type | | |
 | Supervisor override, with a reason | None | None | | |
 | Electronic signature on a disposition | None | None | | |
 | Change log on warehouse master data | Change log | Not configured by this app | | |

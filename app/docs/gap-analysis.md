@@ -139,7 +139,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Pick to cart, with a trolley position | None | None | | |
 | Pick face against bulk | Bin ranking plus replenishment | Replenishment rules per pick bin | | |
 | Work raised from a production order | Warehouse pick for production | None — the sources are receipt, shipment, manual | | |
-| Completion written back to the source document | Native | **None — the link runs one way** | | |
+| Completion written back to the source document | Native | Delivered, behind a setting that ships off. Nothing holds the document open while jobs against it are outstanding | | |
 | Supervisor cancel and re-queue | Delete the line | A status model, but no supervisor console | | |
 
 ### 5. Wave, replenishment, slotting

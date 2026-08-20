@@ -102,8 +102,10 @@ You cannot skip a step and you cannot write `status` directly:
   receipt or shipment is created by a person pressing a button on that document, and it already skips
   lines that are covered — typing a second one by hand defeats that and sends two operators to the
   same goods.
-- **Do not tell a user that finishing a job updates their receipt or shipment.** It does not. The
-  link runs one way: the document raises the work and never hears back.
+- **Do not tell a user whether finishing a job updates their receipt or shipment — check.** It does
+  only when `Write back to the document` is switched on in the warehouse task setup, and that setting
+  ships off. With it off the document never hears back, and saying otherwise sends somebody to post a
+  document that is not ready.
 - **Do not report a job short, and do not "correct" `quantityHandled`.** A short pick is a claim
   about what was on a shelf, made by someone who was standing in front of it. You were not. If a
   user says the recorded quantity is wrong, tell them who can change it and how — do not do it for

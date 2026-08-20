@@ -921,6 +921,142 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Assert.AreEqual(0, Results.Count(), 'A switched-off feature should not put a single count on the role centre.');
     end;
 
+    [Test]
+    procedure FinishingAPutAwayFillsInTheQuantityToReceive()
+    var
+        WarehouseReceiptLine: Record "Warehouse Receipt Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] The link used to run one way: work was raised from a document and finishing it told
+        // the document nothing. This is the other direction, and it is the point at which the app stops
+        // being an overlay and starts driving what Business Central will post.
+        ConfigureQueue(0);
+        ConfigureWriteBack(true);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WB-01', 'PO-9001');
+        AddReceiptLine('WHA-WB-01', 10000, 10);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WB-01');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseReceipt, 'WHA-WB-01', 10000);
+        WorkThrough(WarehouseTask);
+        TaskLogic.Complete(WarehouseTask);
+
+        WarehouseReceiptLine.Get('WHA-WB-01', 10000);
+        Assert.AreEqual(10, WarehouseReceiptLine."Qty. to Receive", 'What was put away should be what the receipt is ready to receive.');
+        Assert.IsTrue(WarehouseTask."Written Back", 'The job should record that it changed the document.');
+    end;
+
+    [Test]
+    procedure TwoJobsAgainstOneLineAddUpRatherThanReplace()
+    var
+        WarehouseReceiptLine: Record "Warehouse Receipt Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+        FollowUpTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+        ShortReason: Enum "WHA Whse. Short Reason";
+    begin
+        // [SCENARIO] A job finished short raises a follow-up, and both serve the same receipt line. If the
+        // second wrote what it moved rather than adding it, the first four would vanish from the document.
+        ConfigureQueue(0);
+        ConfigureWriteBack(true);
+        ConfigureFollowUp(true);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WB-02', 'PO-9002');
+        AddReceiptLine('WHA-WB-02', 10000, 10);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WB-02');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseReceipt, 'WHA-WB-02', 10000);
+        WorkThrough(WarehouseTask);
+        TaskLogic.CompleteShort(WarehouseTask, 4, ShortReason::WHANotEnough);
+
+        WarehouseReceiptLine.Get('WHA-WB-02', 10000);
+        Assert.AreEqual(4, WarehouseReceiptLine."Qty. to Receive", 'Only what was actually put away should reach the document.');
+
+        FollowUpTask.SetRange("Source Type", SourceType::WHAWhseReceipt);
+        FollowUpTask.SetRange("Source No.", 'WHA-WB-02');
+        FollowUpTask.SetRange(Status, FollowUpTask.Status::WHACreated);
+        FollowUpTask.FindFirst();
+        WorkThrough(FollowUpTask);
+        TaskLogic.Complete(FollowUpTask);
+
+        WarehouseReceiptLine.Get('WHA-WB-02', 10000);
+        Assert.AreEqual(10, WarehouseReceiptLine."Qty. to Receive", 'The follow-up should add its six to the four already there.');
+    end;
+
+    [Test]
+    procedure FinishingAPickFillsInTheQuantityToShip()
+    var
+        WarehouseShipmentLine: Record "Warehouse Shipment Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] The shipment side of the same thing. A picked line is a line ready to ship.
+        ConfigureQueue(0);
+        ConfigureWriteBack(true);
+        EnsureTaskNumbering();
+        CreateShipment('WHA-WB-03', 'SO-9003');
+        AddShipmentLine('WHA-WB-03', 10000, 5);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseShipment, 'WHA-WB-03');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseShipment, 'WHA-WB-03', 10000);
+        WorkThrough(WarehouseTask);
+        TaskLogic.Complete(WarehouseTask);
+
+        WarehouseShipmentLine.Get('WHA-WB-03', 10000);
+        Assert.AreEqual(5, WarehouseShipmentLine."Qty. to Ship", 'What was picked should be what the shipment is ready to ship.');
+    end;
+
+    [Test]
+    procedure TheDocumentIsLeftAloneWhenWritingBackIsOff()
+    var
+        WarehouseReceiptLine: Record "Warehouse Receipt Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Off is the default and the behaviour this app has always had. Turning it on is a
+        // decision about who owns the document, and nobody should find it made for them.
+        ConfigureQueue(0);
+        ConfigureWriteBack(false);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WB-04', 'PO-9004');
+        AddReceiptLine('WHA-WB-04', 10000, 7);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WB-04');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseReceipt, 'WHA-WB-04', 10000);
+        WorkThrough(WarehouseTask);
+        TaskLogic.Complete(WarehouseTask);
+
+        WarehouseReceiptLine.Get('WHA-WB-04', 10000);
+        Assert.AreEqual(0, WarehouseReceiptLine."Qty. to Receive", 'The document should be untouched.');
+        Assert.IsFalse(WarehouseTask."Written Back", 'And the job should not claim otherwise.');
+    end;
+
+    [Test]
+    procedure WorkRaisedByHandChangesNoDocument()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+    begin
+        // [SCENARIO] A hand-made job answers to no document, so writing back has nothing to write to and
+        // must say so rather than failing.
+        ConfigureQueue(0);
+        ConfigureWriteBack(true);
+        CreateStartedTask(WarehouseTask, 'WHA-WB-05', 3, CopyStr(UserId(), 1, 50));
+
+        TaskLogic.Complete(WarehouseTask);
+
+        Assert.IsFalse(WarehouseTask."Written Back", 'There was no document to change.');
+    end;
+
     local procedure ConfigureQueue(MaxOpenTasks: Integer)
     var
         Setup: Record "WHA Warehouse Task Setup";
@@ -1132,4 +1268,24 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Setup."WHA Enabled" := Enabled;
         Setup.Modify(true);
     end;
+
+    local procedure ConfigureWriteBack(WriteBack: Boolean)
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+    begin
+        EnsureTaskSetup(Setup);
+        Setup.Validate("Write Back To Document", WriteBack);
+        Setup.Modify(true);
+    end;
+
+    local procedure WorkThrough(var WarehouseTask: Record "WHA Warehouse Task")
+    var
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+    begin
+        if WarehouseTask.Status = WarehouseTask.Status::WHACreated then
+            TaskLogic.Release(WarehouseTask);
+        TaskLogic.Assign(WarehouseTask, CopyStr(UserId(), 1, MaxStrLen(WarehouseTask."Assigned To User ID")));
+        TaskLogic.Start(WarehouseTask);
+    end;
+
 }

@@ -65,6 +65,36 @@ codeunit 50206 "WHA Src Whse. Shipment" implements "WHA ITaskSource"
     end;
 
     /// <summary>
+    /// Adds what was picked to `Qty. to Ship` on the shipment line, without going past what the line
+    /// still has outstanding. It adds rather than sets, for the same reason the receipt side does: two
+    /// picks against one line must leave the line holding both.
+    /// </summary>
+    /// <param name="WarehouseTask">The finished pick.</param>
+    /// <returns>True when the shipment line was changed.</returns>
+    procedure WriteBack(var WarehouseTask: Record "WHA Warehouse Task"): Boolean
+    var
+        WarehouseShipmentLine: Record "Warehouse Shipment Line";
+        NewQuantity: Decimal;
+    begin
+        if WarehouseTask."Quantity Handled" <= 0 then
+            exit(false);
+
+        WarehouseShipmentLine.SetLoadFields("Qty. Outstanding", "Qty. to Ship");
+        if not WarehouseShipmentLine.Get(WarehouseTask."Source No.", WarehouseTask."Source Line No.") then
+            exit(false);
+
+        NewQuantity := WarehouseShipmentLine."Qty. to Ship" + WarehouseTask."Quantity Handled";
+        if NewQuantity > WarehouseShipmentLine."Qty. Outstanding" then
+            NewQuantity := WarehouseShipmentLine."Qty. Outstanding";
+        if NewQuantity = WarehouseShipmentLine."Qty. to Ship" then
+            exit(false);
+
+        WarehouseShipmentLine.Validate("Qty. to Ship", NewQuantity);
+        WarehouseShipmentLine.Modify(true);
+        exit(true);
+    end;
+
+    /// <summary>
     /// Answers whether the shipment line still has something outstanding on it. A line shipped by some
     /// other route leaves a pick nobody needs to walk.
     /// </summary>

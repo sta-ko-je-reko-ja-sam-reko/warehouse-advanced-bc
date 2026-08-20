@@ -65,6 +65,36 @@ codeunit 50205 "WHA Src Whse. Receipt" implements "WHA ITaskSource"
     end;
 
     /// <summary>
+    /// Adds what was put away to `Qty. to Receive` on the receipt line, without going past what the line
+    /// still has outstanding. It adds rather than sets, because a line picked up by two put-aways must
+    /// end with the sum of them and not the last one.
+    /// </summary>
+    /// <param name="WarehouseTask">The finished put-away.</param>
+    /// <returns>True when the receipt line was changed.</returns>
+    procedure WriteBack(var WarehouseTask: Record "WHA Warehouse Task"): Boolean
+    var
+        WarehouseReceiptLine: Record "Warehouse Receipt Line";
+        NewQuantity: Decimal;
+    begin
+        if WarehouseTask."Quantity Handled" <= 0 then
+            exit(false);
+
+        WarehouseReceiptLine.SetLoadFields("Qty. Outstanding", "Qty. to Receive");
+        if not WarehouseReceiptLine.Get(WarehouseTask."Source No.", WarehouseTask."Source Line No.") then
+            exit(false);
+
+        NewQuantity := WarehouseReceiptLine."Qty. to Receive" + WarehouseTask."Quantity Handled";
+        if NewQuantity > WarehouseReceiptLine."Qty. Outstanding" then
+            NewQuantity := WarehouseReceiptLine."Qty. Outstanding";
+        if NewQuantity = WarehouseReceiptLine."Qty. to Receive" then
+            exit(false);
+
+        WarehouseReceiptLine.Validate("Qty. to Receive", NewQuantity);
+        WarehouseReceiptLine.Modify(true);
+        exit(true);
+    end;
+
+    /// <summary>
     /// Answers whether the receipt line still has something outstanding on it. A line received by some
     /// other route leaves a put-away nobody needs to walk.
     /// </summary>

@@ -251,6 +251,7 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         WarehouseTask.Modify(true);
 
         MoveHandlingUnit(WarehouseTask);
+        WriteBackToDocument(WarehouseTask);
     end;
 
     /// <summary>
@@ -281,8 +282,10 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
         WarehouseTask.Modify(true);
 
-        if HandledQuantity > 0 then
+        if HandledQuantity > 0 then begin
             MoveHandlingUnit(WarehouseTask);
+            WriteBackToDocument(WarehouseTask);
+        end;
 
         if Outstanding > 0 then
             CreateFollowUp(WarehouseTask, Outstanding);
@@ -343,6 +346,24 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         if LocationCode <> '' then
             WarehouseTask.SetRange("Location Code", LocationCode);
         exit(WarehouseTask.FindFirst());
+    end;
+
+    local procedure WriteBackToDocument(var WarehouseTask: Record "WHA Warehouse Task")
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+    begin
+        Setup.SetLoadFields("Write Back To Document");
+        if not Setup.Get() then
+            exit;
+        if not Setup."Write Back To Document" then
+            exit;
+
+        if not TaskSourceMgt.WriteBack(WarehouseTask) then
+            exit;
+
+        WarehouseTask."Written Back" := true;
+        WarehouseTask.Modify(true);
     end;
 
     local procedure MoveHandlingUnit(var WarehouseTask: Record "WHA Warehouse Task")

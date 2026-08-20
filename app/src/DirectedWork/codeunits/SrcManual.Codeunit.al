@@ -37,6 +37,16 @@ codeunit 50204 "WHA Src Manual" implements "WHA ITaskSource"
     end;
 
     /// <summary>
+    /// Writes nothing. Work somebody raised by hand answers to no document.
+    /// </summary>
+    /// <param name="WarehouseTask">The finished task, unused.</param>
+    /// <returns>Always false.</returns>
+    procedure WriteBack(var WarehouseTask: Record "WHA Warehouse Task"): Boolean
+    begin
+        exit(false);
+    end;
+
+    /// <summary>
     /// Answers whether the source still wants the work. A task with no source is nobody's to close but
     /// the warehouse's, so it is always its own answer.
     /// </summary>

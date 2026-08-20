@@ -96,7 +96,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 
 | Capability | Standard BC today | This app today | Bucket | Target |
 |---|---|---|---|---|
-| Warehouse topology (zone, aisle, rack, level, depth) | Location, zone, bin, bin type | Uses BC bins as they are; no topology of its own | | |
+| Warehouse topology (zone, aisle, rack, level, depth) | Location, zone, bin, bin type | Uses BC bins as they are, and now keeps their content true; no topology of its own | | |
 | Bin capacity by weight or volume | Max. cubage and weight on the bin | Not read anywhere | | |
 | Item warehouse attributes (dimensions, tare, stackability) | Unit-of-measure dimensions | None | | |
 | Handling class per item | None | None | | |
@@ -107,7 +107,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Catch weight / variable weight | None | None | | |
 | Handling unit type master (pallet type, tare, max layers) | None | None — the unit has no type, capacity or dimensions | | |
 | Handling unit nesting | None | Parent and child, with a nested count | | |
-| Handling unit history and genealogy | None | Status only; no movement history | | |
+| Handling unit history and genealogy | None | Status only. No history of its own, though a registered move now leaves a warehouse entry behind it | | |
 | Equipment and forklift register | None | An RF device register, which is not the same thing | | |
 
 ### 3. Allocation and item tracking
@@ -140,6 +140,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Pick face against bulk | Bin ranking plus replenishment | Replenishment rules per pick bin | | |
 | Work raised from a production order | Warehouse pick for production | None — the sources are receipt, shipment, manual | | |
 | Completion written back to the source document | Native | Delivered, behind a setting that ships off. Nothing holds the document open while jobs against it are outstanding | | |
+| Completion reflected in Business Central's own bins | Native, by registering the activity | Delivered, behind a setting that ships off — a finished job registers a warehouse movement, so bin content and warehouse entries follow the floor. **Never yet run against a real bin** | | |
 | Supervisor cancel and re-queue | Delete the line | A status model, but no supervisor console | | |
 
 ### 5. Wave, replenishment, slotting

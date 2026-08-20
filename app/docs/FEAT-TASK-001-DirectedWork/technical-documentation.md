@@ -44,6 +44,14 @@ handling unit move on completion.
 **Segment 3** — the source document: work raised from a standard warehouse receipt or shipment, and a
 job that knows which document and which order it is serving. This is the segment that turns the queue
 into an execution layer rather than a list somebody types into.
+**Segment 4** — writing back: finishing a job fills in the quantity to receive or to ship on the
+document it came from, behind a setting that ships off. See *Writing back* below.
+**Segment 5** — item tracking on a job: the lot and serial fields, filled in where the answer is
+knowable. See *Item tracking on a job* below.
+**Segment 6** — warehouse registration: finishing a job registers a warehouse movement, so Business
+Central's own bin content and warehouse entries follow the floor instead of standing still. Shared
+machinery, described in [warehouse-registration.md](../warehouse-registration.md); this feature owns
+the setting and the call site.
 
 ## Data model
 
@@ -100,6 +108,7 @@ task with no number errors if that series is unset.
 | `Auto Release Tasks` | Releases a new task as it is created — but only if it already names a location and something to move, so a half-built task never reaches the floor |
 | `Follow Up Short Picks` | Raises a new task for whatever an operator could not find. Off by default — see below |
 | `Max Open Tasks Per User` | How many assigned or in-progress tasks one person may hold. Zero means no limit |
+| `Whse. Registration Method` | What finishing a job tells Business Central about the goods that moved. Ships as *Do not tell Business Central*, which is what the app always did. See [warehouse-registration.md](../warehouse-registration.md) |
 
 **No task history table.** The stamps on the task are the audit trail for segment 1. A separate
 history/event table becomes worth its cost when labour management (`FEAT-LAB-001`) needs indirect
@@ -137,6 +146,9 @@ time and per-step durations; it would be the wrong shape to guess at now.
 | `WHA Task Activity Provider` | enumextension | 50200 | `app/src/DirectedWork/enumextensions/TaskActivityProvider.EnumExt.al` |
 | `WHA Task Activity Cues` | codeunit | 50208 | `app/src/DirectedWork/codeunits/TaskActivityCues.Codeunit.al` |
 | `WHA Task Activities` | pageextension | 50202 | `app/src/DirectedWork/pageextensions/TaskActivities.PageExt.al` |
+| `WHA Task Whse. Registration` | codeunit | 50209 | `app/src/DirectedWork/codeunits/TaskWhseRegistration.Codeunit.al` |
+| `WHA Whse. Registration Tests` | codeunit | 51017 | `test/src/codeunits/WhseRegistrationTests.Codeunit.al` |
+| `WHA Test Whse. Reg. Recorder` | codeunit | 51016 | `test/src/codeunits/TestWhseRegRecorder.Codeunit.al` |
 
 All in namespace `WarehouseAdvanced.DirectedWork`, from the reserved block `50200..50249`.
 
@@ -214,6 +226,13 @@ Two places, both one-directional — directed work reads handling units, never t
 
 Nested units are **not** walked. Moving a pallet does not rewrite the location of the cartons inside
 it, because a nested unit's position is defined by its parent, not by its own location field.
+
+Completion has a third step, and its **ordering is load-bearing**: the move is handed to warehouse
+registration *before* the handling unit is moved, because the bin the goods came from is readable
+then and is not afterwards. It also means a move Business Central refuses stops the completion, so
+the app never records a pallet in a bin that Business Central rejected. A job naming a unit registers
+every line on that unit, because moving the pallet moves all of it; a job naming only an item
+registers that item at the quantity actually handled.
 
 ## The source document — where work comes from
 
@@ -467,7 +486,12 @@ job would be a guess about which of them the warehouse will actually move.
 - **Task history.** See the data model note above — deliberate.
 - **Over-picking.** A job can be closed with less than was asked for, never with more. Finding
   fourteen where twelve were wanted is a different conversation, and nobody has had it yet.
-- **No inventory effect.** `Quantity Handled` records what an operator moved; it posts nothing. What
-  a short pick should do to stock is a question for the capability register.
+- **No inventory effect.** `Quantity Handled` records what an operator moved; it posts nothing to the
+  *item* ledger. Since segment 6 it does move stock between bins where the setting asks for it, which
+  is a warehouse-entry effect and not a ledger one. What a short pick should do to stock is still a
+  question for the capability register.
+- **The handling unit and the bin are two records kept in step by ordering.** Registration does not
+  derive the unit's position from bin content, nor the reverse. Making one the source of the other is
+  a larger change and reaches the handling unit's own model.
 - **Handheld presentation.** `FEAT-RF-001` is the scanner-shaped view of this queue.
 - **Getting-started in the customer language** — the language has not been confirmed.

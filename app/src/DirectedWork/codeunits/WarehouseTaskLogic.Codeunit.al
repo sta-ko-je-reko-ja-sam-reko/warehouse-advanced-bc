@@ -252,6 +252,7 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
         WarehouseTask.Modify(true);
 
+        RegisterMove(WarehouseTask, WarehouseTask."Quantity Handled");
         MoveHandlingUnit(WarehouseTask);
         WriteBackToDocument(WarehouseTask);
     end;
@@ -285,6 +286,7 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         WarehouseTask.Modify(true);
 
         if HandledQuantity > 0 then begin
+            RegisterMove(WarehouseTask, HandledQuantity);
             MoveHandlingUnit(WarehouseTask);
             WriteBackToDocument(WarehouseTask);
         end;
@@ -387,6 +389,13 @@ codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         HandlingUnitLine.FindFirst();
         WarehouseTask."Lot No." := HandlingUnitLine."Lot No.";
         WarehouseTask."Serial No." := HandlingUnitLine."Serial No.";
+    end;
+
+    local procedure RegisterMove(var WarehouseTask: Record "WHA Warehouse Task"; HandledQuantity: Decimal)
+    var
+        TaskWhseRegistration: Codeunit "WHA Task Whse. Registration";
+    begin
+        TaskWhseRegistration.RegisterMove(WarehouseTask, HandledQuantity);
     end;
 
     local procedure MoveHandlingUnit(var WarehouseTask: Record "WHA Warehouse Task")

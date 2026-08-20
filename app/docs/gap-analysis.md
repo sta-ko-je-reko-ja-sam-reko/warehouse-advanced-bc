@@ -115,7 +115,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Capability | Standard BC today | This app today | Bucket | Target |
 |---|---|---|---|---|
 | Lot or serial captured on directed work | Item tracking on activity lines | Fields on the task, filled from an unmixed pallet or by the partner system. **The operator still cannot scan one**, so an item job with no pallet proves nothing | | |
-| Expiry date held on stock | Item tracking, expiration date | **Nothing in the app refers to expiry at all** | | |
+| Expiry date held on stock | Item tracking, expiration date | **The app records none.** It reads back the date Business Central holds for a lot when registering a warehouse change, and refuses a posting that would need one nobody has recorded | | |
 | Shelf-life rules | Strict expiry posting | None | | |
 | FEFO allocation | Pick according to FEFO | None | | |
 | Minimum remaining shelf life at picking, per customer | None | None | | |
@@ -356,8 +356,10 @@ turns around: what that system *sends to* the warehouse, this one *receives*, an
 
 Not the largest rows — the ones that **invalidate what is already built** rather than adding to it:
 
-1. **Shelf life and FEFO.** Nothing in the app refers to expiry. If this warehouse handles dated
-   stock, allocation, picking, counting and quality all change shape rather than gain a field.
+1. **Shelf life and FEFO.** The app records no expiry of its own; it only reads back what Business
+   Central already holds, and refuses a posting that would need a date nobody has recorded. If this
+   warehouse handles dated stock, allocation, picking, counting and quality all change shape rather than
+   gain a field.
 2. ~~**Lot and serial on directed work.**~~ **Partly closed.** The fields exist and fill themselves
    in where the answer is knowable. What remains is the half only the operator can supply: nothing on
    the handheld asks them to scan a lot, and that is an operator-review question.

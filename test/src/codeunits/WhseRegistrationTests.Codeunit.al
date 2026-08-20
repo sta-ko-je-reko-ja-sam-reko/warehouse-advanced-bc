@@ -13,6 +13,8 @@ codeunit 51017 "WHA Whse. Registration Tests"
         ActivityLocationTok: Label 'WHAREGA', Locked = true;
         ItemTok: Label 'WHA-REG-IT', Locked = true;
         OtherItemTok: Label 'WHA-REG-IT2', Locked = true;
+        ExpiryItemTok: Label 'WHA-REG-EXP', Locked = true;
+        DatedItemTok: Label 'WHA-REG-DATE', Locked = true;
 
     [Test]
     procedure NotTellingBusinessCentralRecordsNothing()
@@ -198,6 +200,97 @@ codeunit 51017 "WHA Whse. Registration Tests"
         Assert.IsFalse(WhseRegMgt.LocationRaisesOwnActivities(CopyStr(BinLocationTok, 1, 10)), 'A location with neither flag raises nothing of its own.');
         Assert.IsFalse(WhseRegMgt.LocationRaisesOwnActivities(''), 'No location raises nothing of its own.');
         Assert.IsFalse(WhseRegMgt.LocationRaisesOwnActivities('WHA-NONE'), 'A location that does not exist raises nothing of its own.');
+    end;
+
+    [Test]
+    procedure AnItemNobodyTracksNeedsNoExpiryDate()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        // [SCENARIO] Business Central asks for an expiry date only when the item's tracking code says the
+        // date is entered by hand and that code is tracked in the warehouse. Everything else is left alone.
+        EnsureItem(CopyStr(ItemTok, 1, 20), '');
+
+        Assert.IsFalse(WhseRegMgt.WarehouseExpiryRequired(CopyStr(ItemTok, 1, 20)), 'An item with no tracking code needs no expiry date.');
+        Assert.IsFalse(WhseRegMgt.WarehouseExpiryRequired(''), 'No item needs no expiry date.');
+        Assert.IsFalse(WhseRegMgt.WarehouseExpiryRequired('WHA-NOTHERE'), 'An item that does not exist needs no expiry date.');
+    end;
+
+    [Test]
+    procedure AnItemDatedByHandInTheWarehouseNeedsAnExpiryDate()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        // [SCENARIO] Both halves are needed: dated by hand, and tracked in the warehouse. Either alone is
+        // not what Business Central checks.
+        EnsureItem(CopyStr(ExpiryItemTok, 1, 20), TrackingCode('WHA-EXP', true, true));
+        EnsureItem(CopyStr(DatedItemTok, 1, 20), TrackingCode('WHA-DATE', true, false));
+
+        Assert.IsTrue(WhseRegMgt.WarehouseExpiryRequired(CopyStr(ExpiryItemTok, 1, 20)), 'Dated by hand and tracked in the warehouse needs an expiry date.');
+        Assert.IsFalse(WhseRegMgt.WarehouseExpiryRequired(CopyStr(DatedItemTok, 1, 20)), 'Dated by hand but not tracked in the warehouse is not what Business Central checks.');
+    end;
+
+    [Test]
+    procedure AnExpiryNobodyHasRecordedIsNotKnown()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+        ExpirationDate: Date;
+    begin
+        // [SCENARIO] The app has no expiry of its own, so the only honest answer is the one Business
+        // Central already holds. Where it holds none, nothing is invented.
+        EnsureWarehouse();
+        EnsureItem(CopyStr(ExpiryItemTok, 1, 20), TrackingCode('WHA-EXP', true, true));
+
+        Assert.IsFalse(WhseRegMgt.KnownWarehouseExpiry(CopyStr(ExpiryItemTok, 1, 20), '', CopyStr(LocationTok, 1, 10), 'LOT-NEVER-SEEN', '', ExpirationDate), 'A lot nobody has recorded has no known expiry.');
+        Assert.AreEqual(0D, ExpirationDate, 'Nothing should be invented for a lot nobody has recorded.');
+    end;
+
+    [Test]
+    procedure StockWithNoTrackingAtAllHasNoKnownExpiry()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+        ExpirationDate: Date;
+    begin
+        // [SCENARIO] An expiry date belongs to a lot or a serial number. Without one there is nothing to
+        // look the date up by.
+        EnsureWarehouse();
+        EnsureItem(CopyStr(ExpiryItemTok, 1, 20), TrackingCode('WHA-EXP', true, true));
+
+        Assert.IsFalse(WhseRegMgt.KnownWarehouseExpiry(CopyStr(ExpiryItemTok, 1, 20), '', CopyStr(LocationTok, 1, 10), '', '', ExpirationDate), 'Stock with no lot and no serial number has no expiry to find.');
+        Assert.IsFalse(WhseRegMgt.KnownWarehouseExpiry('', '', CopyStr(LocationTok, 1, 10), 'LOT-A', '', ExpirationDate), 'No item has no expiry to find.');
+        Assert.IsFalse(WhseRegMgt.KnownWarehouseExpiry(CopyStr(ExpiryItemTok, 1, 20), '', 'WHA-NONE', 'LOT-A', '', ExpirationDate), 'A location that does not exist has no expiry to find.');
+    end;
+
+    local procedure TrackingCode(TrackingCodeName: Code[10]; DatedByHand: Boolean; TrackedInWarehouse: Boolean): Code[10]
+    var
+        ItemTrackingCode: Record "Item Tracking Code";
+    begin
+        if ItemTrackingCode.Get(TrackingCodeName) then
+            exit(TrackingCodeName);
+
+        ItemTrackingCode.Init();
+        ItemTrackingCode.Code := TrackingCodeName;
+        ItemTrackingCode."Lot Specific Tracking" := true;
+        ItemTrackingCode."Man. Expir. Date Entry Reqd." := DatedByHand;
+        ItemTrackingCode."Lot Warehouse Tracking" := TrackedInWarehouse;
+        ItemTrackingCode.Insert(false);
+        exit(TrackingCodeName);
+    end;
+
+    local procedure EnsureItem(ItemNo: Code[20]; TrackingCodeName: Code[10])
+    var
+        Item: Record Item;
+    begin
+        if not Item.Get(ItemNo) then begin
+            Item.Init();
+            Item."No." := ItemNo;
+            Item.Insert(false);
+        end;
+
+        if Item."Item Tracking Code" = TrackingCodeName then
+            exit;
+        Item."Item Tracking Code" := TrackingCodeName;
+        Item.Modify(false);
     end;
 
     [Test]

@@ -154,10 +154,14 @@ The same split as posting, and the same honest limit.
 - **Item tracking is carried, not created.** The lot or serial on the pallet line reaches the
   warehouse entry. No reservation entry or tracking specification is built, so an item whose tracking
   code demands warehouse tracking may be refused by `CheckWhseJnlLineTracking`.
-- **Expiry is not carried.** `Warehouse Journal Line` has `Expiration Date` and `New Expiration Date`
-  and this module sets neither, because nothing in the app refers to expiry at all. That is the first
-  of the three rows [gap-analysis.md](gap-analysis.md) says to settle first, and it reaches further
-  than this module.
+- ~~**Expiry is not carried.**~~ **Carried where Business Central already knows it.** The app still has
+  no expiry of its own — nothing in it records one — so the date is read back from what Business Central
+  holds for that lot or serial number, through its own `GetWhseExpirationDate`, and left blank when
+  nothing is known. That is enough for a movement, which is never asked for a date. It is **not** enough
+  to invent one: an item whose tracking code demands the date be entered by hand, added to a bin under a
+  lot Business Central has never seen, is refused by posting rather than guessed at. Closing that
+  properly means the app recording an expiry, which is the row [gap-analysis.md](gap-analysis.md) says to
+  settle first and reaches much further than this module.
 - **A move crossing locations is not handled.** It is a transfer order, and nothing here raises one.
 - **The handling unit is still moved by the app, not by the registration.** Two records now say where
   the goods are, and they are kept in step by ordering rather than by one deriving from the other.

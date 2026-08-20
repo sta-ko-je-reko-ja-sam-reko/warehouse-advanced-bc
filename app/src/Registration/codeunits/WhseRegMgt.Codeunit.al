@@ -1,6 +1,8 @@
 namespace WarehouseAdvanced.Registration;
 
+using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Location;
+using Microsoft.Inventory.Tracking;
 
 codeunit 50802 "WHA Whse. Reg. Mgt."
 {
@@ -146,6 +148,68 @@ codeunit 50802 "WHA Whse. Reg. Mgt."
         if not Location.Get(LocationCode) then
             exit(false);
         exit(Location."Require Put-away" or Location."Require Pick");
+    end;
+
+    /// <summary>
+    /// Answers whether Business Central will insist on an expiry date when stock of this item is added
+    /// to a bin. It insists when the item's tracking code asks for the date to be entered by hand *and*
+    /// that code is tracked in the warehouse; a movement between bins is never asked.
+    /// </summary>
+    /// <param name="ItemNo">The item to ask about.</param>
+    /// <returns>True when a positive warehouse entry for this item needs an expiry date.</returns>
+    procedure WarehouseExpiryRequired(ItemNo: Code[20]): Boolean
+    var
+        Item: Record Item;
+        ItemTrackingCode: Record "Item Tracking Code";
+    begin
+        if ItemNo = '' then
+            exit(false);
+
+        Item.SetLoadFields("Item Tracking Code");
+        if not Item.Get(ItemNo) then
+            exit(false);
+        if Item."Item Tracking Code" = '' then
+            exit(false);
+        if not ItemTrackingCode.Get(Item."Item Tracking Code") then
+            exit(false);
+
+        exit(ItemTrackingCode."Man. Expir. Date Entry Reqd." and ItemTrackingCode.IsWarehouseTracking());
+    end;
+
+    /// <summary>
+    /// Answers the expiry date Business Central already holds for this lot or serial number, so a change
+    /// the app registers carries the same date as everything else about those goods.
+    /// </summary>
+    /// <remarks>
+    /// The app has no expiry of its own — nothing in it refers to one — so the only honest answer is the
+    /// one already recorded. `GetWhseExpirationDate` looks at the item tracking entries first and the
+    /// warehouse entries second, which is the same order Business Central uses when it fills the date in
+    /// for itself.
+    /// </remarks>
+    /// <param name="ItemNo">The item the goods are.</param>
+    /// <param name="VariantCode">The variant, if any.</param>
+    /// <param name="LocationCode">Where the goods are.</param>
+    /// <param name="LotNo">The lot, if the item is tracked by lot.</param>
+    /// <param name="SerialNo">The serial number, if the item is tracked by serial number.</param>
+    /// <param name="ExpiryDate">Receives the date. Left as it was when nothing is known.</param>
+    /// <returns>True when a date was found.</returns>
+    procedure KnownWarehouseExpiry(ItemNo: Code[20]; VariantCode: Code[10]; LocationCode: Code[10]; LotNo: Code[50]; SerialNo: Code[50]; var ExpiryDate: Date): Boolean
+    var
+        ItemTrackingSetup: Record "Item Tracking Setup";
+        Location: Record Location;
+        ItemTrackingMgt: Codeunit "Item Tracking Management";
+    begin
+        if ItemNo = '' then
+            exit(false);
+        if (LotNo = '') and (SerialNo = '') then
+            exit(false);
+        if not Location.Get(LocationCode) then
+            exit(false);
+
+        ItemTrackingSetup."Lot No." := LotNo;
+        ItemTrackingSetup."Serial No." := SerialNo;
+
+        exit(ItemTrackingMgt.GetWhseExpirationDate(ItemNo, VariantCode, Location, ItemTrackingSetup, ExpiryDate));
     end;
 
     /// <summary>

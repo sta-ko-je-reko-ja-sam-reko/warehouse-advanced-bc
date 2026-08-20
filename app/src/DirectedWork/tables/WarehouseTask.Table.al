@@ -221,6 +221,13 @@ table 50201 "WHA Warehouse Task"
             ToolTip = 'Specifies when the task was completed.';
             Editable = false;
         }
+        field(44; "Written Back"; Boolean)
+        {
+            Caption = 'Written back';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether finishing this job changed the warehouse document it came from. It is blank on work raised by hand, which answers to no document, and on a job finished while writing back was switched off.';
+            Editable = false;
+        }
     }
 
     keys

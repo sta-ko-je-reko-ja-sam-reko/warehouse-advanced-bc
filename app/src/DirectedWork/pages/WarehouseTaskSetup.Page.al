@@ -45,6 +45,10 @@ page 50200 "WHA Warehouse Task Setup"
                 {
                     ApplicationArea = WHADirectedWork;
                 }
+                field("Write Back To Document"; Rec."Write Back To Document")
+                {
+                    ApplicationArea = WHADirectedWork;
+                }
             }
             group(Numbering)
             {

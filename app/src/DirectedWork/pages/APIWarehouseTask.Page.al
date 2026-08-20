@@ -139,6 +139,11 @@ page 50203 "WHA API Warehouse Task"
                     Caption = 'Completed date time';
                     Editable = false;
                 }
+                field(writtenBack; Rec."Written Back")
+                {
+                    Caption = 'Written back';
+                    Editable = false;
+                }
                 field(lastModifiedDateTime; Rec.SystemModifiedAt)
                 {
                     Caption = 'Last modified date time';

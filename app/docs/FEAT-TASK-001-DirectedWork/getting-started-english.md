@@ -192,11 +192,30 @@ Open the task and choose **Cancel**. The task stays in the list as a record of w
 A task that has been started or completed cannot be deleted at all. Cancel the ones you no longer
 want, and delete only drafts that never went anywhere.
 
+## Let finished work fill in the document
+
+Off unless you turn it on, and worth understanding before you do.
+
+1. Choose the search icon, enter **Warehouse task setup**, and choose the related link.
+2. Switch on **Write back to the document**.
+
+From then on, finishing a job fills in **Qty. to Receive** on the warehouse receipt, or **Qty. to
+Ship** on the warehouse shipment, with what was actually handled. Nobody has to retype it, and the
+document is ready to post when the work on the floor is done.
+
+Two things to know:
+
+- **It adds up.** A job finished short raises a follow-up; when that one finishes too, the document
+  holds the total of both, not just the last.
+- **It never asks for more than the line wants.** If a job somehow moved more than the line is
+  waiting for, the document gets what the line is waiting for.
+
+Leave it off and nothing changes: the document stays exactly as it was, and somebody fills in the
+quantities the way they do today.
+
 ## What is not here yet
 
-**Finishing a job tells the document nothing.** The receipt or shipment it came from does not know
-the warehouse has done the work, and nothing stops somebody posting it while jobs against it are
-still open. For now the queue is a place to organise work, not a replacement for the document.
+**Nothing holds a document open while its work is unfinished.** If you switch on **Write back to the document**, finishing a job fills in what was handled — but a receipt or shipment can still be posted while jobs against it are outstanding, and nothing warns whoever posts it.
 
 Only warehouse receipts and warehouse shipments raise work. Internal put-aways, movement worksheets,
 production and assembly do not.

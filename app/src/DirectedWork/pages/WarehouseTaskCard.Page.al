@@ -91,6 +91,9 @@ page 50201 "WHA Warehouse Task Card"
                 field("Completed At"; Rec."Completed At")
                 {
                 }
+                field("Written Back"; Rec."Written Back")
+                {
+                }
             }
             group(Origin)
             {

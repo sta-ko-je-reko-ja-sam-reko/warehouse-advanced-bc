@@ -39,6 +39,12 @@ table 50200 "WHA Warehouse Task Setup"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies whether a new warehouse task is raised for whatever an operator could not find. The follow-up is created as a draft, so somebody decides whether it is worth sending a second person to the same bin.';
         }
+        field(45; "Write Back To Document"; Boolean)
+        {
+            Caption = 'Write back to the document';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies whether finishing a job fills in the quantity to receive or to ship on the warehouse document it came from. Leave it off and the document is untouched, which is what this app has always done; turn it on and finished work reaches the document that will be posted, which is a larger change than it sounds.';
+        }
         field(40; "Max Open Tasks Per User"; Integer)
         {
             Caption = 'Max open tasks per user';

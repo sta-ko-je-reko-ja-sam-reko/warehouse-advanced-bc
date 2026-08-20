@@ -389,18 +389,44 @@ tests use real records and rely on the test runner's rollback.
 | `NothingFoundAtAllStillClosesTheJob` | An empty bin is an answer, not a hand back |
 | `DemoImportIsIdempotent` / `DemoImportCoversEveryTaskType` | The seeder is safe to re-run and covers the enum |
 
+## Writing back — where the app stops being an overlay
+
+Segment 3 raised work *from* a document and finishing it told the document nothing. This closes that
+loop, and it is a bigger step than the code makes it look: filling in `Qty. to Receive` or
+`Qty. to Ship` means the warehouse app decides what Business Central is about to post.
+
+So it is **asked for, not assumed**. `Write back to the document` on the warehouse task setup ships
+**off**, which is the behaviour this app has always had, and turning it on is a decision about who
+owns the document rather than a preference.
+
+`WHA ITaskSource` gained `WriteBack`, so what writing back *means* stays with the source that knows
+the document: the receipt implementation fills in `Qty. to Receive`, the shipment one
+`Qty. to Ship`, and a hand-made job answers no to both because it has no document to answer to.
+
+Three properties are deliberate:
+
+- **It adds rather than sets.** A line finished short raises a follow-up, and both jobs serve the
+  same line. A second write that replaced the first would make four already put away disappear from
+  the document.
+- **It never goes past what the line has outstanding.** A quantity larger than the line wants is
+  capped rather than refused, because the job is already finished by the time this runs and failing
+  here would leave the warehouse right and the document wrong with nothing to do about it.
+- **A job that moved nothing writes nothing.** A short pick of zero leaves the document alone.
+
+`Written Back` on the task records that it happened, so a job that changed a document can be told
+from one that did not — a job finished while the setting was off, or a job with no document behind
+it, both read as blank rather than as false-and-therefore-broken.
+
 ## Not done
 
 - **Task interleaving by type and travel path.** `GetNextForUser` ranks by priority and due date, and
   returns an operator's own work first. It does not sequence a pick and a put-away into one trip, and
   it does not know the physical layout of the warehouse. Travel-path sequencing needs a bin
   coordinate or zone-ordering model that does not exist yet.
-- **The link runs one way only.** Work is raised *from* a warehouse receipt or shipment; completing
-  the task writes **nothing back** to it. Nobody looking at the document can see that the warehouse
-  has done the work, and nothing stops the document being posted while jobs against it are still open.
-  Closing that loop is the obvious next segment and it is a bigger decision than it looks: writing
-  `Qty. to Receive` or `Qty. to Ship` from a warehouse app is the point at which this stops being an
-  overlay and starts driving standard posting.
+- ~~**The link runs one way only.**~~ **Closed, behind a switch** — see *Writing back* above. What
+  remains true: **nothing stops the document being posted while jobs against it are still open.**
+  Writing back fills in what was handled; it does not hold the document, and a warehouse that wants
+  posting blocked until the floor is finished needs something this app does not have.
 - **Only two kinds of document.** Internal put-aways, movement worksheet lines, production and
   assembly are not sources. Each is an `enumextension` value and one codeunit, and none of them should
   be written until the capability register says the customer uses them.

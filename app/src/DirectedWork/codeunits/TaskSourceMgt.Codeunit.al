@@ -60,6 +60,20 @@ codeunit 50207 "WHA Task Source Mgt."
     end;
 
     /// <summary>
+    /// Writes what a finished task did back onto the document it came from, through whichever
+    /// implementation the source type names.
+    /// </summary>
+    /// <param name="WarehouseTask">The finished task.</param>
+    /// <returns>True when a document line was changed.</returns>
+    procedure WriteBack(var WarehouseTask: Record "WHA Warehouse Task"): Boolean
+    var
+        TaskSource: Interface "WHA ITaskSource";
+    begin
+        TaskSource := WarehouseTask."Source Type";
+        exit(TaskSource.WriteBack(WarehouseTask));
+    end;
+
+    /// <summary>
     /// Opens the document a task came from.
     /// </summary>
     /// <param name="WarehouseTask">The task to show the origin of.</param>

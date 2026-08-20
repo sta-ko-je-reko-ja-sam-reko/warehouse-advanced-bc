@@ -35,6 +35,19 @@ interface "WHA ITaskSource"
     procedure SourceIsOpen(var WarehouseTask: Record "WHA Warehouse Task"): Boolean;
 
     /// <summary>
+    /// Writes what the work actually did back onto the document line it came from. This is the point at
+    /// which the app stops being an overlay on Business Central and starts driving it, so it is asked
+    /// for rather than assumed: the caller decides whether to call this at all.
+    ///
+    /// What "writing back" means is the implementation's business, and it differs by document. It adds
+    /// to what the line already has rather than replacing it, because two jobs can serve one line and
+    /// the second must not undo the first.
+    /// </summary>
+    /// <param name="WarehouseTask">The finished task to write back.</param>
+    /// <returns>True when a document line was changed.</returns>
+    procedure WriteBack(var WarehouseTask: Record "WHA Warehouse Task"): Boolean;
+
+    /// <summary>
     /// Opens the document a task came from, so somebody looking at a job on the queue can see what is
     /// waiting on it. The one place in this interface that touches the screen, and it is here rather
     /// than on the page because only the implementation knows which document to open.

@@ -267,6 +267,25 @@ a question the document can answer.** Guessing it here would put a wrong bin in 
 which is worse than putting none. Bin choice is what `FEAT-SLOT-001` exists to have an opinion about,
 and this is the seam it will eventually plug into.
 
+### The movement worksheet
+
+A movement worksheet line is already the shape of a warehouse task — a from-bin, a to-bin, an item and
+a quantity — so it comes across as a `WHAMovement` with both ends intact, which no other source can
+give. It needs only `Bin Mandatory` at the location, which is why it is reachable when Business
+Central's other internal documents are not.
+
+Its write-back is **the only one in the app guarded on something other than a setting**, and the reason
+is a hazard rather than a preference. The line exists to be turned into a Business Central movement; if
+this app walks the move and leaves the line outstanding, whoever creates a movement from that worksheet
+next moves the same goods a second time. So the line is marked handled — but only when warehouse
+registration is actually maintaining bin content, because that is exactly when the goods really did move
+somewhere Business Central can see. With registration off the line is left alone, since claiming a move
+Business Central never saw would be worse than the duplication the write-back exists to prevent.
+
+The worksheet is found by name, filtered to the first template of type Movement. A location with two
+movement worksheet templates carrying the same worksheet name is ambiguous, and the app takes the first
+— worth knowing, and not worth a field on the task to fix until somebody has such a warehouse.
+
 ### Where the app may raise work at all
 
 Business Central raises put-aways and picks of its own at a location with `Require Put-away` or
@@ -537,9 +556,13 @@ job would be a guess about which of them the warehouse will actually move.
   remains true: **nothing stops the document being posted while jobs against it are still open.**
   Writing back fills in what was handled; it does not hold the document, and a warehouse that wants
   posting blocked until the floor is finished needs something this app does not have.
-- **Only two kinds of document.** Internal put-aways, movement worksheet lines, production and
-  assembly are not sources. Each is an `enumextension` value and one codeunit, and none of them should
-  be written until the capability register says the customer uses them.
+- ~~**Only two kinds of document.**~~ **The movement worksheet is now a third**, and the other
+  candidates turn out to be **unreachable rather than unbuilt**: internal put-away, internal pick and
+  warehouse picks for production or assembly all test the location for `Require Put-away`,
+  `Require Pick` or `Directed Put-away and Pick` before they will exist, and this app refuses to raise
+  work at any such location. Adding them would be code that can never run. Transfer orders need no
+  source of their own — they flow through a warehouse receipt and shipment. See
+  [../location-configuration.md](../location-configuration.md).
 - **Nothing revisits work already assigned.** Turning the restriction on leaves jobs already held by
   somebody who is not a warehouse employee exactly where they are, and they can still be started and
   finished. Only a new assignment is checked.

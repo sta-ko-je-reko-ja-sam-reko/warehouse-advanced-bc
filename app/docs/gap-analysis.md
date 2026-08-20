@@ -144,7 +144,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Zone picking with handover | Zone-based activities | None | | |
 | Pick to cart, with a trolley position | None | None | | |
 | Pick face against bulk | Bin ranking plus replenishment | Replenishment rules per pick bin | | |
-| Work raised from a production order | Warehouse pick for production | None — the sources are receipt, shipment, manual | | |
+| Work raised from a production order | Warehouse pick for production | **Unreachable, not unbuilt.** A warehouse pick for production needs `Require Pick`, and this app refuses locations where Business Central raises its own activities. Sources are receipt, shipment, movement worksheet, manual | | |
 | Completion written back to the source document | Native | Delivered, behind a setting that ships off | | |
 | Document held while its work is unfinished | None | Delivered, behind a setting that ships off. Nothing warns before the refusal | | |
 | Completion reflected in Business Central's own bins | Native, by registering the activity | Delivered, behind a setting that ships off — a finished job registers a warehouse movement, so bin content and warehouse entries follow the floor. **Never yet run against a real bin** | | |

@@ -1057,6 +1057,97 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Assert.IsFalse(WarehouseTask."Written Back", 'There was no document to change.');
     end;
 
+    [Test]
+    procedure AJobTakesTheLotFromAPalletHoldingOnlyOne()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        // [SCENARIO] A pallet holding one lot of one item leaves no doubt what a job against it moves.
+        // Taking the lot from it is reading a fact, not guessing: the alternative is a directed pick of a
+        // tracked item that cannot say what it picked.
+        ConfigureQueue(0);
+        EnsureLocationAndBin();
+        CreateUnitWithLot(HandlingUnit, HandlingUnitLine, 'WHA-TRK-HU-1', 'LOT-ONE', '');
+
+        WarehouseTask.Init();
+        WarehouseTask."No." := 'WHA-TRK-01';
+        WarehouseTask."Location Code" := TestLocationTok;
+        WarehouseTask."Handling Unit No." := HandlingUnit."No.";
+        WarehouseTask."Item No." := CopyStr(TestItemTok, 1, 20);
+        WarehouseTask.Quantity := 1;
+        WarehouseTask.Insert(true);
+
+        Assert.AreEqual('LOT-ONE', WarehouseTask."Lot No.", 'A pallet with one lot on it says which lot the job is for.');
+    end;
+
+    [Test]
+    procedure AJobTakesNoLotFromAMixedPallet()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        // [SCENARIO] Two lots of the same item on one pallet is exactly the case where guessing would be
+        // wrong, and it is the case bin content has always been wrong about. The job is left blank for
+        // somebody who can see the label to fill in.
+        ConfigureQueue(0);
+        EnsureLocationAndBin();
+        CreateUnitWithLot(HandlingUnit, HandlingUnitLine, 'WHA-TRK-HU-2', 'LOT-A', '');
+        AddUnitLine(HandlingUnit."No.", 20000, 'LOT-B', '');
+
+        WarehouseTask.Init();
+        WarehouseTask."No." := 'WHA-TRK-02';
+        WarehouseTask."Location Code" := TestLocationTok;
+        WarehouseTask."Handling Unit No." := HandlingUnit."No.";
+        WarehouseTask."Item No." := CopyStr(TestItemTok, 1, 20);
+        WarehouseTask.Quantity := 1;
+        WarehouseTask.Insert(true);
+
+        Assert.AreEqual('', WarehouseTask."Lot No.", 'A pallet holding two lots does not say which one the job is for.');
+    end;
+
+    [Test]
+    procedure ALotAlreadyOnTheJobIsNotOverwritten()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        // [SCENARIO] Whoever raised the work may know something the pallet does not — a partner system
+        // asking for one lot out of a pallet it believes holds several. What they asked for wins.
+        ConfigureQueue(0);
+        EnsureLocationAndBin();
+        CreateUnitWithLot(HandlingUnit, HandlingUnitLine, 'WHA-TRK-HU-3', 'LOT-FROM-UNIT', '');
+
+        WarehouseTask.Init();
+        WarehouseTask."No." := 'WHA-TRK-03';
+        WarehouseTask."Location Code" := TestLocationTok;
+        WarehouseTask."Handling Unit No." := HandlingUnit."No.";
+        WarehouseTask."Item No." := CopyStr(TestItemTok, 1, 20);
+        WarehouseTask."Lot No." := 'LOT-ASKED-FOR';
+        WarehouseTask.Quantity := 1;
+        WarehouseTask.Insert(true);
+
+        Assert.AreEqual('LOT-ASKED-FOR', WarehouseTask."Lot No.", 'What the work asked for should survive.');
+    end;
+
+    [Test]
+    procedure AJobWithNoPalletTakesNoLot()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        // [SCENARIO] An item job with no pallet behind it has nothing to read a lot from, and must not
+        // invent one. This is the case the register still calls open: the operator cannot yet say what
+        // they picked, because nothing on the handheld asks them.
+        ConfigureQueue(0);
+        CreateWorkableTask(WarehouseTask, 'WHA-TRK-04');
+
+        Assert.AreEqual('', WarehouseTask."Lot No.", 'There is nothing to take a lot from.');
+        Assert.AreEqual('', WarehouseTask."Serial No.", 'And nothing to take a serial number from.');
+    end;
+
     local procedure ConfigureQueue(MaxOpenTasks: Integer)
     var
         Setup: Record "WHA Warehouse Task Setup";
@@ -1286,6 +1377,32 @@ codeunit 51001 "WHA Warehouse Task Tests"
             TaskLogic.Release(WarehouseTask);
         TaskLogic.Assign(WarehouseTask, CopyStr(UserId(), 1, MaxStrLen(WarehouseTask."Assigned To User ID")));
         TaskLogic.Start(WarehouseTask);
+    end;
+
+
+    local procedure CreateUnitWithLot(var HandlingUnit: Record "WHA Handling Unit"; var HandlingUnitLine: Record "WHA Handling Unit Line"; UnitNo: Code[20]; LotNo: Code[50]; SerialNo: Code[50])
+    begin
+        HandlingUnit.Init();
+        HandlingUnit."No." := UnitNo;
+        HandlingUnit."Location Code" := TestLocationTok;
+        HandlingUnit.Insert(true);
+
+        AddUnitLine(UnitNo, 10000, LotNo, SerialNo);
+        HandlingUnitLine.Get(UnitNo, 10000);
+    end;
+
+    local procedure AddUnitLine(UnitNo: Code[20]; LineNo: Integer; LotNo: Code[50]; SerialNo: Code[50])
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := UnitNo;
+        HandlingUnitLine."Line No." := LineNo;
+        HandlingUnitLine."Item No." := CopyStr(TestItemTok, 1, 20);
+        HandlingUnitLine."Lot No." := LotNo;
+        HandlingUnitLine."Serial No." := SerialNo;
+        HandlingUnitLine.Quantity := 1;
+        HandlingUnitLine.Insert(true);
     end;
 
 }

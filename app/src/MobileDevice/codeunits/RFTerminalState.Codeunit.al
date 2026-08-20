@@ -128,6 +128,8 @@ codeunit 50104 "WHA RF Terminal State"
         JobObjectValue.Add('toBin', WarehouseTask."To Bin Code");
         JobObjectValue.Add('handlingUnit', WarehouseTask."Handling Unit No.");
         JobObjectValue.Add('item', WarehouseTask."Item No.");
+        JobObjectValue.Add('lot', WarehouseTask."Lot No.");
+        JobObjectValue.Add('serial', WarehouseTask."Serial No.");
         JobObjectValue.Add('quantity', WarehouseTask.Quantity);
         JobObjectValue.Add('unitOfMeasure', WarehouseTask."Unit of Measure Code");
         exit(JobObjectValue);

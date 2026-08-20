@@ -64,6 +64,14 @@ page 50203 "WHA API Warehouse Task"
                 {
                     Caption = 'Variant code';
                 }
+                field(lotNumber; Rec."Lot No.")
+                {
+                    Caption = 'Lot number';
+                }
+                field(serialNumber; Rec."Serial No.")
+                {
+                    Caption = 'Serial number';
+                }
                 field(quantity; Rec.Quantity)
                 {
                     Caption = 'Quantity';

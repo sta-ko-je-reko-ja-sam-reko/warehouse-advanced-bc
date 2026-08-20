@@ -364,6 +364,11 @@ Two things stay out of the automated suite and belong in the integration test pl
   [../inventory-posting.md](../inventory-posting.md) for what that leaves untested. Directed put-away
   and pick locations are now **handled** — the bins are adjusted separately from the ledger, as such a
   location requires — but handled is not the same as proven, and none of it has run against one.
+- ~~**A tracked item will be refused by the posting check.**~~ **That claim was wrong**, and had been
+  repeated here since segment 2 without anybody reading the base application. Business Central checks
+  the journal line''s own lot and serial fields, which this app sets, and this feature already raises one
+  request line per lot. What is new is that the app now refuses a line **missing** the tracking its item
+  requires, before handing anything over — see [../inventory-posting.md](../inventory-posting.md).
 - **No dimensions, and no cost on a positive adjustment.** An adjustment carries the item's own
   defaults and nothing from the count, the location or the sheet.
 - **A closed sheet cannot be reopened.** A posting made in error is corrected in Business Central, not

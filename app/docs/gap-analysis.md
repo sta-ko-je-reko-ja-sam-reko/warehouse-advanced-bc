@@ -223,7 +223,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Blind counting | Partly | Delivered | | |
 | Tolerance and variance approval | None | Delivered | | |
 | Posting the difference | Physical inventory journal | Delivered, including at a directed put-away and pick location, where the bins are adjusted separately from the ledger — **never yet run against the ledger** | | |
-| Counting by lot or serial | Item tracking | Fields exist on the count line | | |
+| Counting by lot or serial | Item tracking | Fields exist on the count line, and a line missing the tracking its item requires is now refused before posting | | |
 | ABC- or event-driven count triggering | Counting periods | **None** — counting is the one feature with no scheduler | | |
 | Recount cycle | Recount on the journal | None | | |
 

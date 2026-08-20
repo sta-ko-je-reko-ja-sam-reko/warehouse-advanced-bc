@@ -26,6 +26,27 @@ codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
     /// Assigns the number from the foundation series and the defaults a new count sheet needs.
     /// </summary>
     /// <param name="CountSheet">The count sheet being inserted.</param>
+    /// <summary>
+    /// Answers the expected quantity that may be shown on a printed sheet.
+    /// </summary>
+    /// <remarks>
+    /// A blind count works by the counter not knowing what the system expects. Printing that number on
+    /// the sheet they carry defeats the whole feature, silently, and a report is the easiest place in
+    /// the app for it to happen — nothing about a layout tells you what it leaks.
+    ///
+    /// So the decision lives here rather than in a report trigger where no test can reach it. The report
+    /// asks; it does not decide.
+    /// </remarks>
+    /// <param name="CountSheet">The sheet being printed.</param>
+    /// <param name="CountSheetLine">The line being printed.</param>
+    /// <returns>The expected quantity, or zero when the sheet is blind.</returns>
+    procedure ExpectedQuantityToPrint(var CountSheet: Record "WHA Count Sheet"; var CountSheetLine: Record "WHA Count Sheet Line"): Decimal
+    begin
+        if CountSheet.Blind then
+            exit(0);
+        exit(CountSheetLine."Expected Quantity");
+    end;
+
     procedure Trigger_OnInsert(var CountSheet: Record "WHA Count Sheet")
     var
         Setup: Record "WHA Count Setup";

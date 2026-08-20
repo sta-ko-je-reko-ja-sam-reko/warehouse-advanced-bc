@@ -77,7 +77,8 @@ in different modules cannot collide. Test objects use `51000..51999`.
 | Analytics | `Analytics` | 50700–50749 | Standard warehouse reports | Operational KPI queries, throughput and dock-to-stock measures |
 | Posting | `Posting` | 50750–50799 | Item journal, physical inventory journal | A shared way for any feature to change what Business Central believes is in stock, chosen per feature: not at all, a journal line somebody posts, or straight to the ledger. **Not a feature** — no toggle, no wizard step, no application area of its own |
 | Warehouse registration | `Registration` | 50800–50849 | Warehouse journal, warehouse activity registering | A shared way for any feature to tell Business Central what happened to the goods in a bin — moved between two bins, added to one, or taken out of one. A move is chosen per feature; an adjustment is the other half of writing to the item ledger and is not optional. **Not a feature** — no toggle, no wizard step, no application area of its own |
-| _reserved_ | — | 50850–50999 | — | Unallocated headroom |
+| Telemetry | `Telemetry` | 50850–50899 | Application Insights, `Feature Telemetry` | A shared way for the app's unattended runs to say what they did. **Not a feature** — no toggle, no wizard step, no application area of its own. Emits system metadata only, by the shape of its procedures |
+| _reserved_ | — | 50900–50999 | — | Unallocated headroom |
 
 ## Sequencing note
 

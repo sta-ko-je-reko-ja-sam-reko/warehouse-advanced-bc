@@ -1,6 +1,7 @@
 namespace WarehouseAdvanced.Slotting;
 
 using WarehouseAdvanced.Core;
+using WarehouseAdvanced.Telemetry;
 
 codeunit 50307 "WHA Slotting Scheduler"
 {
@@ -9,6 +10,9 @@ codeunit 50307 "WHA Slotting Scheduler"
 
     var
         LocationFilterMissingErr: Label 'Set a location code filter on the job queue entry before scheduling the slotting analysis. Analysing a location replaces everything known about it, so a run that swept every location would wipe the classes of any site that simply had a quiet period.';
+        FeatureNameTok: Label 'Slotting', Locked = true;
+        RunNameTok: Label 'Re-measure velocity and propose moves', Locked = true;
+        NoHistoryTok: Label 'Nothing has moved at this location', Locked = true;
 
     /// <summary>
     /// Re-measures how fast every item moves at a location and proposes the moves that follow from it.
@@ -20,6 +24,7 @@ codeunit 50307 "WHA Slotting Scheduler"
     trigger OnRun()
     var
         SlottingMgt: Codeunit "WHA Slotting Mgt.";
+        Telemetry: Codeunit "WHA Telemetry";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
         LocationCode: Code[10];
     begin
@@ -29,9 +34,11 @@ codeunit 50307 "WHA Slotting Scheduler"
         if LocationCode = '' then
             Error(LocationFilterMissingErr);
 
-        if SlottingMgt.Analyse(LocationCode, 0D, 0D) = 0 then
+        if SlottingMgt.Analyse(LocationCode, 0D, 0D) = 0 then begin
+            Telemetry.LogRunSkipped(FeatureNameTok, RunNameTok, NoHistoryTok);
             exit;
+        end;
 
-        SlottingMgt.Propose(LocationCode);
+        Telemetry.LogScheduledRun(FeatureNameTok, RunNameTok, SlottingMgt.Propose(LocationCode));
     end;
 }

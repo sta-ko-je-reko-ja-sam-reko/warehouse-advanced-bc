@@ -5,6 +5,7 @@ using Microsoft.Foundation.UOM;
 using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Journal;
+using Microsoft.Warehouse.Setup;
 using Microsoft.Warehouse.Structure;
 
 codeunit 50801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
@@ -15,13 +16,13 @@ codeunit 50801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
         DescriptionLbl: Label 'Every finished job is registered as a warehouse movement. Business Central''s bin content and warehouse entries follow the floor, so the app and the ledger never hold two different pictures of the same shelf.';
 
     /// <summary>
-    /// Registers every move on the request as a warehouse movement, through the same codeunit Business
-    /// Central registers its own put-aways and picks with. A move at a location that keeps no bins is
-    /// skipped rather than refused: there is no bin-level record there for a warehouse entry to be true
-    /// about, so the app moving the goods in its own records is the whole of it.
+    /// Registers everything on the request, through the same codeunit Business Central registers its own
+    /// put-aways, picks and movements with. A change at a location that keeps no bins is skipped rather
+    /// than refused: there is no bin-level record there for a warehouse entry to be true about, so the
+    /// app recording it in its own records is the whole of it.
     /// </summary>
-    /// <param name="MoveRequest">The moves to record. Each is marked as it goes through.</param>
-    /// <returns>How many moves reached the warehouse entries.</returns>
+    /// <param name="MoveRequest">The changes to record. Each is marked as it goes through.</param>
+    /// <returns>How many changes reached the warehouse entries.</returns>
     procedure Register(var MoveRequest: Record "WHA Whse. Move Request"): Integer
     var
         WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
@@ -68,7 +69,10 @@ codeunit 50801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
         SourceJnl: Option " ",ItemJnl,OutputJnl,ConsumpJnl,WhseJnl;
     begin
         BuildJournalLine(MoveRequest, WarehouseJournalLine);
-        WMSMgt.CheckWhseJnlLine(WarehouseJournalLine, SourceJnl::WhseJnl, 0, false);
+        if MoveRequest."Change Type" = MoveRequest."Change Type"::WHAMove then
+            WMSMgt.CheckWhseJnlLine(WarehouseJournalLine, SourceJnl::WhseJnl, 0, false)
+        else
+            WMSMgt.CheckWhseJnlLine(WarehouseJournalLine, SourceJnl::ItemJnl, 0, false);
         WhseJnlRegisterLine.Run(WarehouseJournalLine);
 
         MoveRequest.Registered := true;
@@ -112,11 +116,7 @@ codeunit 50801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
         WarehouseJournalLine."Variant Code" := MoveRequest."Variant Code";
         WarehouseJournalLine."Registering Date" := RegisteringDateOf(MoveRequest);
         WarehouseJournalLine."User ID" := CopyStr(UserId(), 1, MaxStrLen(WarehouseJournalLine."User ID"));
-        WarehouseJournalLine."Entry Type" := WarehouseJournalLine."Entry Type"::Movement;
-        WarehouseJournalLine."From Zone Code" := ZoneOf(MoveRequest."Location Code", MoveRequest."From Bin Code");
-        WarehouseJournalLine."From Bin Code" := MoveRequest."From Bin Code";
-        WarehouseJournalLine."To Zone Code" := ZoneOf(MoveRequest."Location Code", MoveRequest."To Bin Code");
-        WarehouseJournalLine."To Bin Code" := MoveRequest."To Bin Code";
+        SetEntryTypeAndBins(MoveRequest, WarehouseJournalLine);
         WarehouseJournalLine.Description := MoveRequest.Description;
 
         if Location."Directed Put-away and Pick" then begin
@@ -132,16 +132,49 @@ codeunit 50801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
         WarehouseJournalLine."Qty. (Absolute)" := WarehouseJournalLine.Quantity;
         WarehouseJournalLine."Qty. (Absolute, Base)" := QuantityBase;
 
-        SourceCodeSetup.SetLoadFields("Whse. Movement");
+        SourceCodeSetup.SetLoadFields("Whse. Movement", "Item Journal");
         if SourceCodeSetup.Get() then
-            WarehouseJournalLine."Source Code" := SourceCodeSetup."Whse. Movement";
-        WarehouseJournalLine."Reference Document" := WarehouseJournalLine."Reference Document"::Movement;
+            if MoveRequest."Change Type" = MoveRequest."Change Type"::WHAMove then
+                WarehouseJournalLine."Source Code" := SourceCodeSetup."Whse. Movement"
+            else
+                WarehouseJournalLine."Source Code" := SourceCodeSetup."Item Journal";
+        WarehouseJournalLine."Reference Document" := ReferenceDocumentOf(MoveRequest);
         WarehouseJournalLine."Reference No." := MoveRequest."Reference No.";
 
         WarehouseJournalLine."Lot No." := MoveRequest."Lot No.";
         WarehouseJournalLine."Serial No." := MoveRequest."Serial No.";
         WarehouseJournalLine."New Lot No." := MoveRequest."Lot No.";
         WarehouseJournalLine."New Serial No." := MoveRequest."Serial No.";
+    end;
+
+    local procedure SetEntryTypeAndBins(var MoveRequest: Record "WHA Whse. Move Request"; var WarehouseJournalLine: Record "Warehouse Journal Line")
+    begin
+        case MoveRequest."Change Type" of
+            MoveRequest."Change Type"::WHAMove:
+                WarehouseJournalLine."Entry Type" := WarehouseJournalLine."Entry Type"::Movement;
+            MoveRequest."Change Type"::WHAIncrease:
+                WarehouseJournalLine."Entry Type" := WarehouseJournalLine."Entry Type"::"Positive Adjmt.";
+            MoveRequest."Change Type"::WHADecrease:
+                WarehouseJournalLine."Entry Type" := WarehouseJournalLine."Entry Type"::"Negative Adjmt.";
+        end;
+
+        if MoveRequest."From Bin Code" <> '' then begin
+            WarehouseJournalLine."From Zone Code" := ZoneOf(MoveRequest."Location Code", MoveRequest."From Bin Code");
+            WarehouseJournalLine."From Bin Code" := MoveRequest."From Bin Code";
+        end;
+        if MoveRequest."To Bin Code" <> '' then begin
+            WarehouseJournalLine."To Zone Code" := ZoneOf(MoveRequest."Location Code", MoveRequest."To Bin Code");
+            WarehouseJournalLine."To Bin Code" := MoveRequest."To Bin Code";
+        end;
+    end;
+
+    local procedure ReferenceDocumentOf(var MoveRequest: Record "WHA Whse. Move Request"): Enum "Whse. Reference Document Type"
+    var
+        ReferenceDocument: Enum "Whse. Reference Document Type";
+    begin
+        if MoveRequest."Change Type" = MoveRequest."Change Type"::WHAMove then
+            exit(ReferenceDocument::Movement);
+        exit(ReferenceDocument::"Item Journal");
     end;
 
     local procedure UnitOfMeasureOf(var MoveRequest: Record "WHA Whse. Move Request"; var Item: Record Item): Code[10]

@@ -295,8 +295,9 @@ project develops against.
 
 - **Nothing has been written off for real.** The write-off path is covered by unit tests against a
   recorder and by nothing else: no ledger entry has ever been produced by this code. See
-  [../inventory-posting.md](../inventory-posting.md) for what that leaves untested, including directed
-  put-away and pick locations, which almost certainly do not work.
+  [../inventory-posting.md](../inventory-posting.md) for what that leaves untested. Directed put-away
+  and pick locations are now **handled** — the bins are adjusted separately from the ledger, as such a
+  location requires — but handled is not the same as proven, and none of it has run against one.
 - **A released hold cannot be un-released.** A write-off made in error is corrected in Business
   Central, not by reopening the hold — the hold record is an audit trail and does not go backwards.
 - **Rework writes nothing off, and should not**, but nothing accounts for what rework consumes or

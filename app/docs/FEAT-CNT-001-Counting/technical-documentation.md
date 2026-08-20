@@ -361,8 +361,9 @@ Two things stay out of the automated suite and belong in the integration test pl
   what they are counting.
 - **Nothing has been posted for real.** The posting path is covered by unit tests against a recorder
   and by nothing else: no ledger entry has ever been written by this code. See
-  [../inventory-posting.md](../inventory-posting.md) for what that leaves untested, including directed
-  put-away and pick locations, which almost certainly do not work.
+  [../inventory-posting.md](../inventory-posting.md) for what that leaves untested. Directed put-away
+  and pick locations are now **handled** — the bins are adjusted separately from the ledger, as such a
+  location requires — but handled is not the same as proven, and none of it has run against one.
 - **No dimensions, and no cost on a positive adjustment.** An adjustment carries the item's own
   defaults and nothing from the count, the location or the sheet.
 - **A closed sheet cannot be reopened.** A posting made in error is corrected in Business Central, not

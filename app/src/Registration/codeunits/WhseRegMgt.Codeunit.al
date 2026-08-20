@@ -12,6 +12,9 @@ codeunit 50802 "WHA Whse. Reg. Mgt."
         LocationMissingErr: Label 'The warehouse move request for item %1 has no location on it, so there is no bin to register it against.', Comment = '%1 = the item number';
         BinMissingErr: Label 'The warehouse move request for item %1 does not say both where the goods came from and where they went, so it is not a move Business Central can record.', Comment = '%1 = the item number';
         SameBinErr: Label 'The warehouse move request for item %1 takes from bin %2 and puts back into bin %2, which is not a move.', Comment = '%1 = the item number; %2 = the bin code';
+        IntoBinMissingErr: Label 'The warehouse request for item %1 does not say which bin the goods were added to.', Comment = '%1 = the item number';
+        OutOfBinMissingErr: Label 'The warehouse request for item %1 does not say which bin the goods were taken out of.', Comment = '%1 = the item number';
+        TwoEndedAdjustmentErr: Label 'The warehouse request for item %1 has a bin at both ends, which makes it a move rather than stock being added or taken away.', Comment = '%1 = the item number';
 
     /// <summary>
     /// Hands the request to the chosen way of recording a move. This is the single place a feature calls,
@@ -55,6 +58,21 @@ codeunit 50802 "WHA Whse. Reg. Mgt."
     end;
 
     /// <summary>
+    /// Registers stock being added to or taken out of a bin, as the other half of writing to the item
+    /// ledger. This is deliberately **not** behind the method enum: where a feature has decided to post,
+    /// telling the warehouse is not a second choice somebody could switch off — it is the rest of the
+    /// same operation, and half of it is worse than neither half.
+    /// </summary>
+    /// <param name="MoveRequest">The changes to record. Marked up in place with what happened to each.</param>
+    /// <returns>How many changes reached the warehouse entries.</returns>
+    internal procedure RegisterAdjustment(var MoveRequest: Record "WHA Whse. Move Request"): Integer
+    var
+        WhseJnlRegistration: Codeunit "WHA Whse. Jnl. Registration";
+    begin
+        exit(WhseJnlRegistration.Register(MoveRequest));
+    end;
+
+    /// <summary>
     /// Answers the next free entry number on a request buffer, so a caller building one does not have to
     /// count its own lines. It reads the buffer, so it **repositions the record** — ask for the number
     /// before calling Init, not after, or the fields just initialised are overwritten.
@@ -75,7 +93,7 @@ codeunit 50802 "WHA Whse. Reg. Mgt."
     /// </summary>
     /// <param name="LocationCode">The location to ask about. Blank counts as keeping no bins.</param>
     /// <returns>True when the location is bin mandatory.</returns>
-    internal procedure LocationKeepsBins(LocationCode: Code[10]): Boolean
+    procedure LocationKeepsBins(LocationCode: Code[10]): Boolean
     var
         Location: Record Location;
     begin
@@ -85,6 +103,25 @@ codeunit 50802 "WHA Whse. Reg. Mgt."
         if not Location.Get(LocationCode) then
             exit(false);
         exit(Location."Bin Mandatory");
+    end;
+
+    /// <summary>
+    /// Answers whether a location runs directed put-away and pick. It is a public question because the
+    /// answer changes what any caller may do: at such a location bins live in warehouse entries alone,
+    /// an item journal line carries no bin at all, and the two halves have to be written separately.
+    /// </summary>
+    /// <param name="LocationCode">The location to ask about. Blank counts as not directed.</param>
+    /// <returns>True when the location runs directed put-away and pick.</returns>
+    procedure LocationIsDirected(LocationCode: Code[10]): Boolean
+    var
+        Location: Record Location;
+    begin
+        if LocationCode = '' then
+            exit(false);
+        Location.SetLoadFields("Directed Put-away and Pick");
+        if not Location.Get(LocationCode) then
+            exit(false);
+        exit(Location."Directed Put-away and Pick");
     end;
 
     /// <summary>
@@ -101,9 +138,29 @@ codeunit 50802 "WHA Whse. Reg. Mgt."
             Error(QuantityMissingErr, MoveRequest."Item No.");
         if MoveRequest."Location Code" = '' then
             Error(LocationMissingErr, MoveRequest."Item No.");
-        if (MoveRequest."From Bin Code" = '') or (MoveRequest."To Bin Code" = '') then
-            Error(BinMissingErr, MoveRequest."Item No.");
-        if MoveRequest."From Bin Code" = MoveRequest."To Bin Code" then
-            Error(SameBinErr, MoveRequest."Item No.", MoveRequest."From Bin Code");
+
+        case MoveRequest."Change Type" of
+            MoveRequest."Change Type"::WHAMove:
+                begin
+                    if (MoveRequest."From Bin Code" = '') or (MoveRequest."To Bin Code" = '') then
+                        Error(BinMissingErr, MoveRequest."Item No.");
+                    if MoveRequest."From Bin Code" = MoveRequest."To Bin Code" then
+                        Error(SameBinErr, MoveRequest."Item No.", MoveRequest."From Bin Code");
+                end;
+            MoveRequest."Change Type"::WHAIncrease:
+                begin
+                    if MoveRequest."To Bin Code" = '' then
+                        Error(IntoBinMissingErr, MoveRequest."Item No.");
+                    if MoveRequest."From Bin Code" <> '' then
+                        Error(TwoEndedAdjustmentErr, MoveRequest."Item No.");
+                end;
+            MoveRequest."Change Type"::WHADecrease:
+                begin
+                    if MoveRequest."From Bin Code" = '' then
+                        Error(OutOfBinMissingErr, MoveRequest."Item No.");
+                    if MoveRequest."To Bin Code" <> '' then
+                        Error(TwoEndedAdjustmentErr, MoveRequest."Item No.");
+                end;
+        end;
     end;
 }

@@ -18,6 +18,12 @@ table 50800 "WHA Whse. Move Request"
             DataClassification = CustomerContent;
             ToolTip = 'Specifies the position of the move within the request.';
         }
+        field(2; "Change Type"; Enum "WHA Whse. Change Type")
+        {
+            Caption = 'Change type';
+            DataClassification = CustomerContent;
+            ToolTip = 'Specifies what happened to the goods. A move has a bin at both ends; the goods being added to or taken out of a bin has one end only, because the other end is the item ledger.';
+        }
         field(10; "Item No."; Code[20])
         {
             Caption = 'Item no.';

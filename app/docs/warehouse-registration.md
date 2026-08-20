@@ -19,11 +19,27 @@ inventory — is taken from the picture that was never updated.
 The decision recorded here is that **Business Central owns bin-level stock**. Where it keeps bins,
 what it believes is what is true, and the app's job is to keep it that way.
 
+## What it records
+
+Three things can happen to goods, and the module records all three:
+
+| Change | Warehouse journal shape | Raised by |
+|---|---|---|
+| **Moved** from one bin to another | `Movement`, a bin at each end | A finished job — `FEAT-TASK-001` |
+| **Added** to a bin | `Positive Adjmt.`, one bin | A posting at a directed location — see [inventory-posting.md](inventory-posting.md) |
+| **Taken out** of a bin | `Negative Adjmt.`, one bin | The same |
+
+A move is a choice — a warehouse decides whether to tell Business Central, and the setting ships off.
+An adjustment is **not** a choice: it is raised only where a feature has already decided to write to
+the item ledger, and at a directed location the bins are the other half of that same write. Half of it
+is worse than neither half, so `RegisterAdjustment` is called directly rather than through the method
+enum.
+
 ## What it does
 
-A finished job is turned into a `Warehouse Journal Line` with `Entry Type = Movement`, a from-bin and
-a to-bin, and handed to `Whse. Jnl.-Register Line` — codeunit 7301, the same one the base application
-registers its own put-aways, picks and movements with. That produces two warehouse entries, maintains
+A change is turned into a `Warehouse Journal Line` and handed to `Whse. Jnl.-Register Line` — codeunit
+7301, the same one the base application registers its own put-aways, picks and movements with. A move
+carries `Entry Type = Movement` with a bin at each end; That produces two warehouse entries, maintains
 bin content on both ends, and writes a warehouse register, exactly as a movement registered through a
 warehouse activity does.
 
@@ -33,8 +49,15 @@ quantity is expressed in the line's unit of measure or in the item's base unit. 
 this app writes is meant to be indistinguishable from one the base application wrote, because
 anything that can tell them apart is a report that will one day disagree with itself.
 
-Before registering, the line goes through `WMS Management.CheckWhseJnlLine` with the same source
-option the warehouse journal page uses. That is what refuses a move the from-bin cannot supply, or a
+Before registering, the line goes through `WMS Management.CheckWhseJnlLine`. A move is checked as the
+warehouse journal page checks its own lines; an adjustment is checked as an **item journal** line
+instead, and the difference is not cosmetic: the warehouse-journal option reaches `CheckAdjBinCode`,
+which reads a warehouse journal *template* by name. Requiring one would mean asking every warehouse to
+configure a template and a per-location batch for adjustments this app never leaves in a journal. The
+item-journal option skips that check — the only rule in it is that the counterpart bin is the
+adjustment bin, and this module has no counterpart bin at all — while keeping the ones that matter:
+whether the bin holds what is being taken out of it, and whether the bin will accept what is being put
+into it. That is what refuses a move the from-bin cannot supply, or a
 bin whose warehouse class does not accept the item. Those refusals are Business Central's own rules
 about its own bins, and the app does not second-guess them: if the check fails, the job does not
 finish.
@@ -76,8 +99,8 @@ caller can see which of its moves reached Business Central and find the entry it
 
 This is the part worth reading twice, because what the module *refuses* to do is most of its value.
 
-A move is registered only when **both ends are known bins at one location**. Everything else produces
-nothing:
+A **move** is registered only when **both ends are known bins at one location**. Everything else
+produces nothing:
 
 - **A pick that ends at a shipment has no destination bin.** What happens to that stock is decided by
   posting the shipment. Registering a one-sided movement here would be an adjustment the app never
@@ -88,8 +111,12 @@ nothing:
 - **A location that keeps no bins** has no bin-level record to keep true. That move is *passed over*,
   not refused — nothing is wrong with it, there is simply nothing there to record it against.
 
-A line that is malformed rather than inapplicable — no item, no quantity, no location, one bin, or
-the same bin twice — is an error, and it names which. That distinction is the whole design: a caller
+An **adjustment** is the mirror of that rule: it must have exactly **one** end. A bin at both ends
+means the goods went somewhere, which is a move, and recording it as an adjustment would say stock
+appeared in one place and vanished from another.
+
+A line that is malformed rather than inapplicable — no item, no quantity, no location, the wrong
+number of bins, or the same bin twice — is an error, and it names which. That distinction is the whole design: a caller
 that builds nonsense hears about it immediately, and a warehouse that is simply configured
 differently is not shouted at.
 
@@ -97,7 +124,8 @@ differently is not shouted at.
 
 | Feature | When | What it registers |
 |---|---|---|
-| `FEAT-TASK-001` directed work | Finishing a job, in full or short | A job naming a handling unit registers **every line on the unit**, because that is what the app moves. A job naming only an item registers that item, at the quantity the operator actually handled. |
+| `FEAT-TASK-001` directed work | Finishing a job, in full or short | A **move**. A job naming a handling unit registers every line on the unit, because that is what the app moves. A job naming only an item registers that item, at the quantity the operator actually handled. |
+| `app/src/Posting/` | Posting a count difference or a write-off at a **directed** location | An **adjustment**, into or out of the bin, as the other half of the item ledger entry. Not behind the method enum — see above. |
 
 The call sits **before** the app moves the handling unit, and the ordering is load-bearing: the bin
 the goods came from is readable then and is not afterwards. It also means a move Business Central
@@ -117,7 +145,7 @@ The same split as posting, and the same honest limit.
 
 ## Known gaps
 
-- **Nothing registers on a directed put-away and pick location has been proven.** The code has the
+- **Nothing on a directed put-away and pick location has been proven.** The code has the
   branch for it, taken from the base application, and the zone codes are read from the bin. Whether a
   real WMS location accepts what this builds is untested, and that is where the standard checks are
   strictest.

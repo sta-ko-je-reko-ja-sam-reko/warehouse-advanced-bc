@@ -1576,6 +1576,128 @@ codeunit 51001 "WHA Warehouse Task Tests"
         Bin.Insert();
     end;
 
+    [Test]
+    procedure AWarehouseActivityPairBecomesOneJobWithBothEnds()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+        TaskType: Enum "WHA Warehouse Task Type";
+    begin
+        // [SCENARIO] Business Central splits a movement into a take from one bin and a place into another.
+        // One job is that pair, not two jobs, and it carries both ends — which no document source can give.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateActivityPair('WHA-ACT-01', 3);
+
+        Assert.AreEqual(1, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseActivity, 'WHA-ACT-01'), 'A take and its place are one job.');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAWhseActivity, 'WHA-ACT-01', 10000);
+        Assert.AreEqual(TaskType::WHAMovement, WarehouseTask."Task Type", 'A movement activity becomes a movement.');
+        Assert.AreEqual(CopyStr(TestBinTok, 1, 20), WarehouseTask."From Bin Code", 'The job starts at the take line''s bin.');
+        Assert.AreEqual('WHATEST-02', WarehouseTask."To Bin Code", 'The job ends at the place line''s bin.');
+        Assert.AreEqual(3, WarehouseTask.Quantity, 'The job asks for what the activity still wants handled.');
+    end;
+
+    [Test]
+    procedure AnActivityAlreadyOnTheQueueIsNotRaisedTwice()
+    var
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] The same rule every other source follows.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateActivityPair('WHA-ACT-02', 3);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAWhseActivity, 'WHA-ACT-02');
+
+        Assert.AreEqual(0, TaskSourceMgt.GenerateFrom(SourceType::WHAWhseActivity, 'WHA-ACT-02'), 'Running it again should raise nothing.');
+    end;
+
+    [Test]
+    procedure TwoKindsOfActivitySharingANumberAreRefused()
+    var
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] An activity is identified by its kind and its number, and a task has room for one
+        // code. Business Central numbers each kind separately so this is rare — and rare is not a reason
+        // to guess when the answer decides which stock moves.
+        ConfigureQueue(0);
+        CreateActivityPair('WHA-ACT-03', 3);
+        AddActivityLine('WHA-ACT-03', 30000, ActivityTypePick(), ActionTake(), CopyStr(TestBinTok, 1, 20), 1);
+
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseActivity, 'WHA-ACT-03');
+
+        Assert.ExpectedError('More than one kind of warehouse activity');
+    end;
+
+    [Test]
+    procedure AnActivityNobodyRaisedIsRefused()
+    var
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Asking for work from an activity that does not exist is a mistake, not an empty queue.
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseActivity, 'WHA-ACT-NONE');
+
+        Assert.ExpectedError('has no lines');
+    end;
+
+    local procedure ActivityTypeMovement(): Enum "Warehouse Activity Type"
+    var
+        ActivityType: Enum "Warehouse Activity Type";
+    begin
+        exit(ActivityType::Movement);
+    end;
+
+    local procedure ActivityTypePick(): Enum "Warehouse Activity Type"
+    var
+        ActivityType: Enum "Warehouse Activity Type";
+    begin
+        exit(ActivityType::Pick);
+    end;
+
+    local procedure ActionTake(): Enum "Warehouse Action Type"
+    var
+        ActionType: Enum "Warehouse Action Type";
+    begin
+        exit(ActionType::Take);
+    end;
+
+    local procedure ActionPlace(): Enum "Warehouse Action Type"
+    var
+        ActionType: Enum "Warehouse Action Type";
+    begin
+        exit(ActionType::Place);
+    end;
+
+    local procedure CreateActivityPair(ActivityNo: Code[20]; Quantity: Decimal)
+    begin
+        EnsureLocationAndBin();
+        EnsureTestItem();
+        EnsureSecondBin();
+        AddActivityLine(ActivityNo, 10000, ActivityTypeMovement(), ActionTake(), CopyStr(TestBinTok, 1, 20), Quantity);
+        AddActivityLine(ActivityNo, 20000, ActivityTypeMovement(), ActionPlace(), 'WHATEST-02', Quantity);
+    end;
+
+    local procedure AddActivityLine(ActivityNo: Code[20]; LineNo: Integer; ActivityType: Enum "Warehouse Activity Type"; ActionType: Enum "Warehouse Action Type"; BinCode: Code[20]; Quantity: Decimal)
+    var
+        WarehouseActivityLine: Record "Warehouse Activity Line";
+    begin
+        WarehouseActivityLine.Init();
+        WarehouseActivityLine."Activity Type" := ActivityType;
+        WarehouseActivityLine."No." := ActivityNo;
+        WarehouseActivityLine."Line No." := LineNo;
+        WarehouseActivityLine."Action Type" := ActionType;
+        WarehouseActivityLine."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        WarehouseActivityLine."Bin Code" := BinCode;
+        WarehouseActivityLine."Item No." := CopyStr(TestItemTok, 1, 20);
+        WarehouseActivityLine.Quantity := Quantity;
+        WarehouseActivityLine."Qty. Outstanding" := Quantity;
+        WarehouseActivityLine.Insert(false);
+    end;
+
     local procedure CreateSourcedTask(TaskNo: Code[20]; SourceNo: Code[20]; NewStatus: Enum "WHA Warehouse Task Status")
     var
         WarehouseTask: Record "WHA Warehouse Task";

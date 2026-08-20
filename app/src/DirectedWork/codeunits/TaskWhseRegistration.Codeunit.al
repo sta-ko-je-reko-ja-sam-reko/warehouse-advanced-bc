@@ -37,6 +37,11 @@ codeunit 50209 "WHA Task Whse. Registration"
     /// to tell it to.
     /// </summary>
     /// <remarks>
+    /// A job raised from a **warehouse activity** produces nothing here at all. Registering that activity
+    /// writes the warehouse entries itself, and registering a movement as well would move the goods
+    /// twice — the same "half of it is worse than neither half" rule the posting module already follows,
+    /// pointing the other way.
+    ///
     /// A job that names a handling unit moves the whole unit, so every line on it is a move. A job that
     /// names only an item moves that item alone. A job whose two ends are not both bins at one location
     /// is not a move Business Central can record, and produces nothing: goods leaving the warehouse are
@@ -52,6 +57,8 @@ codeunit 50209 "WHA Task Whse. Registration"
         FromBinCode: Code[20];
     begin
         if (WarehouseTask."Location Code" = '') or (WarehouseTask."To Bin Code" = '') then
+            exit(0);
+        if WarehouseTask."Source Type" = WarehouseTask."Source Type"::WHAWhseActivity then
             exit(0);
 
         if WarehouseTask."Handling Unit No." <> '' then begin

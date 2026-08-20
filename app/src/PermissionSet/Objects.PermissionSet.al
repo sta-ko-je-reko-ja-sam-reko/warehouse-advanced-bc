@@ -15,6 +15,7 @@ using WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Registration;
 using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.Slotting;
+using WarehouseAdvanced.Telemetry;
 using WarehouseAdvanced.WaveManagement;
 
 permissionset 50000 "WHA Objects"
@@ -314,5 +315,6 @@ permissionset 50000 "WHA Objects"
         table "WHA Whse. Move Request" = X,
         codeunit "WHA Whse. Reg. Mgt." = X,
         codeunit "WHA No Whse. Registration" = X,
-        codeunit "WHA Whse. Jnl. Registration" = X;
+        codeunit "WHA Whse. Jnl. Registration" = X,
+        codeunit "WHA Telemetry" = X;
 }

@@ -61,6 +61,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | **A document can be held until its work is finished** — the last of the three things three separate documents had listed as outstanding. Posting a receipt or shipment decides what Business Central believes happened; while a job raised from it is still on the floor, that is not what the warehouse has done. Behind a setting that ships **off**. It is the app's **first subscriber on a warehouse publisher**: everything else it does inside standard Business Central is a button, and posting has no moment where a user could be asked to press one |
 | Delivered | **Who may be given work.** Business Central keeps a `Warehouse Employee` list, one row per user per location, and its own warehouse pages will not let anybody else in; this app kept its own queue and never consulted it. Now a choice, shipping as *anybody*. The list is read directly rather than through `CheckUserIsWhseEmployeeForLocation`, whose confirm dialog is right on a page and wrong on a handheld, an API call or a job queue |
 | Delivered | **Expiry, as far as it can honestly go.** `Whse. Jnl.-Register Line` tests the expiry date on a positive warehouse entry for an item dated by hand, so the adjustment path shipped two segments ago would have failed on exactly those items. The date is now read back from what Business Central already holds for that lot, through its own `GetWhseExpirationDate`, and carried onto the warehouse journal line. Where nothing is known it is **refused rather than guessed** — the app records no expiry of its own, and that row is still the first of the three the register says to settle |
+| Delivered | **Telemetry on the unattended runs** — [telemetry.md](telemetry.md). Five schedulers and the integration runner are designed to run with nobody watching, and said nothing: a run that did nothing every night for a month looked exactly like one that was working. Two events now go through Business Central's own `Feature Telemetry`. What is **not** emitted is the part worth reading — no item, lot, document, bin, location or person, guaranteed by the shape of the procedures rather than by care at the call sites |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of nine features — most of it blocked on customer facts, though **not as much as was claimed a moment ago**: see §5 |
@@ -430,6 +431,21 @@ since the first commit. Neither is in §4 either. The lesson generalises past th
 this project cannot see is the work no section of this project is about.* Reading §4 again will not
 find it, and neither will reading §5.
 
+**Then it happened a fourth time, and a fifth.** The fourth was the largest yet: asking *what connects
+this app to standard Business Central?* produced eight changes — warehouse registration, posting at a
+directed location, the location-configuration guard, the tracking pre-flight, the document hold,
+warehouse-employee access, and expiry. Not one of them appears in §4, and none was found by reading it.
+Two of them corrected claims this document had been repeating: that a tracked item would be refused by
+the posting check, and that a directed location could run directed work at all.
+
+The fifth came from asking *what happens when nobody is watching?* — five schedulers and the integration
+runner ran unattended and emitted nothing. Also not a feature. Also invisible to §4 and §5.
+
+**Five times now.** The conclusion "there is nothing left to build" has been reached five times and been
+wrong five times, and each time the work was found by asking a question no section of this document was
+about. That is not a run of bad luck; it is what this document is for and what it cannot do. Treat "the
+catalogue is exhausted" as a statement about the catalogue and nothing else.
+
 **The list of catalogue work needing no customer facts is empty. The list of non-catalogue work is not,
 and it is not enumerated anywhere.** What is visible from here:
 
@@ -441,7 +457,9 @@ and it is not enumerated anywhere.** What is visible from here:
 | ~~The incumbent WMS is named throughout the documentation~~ | **Scrubbed.** `CLAUDE.md` forbids naming another vendor's product in this public repo and 25 mentions across six files did it anyway. The vocabulary is now "the incumbent WMS" or "the system being replaced" |
 | ~~**No LICENSE**~~ | **Delivered.** Proprietary, all rights reserved: `LICENSE` grants nothing to anyone reading the public source, and [eula.md](eula.md) is the customer-facing agreement. The EULA is **draft and unreviewed**, with governing law and support terms left visibly unfilled — both are commercial decisions, and a guess there would have been worse than a gap |
 | **`dmom.ai/privacy`, `/eula`, `/help` do not exist** | **Decided: leave the manifest pointing there and carry the debt.** The alternative — repointing at files in this repository — would have made the links resolve today. AppSourceCop validates URL shape only, so the build passes and the links stay dead. This closes before customer delivery, not before the next feature |
+| ~~**The app emits no telemetry**~~ | **Delivered for the unattended runs** — [telemetry.md](telemetry.md). Feature uptake, the guards, errors and durations are all still silent, and that document says so |
 | **No CI.** `.github/workflows/` holds only a `.gitkeep` | And CI would need access to the private `bc-dev-templates` repo |
+| **No upgrade tags.** `WHA Upgrade` re-runs its steps on every upgrade | The steps are idempotent, so this is harmless today. It is undocumented rather than decided, which is how it should be read |
 | **`app/img/AppLogo.png` is a generated placeholder** | Not real branding |
 | **Customer-language getting-started files** | Deliberately deferred until a customer is engaged |
 
@@ -596,7 +614,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 373 automated tests exist across sixteen test codeunits and **not one
+1. **Run the test suite once.** 378 automated tests exist across seventeen test codeunits and **not one
    has ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

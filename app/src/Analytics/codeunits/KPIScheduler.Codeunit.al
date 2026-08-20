@@ -1,11 +1,16 @@
 namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.Core;
+using WarehouseAdvanced.Telemetry;
 
 codeunit 50710 "WHA KPI Scheduler"
 {
     Access = Public;
     TableNo = "WHA KPI Snapshot";
+
+    var
+        FeatureNameTok: Label 'Analytics', Locked = true;
+        RunNameTok: Label 'Capture KPI snapshots', Locked = true;
 
     /// <summary>
     /// Keeps a snapshot of every measure for the setup's period, and fills in the days a run that did not
@@ -17,10 +22,13 @@ codeunit 50710 "WHA KPI Scheduler"
     /// <param name="Rec">A snapshot record whose Location Code filter, if any, limits the capture to one site.</param>
     trigger OnRun()
     var
+        Telemetry: Codeunit "WHA Telemetry";
         KpiMgt: Codeunit "WHA KPI Mgt.";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
+        Handled: Integer;
     begin
         FeatureMgt.CheckEnabled(Enum::"WHA Feature"::WHAAnalytics);
-        KpiMgt.CaptureMissing(CopyStr(Rec.GetFilter("Location Code"), 1, MaxStrLen(Rec."Location Code")));
+        Handled := KpiMgt.CaptureMissing(CopyStr(Rec.GetFilter("Location Code"), 1, MaxStrLen(Rec."Location Code")));
+        Telemetry.LogScheduledRun(FeatureNameTok, RunNameTok, Handled);
     end;
 }

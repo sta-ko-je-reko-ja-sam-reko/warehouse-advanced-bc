@@ -1,11 +1,16 @@
 namespace WarehouseAdvanced.LabourManagement;
 
 using WarehouseAdvanced.Core;
+using WarehouseAdvanced.Telemetry;
 
 codeunit 50358 "WHA Labour Scheduler"
 {
     Access = Public;
     TableNo = "WHA Labour Entry";
+
+    var
+        FeatureNameTok: Label 'Labour management', Locked = true;
+        RunNameTok: Label 'Measure finished work', Locked = true;
 
     /// <summary>
     /// Turns finished warehouse work into measured time. Point a job queue entry at this codeunit and
@@ -25,11 +30,14 @@ codeunit 50358 "WHA Labour Scheduler"
     /// </remarks>
     trigger OnRun()
     var
+        Telemetry: Codeunit "WHA Telemetry";
         LabourMgt: Codeunit "WHA Labour Mgt.";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
+        Handled: Integer;
     begin
         FeatureMgt.CheckEnabled(Enum::"WHA Feature"::WHALabourManagement);
-        LabourMgt.Generate(CopyStr(Rec.GetFilter("Location Code"), 1, MaxStrLen(Rec."Location Code")), LookBackFrom(), 0D);
+        Handled := LabourMgt.Generate(CopyStr(Rec.GetFilter("Location Code"), 1, MaxStrLen(Rec."Location Code")), LookBackFrom(), 0D);
+        Telemetry.LogScheduledRun(FeatureNameTok, RunNameTok, Handled);
     end;
 
     local procedure LookBackFrom(): Date

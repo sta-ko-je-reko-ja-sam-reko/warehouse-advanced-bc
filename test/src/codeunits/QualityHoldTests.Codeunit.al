@@ -649,4 +649,130 @@ codeunit 51009 "WHA Quality Hold Tests"
         Setup."WHA Enabled" := true;
         Setup.Modify(true);
     end;
+    [Test]
+    procedure RecordingTheHoldOnlyTouchesNothingInBusinessCentral()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        HoldRecordsOnly: Codeunit "WHA Hold Records Only";
+    begin
+        // [SCENARIO] The value a fresh install and every upgrade lands on. Business Central goes on
+        // offering the goods, and the setup page says so rather than leaving it to be discovered.
+        Assert.AreEqual(0, HoldRecordsOnly.Apply(QualityHold, HandlingUnit), 'Recording the hold only should block nothing.');
+        Assert.AreEqual(0, HoldRecordsOnly.Lift(QualityHold, HandlingUnit), 'Recording the hold only should release nothing.');
+        Assert.AreNotEqual('', HoldRecordsOnly.Describe(), 'Every policy should say what it does.');
+    end;
+
+    [Test]
+    procedure EveryHoldStockPolicyExplainsHowFarItReaches()
+    var
+        HoldBlocksBin: Codeunit "WHA Hold Blocks Bin";
+        HoldBlocksLot: Codeunit "WHA Hold Blocks Lot";
+    begin
+        // [SCENARIO] Blocking a lot reaches every warehouse in the company and blocking a bin reaches
+        // everything else standing in it. Neither may be chosen without the page saying so.
+        Assert.AreNotEqual('', HoldBlocksBin.Describe(), 'Blocking the bin should say what it does.');
+        Assert.AreNotEqual('', HoldBlocksLot.Describe(), 'Blocking the lot should say what it does.');
+    end;
+
+    [Test]
+    procedure BlockingABinStopsMovementBothWays()
+    var
+        BinContent: Record "Bin Content";
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        HoldBlocksBin: Codeunit "WHA Hold Blocks Bin";
+    begin
+        // [SCENARIO] Goods under investigation should not be added to either, or the quantity being
+        // questioned changes while somebody is questioning it.
+        EnsureLocation(CopyStr(LocationTok, 1, 10));
+        CreateUnit(HandlingUnit, 'QC-BLK-1', '', HandlingUnit.Status::WHAOpen);
+        AddContents('QC-BLK-1', 4);
+        EnsureBinContent('QC-BLK-1');
+
+        Assert.AreEqual(1, HoldBlocksBin.Apply(QualityHold, HandlingUnit), 'The bin content should have been blocked.');
+
+        BinContent.Get(CopyStr(LocationTok, 1, 10), CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '');
+        Assert.AreEqual(BinContent."Block Movement"::All, BinContent."Block Movement", 'A held bin should be blocked in both directions.');
+    end;
+
+    [Test]
+    procedure ReleasingGivesTheBinBackWhenNobodyElseIsHoldingIt()
+    var
+        BinContent: Record "Bin Content";
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        HoldBlocksBin: Codeunit "WHA Hold Blocks Bin";
+    begin
+        // [SCENARIO] Scrapping is not a reason to leave the block standing: what is scrapped is written
+        // off by posting, and a bin left blocked afterwards holds back the good stock still in it.
+        EnsureLocation(CopyStr(LocationTok, 1, 10));
+        CreateUnit(HandlingUnit, 'QC-BLK-2', '', HandlingUnit.Status::WHAOpen);
+        AddContents('QC-BLK-2', 4);
+        EnsureBinContent('QC-BLK-2');
+        HoldBlocksBin.Apply(QualityHold, HandlingUnit);
+
+        Assert.AreEqual(1, HoldBlocksBin.Lift(QualityHold, HandlingUnit), 'The bin content should have been released.');
+
+        BinContent.Get(CopyStr(LocationTok, 1, 10), CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '');
+        Assert.AreEqual(BinContent."Block Movement"::" ", BinContent."Block Movement", 'A released bin should move again.');
+    end;
+
+    [Test]
+    procedure ABinIsNotGivenBackWhileAnotherHoldStandsOnIt()
+    var
+        BinContent: Record "Bin Content";
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        HoldBlocksBin: Codeunit "WHA Hold Blocks Bin";
+    begin
+        // [SCENARIO] Business Central blocks a bin, not a pallet, so two pallets in one bin share one
+        // block. Releasing the first must not free stock the second is still questioning.
+        EnsureLocation(CopyStr(LocationTok, 1, 10));
+        CreateUnit(HandlingUnit, 'QC-BLK-3', '', HandlingUnit.Status::WHAOpen);
+        AddContents('QC-BLK-3', 4);
+        EnsureBinContent('QC-BLK-3');
+
+        InsertLiveHold(99001, 'QC-BLK-3');
+        QualityHold.Get(99001);
+        HoldBlocksBin.Apply(QualityHold, HandlingUnit);
+
+        InsertLiveHold(99002, 'QC-BLK-3');
+
+        Assert.AreEqual(0, HoldBlocksBin.Lift(QualityHold, HandlingUnit), 'A second live hold on the same bin should keep the block.');
+
+        BinContent.Get(CopyStr(LocationTok, 1, 10), CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '');
+        Assert.AreEqual(BinContent."Block Movement"::All, BinContent."Block Movement", 'The bin should still be blocked.');
+    end;
+
+    local procedure InsertLiveHold(EntryNo: Integer; UnitNo: Code[20])
+    var
+        QualityHold: Record "WHA Quality Hold";
+    begin
+        QualityHold.Init();
+        QualityHold."Entry No." := EntryNo;
+        QualityHold."Handling Unit No." := UnitNo;
+        QualityHold."Location Code" := CopyStr(LocationTok, 1, 10);
+        QualityHold."Bin Code" := CopyStr(BinTok, 1, 20);
+        QualityHold.Status := QualityHold.Status::WHAOnHold;
+        QualityHold.Insert(false);
+    end;
+
+    local procedure EnsureBinContent(UnitNo: Code[20])
+    var
+        BinContent: Record "Bin Content";
+        HandlingUnit: Record "WHA Handling Unit";
+    begin
+        HandlingUnit.Get(UnitNo);
+
+        if BinContent.Get(HandlingUnit."Location Code", HandlingUnit."Bin Code", CopyStr(ItemTok, 1, 20), '', '') then
+            exit;
+
+        BinContent.Init();
+        BinContent."Location Code" := HandlingUnit."Location Code";
+        BinContent."Bin Code" := HandlingUnit."Bin Code";
+        BinContent."Item No." := CopyStr(ItemTok, 1, 20);
+        BinContent.Insert(false);
+    end;
+
 }

@@ -16,6 +16,27 @@ candidate feature catalogue, and the order it should be tackled in.
 > difference between a deliverable project and an undeliverable one.
 >
 > Phase 0 exists to replace §4 with fact. Nothing in §4 should be started before it does.
+>
+> ## Read this second — **there is no customer**
+>
+> Confirmed 2026-08-20: this app has **no specific customer**. It is a product that reimplements the
+> functional footprint of the incumbent WMS in Business Central.
+>
+> That invalidates the framing of everything below, and of [gap-analysis.md](gap-analysis.md) with it.
+> Phase 0 asks for a licence file, a configuration export, transaction volumes, floor observation and
+> operator interviews **at a site**. There is no site. The register cannot be signed off, and the
+> repeated instruction *"do not build this until the register says the customer uses it"* therefore
+> blocks work that will never be unblocked.
+>
+> **The rule that replaces it:** where this document says a decision needs a customer fact, a product
+> answers the same question differently — **pick the least invasive default and make the alternatives
+> swappable**. That is what this app's conventions already require of every other decision: an
+> extensible enum with a `DefaultImplementation`, each value binding its own interface implementation.
+> The first thing built that way is *what a hold does to stock* (§1), which had been sitting in the
+> "needs a customer decision" pile and had three defensible answers, all of which now ship.
+>
+> Read §2 and §4 as an **interview agenda for a customer who does not exist yet** — still the right
+> shape for the day one appears, and no longer a gate on building anything.
 
 ## 1. Where the project stands
 
@@ -62,6 +83,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | **Who may be given work.** Business Central keeps a `Warehouse Employee` list, one row per user per location, and its own warehouse pages will not let anybody else in; this app kept its own queue and never consulted it. Now a choice, shipping as *anybody*. The list is read directly rather than through `CheckUserIsWhseEmployeeForLocation`, whose confirm dialog is right on a page and wrong on a handheld, an API call or a job queue |
 | Delivered | **Expiry, as far as it can honestly go.** `Whse. Jnl.-Register Line` tests the expiry date on a positive warehouse entry for an item dated by hand, so the adjustment path shipped two segments ago would have failed on exactly those items. The date is now read back from what Business Central already holds for that lot, through its own `GetWhseExpirationDate`, and carried onto the warehouse journal line. Where nothing is known it is **refused rather than guessed** — the app records no expiry of its own, and that row is still the first of the three the register says to settle |
 | Delivered | **Telemetry on the unattended runs** — [telemetry.md](telemetry.md). Five schedulers and the integration runner are designed to run with nobody watching, and said nothing: a run that did nothing every night for a month looked exactly like one that was working. Two events now go through Business Central's own `Feature Telemetry`. What is **not** emitted is the part worth reading — no item, lot, document, bin, location or person, guaranteed by the shape of the procedures rather than by care at the call sites |
+| Delivered | **A hold can stop Business Central handing the goods out.** Quality hold quarantined a pallet in this app's records and Business Central went on offering it to orders, planning and picks — the largest remaining functional hole in the app, and the first thing built under the no-customer rule above. Three answers ship as swappable implementations rather than one being guessed at: record only (the default), block movement in the bin, or block the lot. The ordering matters and is the part worth reading — the block is **lifted before the write-off posts**, because a blocked lot would make Business Central refuse the very posting the scrap disposition exists to make |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of nine features — most of it blocked on customer facts, though **not as much as was claimed a moment ago**: see §5 |
@@ -614,7 +636,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 378 automated tests exist across seventeen test codeunits and **not one
+1. **Run the test suite once.** 383 automated tests exist across seventeen test codeunits and **not one
    has ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

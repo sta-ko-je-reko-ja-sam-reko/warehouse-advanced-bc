@@ -108,6 +108,7 @@ permissionset 50000 "WHA Objects"
         page "WHA RF Handheld" = X,
         page "WHA API RF Device" = X,
         codeunit "WHA RF Standard Flow" = X,
+        codeunit "WHA RF Terminal State" = X,
         codeunit "WHA RF Feature Setup" = X,
         codeunit "WHA RF App Area Sub." = X,
         codeunit "WHA Demo RF Device" = X,

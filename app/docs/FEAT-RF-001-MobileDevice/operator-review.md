@@ -24,8 +24,15 @@ swappable interface (`WHA IRFFlow`) precisely so this review can rewrite it.
 **On the floor, with the real app.** What this document was written for, and what actually settles
 the questions. Everything under *Before the session* applies.
 
+**At a desk, with the real screen.** Open **Handheld** in a test company and choose **Simulator**.
+The terminal draws itself as a device and offers the labels within reach as buttons, and everything
+behind it is the real flow: a job finished there is finished. This is the better desk option now
+that it exists, because nothing about it can drift from what the app does.
+
 **At a desk, with the bench.** `tools/rf-simulator/index.html` is the same screen, the same step
-sequence and the same wording, running in a browser with nothing behind it. It needs no company, no
+sequence and the same wording, running in a browser with nothing behind it. It needs no company at
+all, which is the one thing it still does better — hand it to somebody who has no Business Central
+login. Everything else about it is now a second implementation of a thing the app can do itself. It needs no company, no
 sample data, no container and no credential — which is why it exists: this review has been blocked
 on infrastructure rather than on anybody's time since the feature shipped.
 

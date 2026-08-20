@@ -4,6 +4,17 @@
 a browser; there is nothing to install, no server, and no network call. It is one self-contained
 file so it can be mailed, hosted anywhere, or opened from a phone.
 
+## Mostly superseded
+
+The app now has a **control add-in** that draws the same terminal inside Business Central, with a
+**Simulator** action that puts a device frame around it and offers the labels as buttons. That runs
+the real `WHA IRFFlow`, so it cannot drift from what the app does — which is the one problem this
+file has by construction.
+
+Use the bench only for what it still does better: it needs **no Business Central at all**. Hand it to
+somebody with no login, or open it on a phone with nothing installed. For anything else, use
+**Handheld → Simulator** in a test company.
+
 ## Why it exists
 
 [`operator-review.md`](../../app/docs/FEAT-RF-001-MobileDevice/operator-review.md) is the highest

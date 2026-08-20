@@ -19,9 +19,46 @@ page 50103 "WHA RF Handheld"
     {
         area(Content)
         {
+            usercontrol(Terminal; "WHA RF Terminal")
+            {
+                ApplicationArea = WHAMobileDevice;
+
+                trigger Ready()
+                begin
+                    TerminalReady := true;
+                    Refresh();
+                end;
+
+                trigger Scanned(ScannedValue: Text)
+                begin
+                    ScanInput := ScannedValue;
+                    ApplyScan();
+                end;
+
+                trigger NextTaskRequested()
+                begin
+                    TakeNextTask();
+                end;
+
+                trigger ConfirmRequested()
+                begin
+                    ApplyConfirm();
+                end;
+
+                trigger ShortPickRequested()
+                begin
+                    ApplyStartShortPick();
+                end;
+
+                trigger HandBackRequested()
+                begin
+                    ApplyHandBack();
+                end;
+            }
             group(Instruction)
             {
                 Caption = 'What to do';
+                Visible = ClassicVisible;
 
                 field(InstructionText; InstructionText)
                 {
@@ -46,6 +83,7 @@ page 50103 "WHA RF Handheld"
             group(Device)
             {
                 Caption = 'Handheld';
+                Visible = ClassicVisible;
 
                 field(DeviceCode; DeviceCode)
                 {
@@ -89,7 +127,7 @@ page 50103 "WHA RF Handheld"
             group(Job)
             {
                 Caption = 'Your job';
-                Visible = HasJob;
+                Visible = HasJob and ClassicVisible;
 
                 field("No."; Rec."No.")
                 {
@@ -174,6 +212,30 @@ page 50103 "WHA RF Handheld"
                     ApplyShortPick();
                 end;
             }
+            action(SimulatorView)
+            {
+                Caption = 'Simulator';
+                ToolTip = 'Specifies the action that draws the terminal as a handheld and offers the labels within reach as buttons, so the screen can be tried out from a desk. It changes nothing about how the work is done.';
+                Image = Setup;
+
+                trigger OnAction()
+                begin
+                    SimulatorMode := not SimulatorMode;
+                    Refresh();
+                end;
+            }
+            action(ClassicView)
+            {
+                Caption = 'Classic fields';
+                ToolTip = 'Specifies the action that shows the plain Business Central fields underneath the terminal. Use it if the terminal does not appear, or to see a field the terminal does not show.';
+                Image = ViewDetails;
+
+                trigger OnAction()
+                begin
+                    ClassicVisible := not ClassicVisible;
+                    CurrPage.Update(false);
+                end;
+            }
             action(HandBackTask)
             {
                 Caption = 'Hand back';
@@ -208,6 +270,9 @@ page 50103 "WHA RF Handheld"
                 actionref(HandBackTaskRef; HandBackTask)
                 {
                 }
+                actionref(SimulatorViewRef; SimulatorView)
+                {
+                }
             }
         }
     }
@@ -228,6 +293,9 @@ page 50103 "WHA RF Handheld"
         HandledQuantity: Decimal;
         HasJob: Boolean;
         ShortVisible: Boolean;
+        ClassicVisible: Boolean;
+        SimulatorMode: Boolean;
+        TerminalReady: Boolean;
 
     local procedure SignIn()
     begin
@@ -304,10 +372,16 @@ page 50103 "WHA RF Handheld"
     end;
 
     local procedure Refresh()
+    var
+        TerminalState: Codeunit "WHA RF Terminal State";
     begin
         HasJob := Rec."No." <> '';
         ShortVisible := CurrentStep = CurrentStep::WHAShortPick;
         InstructionText := Flow().Instruction(Rec, CurrentStep);
+
+        if TerminalReady then
+            CurrPage.Terminal.Render(TerminalState.Build(Rec, RFDevice, CurrentStep, InstructionText, SimulatorMode));
+
         CurrPage.Update(false);
     end;
 

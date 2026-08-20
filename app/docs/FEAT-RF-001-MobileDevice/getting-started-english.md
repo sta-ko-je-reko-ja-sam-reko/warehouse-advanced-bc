@@ -59,7 +59,32 @@ finding a device that has gone quiet.
 5. Choose **Confirm** to finish. The job is done, the pallet is recorded in its new bin, and you are
    ready for the next one.
 
-**Your job** on the screen shows what you are carrying, where it came from and where it goes.
+**Your job** on the screen shows what you are carrying, where it came from and where it goes. The
+line you have to act on is picked out in yellow, so it is the one thing to look at.
+
+If the terminal does not appear — an old browser, or scripts blocked — choose **Classic fields** and
+the plain Business Central fields come back. Everything works the same way; it is only the look that
+changes.
+
+## Try it from a desk
+
+You do not need a real handheld to see how the screen works.
+
+1. Open **Handheld** on a laptop.
+2. Choose **Simulator**.
+
+The screen is drawn as a device, and the labels you could reach for appear as buttons: the bin the
+job names, the one next to it, the item, and the pallet. Tap one as if you had scanned it.
+
+Two things to know before you judge anything by it:
+
+- **The right label is not the first one.** That is on purpose. Which label somebody reaches for is
+  worth knowing, and putting the right one first would tell you nothing.
+- **It is the real screen, doing the real work.** A job you finish in the simulator is finished. Use
+  a test company.
+
+Choose **Simulator** again to go back. Nobody else is affected — it lasts as long as your session
+and changes no setting.
 
 ## When a scan is refused
 
@@ -100,6 +125,9 @@ while turning the feature on. Switch on **Load sample data** on the same step as
 feature**. It is safe to run more than once.
 
 ## What is not here yet
+
+Nobody has yet used this screen on a real handheld, so treat the way it looks and feels as a first
+attempt rather than a finished thing — and tell whoever asked you to try it what is wrong with it.
 
 There is no way to scan the item or the lot, only the pallet — so an item job is confirmed without
 proving what was picked. You cannot report a wrong item in the bin, or a damaged pallet, other than

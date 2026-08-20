@@ -73,6 +73,24 @@ page 50051 "WHA Handling Unit Card"
 
     actions
     {
+        area(Reporting)
+        {
+            action(PrintContents)
+            {
+                Caption = 'Print contents';
+                ToolTip = 'Print what is on this handling unit, as a contents list to travel with the goods.';
+                ApplicationArea = WHAHandlingUnits;
+                Image = Print;
+
+                trigger OnAction()
+                var
+                    HandlingUnit: Record "WHA Handling Unit";
+                begin
+                    HandlingUnit := Rec;
+                    Report.Run(Report::"WHA Handling Unit Contents", true, false, HandlingUnit);
+                end;
+            }
+        }
         area(Navigation)
         {
             action(AssignLabel)

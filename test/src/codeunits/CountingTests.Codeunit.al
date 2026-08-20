@@ -781,6 +781,41 @@ codeunit 51008 "WHA Counting Tests"
         Item.Modify(false);
     end;
 
+    [Test]
+    procedure ABlindSheetIsPrintedWithoutTheExpectedQuantity()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [SCENARIO] A blind count works by the counter not knowing what the system expects. Printing that
+        // number on the sheet they carry defeats the whole feature, silently — which is why the decision
+        // is here and not in a report layout nobody can test.
+        ConfigureCounting(0, 0);
+        CreateSheet(CountSheet, 'CNT-BLIND-P', SelectionBinContent(), true);
+        CountSheetLogic.AddLine(CountSheet, CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '', '', 12);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+
+        Assert.AreEqual(0, CountSheetLogic.ExpectedQuantityToPrint(CountSheet, CountSheetLine), 'A blind sheet must not print what the system expects.');
+    end;
+
+    [Test]
+    procedure AnOpenSheetIsPrintedWithTheExpectedQuantity()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [SCENARIO] The suppression applies to blind sheets and nothing else. A sheet nobody asked to be
+        // blind prints what it knows.
+        ConfigureCounting(0, 0);
+        CreateSheet(CountSheet, 'CNT-OPEN-P', SelectionBinContent(), false);
+        CountSheetLogic.AddLine(CountSheet, CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '', '', 12);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+
+        Assert.AreEqual(12, CountSheetLogic.ExpectedQuantityToPrint(CountSheet, CountSheetLine), 'A sheet that is not blind should print what the system expects.');
+    end;
+
     local procedure GetOnlyLine(var CountSheetLine: Record "WHA Count Sheet Line"; SheetNo: Code[20])
     begin
         CountSheetLine.Reset();

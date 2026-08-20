@@ -174,7 +174,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Cartonisation | None | **None** — needs item dimensions nobody has confirmed | | |
 | Pack verification against the order | None | A status change; there is nothing to compare against | | |
 | Packaging material consumption | None | None | | |
-| Packing list output | Report layouts | **None — the app ships no report objects at all** | | |
+| Packing list output | Report layouts | Three reports ship, with no layout file — see [reports.md](reports.md). The nearest thing is handling unit contents; there is no packing list as a customer would recognise one | | |
 | Delivery note, CMR, bill of lading | Standard reports | None from this app | | |
 | Load planning and load sequence | None | None | | |
 | Staging bin management | Bin types for ship and receive | None | | |

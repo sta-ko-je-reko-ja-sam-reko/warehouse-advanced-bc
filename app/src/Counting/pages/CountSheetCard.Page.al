@@ -107,6 +107,24 @@ page 50502 "WHA Count Sheet Card"
 
     actions
     {
+        area(Reporting)
+        {
+            action(PrintSheet)
+            {
+                Caption = 'Print sheet';
+                ToolTip = 'Print this count sheet to count against. A blind sheet is printed without the expected quantity.';
+                ApplicationArea = WHACounting;
+                Image = Print;
+
+                trigger OnAction()
+                var
+                    CountSheet: Record "WHA Count Sheet";
+                begin
+                    CountSheet := Rec;
+                    Report.Run(Report::"WHA Count Sheet Print", true, false, CountSheet);
+                end;
+            }
+        }
         area(Processing)
         {
             action(FillSheet)

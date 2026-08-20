@@ -44,6 +44,7 @@ These are not feature documentation and follow no `{MARK}` convention:
 - [warehouse-registration.md](warehouse-registration.md) — how a finished job reaches Business Central's own bins, and why it is not a feature
 - [location-configuration.md](location-configuration.md) — which Business Central location settings this app works with, and which it refuses
 - [telemetry.md](telemetry.md) — what the unattended runs report, and what will never leave the customer's tenant
+- [reports.md](reports.md) — what the app prints, and why none of it ships with a layout file
 
 ## Customer-facing legal text
 

@@ -79,6 +79,24 @@ page 50202 "WHA Warehouse Tasks"
 
     actions
     {
+        area(Reporting)
+        {
+            action(PrintTaskList)
+            {
+                Caption = 'Print list';
+                ToolTip = 'Print the jobs shown here, as a work list to carry onto the floor.';
+                ApplicationArea = WHADirectedWork;
+                Image = Print;
+
+                trigger OnAction()
+                var
+                    WarehouseTask: Record "WHA Warehouse Task";
+                begin
+                    WarehouseTask := Rec;
+                    Report.Run(Report::"WHA Warehouse Task List", true, false, WarehouseTask);
+                end;
+            }
+        }
         area(Processing)
         {
             action(GetNextTask)

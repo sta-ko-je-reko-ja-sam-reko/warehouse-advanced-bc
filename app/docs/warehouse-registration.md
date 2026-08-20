@@ -19,6 +19,9 @@ inventory — is taken from the picture that was never updated.
 The decision recorded here is that **Business Central owns bin-level stock**. Where it keeps bins,
 what it believes is what is true, and the app's job is to keep it that way.
 
+That decision has a consequence for how a location may be set up, and it is not a small one:
+[location-configuration.md](location-configuration.md).
+
 ## What it records
 
 Three things can happen to goods, and the module records all three:

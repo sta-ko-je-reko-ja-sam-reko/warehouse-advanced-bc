@@ -10,6 +10,7 @@ codeunit 51017 "WHA Whse. Registration Tests"
         ToBinTok: Label 'WHAREG-TO', Locked = true;
         BinLocationTok: Label 'WHAREGB', Locked = true;
         DirectedLocationTok: Label 'WHAREGD', Locked = true;
+        ActivityLocationTok: Label 'WHAREGA', Locked = true;
         ItemTok: Label 'WHA-REG-IT', Locked = true;
         OtherItemTok: Label 'WHA-REG-IT2', Locked = true;
 
@@ -167,6 +168,36 @@ codeunit 51017 "WHA Whse. Registration Tests"
         Assert.IsFalse(WhseRegMgt.LocationIsDirected(''), 'No location is not directed.');
         Assert.IsFalse(WhseRegMgt.LocationKeepsBins('WHA-NONE'), 'A location that does not exist keeps no bins.');
         Assert.IsFalse(WhseRegMgt.LocationIsDirected('WHA-NONE'), 'A location that does not exist is not directed.');
+    end;
+
+    [Test]
+    procedure ALocationRequiringItsOwnPutAwayRaisesItsOwnActivities()
+    var
+        Location: Record Location;
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        // [SCENARIO] Where Business Central raises its own put-away or pick, this app must not raise work
+        // for the same goods: neither queue can see the other and an operator is sent twice.
+        EnsureLocation(CopyStr(ActivityLocationTok, 1, 10), true, false);
+        Location.Get(ActivityLocationTok);
+        Location."Require Put-away" := true;
+        Location.Modify(false);
+
+        Assert.IsTrue(WhseRegMgt.LocationRaisesOwnActivities(CopyStr(ActivityLocationTok, 1, 10)), 'A location that requires its own put-away raises its own activities.');
+    end;
+
+    [Test]
+    procedure ALocationLeftToThisAppRaisesNoActivitiesOfItsOwn()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        // [SCENARIO] The configuration this app is built for: Business Central holds the documents and
+        // the bins, and the queue over them is this app's.
+        EnsureLocation(CopyStr(BinLocationTok, 1, 10), true, false);
+
+        Assert.IsFalse(WhseRegMgt.LocationRaisesOwnActivities(CopyStr(BinLocationTok, 1, 10)), 'A location with neither flag raises nothing of its own.');
+        Assert.IsFalse(WhseRegMgt.LocationRaisesOwnActivities(''), 'No location raises nothing of its own.');
+        Assert.IsFalse(WhseRegMgt.LocationRaisesOwnActivities('WHA-NONE'), 'A location that does not exist raises nothing of its own.');
     end;
 
     [Test]

@@ -88,7 +88,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Cross-docking / flow-through | None | None | | |
 | Customer return receipt | Return order, return receipt | None on the warehouse side | | |
 | Inspection or sampling at receipt | None | Quality hold applies only once a unit exists | | |
-| Put-away by rule or template | Put-away templates, bin ranking | A put-away task type; no template engine | | |
+| Put-away by rule or template | Put-away templates, bin ranking | A put-away task type; no template engine. Business Central's own put-away cannot be used alongside it — see [location-configuration.md](location-configuration.md) | | |
 | Put-away fit check (does it go in the bin) | Bin capacity, if maintained | None — a bin is chosen without asking | | |
 | Dock-to-stock elapsed time | None | Two halves shipped; nothing links a put-away to a vehicle | | |
 
@@ -129,7 +129,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 
 | Capability | Standard BC today | This app today | Bucket | Target |
 |---|---|---|---|---|
-| Task queue with priority | Warehouse activity lines | Delivered | | |
+| Task queue with priority | Warehouse activity lines | Delivered, as a queue of its own. It does not create or register `Warehouse Activity Line`, so it cannot run at a location that requires Business Central's own put-away or pick | | |
 | Operator assignment | None | Assigned-to user, with timestamps | | |
 | Partial completion with a reason | Partial handling on the line | Delivered | | |
 | Travel-path sequencing | Sorting by bin ranking | **None** — the task carries nothing spatial | | |

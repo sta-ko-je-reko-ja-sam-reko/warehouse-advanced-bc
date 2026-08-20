@@ -241,6 +241,23 @@ Three things to know:
   is rejected and the job does not finish. That is deliberate: it stops the two records drifting apart
   silently.
 
+## Before you use this at a location with bins
+
+Business Central has a warehouse of its own, and two of its location settings clash with this app.
+
+1. Choose the search icon, enter **Locations**, and open the location you will work at.
+2. Make sure **Require Receive** and **Require Shipment** are **on** — this app raises work from
+   warehouse receipts and warehouse shipments, and without them there are none.
+3. Make sure **Require Put-away** and **Require Pick** are **off**.
+
+If you leave those last two on, Business Central creates its own put-away and pick documents for the
+same goods, and an operator gets sent to the same bin twice. The app will not let that happen: raising
+work from a receipt or shipment at such a location stops with a message naming the location.
+
+**A location with Directed Put-away and Pick cannot be used for this feature at all.** Business Central
+turns all four settings on with it and will not let them off. Counting, quality hold and their posting
+still work at such a location.
+
 ## What is not here yet
 
 **Nothing holds a document open while its work is unfinished.** If you switch on **Write back to the document**, finishing a job fills in what was handled — but a receipt or shipment can still be posted while jobs against it are outstanding, and nothing warns whoever posts it.

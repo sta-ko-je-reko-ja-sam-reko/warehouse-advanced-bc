@@ -135,7 +135,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 
 | Capability | Standard BC today | This app today | Bucket | Target |
 |---|---|---|---|---|
-| Task queue with priority | Warehouse activity lines | Delivered, as a queue of its own. It does not create or register `Warehouse Activity Line`, so it cannot run at a location that requires Business Central's own put-away or pick | | |
+| Task queue with priority | Warehouse activity lines | Delivered, as a queue of its own. It does not create or register `Warehouse Activity Line`, so it cannot run at a location that requires Business Central's own put-away or pick. [scope-fork.md](scope-fork.md) recommends closing that by executing those activities rather than paralleling them | | |
 | Operator assignment | None | Assigned-to user, with timestamps | | |
 | Partial completion with a reason | Partial handling on the line | Delivered | | |
 | Travel-path sequencing | Sorting by bin ranking | **None** — the task carries nothing spatial | | |

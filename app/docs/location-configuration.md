@@ -56,9 +56,10 @@ So a directed location cannot use this app's directed work. What it *can* use:
 That is a real limit on the app, not a preference, and it follows from Business Central owning
 bin-level stock — the decision recorded in
 [warehouse-registration.md](warehouse-registration.md). An app that wanted to run directed work at a
-directed location would have to *be* Business Central's put-away and pick — creating and registering
-`Warehouse Activity Line` records rather than a queue of its own. Nothing in this app does that, and
-whether it should is a scope question the capability register has never been asked.
+directed location would have to work through `Warehouse Activity Line` rather than keep a queue of its
+own. Nothing in this app does that yet, and **that question is now written up and answered**:
+[scope-fork.md](scope-fork.md) recommends executing Business Central's activities rather than
+paralleling or replacing them.
 
 ## Which of Business Central's own warehouse documents this app can read
 
@@ -82,10 +83,9 @@ Transfer orders are not on the list because they do not need to be — a transfe
 flows through a warehouse receipt and a warehouse shipment, both of which are already sources.
 
 **So the honest summary is that the list of document sources is finished**, not partly built, unless the
-app changes shape. Which brings the same fork as the section above: an app that wanted the other four
-would have to *be* Business Central's put-away and pick, creating and registering `Warehouse Activity
-Line` records instead of keeping a queue of its own. That is a different product, and it is the one
-scope decision this project has never actually taken.
+app changes shape. Every one of the four unreachable rows becomes reachable at once if the app works
+through `Warehouse Activity Line` — which is what [scope-fork.md](scope-fork.md) recommends, and why
+that document exists.
 
 ## Bin mandatory, and what registration does
 

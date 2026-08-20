@@ -98,6 +98,9 @@ Central that is hardest to rebuild and least in need of rebuilding.
 
 **It is incremental, and the first segment is small.** The task table keeps its shape.
 
+> **Segment 1 of this is delivered.** Steps 1, 2 and 4 below are built; step 3 turned out to need no code
+> — see *What building it settled*. Everything after remains as written.
+
 1. **A task source that reads `Warehouse Activity Line`.** `WHA ITaskSource` already exists and already
    has four implementations; this is a fifth. `Generate` reads the activity's lines instead of a
    document's, and the task carries the activity type, number and line number.
@@ -113,6 +116,20 @@ Central that is hardest to rebuild and least in need of rebuilding.
 Everything reading `WHA Warehouse Task` — waves, labour, analytics, slotting, the handheld — keeps
 working untouched, because the task table is still the task table. That is the whole reason to take C
 this way rather than by replacing the spine.
+
+## What building it settled
+
+Two things changed in the writing, both worth keeping:
+
+- **The location guard needs no inversion.** Step 3 above assumed the guard would have to be turned
+  around for this source. It does not: a location that raises Business Central activities is one the
+  document sources already refuse, and a location that raises none has no activity lines for this source
+  to read. **The two are mutually exclusive by Business Central's own configuration**, and no rule in
+  this app has to arrange it.
+- **An activity is identified by its kind *and* its number**, and a warehouse task has room for one
+  code. Business Central numbers each kind from a separate series, so a collision is rare — and rare is
+  not a reason to guess when the answer decides which stock moves. Two kinds sharing a number is
+  refused.
 
 ## What this does not settle
 

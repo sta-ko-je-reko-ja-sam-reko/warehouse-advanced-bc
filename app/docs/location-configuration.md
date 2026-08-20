@@ -71,9 +71,9 @@ warehouse documents test the location before they will exist at all:
 | Warehouse receipt | `Require Receive` | **Yes** — a task source since segment 3 |
 | Warehouse shipment | `Require Shipment` | **Yes** — a task source since segment 3 |
 | **Movement worksheet** | `Bin Mandatory` only | **Yes** — a task source, and the shape fits exactly |
-| Whse. internal put-away | `Require Put-away` **and** `Directed Put-away and Pick` | **No** |
+| Whse. internal put-away | `Require Put-away` **and** `Directed Put-away and Pick` | Not as a document — but the **activity** it produces is now readable |
 | Whse. internal pick | `Require Pick` **and** `Directed Put-away and Pick` | **No** |
-| Warehouse pick for production or assembly | `Require Pick` | **No** |
+| Warehouse pick for production or assembly | `Require Pick` | Not as a document — but the **activity** it produces is now readable |
 
 The four marked *No* are not unbuilt. They are **unreachable**: every location they can exist at is a
 location this app refuses to raise work in, because Business Central is already raising its own there.

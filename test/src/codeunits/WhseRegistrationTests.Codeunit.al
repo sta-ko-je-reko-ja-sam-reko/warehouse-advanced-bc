@@ -597,6 +597,27 @@ codeunit 51017 "WHA Whse. Registration Tests"
         Assert.AreEqual(0, Recorder.Recorded(TempRecorded), 'Finishing the job should tell nobody when the warehouse has not asked for it.');
     end;
 
+    [Test]
+    procedure WorkFromAWarehouseActivityRegistersNoMovementOfItsOwn()
+    var
+        TempRecorded: Record "WHA Whse. Move Request" temporary;
+        WarehouseTask: Record "WHA Warehouse Task";
+        Recorder: Codeunit "WHA Test Whse. Reg. Recorder";
+    begin
+        // [SCENARIO] Registering the warehouse activity writes the warehouse entries itself. Registering a
+        // movement as well would move the goods twice — the posting module's "half of it is worse than
+        // neither half" rule, pointing the other way.
+        ConfigureRegistration();
+        Recorder.Forget();
+
+        CreateItemTask(WarehouseTask, 'WHA-REG-ACT');
+        WarehouseTask."Source Type" := WarehouseTask."Source Type"::WHAWhseActivity;
+        WarehouseTask.Modify(false);
+        FinishInFull(WarehouseTask);
+
+        Assert.AreEqual(0, Recorder.Recorded(TempRecorded), 'A job from a warehouse activity should register no movement of its own.');
+    end;
+
     local procedure AddMoveLine(var MoveRequest: Record "WHA Whse. Move Request"; EntryNo: Integer; ItemNo: Code[20]; Quantity: Decimal)
     begin
         MoveRequest.Init();

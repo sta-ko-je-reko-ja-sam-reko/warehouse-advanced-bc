@@ -26,4 +26,9 @@ enum 50203 "WHA Task Source" implements "WHA ITaskSource"
         Caption = 'Movement worksheet';
         Implementation = "WHA ITaskSource" = "WHA Src Movement Wksh.";
     }
+    value(4; WHAWhseActivity)
+    {
+        Caption = 'Warehouse activity';
+        Implementation = "WHA ITaskSource" = "WHA Src Whse. Activity";
+    }
 }

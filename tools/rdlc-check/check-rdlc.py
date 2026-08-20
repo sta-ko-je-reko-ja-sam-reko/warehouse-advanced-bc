@@ -1,9 +1,13 @@
 """Check every RDLC layout in app/ against the AL report it belongs to.
 
-The AL compiler does not do this. Verified against alc 17.0.34.45391: a layout file
-containing nothing but `<Report><Unclosed>` compiles clean, and so does an `RDLCLayout`
-property pointing at a file that does not exist. A layout is therefore the one artefact in
-this repository that can be wrong in a way the build will not notice.
+Verified against alc 17.0.34.45391, the compiler catches some of this and not the rest:
+
+  * malformed XML  -> error AL0444, caught
+  * a missing file -> no error; alc silently *generates* a default layout in its place
+  * Fields!DoesNotExist.Value in a valid layout -> not caught, renders blank
+
+So the build catches a layout that is broken and misses one that is merely wrong, which is
+the more likely mistake and the harder one to see.
 
 This script closes as much of that gap as static checking can:
 

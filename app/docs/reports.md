@@ -35,14 +35,20 @@ through *Report Layouts* without any change here.
 
 Worth knowing before trusting a green build. Verified against `alc 17.0.34.45391`:
 
-| | |
+| Case | What `alc` does |
 |---|---|
-| A layout containing only `<Report><Unclosed>` | **Compiles clean** |
-| `RDLCLayout` pointing at a file that does not exist | **Compiles clean** |
-| Whether the layout is embedded in the built `.app` | Not reported, but it **is** — confirmed by opening the package |
-| The dataset in the layout | **Rewritten by the compiler.** `alc` syncs the report's columns into the `.rdlc` on build and adds a `<Column>Format` companion for each formatted column |
+| Malformed XML | **error AL0444**, naming the file and the parse failure. Caught |
+| `RDLCLayout` pointing at a file that does not exist | **No error** — it silently *generates* a default layout at that path |
+| `Fields!DoesNotExist.Value` in an otherwise valid layout | **Not caught.** It renders blank |
+| The dataset in the layout | **Rewritten.** `alc` syncs the report's columns into the `.rdlc` on build and adds a `<Column>Format` companion for each formatted column |
+| Whether the layout reaches the built `.app` | Not reported, but it **does** — confirmed by opening the package |
 
-So a build proves the layout was picked up, and proves nothing about whether it is right.
+So the build catches a layout that is *broken* and misses one that is merely *wrong* — which is the
+more likely mistake and much the harder one to notice.
+
+A caution that follows from the second row: a typo in an `RDLCLayout` path does not fail. It quietly
+leaves a generated layout at the wrong place and uses it. Three such strays were committed while this
+was being worked out, and removed once the behaviour was understood.
 
 ## The check the compiler does not do
 
@@ -59,6 +65,9 @@ checks that:
 
 It found a real discrepancy on its first run, which is how the compiler's dataset rewriting was
 discovered rather than assumed.
+
+Its value is narrower than "the compiler checks nothing" but it is real: everything in the middle two
+rows of the table above is invisible to the build and visible to this.
 
 **What it cannot tell you is whether any of it renders**, or whether the result looks like something a
 warehouse would want to hold. That needs the container and a pair of eyes, and neither has happened.

@@ -407,6 +407,98 @@ codeunit 51003 "WHA RF Tests"
         Assert.AreEqual(CountAfterFirstRun, RFDevice.Count(), 'A second import should not create more devices.');
     end;
 
+    [Test]
+    procedure TheTerminalStateNamesTheStepAndTheJob()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFDevice: Record "WHA RF Device";
+        TerminalState: Codeunit "WHA RF Terminal State";
+        Step: Enum "WHA RF Step";
+        StateObject: JsonObject;
+    begin
+        // [SCENARIO] The terminal draws itself from one document and decides nothing. If a field is not
+        // in the document the operator cannot be shown it, so what the document carries is the whole
+        // contract between the flow and the screen.
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-STATE-1');
+        WarehouseTask."From Bin Code" := CopyStr(FromBinTok, 1, 20);
+        WarehouseTask.Modify(false);
+
+        StateObject := ParseState(TerminalState.Build(WarehouseTask, RFDevice, Step::WHAScanFrom, 'Go to bin RF-FROM-01 and scan it.', false));
+
+        Assert.AreEqual('WHAScanFrom', TextValue(StateObject, 'step'), 'The state should name the step the operator is on.');
+        Assert.AreEqual('Go to bin RF-FROM-01 and scan it.', TextValue(StateObject, 'instruction'), 'The state should carry the instruction the flow worked out.');
+        Assert.AreEqual(FromBinTok, TextValue(StateObject, 'target'), 'The state should name what has to be scanned now.');
+    end;
+
+    [Test]
+    procedure TheTerminalOffersNoLabelsOnARealHandheld()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TerminalState: Codeunit "WHA RF Terminal State";
+        Step: Enum "WHA RF Step";
+        Labels: JsonArray;
+    begin
+        // [SCENARIO] The labels are a desk affordance. On a real handheld the labels are on the racking,
+        // and a list of them on the screen would be a way of finishing a job without walking anywhere.
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-STATE-2');
+        WarehouseTask."From Bin Code" := CopyStr(FromBinTok, 1, 20);
+        WarehouseTask.Modify(false);
+
+        Labels := TerminalState.LabelArray(WarehouseTask, Step::WHAScanFrom, false);
+
+        Assert.AreEqual(0, Labels.Count(), 'Nothing should be offered to scan when the simulator is off.');
+    end;
+
+    [Test]
+    procedure TheSimulatorDoesNotOfferTheRightLabelFirst()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TerminalState: Codeunit "WHA RF Terminal State";
+        Step: Enum "WHA RF Step";
+        Labels: JsonArray;
+        FirstLabel: JsonToken;
+    begin
+        // [SCENARIO] Whether an operator scans what they were asked for or the first barcode they see is
+        // the finding the review exists to get. Putting the wanted label first would answer the question
+        // for them and destroy it.
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-STATE-3');
+        WarehouseTask."From Bin Code" := CopyStr(FromBinTok, 1, 20);
+        WarehouseTask.Modify(false);
+
+        Labels := TerminalState.LabelArray(WarehouseTask, Step::WHAScanFrom, true);
+        Labels.Get(0, FirstLabel);
+
+        Assert.IsTrue(Labels.Count() > 1, 'The simulator should offer more than the one right answer.');
+        Assert.AreNotEqual(FromBinTok, FirstLabel.AsValue().AsText(), 'The label the job asks for should not be the first one offered.');
+        Assert.IsTrue(LabelsContain(Labels, CopyStr(FromBinTok, 1, 20)), 'The label the job asks for should still be there.');
+    end;
+
+    [Test]
+    procedure TheTerminalCannotConfirmWhileTheShortFormIsOpen()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFDevice: Record "WHA RF Device";
+        TerminalState: Codeunit "WHA RF Terminal State";
+        Step: Enum "WHA RF Step";
+        StateObject: JsonObject;
+        Token: JsonToken;
+    begin
+        // [SCENARIO] The quantity found and the reason are Business Central fields, not add-in ones, so
+        // the terminal must not offer a key that would confirm before they are filled in. The flow would
+        // refuse it, and an operator would read the refusal as the device being broken.
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-STATE-4');
+
+        StateObject := ParseState(TerminalState.Build(WarehouseTask, RFDevice, Step::WHAShortPick, 'The job asks for 1.', false));
+        StateObject.Get('primaryEnabled', Token);
+
+        Assert.IsFalse(Token.AsValue().AsBoolean(), 'The main key should be dead while the short form is open.');
+        Assert.IsTrue(TextValue(StateObject, 'primaryKey') <> '', 'The key should still say what it is for.');
+    end;
+
     local procedure ConfigureHandheld(ConfirmByScan: Boolean; RequireDevice: Boolean)
     var
         Setup: Record "WHA RF Setup";
@@ -490,4 +582,37 @@ codeunit 51003 "WHA RF Tests"
         User."User Name" := CurrentUserName;
         User.Insert();
     end;
+
+    local procedure ParseState(StateJson: Text): JsonObject
+    var
+        StateObject: JsonObject;
+    begin
+        StateObject.ReadFrom(StateJson);
+        exit(StateObject);
+    end;
+
+    local procedure TextValue(StateObject: JsonObject; KeyName: Text): Text
+    var
+        Token: JsonToken;
+    begin
+        if not StateObject.Get(KeyName, Token) then
+            exit('');
+
+        exit(Token.AsValue().AsText());
+    end;
+
+    local procedure LabelsContain(Labels: JsonArray; Wanted: Text): Boolean
+    var
+        Token: JsonToken;
+        Index: Integer;
+    begin
+        for Index := 0 to Labels.Count() - 1 do begin
+            Labels.Get(Index, Token);
+            if Token.AsValue().AsText() = Wanted then
+                exit(true);
+        end;
+
+        exit(false);
+    end;
+
 }

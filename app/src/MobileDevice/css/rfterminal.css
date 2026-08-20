@@ -1,0 +1,228 @@
+.wha-rf {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: #E9EDE7;
+}
+
+.wha-rf-shell {
+    background: #0B1013;
+    border: 1px solid #05090B;
+    border-radius: 6px;
+    padding: 12px;
+    max-width: 460px;
+}
+
+.wha-rf-shell.wha-rf-simulator {
+    background: linear-gradient(180deg, #2A3138 0%, #1D2328 100%);
+    border-radius: 26px;
+    padding: 22px 16px 30px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 14px 30px rgba(0, 0, 0, 0.3);
+    margin: 0 auto;
+}
+
+.wha-rf-shell.wha-rf-simulator .wha-rf-screen {
+    background: #0B1013;
+    border: 1px solid #05090B;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.wha-rf-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 380px;
+}
+
+.wha-rf-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #8E9C9E;
+    border-bottom: 1px solid #26343C;
+    padding-bottom: 6px;
+}
+
+.wha-rf-status strong {
+    color: #E9EDE7;
+    font-weight: 600;
+}
+
+.wha-rf-instruction {
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.2;
+    font-weight: 600;
+    color: #F0B429;
+    min-height: 2.4em;
+}
+
+.wha-rf-job {
+    border: 1px solid #26343C;
+    border-radius: 4px;
+    background: #131B20;
+    padding: 8px 10px;
+}
+
+.wha-rf-job-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    border-bottom: 1px solid #26343C;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.wha-rf-job-no {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.wha-rf-job-type {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    background: #F0B429;
+    color: #14171A;
+    padding: 1px 7px;
+    border-radius: 2px;
+}
+
+.wha-rf-job-rows {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.wha-rf-job-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.wha-rf-job-row dt {
+    color: #8E9C9E;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 11px;
+}
+
+.wha-rf-job-row dd {
+    margin: 0;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+}
+
+.wha-rf-job-row dd.wha-rf-target {
+    color: #F0B429;
+    font-weight: 700;
+}
+
+.wha-rf-scanbox {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wha-rf-label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+    color: #8E9C9E;
+}
+
+.wha-rf-scan {
+    width: 100%;
+    box-sizing: border-box;
+    background: #050809;
+    border: 1px solid #26343C;
+    border-radius: 3px;
+    color: #E9EDE7;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 17px;
+    padding: 10px;
+}
+
+.wha-rf-scan:focus {
+    outline: 2px solid #F0B429;
+    outline-offset: 1px;
+}
+
+.wha-rf-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.wha-rf-barcode {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11px;
+    background: #F4F3EE;
+    color: #14171A;
+    border: 1px solid #9AA0A4;
+    border-bottom-width: 3px;
+    border-radius: 2px;
+    padding: 3px 7px 2px;
+    cursor: pointer;
+}
+
+.wha-rf-barcode:hover {
+    background: #FFFFFF;
+}
+
+.wha-rf-keys {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.wha-rf-key {
+    flex: 1 1 40%;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 13px 8px;
+    border-radius: 3px;
+    border: 1px solid #05090B;
+    border-bottom-width: 3px;
+    background: #2F383E;
+    color: #E9EDE7;
+    cursor: pointer;
+}
+
+.wha-rf-key:hover:not(:disabled) {
+    background: #3B464D;
+}
+
+.wha-rf-key:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.wha-rf-key-primary {
+    flex: 1 1 100%;
+    background: #F0B429;
+    color: #14171A;
+    border-color: #7A5A00;
+}
+
+.wha-rf-key-primary:hover:not(:disabled) {
+    background: #FFC64A;
+}
+
+.wha-rf-key:focus-visible,
+.wha-rf-barcode:focus-visible {
+    outline: 2px solid #F0B429;
+    outline-offset: 2px;
+}
+
+.wha-rf-hidden {
+    display: none;
+}

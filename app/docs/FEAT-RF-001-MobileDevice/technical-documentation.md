@@ -91,6 +91,8 @@ keeps the operator's place on the page, in their own session — see "Not done".
 | `WHA RF Devices` | page | 50101 | `app/src/MobileDevice/pages/RFDevices.Page.al` |
 | `WHA RF Device Card` | page | 50102 | `app/src/MobileDevice/pages/RFDeviceCard.Page.al` |
 | `WHA RF Handheld` | page | 50103 | `app/src/MobileDevice/pages/RFHandheld.Page.al` |
+| `WHA RF Terminal` | controladdin | — | `app/src/MobileDevice/controladdins/RFTerminal.ControlAddIn.al` |
+| `WHA RF Terminal State` | codeunit | 50104 | `app/src/MobileDevice/codeunits/RFTerminalState.Codeunit.al` |
 | `WHA API RF Device` | page | 50104 | `app/src/MobileDevice/pages/APIRFDevice.Page.al` |
 | `WHA API Demo RF Device` | page | 50105 | `app/src/MobileDevice/pages/APIDemoRFDevice.Page.al` |
 | `WHA RF Tests` | codeunit | 51003 | `test/src/codeunits/RFTests.Codeunit.al` |
@@ -156,6 +158,53 @@ Fixed in `WHA Warehouse Task Logic`: clearing the user on an *In progress* task 
 *Released* **and clears `Started At`**, because it is no longer true that anybody started it. Covered
 by `HandingBackStartedWorkReturnsItToTheQueue` in the directed work tests as well as through the
 flow here.
+
+## The terminal — a control add-in that decides nothing
+
+The handheld page is a Business Central card page, which is a desktop shape: small type, small
+targets, and a layout that assumes a mouse. `WHA RF Terminal` is a control add-in that draws the
+same page as a scanner instead — one instruction in large type, one scan box that keeps the focus,
+and three keys big enough for a gloved hand.
+
+**It contains no logic, and that is the whole design.** The add-in is sent one state document by
+`WHA RF Terminal State` and draws it. Every decision — which step, what the instruction says,
+whether a scan is wanted, what a wrong scan is told, which key does what — is already made in AL by
+`WHA IRFFlow` before the document is built. The script cannot reach a record, and the events it
+raises (`Scanned`, `NextTaskRequested`, `ConfirmRequested`, `ShortPickRequested`,
+`HandBackRequested`) are the same five things the page's own actions do.
+
+The reason for the split is that **nothing in this project can run JavaScript**. There is no test
+runner for it, no container to publish to, and no way to assert on what the script did. A terminal
+whose behaviour lived in the script would be a second implementation nobody could check — which is
+exactly what `tools/rf-simulator/` is, and it carries that debt openly. So the behaviour stays in
+AL where the tests are, and the document it produces is what the tests assert on.
+
+### Simulator mode
+
+The same add-in, with `simulator` set, draws a device frame around the screen and offers the labels
+within reach as buttons: the bin the job names, its neighbour, the item, the handling unit and its
+SSCC. It is a page action, not a setup field — a session-only choice, off by default, and it changes
+nothing about how work is done.
+
+Two properties of it are deliberate:
+
+- **The wanted label is never first.** Whether an operator scans what they were asked for or the
+  first barcode they see is the finding the operator review exists to get; offering the right answer
+  first would answer the question for them.
+- **No labels are sent at all unless simulator mode is on.** On a real handheld the labels are on the
+  racking. A list of them on the screen would be a way of finishing a job without walking anywhere,
+  and it would be in the app rather than in a tool somebody chose to open.
+
+### What is still shown as ordinary fields
+
+The short-pick form. The quantity found is a decimal and the reason is an enum, and both are worth
+more as Business Central fields — validated, translated, and extensible by an `enumextension` —
+than as script. While that form is open the terminal's main key is **dead on purpose**: confirming
+before the fields are filled in would be refused by the flow, and an operator reads a refusal as the
+device being broken.
+
+**Classic fields** is the other half of that. The page's original groups are still there, hidden
+behind an action, so an operator whose add-in does not load is not left with a blank screen.
 
 ## Enablement
 
@@ -234,6 +283,10 @@ directly with unsaved task records and no database writes:
   alone.
 - **The operator's place is session state, not stored.** Closing the page loses the current step,
   though not the job.
+- **The add-in has never run.** It compiles, its resources resolve, and the document it is sent is
+  covered by tests — but no browser has executed a line of `rfterminal.js`, because publishing needs
+  the container credential this project does not have. Treat every runtime behaviour of it as
+  unverified: focus handling, the wedge scanner's Enter, and how it looks on a real device screen.
 - **No other exception handling.** The short pick is in (segment 2), but there is still no way to
   report a wrong item in the bin, a damaged pallet that should be quarantined, or a bin that is not
   where the job says it is. Each is a different conversation with directed work, and each should

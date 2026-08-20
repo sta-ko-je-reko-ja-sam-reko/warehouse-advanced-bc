@@ -55,6 +55,7 @@ candidate feature catalogue, and the order it should be tackled in.
 | Delivered | `FEAT-INT-001` segment 3 — **the message set widened from four types to twelve**, from evidence by analogy: a production connector integrating BC with an external warehouse system, read for what a BC-side warehouse interface actually carries. The direction flips, because there BC is the host and here the app *is* the warehouse. Three of the four new inbound types read **no payload at all** — they name their subject in the external ID, so there is no schema in them to guess wrong. Master-data synchronisation, a fifth of that connector, is **not applicable here**: both ends are the same database |
 | Delivered | **The capability register, in draft.** [gap-analysis.md](gap-analysis.md) named a signed-off register as its output and left producing one to a discovery that has never run, so every scope conversation started from a blank page. ~147 rows across 16 operational areas, buckets deliberately empty. `This app today` was checked against `app/src/` rather than taken from §4 below — which is why several catalogue promises read as absent |
 | Delivered | **Warehouse registration** — the answer to the question the app had never asked: where does Business Central think the goods are? Until now, finishing a job moved the handling unit in the app's own records and left `Bin Content` and `Warehouse Entry` saying the goods were still in the bin they had left. A finished job is now registered as a warehouse movement through `Whse. Jnl.-Register Line`, the same codeunit the base application registers its own put-aways and picks with. Built once, in a module that is deliberately **not a feature** — see [warehouse-registration.md](warehouse-registration.md). Ships **off**, because turning it on decides who owns bin-level stock. **No warehouse entry has ever been written by it** |
+| Delivered | **Posting at a directed put-away and pick location.** The gap the module above opened and named: an item journal line carries no bin at such a location, so posting alone moved the ledger and left the bins standing. Posting is now written as the two halves it is — a warehouse adjustment through `Whse. Jnl.-Register Line`, then an item journal line with no bin and the `Warehouse Adjustment` marker, exactly the shape *Calculate Whse. Adjustment* produces. **Nothing is written to the adjustment bin**, because both halves are done here and a residual there would be posted a second time by whoever ran that report next. **Never run against a real WMS location** |
 | Distribution | Per-tenant extension, publisher `matr`, object range `50000..50999` |
 | Environment | BC 28.1, runtime 17.0, dev container `mrt28`, production BC online W1 |
 | Not started | Nothing in §4. **Every feature in the catalogue now has a first segment**, the two that stopped short of the ledger no longer do, and the queue is tied to the documents that feed it. What is unbuilt is the second segment of nine features — most of it blocked on customer facts, though **not as much as was claimed a moment ago**: see §5 |
@@ -295,10 +296,22 @@ Three things about it are worth carrying forward:
   came from is readable then and is not afterwards, and a movement Business Central refuses stops the
   completion rather than leaving the two records disagreeing.
 
-**What this does not close:** posting still refuses a directed put-away and pick location, because
-that path needs a warehouse adjustment through the adjustment bin rather than an item journal line.
-The two modules now sit next to each other and that gap is the obvious next piece of the same
-argument — but it is a second segment, not this one.
+~~**What this does not close:** posting still refuses a directed put-away and pick location…~~
+**Closed, in the segment after it.** The two modules sitting next to each other is what made it cheap:
+posting asks `WHA Whse. Reg. Mgt.` one question about the location and writes a different shape of
+journal line when the answer is yes, and the warehouse half goes through the registration module that
+already existed. Two things in it are worth carrying forward:
+
+- **The adjustment bin is deliberately left empty.** Business Central uses it to hold the difference
+  between a warehouse that has been adjusted and a ledger that has not; *Calculate Whse. Adjustment*
+  turns whatever stands in it into item journal lines. Writing both halves here makes that difference
+  zero. A counterpart entry in the adjustment bin would have looked like an outstanding discrepancy and
+  been posted a second time — the sort of mistake that is invisible in a test and expensive in a
+  warehouse.
+- **The choice not to be a choice.** A *move* is behind the method enum, because a warehouse decides
+  whether to tell Business Central. An *adjustment* is not, because it is only ever raised where a
+  feature has already decided to write to the ledger, and half of that write is worse than neither
+  half. Two things that look alike, and only one of them is optional.
 
 Wave F closed the loop the app has been building towards since directed work: analytics measures
 **nothing but what the app itself recorded**, so every figure it produces is a statement about how
@@ -565,7 +578,7 @@ feature can ship dark and be switched on per company when the business is ready.
 
 ## 8. Immediate next steps
 
-1. **Run the test suite once.** 344 automated tests exist across sixteen test codeunits and **not one
+1. **Run the test suite once.** 351 automated tests exist across sixteen test codeunits and **not one
    has ever been executed** — they are compile-verified only. Until they have run green once, every claim
    this project makes about its own behaviour rests on the compiler agreeing the code parses.
 

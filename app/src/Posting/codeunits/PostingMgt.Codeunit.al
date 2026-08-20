@@ -2,6 +2,7 @@ namespace WarehouseAdvanced.Posting;
 
 using Microsoft.Inventory.Journal;
 using Microsoft.Inventory.Ledger;
+using WarehouseAdvanced.Registration;
 
 codeunit 50753 "WHA Posting Mgt."
 {
@@ -55,6 +56,68 @@ codeunit 50753 "WHA Posting Mgt."
     end;
 
     /// <summary>
+    /// Tells the warehouse what a posting is about to do to the bins, where Business Central keeps bins
+    /// that an item journal line cannot reach. At a location with directed put-away and pick, the item
+    /// journal line carries no bin at all — bins live in warehouse entries alone — so posting the ledger
+    /// without this leaves the two halves of the same adjustment describing different warehouses.
+    /// </summary>
+    /// <remarks>
+    /// The change is registered directly rather than through the method enum on
+    /// <see cref="WHA Whse. Reg. Mgt."/>, and that is deliberate: once a feature has decided to write to
+    /// the ledger, telling the warehouse is not a second choice somebody could switch off. It is the rest
+    /// of the same operation, and half of it is worse than neither half.
+    ///
+    /// Nothing is registered against the location's **adjustment bin**. Business Central uses that bin to
+    /// hold the difference between a warehouse that has been adjusted and a ledger that has not, and
+    /// *Calculate Whse. Adjustment* turns whatever stands in it into item journal lines. Because both
+    /// halves are written here, that difference is zero, and leaving anything in the adjustment bin
+    /// would be picked up later and posted a second time.
+    /// </remarks>
+    /// <param name="PostingRequest">The line about to be posted. Read, not modified.</param>
+    /// <returns>True when a warehouse entry was written.</returns>
+    internal procedure RegisterWarehouseChange(var PostingRequest: Record "WHA Posting Request"): Boolean
+    var
+        TempMoveRequest: Record "WHA Whse. Move Request" temporary;
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        if PostingRequest."Bin Code" = '' then
+            exit(false);
+        if not WhseRegMgt.LocationIsDirected(PostingRequest."Location Code") then
+            exit(false);
+
+        BuildMoveRequest(PostingRequest, TempMoveRequest);
+        exit(WhseRegMgt.RegisterAdjustment(TempMoveRequest) > 0);
+    end;
+
+    local procedure BuildMoveRequest(var PostingRequest: Record "WHA Posting Request"; var MoveRequest: Record "WHA Whse. Move Request")
+    begin
+        MoveRequest.Init();
+        MoveRequest."Entry No." := 1;
+        MoveRequest."Item No." := PostingRequest."Item No.";
+        MoveRequest."Variant Code" := PostingRequest."Variant Code";
+        MoveRequest."Unit of Measure Code" := PostingRequest."Unit of Measure Code";
+        MoveRequest.Quantity := PostingRequest.Quantity;
+        MoveRequest."Location Code" := PostingRequest."Location Code";
+        MoveRequest."Lot No." := PostingRequest."Lot No.";
+        MoveRequest."Serial No." := PostingRequest."Serial No.";
+        MoveRequest."Registering Date" := PostingRequest."Posting Date";
+        MoveRequest.Description := PostingRequest.Description;
+        MoveRequest."Reference No." := PostingRequest."Document No.";
+        MoveRequest."Source Table No." := PostingRequest."Source Table No.";
+        MoveRequest."Source No." := PostingRequest."Source No.";
+
+        if PostingRequest."Posting Type" = PostingRequest."Posting Type"::WHANegativeAdjustment then begin
+            MoveRequest."Change Type" := MoveRequest."Change Type"::WHADecrease;
+            MoveRequest."From Bin Code" := PostingRequest."Bin Code";
+        end else begin
+            MoveRequest."Change Type" := MoveRequest."Change Type"::WHAIncrease;
+            MoveRequest."To Bin Code" := PostingRequest."Bin Code";
+        end;
+
+        MoveRequest.Insert(false);
+    end;
+
+    /// <summary>
     /// Answers the next free entry number on a request buffer, so a caller building one does not have to
     /// count its own lines. It reads the buffer, so it **repositions the record** — ask for the number
     /// before calling Init, not after, or the fields just initialised are overwritten.
@@ -77,6 +140,8 @@ codeunit 50753 "WHA Posting Mgt."
     /// <param name="ItemJournalLine">Receives the journal line.</param>
     /// <param name="LineNo">The line number to give it.</param>
     internal procedure BuildJournalLine(var PostingRequest: Record "WHA Posting Request"; var ItemJournalLine: Record "Item Journal Line"; LineNo: Integer)
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
     begin
         CheckRequestLine(PostingRequest);
 
@@ -93,8 +158,11 @@ codeunit 50753 "WHA Posting Mgt."
         ItemJournalLine.Validate("Location Code", PostingRequest."Location Code");
         if PostingRequest."Unit of Measure Code" <> '' then
             ItemJournalLine.Validate("Unit of Measure Code", PostingRequest."Unit of Measure Code");
-        if PostingRequest."Bin Code" <> '' then
-            ItemJournalLine.Validate("Bin Code", PostingRequest."Bin Code");
+        if WhseRegMgt.LocationIsDirected(PostingRequest."Location Code") then
+            ItemJournalLine."Warehouse Adjustment" := true
+        else
+            if PostingRequest."Bin Code" <> '' then
+                ItemJournalLine.Validate("Bin Code", PostingRequest."Bin Code");
         ItemJournalLine.Validate(Quantity, PostingRequest.Quantity);
 
         if PostingRequest.Description <> '' then

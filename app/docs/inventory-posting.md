@@ -115,6 +115,34 @@ knowing:
   item tracking switched on. Assigning it directly leaves it in place, and
   `ItemLedgEntry.CopyTrackingFromItemJnlLine` carries it onto the ledger entry.
 
+## Directed locations — where posting is two halves
+
+At a location with **directed put-away and pick**, an item journal line carries **no bin code at all**.
+Bins there live in warehouse entries alone, and the item ledger holds only the location. So posting a
+count difference or a write-off at such a location is two writes, not one:
+
+1. **The warehouse half.** A warehouse journal line — `Positive Adjmt.` into the bin, or
+   `Negative Adjmt.` out of it — registered through `Whse. Jnl.-Register Line`, the base application's
+   own registering codeunit. This is what moves bin content.
+2. **The ledger half.** The item journal line, with no bin code and `Warehouse Adjustment` set, which
+   is exactly the shape *Calculate Whse. Adjustment* produces.
+
+`WHA Posting Mgt.` decides which shape to build by asking
+`WHA Whse. Reg. Mgt.LocationIsDirected`, and `WHA Direct Posting` writes the warehouse half first.
+Both halves are one operation: if the ledger refuses the line, the warehouse entry rolls back with it.
+
+**Nothing is written to the location's adjustment bin, and that is the important part.** Business
+Central uses that bin to hold the difference between a warehouse that has been adjusted and a ledger
+that has not; *Calculate Whse. Adjustment* turns whatever stands in it into item journal lines. Because
+this module writes both halves, that difference is zero. Leaving a counterpart entry in the adjustment
+bin would look like an outstanding discrepancy and be posted a second time by whoever ran that report
+next.
+
+**`WHA Jnl. Line Posting` does neither half at a directed location** — it writes the journal line, with
+no bin and the `Warehouse Adjustment` marker, and leaves it. That is deliberate and consistent with what
+that method means: nothing has happened yet. Whoever posts the line owns the warehouse half, through the
+Whse. Item Journal, exactly as they would for a line they typed themselves.
+
 ## Who calls it
 
 | Feature | When | What it posts | Document number |
@@ -147,15 +175,16 @@ accepts the line.
 
 ## Known gaps
 
-- **Directed put-away and pick locations are untested and probably do not work.** Posting an item
-  journal line at a location with directed put-away and pick requires a warehouse journal as well;
-  the check refuses the line otherwise. Nothing in this module raises one. Its sibling module now
-  does raise warehouse journal lines — see [warehouse-registration.md](warehouse-registration.md) —
-  but for *movements*, not for the adjustment through the adjustment bin that this gap needs. Closing
-  it is the obvious next piece of the same argument.
+- ~~**Directed put-away and pick locations are untested and probably do not work.**~~ **Handled — see
+  *Directed locations* above.** What remains true is the second half of that sentence: it has never
+  been run against one.
 - **Item tracking is carried, not created.** A lot number reaches the ledger entry, but no reservation
   entry or tracking specification is built. An item whose tracking code demands specific handling will
   be refused by the posting check, and the count sheet will not close.
+- **The directed path has never been run.** Every branch of it was written from the base application's
+  own source — `Calculate Whse. Adjustment` for the journal line's shape, `WMS Management` for what the
+  warehouse journal check requires — and none of it has touched a real WMS location. That needs zones,
+  bin types, an adjustment bin and bin content to take from.
 - **No dimensions beyond the item's own defaults.** Nothing sets a dimension from the location, the
   count sheet or the hold.
 - **Costs are not touched.** A positive adjustment posts at the item's cost; nothing lets a count

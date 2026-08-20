@@ -208,7 +208,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 |---|---|---|---|---|
 | Hold a handling unit and everything on it | Blocked item or lot, bin blocking | Delivered | | |
 | Dispositions: release, rework, scrap, pending | None | Delivered | | |
-| Write-off on scrap | Item journal | Delivered — **never yet run against the ledger** | | |
+| Write-off on scrap | Item journal | Delivered, including at a directed put-away and pick location — **never yet run against the ledger** | | |
 | Hold audit trail that cannot be deleted | Change log | Delivered | | |
 | Inspection plans and sampling | None | None | | |
 | Recorded results and certificates | None | None | | |
@@ -222,7 +222,7 @@ local customisations nobody wrote down, and none of those can be in a list writt
 | Count sheets by bin or by handling unit | Physical inventory journal | Delivered | | |
 | Blind counting | Partly | Delivered | | |
 | Tolerance and variance approval | None | Delivered | | |
-| Posting the difference | Physical inventory journal | Delivered — **never yet run against the ledger** | | |
+| Posting the difference | Physical inventory journal | Delivered, including at a directed put-away and pick location, where the bins are adjusted separately from the ledger — **never yet run against the ledger** | | |
 | Counting by lot or serial | Item tracking | Fields exist on the count line | | |
 | ABC- or event-driven count triggering | Counting periods | **None** — counting is the one feature with no scheduler | | |
 | Recount cycle | Recount on the journal | None | | |

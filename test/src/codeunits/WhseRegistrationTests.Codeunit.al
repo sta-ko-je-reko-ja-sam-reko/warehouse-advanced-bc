@@ -8,6 +8,8 @@ codeunit 51017 "WHA Whse. Registration Tests"
         LocationTok: Label 'WHAREG', Locked = true;
         FromBinTok: Label 'WHAREG-FROM', Locked = true;
         ToBinTok: Label 'WHAREG-TO', Locked = true;
+        BinLocationTok: Label 'WHAREGB', Locked = true;
+        DirectedLocationTok: Label 'WHAREGD', Locked = true;
         ItemTok: Label 'WHA-REG-IT', Locked = true;
         OtherItemTok: Label 'WHA-REG-IT2', Locked = true;
 
@@ -137,7 +139,7 @@ codeunit 51017 "WHA Whse. Registration Tests"
     end;
 
     [Test]
-    procedure ALocationThatKeepsNoBinsIsPassedOver()
+    procedure AMoveWhereBinsAreNotKeptIsPassedOver()
     var
         TempMoveRequest: Record "WHA Whse. Move Request" temporary;
         WhseJnlRegistration: Codeunit "WHA Whse. Jnl. Registration";
@@ -152,6 +154,106 @@ codeunit 51017 "WHA Whse. Registration Tests"
 
         TempMoveRequest.FindFirst();
         Assert.IsFalse(TempMoveRequest.Registered, 'A move that was passed over should not claim to have been registered.');
+    end;
+
+    [Test]
+    procedure ALocationNobodyKeepsBinsAtIsNeitherThingWeAskAbout()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        // [SCENARIO] Both questions the app asks about a location answer no when there is no location to
+        // ask about, so a blank or unknown code never sends anything down a warehouse path.
+        Assert.IsFalse(WhseRegMgt.LocationKeepsBins(''), 'No location keeps no bins.');
+        Assert.IsFalse(WhseRegMgt.LocationIsDirected(''), 'No location is not directed.');
+        Assert.IsFalse(WhseRegMgt.LocationKeepsBins('WHA-NONE'), 'A location that does not exist keeps no bins.');
+        Assert.IsFalse(WhseRegMgt.LocationIsDirected('WHA-NONE'), 'A location that does not exist is not directed.');
+    end;
+
+    [Test]
+    procedure ABinMandatoryLocationKeepsBinsButIsNotDirected()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        // [SCENARIO] The two questions are not the same question. A warehouse can keep bins without
+        // running directed put-away and pick, and there an item journal line still carries its own bin.
+        EnsureLocation(CopyStr(BinLocationTok, 1, 10), true, false);
+
+        Assert.IsTrue(WhseRegMgt.LocationKeepsBins(CopyStr(BinLocationTok, 1, 10)), 'A bin mandatory location keeps bins.');
+        Assert.IsFalse(WhseRegMgt.LocationIsDirected(CopyStr(BinLocationTok, 1, 10)), 'Bin mandatory on its own is not directed put-away and pick.');
+    end;
+
+    [Test]
+    procedure ADirectedLocationIsBothOfThem()
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+    begin
+        // [SCENARIO] At a directed location bins live in warehouse entries alone, which is what makes
+        // posting there two halves rather than one.
+        EnsureLocation(CopyStr(DirectedLocationTok, 1, 10), true, true);
+
+        Assert.IsTrue(WhseRegMgt.LocationKeepsBins(CopyStr(DirectedLocationTok, 1, 10)), 'A directed location keeps bins.');
+        Assert.IsTrue(WhseRegMgt.LocationIsDirected(CopyStr(DirectedLocationTok, 1, 10)), 'A directed location is directed.');
+    end;
+
+    [Test]
+    procedure StockAddedToNoBinIsRefused()
+    var
+        TempMoveRequest: Record "WHA Whse. Move Request" temporary;
+        WhseJnlRegistration: Codeunit "WHA Whse. Jnl. Registration";
+        ChangeType: Enum "WHA Whse. Change Type";
+    begin
+        // [SCENARIO] Stock arriving has one end, and that end has to be a bin.
+        AddChangeLine(TempMoveRequest, ChangeType::WHAIncrease, '', '', 5);
+
+        asserterror WhseJnlRegistration.Register(TempMoveRequest);
+
+        Assert.ExpectedError('which bin the goods were added to');
+    end;
+
+    [Test]
+    procedure StockTakenOutOfNoBinIsRefused()
+    var
+        TempMoveRequest: Record "WHA Whse. Move Request" temporary;
+        WhseJnlRegistration: Codeunit "WHA Whse. Jnl. Registration";
+        ChangeType: Enum "WHA Whse. Change Type";
+    begin
+        // [SCENARIO] Stock leaving has one end too, and it has to say which bin it left.
+        AddChangeLine(TempMoveRequest, ChangeType::WHADecrease, '', '', 5);
+
+        asserterror WhseJnlRegistration.Register(TempMoveRequest);
+
+        Assert.ExpectedError('which bin the goods were taken out of');
+    end;
+
+    [Test]
+    procedure AnAdjustmentWithTwoEndsIsRefused()
+    var
+        TempMoveRequest: Record "WHA Whse. Move Request" temporary;
+        WhseJnlRegistration: Codeunit "WHA Whse. Jnl. Registration";
+        ChangeType: Enum "WHA Whse. Change Type";
+    begin
+        // [SCENARIO] Two bins make it a move. Registering it as an adjustment would say stock appeared
+        // and disappeared rather than that it went somewhere.
+        AddChangeLine(TempMoveRequest, ChangeType::WHAIncrease, FromBinTok, ToBinTok, 5);
+
+        asserterror WhseJnlRegistration.Register(TempMoveRequest);
+
+        Assert.ExpectedError('bin at both ends');
+    end;
+
+    [Test]
+    procedure AnAdjustmentWhereBinsAreNotKeptIsPassedOver()
+    var
+        TempMoveRequest: Record "WHA Whse. Move Request" temporary;
+        WhseJnlRegistration: Codeunit "WHA Whse. Jnl. Registration";
+        ChangeType: Enum "WHA Whse. Change Type";
+    begin
+        // [SCENARIO] An adjustment is passed over for the same reason a move is: with no bins there is
+        // nothing for a warehouse entry to be true about, and the item journal line keeps its own bin.
+        EnsureWarehouse();
+        AddChangeLine(TempMoveRequest, ChangeType::WHADecrease, FromBinTok, '', 5);
+
+        Assert.AreEqual(0, WhseJnlRegistration.Register(TempMoveRequest), 'A location without bins should have nothing registered against it.');
     end;
 
     [Test]
@@ -381,6 +483,33 @@ codeunit 51017 "WHA Whse. Registration Tests"
         MoveRequest."From Bin Code" := CopyStr(FromBinTok, 1, MaxStrLen(MoveRequest."From Bin Code"));
         MoveRequest."To Bin Code" := CopyStr(ToBinTok, 1, MaxStrLen(MoveRequest."To Bin Code"));
         MoveRequest.Insert(false);
+    end;
+
+    local procedure AddChangeLine(var MoveRequest: Record "WHA Whse. Move Request"; ChangeType: Enum "WHA Whse. Change Type"; FromBinCode: Code[20]; ToBinCode: Code[20]; Quantity: Decimal)
+    begin
+        MoveRequest.Init();
+        MoveRequest."Entry No." := 1;
+        MoveRequest."Change Type" := ChangeType;
+        MoveRequest."Item No." := CopyStr(ItemTok, 1, MaxStrLen(MoveRequest."Item No."));
+        MoveRequest.Quantity := Quantity;
+        MoveRequest."Location Code" := CopyStr(LocationTok, 1, MaxStrLen(MoveRequest."Location Code"));
+        MoveRequest."From Bin Code" := FromBinCode;
+        MoveRequest."To Bin Code" := ToBinCode;
+        MoveRequest.Insert(false);
+    end;
+
+    local procedure EnsureLocation(LocationCode: Code[10]; BinMandatory: Boolean; Directed: Boolean)
+    var
+        Location: Record Location;
+    begin
+        if Location.Get(LocationCode) then
+            exit;
+
+        Location.Init();
+        Location.Code := LocationCode;
+        Location."Bin Mandatory" := BinMandatory;
+        Location."Directed Put-away and Pick" := Directed;
+        Location.Insert(false);
     end;
 
     local procedure CreateItemTask(var WarehouseTask: Record "WHA Warehouse Task"; TaskNo: Code[20])

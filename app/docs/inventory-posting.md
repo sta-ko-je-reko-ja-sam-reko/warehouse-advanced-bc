@@ -130,6 +130,7 @@ numbers.
 | A lot-tracked item with no lot | `Item Jnl.-Post Line` requires one and will not post without it |
 | A serial-tracked item with no serial number | The same |
 | A serial number with a quantity other than one | A serial number names one unit. Business Central enforces this when the field is *validated*; this module assigns it, so nothing would have caught it |
+| Stock added to a bin at a directed location, for an item dated by hand, under a lot Business Central has never seen | `Whse. Jnl.-Register Line` tests the expiry date on a positive warehouse entry. The app records no expiry, so if Business Central holds none either there is no honest date to supply |
 
 The requirement is worked out with Business Central's own `Item Tracking Management.GetItemTrackingSetup`,
 given the entry type and direction the line will be posted under — so the answer here and the answer at

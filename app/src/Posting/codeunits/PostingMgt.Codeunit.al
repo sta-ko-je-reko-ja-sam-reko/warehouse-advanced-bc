@@ -18,6 +18,7 @@ codeunit 50753 "WHA Posting Mgt."
         LotMissingErr: Label 'Item %1 is tracked by lot, so it cannot be posted without one. Whatever raised this line has to say which lot it counted or scrapped.', Comment = '%1 = the item number';
         SerialMissingErr: Label 'Item %1 is tracked by serial number, so it cannot be posted without one. Whatever raised this line has to say which unit it counted or scrapped.', Comment = '%1 = the item number';
         SerialQuantityErr: Label 'Serial number %1 of item %2 names one unit, so %3 of it cannot be posted.', Comment = '%1 = the serial number; %2 = the item number; %3 = the quantity on the request line';
+        ExpiryUnknownErr: Label 'Item %1 will not go into a bin without an expiry date, and Business Central holds none for %2. Nothing in this app records an expiry, so the date has to reach Business Central some other way before this can be posted at a warehouse location.', Comment = '%1 = the item number; %2 = the lot or serial number the stock is being added under';
 
     /// <summary>
     /// Hands the request to the chosen way of posting. This is the single place a feature calls, so a
@@ -88,6 +89,37 @@ codeunit 50753 "WHA Posting Mgt."
             Error(SerialMissingErr, PostingRequest."Item No.");
         if ItemTrackingSetup."Lot No. Required" and (PostingRequest."Lot No." = '') then
             Error(LotMissingErr, PostingRequest."Item No.");
+
+        CheckExpiryIsKnown(PostingRequest);
+    end;
+
+    local procedure CheckExpiryIsKnown(var PostingRequest: Record "WHA Posting Request")
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+        ExpirationDate: Date;
+    begin
+        if PostingRequest."Posting Type" <> PostingRequest."Posting Type"::WHAPositiveAdjustment then
+            exit;
+        if PostingRequest."Bin Code" = '' then
+            exit;
+        if not WhseRegMgt.LocationIsDirected(PostingRequest."Location Code") then
+            exit;
+        if not WhseRegMgt.WarehouseExpiryRequired(PostingRequest."Item No.") then
+            exit;
+        if WhseRegMgt.KnownWarehouseExpiry(
+            PostingRequest."Item No.", PostingRequest."Variant Code", PostingRequest."Location Code",
+            PostingRequest."Lot No.", PostingRequest."Serial No.", ExpirationDate)
+        then
+            exit;
+
+        Error(ExpiryUnknownErr, PostingRequest."Item No.", TrackingNoOf(PostingRequest));
+    end;
+
+    local procedure TrackingNoOf(var PostingRequest: Record "WHA Posting Request"): Code[50]
+    begin
+        if PostingRequest."Serial No." <> '' then
+            exit(PostingRequest."Serial No.");
+        exit(PostingRequest."Lot No.");
     end;
 
     /// <summary>

@@ -145,6 +145,23 @@ codeunit 50801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
         WarehouseJournalLine."Serial No." := MoveRequest."Serial No.";
         WarehouseJournalLine."New Lot No." := MoveRequest."Lot No.";
         WarehouseJournalLine."New Serial No." := MoveRequest."Serial No.";
+
+        SetExpirationDate(MoveRequest, WarehouseJournalLine);
+    end;
+
+    local procedure SetExpirationDate(var MoveRequest: Record "WHA Whse. Move Request"; var WarehouseJournalLine: Record "Warehouse Journal Line")
+    var
+        WhseRegMgt: Codeunit "WHA Whse. Reg. Mgt.";
+        ExpirationDate: Date;
+    begin
+        if not WhseRegMgt.KnownWarehouseExpiry(
+            MoveRequest."Item No.", MoveRequest."Variant Code", MoveRequest."Location Code",
+            MoveRequest."Lot No.", MoveRequest."Serial No.", ExpirationDate)
+        then
+            exit;
+
+        WarehouseJournalLine."Expiration Date" := ExpirationDate;
+        WarehouseJournalLine."New Expiration Date" := ExpirationDate;
     end;
 
     local procedure SetEntryTypeAndBins(var MoveRequest: Record "WHA Whse. Move Request"; var WarehouseJournalLine: Record "Warehouse Journal Line")

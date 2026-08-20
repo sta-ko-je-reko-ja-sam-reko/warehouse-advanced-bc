@@ -79,6 +79,7 @@ permissionset 50000 "WHA Objects"
         codeunit "WHA Src Manual" = X,
         codeunit "WHA Src Whse. Receipt" = X,
         codeunit "WHA Src Whse. Shipment" = X,
+        codeunit "WHA Src Movement Wksh." = X,
         codeunit "WHA Demo Warehouse Task" = X,
         page "WHA API Demo Warehouse Task" = X,
         table "WHA Integration Setup" = X,

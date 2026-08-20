@@ -1463,6 +1463,119 @@ codeunit 51001 "WHA Warehouse Task Tests"
         WarehouseEmployee.Insert(false);
     end;
 
+    [Test]
+    procedure AMovementWorksheetLineBecomesAMovement()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+        TaskType: Enum "WHA Warehouse Task Type";
+    begin
+        // [SCENARIO] A movement worksheet line is already the shape of a warehouse task: a from-bin, a
+        // to-bin, an item and a quantity. It should come across as a movement with both ends intact.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateMovementWorksheetLine('WHAMOVE', 10000, 5);
+
+        Assert.AreEqual(1, TaskSourceMgt.GenerateFrom(SourceType::WHAMovementWksh, 'WHAMOVE'), 'The one outstanding line should have raised one job.');
+
+        FindTaskForSource(WarehouseTask, SourceType::WHAMovementWksh, 'WHAMOVE', 10000);
+        Assert.AreEqual(TaskType::WHAMovement, WarehouseTask."Task Type", 'A worksheet move is a movement.');
+        Assert.AreEqual(5, WarehouseTask.Quantity, 'The job should ask for what is still outstanding.');
+        Assert.AreEqual(CopyStr(TestBinTok, 1, 20), WarehouseTask."From Bin Code", 'A movement starts where the worksheet line takes from.');
+        Assert.AreEqual('WHATEST-02', WarehouseTask."To Bin Code", 'A movement ends where the worksheet line puts into.');
+    end;
+
+    [Test]
+    procedure AWorksheetLineAlreadyCoveredRaisesNothingTwice()
+    var
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Running it again should not double the queue, the same as every other source.
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateMovementWorksheetLine('WHAMOVE2', 10000, 5);
+        TaskSourceMgt.GenerateFrom(SourceType::WHAMovementWksh, 'WHAMOVE2');
+
+        Assert.AreEqual(0, TaskSourceMgt.GenerateFrom(SourceType::WHAMovementWksh, 'WHAMOVE2'), 'Running it again should raise nothing.');
+    end;
+
+    [Test]
+    procedure AWorksheetMoveIsNotWrittenBackWhileTheBinsAreNotMaintained()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        SrcMovementWksh: Codeunit "WHA Src Movement Wksh.";
+    begin
+        // [SCENARIO] Marking a worksheet line handled says the goods moved where Business Central can see
+        // it. With registration off nothing moved there, and saying otherwise would be worse than the
+        // duplication the write-back exists to prevent.
+        ConfigureQueue(0);
+        ConfigureNoRegistration();
+        CreateMovementWorksheetLine('WHAMOVE3', 10000, 5);
+
+        WarehouseTask.Init();
+        WarehouseTask."Source No." := 'WHAMOVE3';
+        WarehouseTask."Source Line No." := 10000;
+        WarehouseTask."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        WarehouseTask."Quantity Handled" := 5;
+
+        Assert.IsFalse(SrcMovementWksh.WriteBack(WarehouseTask), 'Nothing should be written back while the bins are not maintained.');
+    end;
+
+    local procedure ConfigureNoRegistration()
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+        Method: Enum "WHA Whse. Reg. Method";
+    begin
+        EnsureTaskSetup(Setup);
+        Setup.Validate("Whse. Registration Method", Method::WHANone);
+        Setup.Modify(true);
+    end;
+
+    local procedure CreateMovementWorksheetLine(WorksheetName: Code[10]; LineNo: Integer; Quantity: Decimal)
+    var
+        WhseWorksheetLine: Record "Whse. Worksheet Line";
+        WhseWorksheetTemplate: Record "Whse. Worksheet Template";
+    begin
+        EnsureLocationAndBin();
+        EnsureTestItem();
+        EnsureSecondBin();
+
+        WhseWorksheetTemplate.SetRange(Type, WhseWorksheetTemplate.Type::Movement);
+        if not WhseWorksheetTemplate.FindFirst() then begin
+            WhseWorksheetTemplate.Init();
+            WhseWorksheetTemplate.Name := 'WHAMVT';
+            WhseWorksheetTemplate.Type := WhseWorksheetTemplate.Type::Movement;
+            WhseWorksheetTemplate.Insert(false);
+        end;
+
+        WhseWorksheetLine.Init();
+        WhseWorksheetLine."Worksheet Template Name" := WhseWorksheetTemplate.Name;
+        WhseWorksheetLine.Name := WorksheetName;
+        WhseWorksheetLine."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        WhseWorksheetLine."Line No." := LineNo;
+        WhseWorksheetLine."Item No." := CopyStr(TestItemTok, 1, 20);
+        WhseWorksheetLine."From Bin Code" := CopyStr(TestBinTok, 1, 20);
+        WhseWorksheetLine."To Bin Code" := 'WHATEST-02';
+        WhseWorksheetLine.Quantity := Quantity;
+        WhseWorksheetLine."Qty. Outstanding" := Quantity;
+        WhseWorksheetLine.Insert(false);
+    end;
+
+    local procedure EnsureSecondBin()
+    var
+        Bin: Record Bin;
+    begin
+        if Bin.Get(TestLocationTok, 'WHATEST-02') then
+            exit;
+
+        Bin.Init();
+        Bin."Location Code" := CopyStr(TestLocationTok, 1, 10);
+        Bin.Code := 'WHATEST-02';
+        Bin.Insert();
+    end;
+
     local procedure CreateSourcedTask(TaskNo: Code[20]; SourceNo: Code[20]; NewStatus: Enum "WHA Warehouse Task Status")
     var
         WarehouseTask: Record "WHA Warehouse Task";

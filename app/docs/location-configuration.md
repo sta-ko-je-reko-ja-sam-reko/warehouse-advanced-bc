@@ -60,6 +60,33 @@ directed location would have to *be* Business Central's put-away and pick — cr
 `Warehouse Activity Line` records rather than a queue of its own. Nothing in this app does that, and
 whether it should is a scope question the capability register has never been asked.
 
+## Which of Business Central's own warehouse documents this app can read
+
+The rule above decides this, and it decides most of it against us. Business Central's internal
+warehouse documents test the location before they will exist at all:
+
+| Document | Location it needs | Reachable here |
+|---|---|---|
+| Warehouse receipt | `Require Receive` | **Yes** — a task source since segment 3 |
+| Warehouse shipment | `Require Shipment` | **Yes** — a task source since segment 3 |
+| **Movement worksheet** | `Bin Mandatory` only | **Yes** — a task source, and the shape fits exactly |
+| Whse. internal put-away | `Require Put-away` **and** `Directed Put-away and Pick` | **No** |
+| Whse. internal pick | `Require Pick` **and** `Directed Put-away and Pick` | **No** |
+| Warehouse pick for production or assembly | `Require Pick` | **No** |
+
+The four marked *No* are not unbuilt. They are **unreachable**: every location they can exist at is a
+location this app refuses to raise work in, because Business Central is already raising its own there.
+Adding them as task sources would add code that can never run.
+
+Transfer orders are not on the list because they do not need to be — a transfer at a warehouse location
+flows through a warehouse receipt and a warehouse shipment, both of which are already sources.
+
+**So the honest summary is that the list of document sources is finished**, not partly built, unless the
+app changes shape. Which brings the same fork as the section above: an app that wanted the other four
+would have to *be* Business Central's put-away and pick, creating and registering `Warehouse Activity
+Line` records instead of keeping a queue of its own. That is a different product, and it is the one
+scope decision this project has never actually taken.
+
 ## Bin mandatory, and what registration does
 
 | Location | Finishing a job | Posting a count difference or a write-off |

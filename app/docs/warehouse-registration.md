@@ -39,9 +39,10 @@ enum.
 
 A change is turned into a `Warehouse Journal Line` and handed to `Whse. Jnl.-Register Line` — codeunit
 7301, the same one the base application registers its own put-aways, picks and movements with. A move
-carries `Entry Type = Movement` with a bin at each end; That produces two warehouse entries, maintains
-bin content on both ends, and writes a warehouse register, exactly as a movement registered through a
-warehouse activity does.
+carries `Entry Type = Movement` with a bin at each end; an adjustment carries `Positive Adjmt.` or
+`Negative Adjmt.` with one. That produces a warehouse entry for every end named, maintains bin content
+there, and writes a warehouse register, exactly as a movement registered through a warehouse activity
+does.
 
 The shape of the journal line is copied from `Whse.-Activity-Register`, deliberately and field by
 field, including the two branches for directed and non-directed locations that decide whether the
@@ -57,10 +58,8 @@ configure a template and a per-location batch for adjustments this app never lea
 item-journal option skips that check — the only rule in it is that the counterpart bin is the
 adjustment bin, and this module has no counterpart bin at all — while keeping the ones that matter:
 whether the bin holds what is being taken out of it, and whether the bin will accept what is being put
-into it. That is what refuses a move the from-bin cannot supply, or a
-bin whose warehouse class does not accept the item. Those refusals are Business Central's own rules
-about its own bins, and the app does not second-guess them: if the check fails, the job does not
-finish.
+into it. Those are Business Central's own rules about its own bins, and the app does not second-guess
+them: if the check fails, the operation that raised the change does not finish.
 
 ## Why it is not a feature
 

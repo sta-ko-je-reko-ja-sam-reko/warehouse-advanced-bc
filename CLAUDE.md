@@ -202,8 +202,10 @@ set in this repo's `.git/config` only. Consequences:
   left unfilled** — governing law and support terms, both commercial decisions.
 - `app/docs/privacy-statement.md` is the draft content for the privacy page
 - `app/img/AppLogo.png` is a generated placeholder, not real branding
-- No CI: `.github/workflows/` holds only a `.gitkeep`, and CI would need private
-  `bc-dev-templates` access
+- **CI covers the handheld's script only.** `.github/workflows/rf-bench.yml` runs
+  `tools/rf-bench/` — Playwright against the real control add-in — because it needs no AL compile
+  and therefore no private `bc-dev-templates` access. **There is still no CI for the AL build**, and
+  there cannot be until the conventions repo is reachable from a runner.
 - **No interface specification exists for the system being replaced, and none can be produced.**
   Confirmed with the customer. `FEAT-INT-001` was therefore built on assumed contracts — see the
   boxed note at the top of `app/docs/FEAT-INT-001-Integration/technical-documentation.md`. Treat

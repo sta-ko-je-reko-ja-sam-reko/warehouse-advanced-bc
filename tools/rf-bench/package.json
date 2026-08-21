@@ -1,0 +1,17 @@
+{
+  "name": "wha-rf-bench",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A browser bench for the WHA RF Terminal control add-in: the real script, real key events, real screens.",
+  "scripts": {
+    "test": "npm run check && playwright test",
+    "check": "node check-fixtures.mjs",
+    "bench": "node serve.mjs --host",
+    "serve": "node serve.mjs",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

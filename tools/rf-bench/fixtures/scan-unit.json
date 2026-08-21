@@ -1,0 +1,32 @@
+{
+  "step": "WHAScanUnit",
+  "stepLabel": "Scan the handling unit",
+  "instruction": "Scan handling unit HU000042.",
+  "device": {
+    "code": "RF-01",
+    "location": "WHITE"
+  },
+  "job": {
+    "hasJob": true,
+    "number": "WT000042",
+    "type": "Pick",
+    "description": "Pick 12 PCS of ITEM-1000",
+    "fromBin": "B-01-0001",
+    "toBin": "STAGE-01",
+    "handlingUnit": "HU000042",
+    "item": "ITEM-1000",
+    "lot": "LOT-A",
+    "serial": "",
+    "quantity": 12,
+    "unitOfMeasure": "PCS"
+  },
+  "wantsScan": true,
+  "wantsShortForm": false,
+  "target": "HU000042",
+  "primaryKey": "Confirm",
+  "primaryEnabled": true,
+  "shortEnabled": true,
+  "handBackEnabled": true,
+  "simulator": false,
+  "labels": []
+}

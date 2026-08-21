@@ -1,0 +1,32 @@
+{
+  "step": "WHAConfirm",
+  "stepLabel": "Confirm",
+  "instruction": "Choose Confirm to finish.",
+  "device": {
+    "code": "RF-01",
+    "location": "WHITE"
+  },
+  "job": {
+    "hasJob": true,
+    "number": "WT000042",
+    "type": "Pick",
+    "description": "Pick 12 PCS of ITEM-1000",
+    "fromBin": "B-01-0001",
+    "toBin": "STAGE-01",
+    "handlingUnit": "HU000042",
+    "item": "ITEM-1000",
+    "lot": "LOT-A",
+    "serial": "",
+    "quantity": 12,
+    "unitOfMeasure": "PCS"
+  },
+  "wantsScan": false,
+  "wantsShortForm": false,
+  "target": "",
+  "primaryKey": "Confirm",
+  "primaryEnabled": true,
+  "shortEnabled": true,
+  "handBackEnabled": true,
+  "simulator": false,
+  "labels": []
+}

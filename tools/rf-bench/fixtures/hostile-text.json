@@ -1,0 +1,32 @@
+{
+  "step": "WHAScanFrom",
+  "stepLabel": "Scan the bin to take from",
+  "instruction": "Go to bin <img src=x onerror=alert(1)> and scan it.",
+  "device": {
+    "code": "RF-01",
+    "location": "WHITE"
+  },
+  "job": {
+    "hasJob": true,
+    "number": "WT000042",
+    "type": "Pick",
+    "description": "\" onmouseover=\"x",
+    "fromBin": "B-01-0001",
+    "toBin": "STAGE-01",
+    "handlingUnit": "HU000042",
+    "item": "<script>window.whaPwned=1</script>",
+    "lot": "LOT-A",
+    "serial": "",
+    "quantity": 12,
+    "unitOfMeasure": "PCS"
+  },
+  "wantsScan": true,
+  "wantsShortForm": false,
+  "target": "B-01-0001",
+  "primaryKey": "Confirm",
+  "primaryEnabled": true,
+  "shortEnabled": true,
+  "handBackEnabled": true,
+  "simulator": false,
+  "labels": []
+}

@@ -179,6 +179,27 @@ whose behaviour lived in the script would be a second implementation nobody coul
 exactly what `tools/rf-simulator/` is, and it carries that debt openly. So the behaviour stays in
 AL where the tests are, and the document it produces is what the tests assert on.
 
+### What the terminal asks of the hardware
+
+Nothing in this feature knows what make of device it is running on, and nothing should. `WHA RF
+Device` records a code, a description, a location and a blocked flag — there is no model, vendor or
+capability field, and no code path branches on one. The whole contract with the hardware is two
+lines:
+
+- **A current browser**, because the screen is the web client. A device whose only interface is a
+  terminal session has no path to this screen at all; that is a hardware replacement, not a setting.
+- **The scanner in keyboard-wedge mode with an Enter suffix**, because `submitScan` is reached from
+  a `keydown` on Enter and nothing else. Every scanner has this setting under some name.
+
+Both are met out of the box by current handhelds. Neither is worth a setup field: a device that
+fails either one fails it for every flow, and the failure is fixed on the device.
+
+**The scan box sets `inputmode="none"`.** The blur handler puts focus back in the box and keeps it
+there, so on a touch device without the attribute the on-screen keyboard would open at sign-in and
+never close, covering the instruction the operator is meant to read. Suppressing it costs the
+ability to key a code by hand on a touch-only device — a physical keypad still works, since those
+are hardware keys. **Classic fields** is the way back for that case, which is what it is for.
+
 ### Simulator mode
 
 The same add-in, with `simulator` set, draws a device frame around the screen and offers the labels
@@ -286,7 +307,8 @@ directly with unsaved task records and no database writes:
 - **The add-in has never run.** It compiles, its resources resolve, and the document it is sent is
   covered by tests — but no browser has executed a line of `rfterminal.js`, because publishing needs
   the container credential this project does not have. Treat every runtime behaviour of it as
-  unverified: focus handling, the wedge scanner's Enter, and how it looks on a real device screen.
+  unverified: focus handling, the wedge scanner's Enter, whether `inputmode="none"` keeps the
+  on-screen keyboard down on the devices that matter, and how it looks on a real device screen.
 - **No other exception handling.** The short pick is in (segment 2), but there is still no way to
   report a wrong item in the bin, a damaged pallet that should be quarantined, or a bin that is not
   where the job says it is. Each is a different conversation with directed work, and each should

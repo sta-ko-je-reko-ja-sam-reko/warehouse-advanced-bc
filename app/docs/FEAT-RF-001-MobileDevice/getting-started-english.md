@@ -6,6 +6,27 @@ asks for their next job, and scans their way through it. One instruction at a ti
 > This screen is a first version. It has not yet been tried by operators on the floor, and the order
 > of the steps is expected to change once it has. Tell whoever set it up what gets in your way.
 
+## What the handheld needs
+
+Two things, and both are settings on the device rather than anything in Business Central.
+
+- **An up-to-date web browser.** This screen is the Business Central web client, so any handheld
+  running a current browser will show it. A handheld that runs a green-screen terminal session
+  instead of a browser cannot show it at all — those devices have to be replaced, not configured.
+- **The scanner set to type what it reads, and to press Enter afterwards.** Every scanner has this
+  setting, usually described as *keyboard wedge* or *keystroke output*, with a separate setting for
+  the character sent at the end — set that to Enter or carriage return. Without it the scanned code
+  sits in the box and nothing happens, which reads as the device being broken.
+
+Nothing else about the handheld matters to this app. It does not know or care which make of device
+it is talking to; there is nowhere to record one, and no setting that depends on it.
+
+**The on-screen keyboard stays down.** The scan box does not raise it, on purpose — on a small
+screen it covers the instruction you are meant to be reading, and scans come from the scanner
+anyway. On a device with a physical keypad you can still key a code in. On a touch-only device, if
+you have to type a code because the scanner will not read a damaged label, choose **Classic fields**
+and use the plain Business Central fields instead.
+
 ## Turn the handheld on
 
 You only need to do this once, and you need administrator rights.

@@ -45,7 +45,7 @@ var WHARFTerminal = (function () {
         scanBox.setAttribute("data-el", "scanbox");
         scanBox.innerHTML =
             '<label class="wha-rf-label" for="whaRfScan">Scan</label>' +
-            '<input id="whaRfScan" class="wha-rf-scan" autocomplete="off" spellcheck="false" autocapitalize="characters">' +
+            '<input id="whaRfScan" class="wha-rf-scan" autocomplete="off" spellcheck="false" autocapitalize="characters" inputmode="none">' +
             '<div class="wha-rf-labels" data-el="labels"></div>';
 
         var keys = document.createElement("div");

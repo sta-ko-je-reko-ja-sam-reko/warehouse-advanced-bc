@@ -55,6 +55,12 @@ waste a floor session.
       with typed codes tests nothing that matters.
 - [ ] At least one handling unit with a **printed SSCC label**.
 - [ ] A device with the actual form factor operators use. A laptop browser is not a handheld.
+- [ ] That device's **scanner set to keyboard-wedge mode with an Enter suffix**, checked in any
+      text box before the session starts. Without it every scan is silent and you will spend the
+      session debugging the device instead of watching the operator.
+- [ ] A look at whether the **on-screen keyboard stays down** on that device. It should — the scan
+      box asks for no keyboard — but no browser has ever run this screen, so confirm it rather
+      than assume it.
 - [ ] One task deliberately set up to be **short** — ask for 12 where there are 4.
 - [ ] One task pointing at a bin that is **empty**.
 - [ ] Somebody to take notes who is **not** the person running the session.

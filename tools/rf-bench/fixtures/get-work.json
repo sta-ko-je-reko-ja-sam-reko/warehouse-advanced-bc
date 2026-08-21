@@ -1,0 +1,32 @@
+{
+  "step": "WHAGetWork",
+  "stepLabel": "Get work",
+  "instruction": "Choose Next task.",
+  "device": {
+    "code": "RF-01",
+    "location": "WHITE"
+  },
+  "job": {
+    "hasJob": false,
+    "number": "",
+    "type": "Put-away",
+    "description": "",
+    "fromBin": "",
+    "toBin": "",
+    "handlingUnit": "",
+    "item": "",
+    "lot": "",
+    "serial": "",
+    "quantity": 0,
+    "unitOfMeasure": ""
+  },
+  "wantsScan": false,
+  "wantsShortForm": false,
+  "target": "",
+  "primaryKey": "Next task",
+  "primaryEnabled": true,
+  "shortEnabled": false,
+  "handBackEnabled": false,
+  "simulator": false,
+  "labels": []
+}

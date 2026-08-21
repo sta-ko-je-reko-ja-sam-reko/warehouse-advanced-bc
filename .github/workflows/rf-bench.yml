@@ -1,0 +1,45 @@
+name: RF terminal bench
+
+on:
+  push:
+    paths:
+      - 'app/src/MobileDevice/js/**'
+      - 'app/src/MobileDevice/css/**'
+      - 'app/src/MobileDevice/codeunits/RFTerminalState.Codeunit.al'
+      - 'tools/rf-bench/**'
+      - '.github/workflows/rf-bench.yml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/rf-bench
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/rf-bench/package-lock.json
+
+      - run: npm ci
+
+      - name: Check the fixtures still match the AL
+        run: npm run check
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the bench
+        run: npx playwright test
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tools/rf-bench/playwright-report/
+          retention-days: 7

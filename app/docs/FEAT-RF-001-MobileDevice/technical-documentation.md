@@ -200,6 +200,22 @@ never close, covering the instruction the operator is meant to read. Suppressing
 ability to key a code by hand on a touch-only device — a physical keypad still works, since those
 are hardware keys. **Classic fields** is the way back for that case, which is what it is for.
 
+### The bench
+
+Nothing in this project can run JavaScript — which was true of the *tests*, and was taken to mean the
+script could not be checked at all. `tools/rf-bench/` is the correction. It is not part of the app
+and ships in nothing: a static server rooted at the repository, a page that loads
+`app/src/MobileDevice/js/rfterminal.js` **by its shipping path** so no copy can drift, a stub of the
+one global the add-in calls, and Playwright driving it with real key events.
+
+Two things it is deliberately not. It is **not a device emulator** — no profile is named after a
+make of handheld, because nobody here has measured one and a profile invented at a desk is a
+specification nobody can trust. And it is **not the operator review**, which still needs an operator.
+
+The same page served over the LAN is how a real handheld gets used against it: real screen, real
+scanner, real wedge configuration. That is the only way to find out whether the two hardware
+requirements above are actually met on a given device.
+
 ### Simulator mode
 
 The same add-in, with `simulator` set, draws a device frame around the screen and offers the labels
@@ -304,11 +320,17 @@ directly with unsaved task records and no database writes:
   alone.
 - **The operator's place is session state, not stored.** Closing the page loses the current step,
   though not the job.
-- **The add-in has never run.** It compiles, its resources resolve, and the document it is sent is
-  covered by tests — but no browser has executed a line of `rfterminal.js`, because publishing needs
-  the container credential this project does not have. Treat every runtime behaviour of it as
-  unverified: focus handling, the wedge scanner's Enter, whether `inputmode="none"` keeps the
-  on-screen keyboard down on the devices that matter, and how it looks on a real device screen.
+- **The add-in has run in a browser, but never in Business Central.** `tools/rf-bench/` loads the
+  real script and stylesheet from where they ship, feeds them state documents in the shape
+  `WHA RF Terminal State` builds, and asserts on what they raise — so focus handling, the wedge's
+  Enter, the suppressed on-screen keyboard, the disabled keys and the four screen sizes are now
+  covered rather than assumed. See [the bench's README](../../../tools/rf-bench/README.md).
+
+  What that does **not** cover: the add-in has still never been published, so nothing has exercised
+  the real `Microsoft.Dynamics.NAV` bridge, the real state documents produced by a running AL
+  codeunit, the Business Central page hosting it, or a real scanner. The bench's fixture values are
+  hand-derived from the AL. Replace them with captured output the first time this is published to a
+  container.
 - **No other exception handling.** The short pick is in (segment 2), but there is still no way to
   report a wrong item in the bin, a damaged pallet that should be quarantined, or a bin that is not
   where the job says it is. Each is a different conversation with directed work, and each should

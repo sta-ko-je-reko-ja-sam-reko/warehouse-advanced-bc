@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>RF terminal bench</title>
+<link rel="stylesheet" href="/app/src/MobileDevice/css/rfterminal.css">
+<link rel="stylesheet" href="/tools/rf-bench/bench/bench.css">
+</head>
+<body>
+<div class="bench-controls" id="benchControls" hidden>
+    <div class="bench-row">
+        <label for="benchFixture">State</label>
+        <select id="benchFixture"></select>
+    </div>
+    <div class="bench-row">
+        <label for="benchWedge">Wedge</label>
+        <select id="benchWedge"></select>
+        <input id="benchWedgeText" placeholder="code to send" autocomplete="off" spellcheck="false">
+        <button type="button" id="benchSend">Send</button>
+    </div>
+    <div class="bench-row">
+        <button type="button" id="benchFocus">Focus scan box</button>
+        <button type="button" id="benchClear">Clear log</button>
+        <span class="bench-note">Scan with the real scanner into the box below; the log records what the add-in raised.</span>
+    </div>
+    <ol class="bench-log" id="benchLog"></ol>
+</div>
+
+<div id="controlAddIn"></div>
+
+<script src="/tools/rf-bench/bench/navstub.js"></script>
+<script src="/app/src/MobileDevice/js/rfterminal.js"></script>
+<script src="/app/src/MobileDevice/js/rfterminalstart.js"></script>
+<script type="module" src="/tools/rf-bench/bench/bench.js"></script>
+</body>
+</html>

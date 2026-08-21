@@ -1,0 +1,32 @@
+{
+  "step": "WHASignIn",
+  "stepLabel": "Sign in",
+  "instruction": "Scan the code on the handheld.",
+  "device": {
+    "code": "",
+    "location": ""
+  },
+  "job": {
+    "hasJob": false,
+    "number": "",
+    "type": "Put-away",
+    "description": "",
+    "fromBin": "",
+    "toBin": "",
+    "handlingUnit": "",
+    "item": "",
+    "lot": "",
+    "serial": "",
+    "quantity": 0,
+    "unitOfMeasure": ""
+  },
+  "wantsScan": true,
+  "wantsShortForm": false,
+  "target": "",
+  "primaryKey": "Sign in",
+  "primaryEnabled": true,
+  "shortEnabled": false,
+  "handBackEnabled": false,
+  "simulator": false,
+  "labels": []
+}

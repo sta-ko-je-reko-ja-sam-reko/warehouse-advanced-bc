@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50664 "WHA Int. Receipt Release" implements "WHA IIntMessageHandler"
+codeunit 55664 "WHA Int. Receipt Release" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

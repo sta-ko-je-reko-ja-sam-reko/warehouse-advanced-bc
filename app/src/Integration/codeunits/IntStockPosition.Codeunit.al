@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50671 "WHA Int. Stock Position" implements "WHA IIntMessageHandler"
+codeunit 55671 "WHA Int. Stock Position" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

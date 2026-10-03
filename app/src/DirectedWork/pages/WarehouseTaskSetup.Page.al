@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Registration;
 
-page 50200 "WHA Warehouse Task Setup"
+page 55200 "WHA Warehouse Task Setup"
 {
     PageType = Card;
     ApplicationArea = All;

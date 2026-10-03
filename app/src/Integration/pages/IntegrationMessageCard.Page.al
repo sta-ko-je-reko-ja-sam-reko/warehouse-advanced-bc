@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-page 50652 "WHA Integration Message Card"
+page 55652 "WHA Integration Message Card"
 {
     PageType = Card;
     ApplicationArea = WHAIntegration;

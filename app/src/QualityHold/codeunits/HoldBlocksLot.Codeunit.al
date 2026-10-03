@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.QualityHold;
 using Microsoft.Inventory.Tracking;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50563 "WHA Hold Blocks Lot" implements "WHA IHoldStockPolicy"
+codeunit 55563 "WHA Hold Blocks Lot" implements "WHA IHoldStockPolicy"
 {
     Access = Public;
 

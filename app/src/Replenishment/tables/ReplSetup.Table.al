@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Replenishment;
 
-table 50250 "WHA Repl. Setup"
+table 55250 "WHA Repl. Setup"
 {
     Caption = 'Replenishment setup';
     DataClassification = CustomerContent;

@@ -1,4 +1,4 @@
-codeunit 51007 "WHA Replenishment Tests"
+codeunit 59007 "WHA Replenishment Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

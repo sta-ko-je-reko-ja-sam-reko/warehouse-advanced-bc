@@ -1,4 +1,4 @@
-codeunit 51017 "WHA Whse. Registration Tests"
+codeunit 59017 "WHA Whse. Registration Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

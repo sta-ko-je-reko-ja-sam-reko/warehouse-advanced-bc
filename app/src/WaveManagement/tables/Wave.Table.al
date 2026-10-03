@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.WaveManagement;
 using Microsoft.Inventory.Location;
 using WarehouseAdvanced.DirectedWork;
 
-table 50151 "WHA Wave"
+table 55151 "WHA Wave"
 {
     Caption = 'Wave';
     DataClassification = CustomerContent;

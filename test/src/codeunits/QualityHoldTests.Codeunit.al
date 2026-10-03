@@ -1,4 +1,4 @@
-codeunit 51009 "WHA Quality Hold Tests"
+codeunit 59009 "WHA Quality Hold Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

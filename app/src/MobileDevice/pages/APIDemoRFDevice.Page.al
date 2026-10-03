@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.MobileDevice;
 
 using WarehouseAdvanced.Core;
 
-page 50105 "WHA API Demo RF Device"
+page 55105 "WHA API Demo RF Device"
 {
     PageType = API;
     APIPublisher = 'matr';

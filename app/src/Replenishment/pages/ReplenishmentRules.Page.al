@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Replenishment;
 
-page 50251 "WHA Replenishment Rules"
+page 55251 "WHA Replenishment Rules"
 {
     PageType = List;
     ApplicationArea = WHAReplenishment;

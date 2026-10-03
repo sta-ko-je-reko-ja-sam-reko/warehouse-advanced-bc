@@ -1,4 +1,4 @@
-codeunit 51018 "WHA Telemetry Tests"
+codeunit 59018 "WHA Telemetry Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

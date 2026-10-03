@@ -46,10 +46,10 @@ and a system that overwrites the promise with what happened cannot measure it.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Dock Setup` | 50450 | Single-record feature setup |
-| `WHA Dock Door` | 50451 | One door, at one location |
-| `WHA Yard Position` | 50452 | One place a trailer can stand |
-| `WHA Dock Appointment` | 50453 | One vehicle visit, promised and then recorded |
+| `WHA Dock Setup` | 55450 | Single-record feature setup |
+| `WHA Dock Door` | 55451 | One door, at one location |
+| `WHA Yard Position` | 55452 | One place a trailer can stand |
+| `WHA Dock Appointment` | 55453 | One vehicle visit, promised and then recorded |
 
 ### `WHA Dock Door`
 
@@ -81,40 +81,40 @@ off. That is what makes the yard list answer "where is that trailer" rather than
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Dock Setup` | table | 50450 | `app/src/DockYard/tables/DockSetup.Table.al` |
-| `WHA Dock Door` | table | 50451 | `app/src/DockYard/tables/DockDoor.Table.al` |
-| `WHA Yard Position` | table | 50452 | `app/src/DockYard/tables/YardPosition.Table.al` |
-| `WHA Dock Appointment` | table | 50453 | `app/src/DockYard/tables/DockAppointment.Table.al` |
-| `WHA Dock Direction` | enum | 50450 | `app/src/DockYard/enums/DockDirection.Enum.al` |
-| `WHA Door Direction` | enum | 50451 | `app/src/DockYard/enums/DoorDirection.Enum.al` |
-| `WHA Appointment Status` | enum | 50452 | `app/src/DockYard/enums/AppointmentStatus.Enum.al` |
-| `WHA Door Selection` | enum | 50453 | `app/src/DockYard/enums/DoorSelection.Enum.al` |
+| `WHA Dock Setup` | table | 55450 | `app/src/DockYard/tables/DockSetup.Table.al` |
+| `WHA Dock Door` | table | 55451 | `app/src/DockYard/tables/DockDoor.Table.al` |
+| `WHA Yard Position` | table | 55452 | `app/src/DockYard/tables/YardPosition.Table.al` |
+| `WHA Dock Appointment` | table | 55453 | `app/src/DockYard/tables/DockAppointment.Table.al` |
+| `WHA Dock Direction` | enum | 55450 | `app/src/DockYard/enums/DockDirection.Enum.al` |
+| `WHA Door Direction` | enum | 55451 | `app/src/DockYard/enums/DoorDirection.Enum.al` |
+| `WHA Appointment Status` | enum | 55452 | `app/src/DockYard/enums/AppointmentStatus.Enum.al` |
+| `WHA Door Selection` | enum | 55453 | `app/src/DockYard/enums/DoorSelection.Enum.al` |
 | `WHA IDockAppointment` | interface | — | `app/src/DockYard/interfaces/IDockAppointment.Interface.al` |
 | `WHA IDoorSelection` | interface | — | `app/src/DockYard/interfaces/IDoorSelection.Interface.al` |
-| `WHA Dock Mgt.` | codeunit | 50450 | `app/src/DockYard/codeunits/DockMgt.Codeunit.al` |
-| `WHA Dock Appt. Logic` | codeunit | 50451 | `app/src/DockYard/codeunits/DockApptLogic.Codeunit.al` |
-| `WHA Dock Feature Setup` | codeunit | 50452 | `app/src/DockYard/codeunits/DockFeatureSetup.Codeunit.al` |
-| `WHA Dock App Area Sub.` | codeunit | 50453 | `app/src/DockYard/codeunits/DockAppAreaSub.Codeunit.al` |
-| `WHA Demo Dock` | codeunit | 50454 | `app/src/DockYard/codeunits/DemoDock.Codeunit.al` |
-| `WHA Door First Free` | codeunit | 50455 | `app/src/DockYard/codeunits/DoorFirstFree.Codeunit.al` |
-| `WHA Door Least Busy` | codeunit | 50456 | `app/src/DockYard/codeunits/DoorLeastBusy.Codeunit.al` |
-| `WHA Dock Appl. Area Setup` | tableextension | 50450 | `app/src/DockYard/tableextensions/DockApplAreaSetup.TableExt.al` |
-| `WHA Dock Setup` | page | 50450 | `app/src/DockYard/pages/DockSetup.Page.al` |
-| `WHA Dock Doors` | page | 50451 | `app/src/DockYard/pages/DockDoors.Page.al` |
-| `WHA Yard Positions` | page | 50452 | `app/src/DockYard/pages/YardPositions.Page.al` |
-| `WHA Dock Appointments` | page | 50453 | `app/src/DockYard/pages/DockAppointments.Page.al` |
-| `WHA Dock Appointment Card` | page | 50454 | `app/src/DockYard/pages/DockAppointmentCard.Page.al` |
-| `WHA API Dock Door` | page | 50455 | `app/src/DockYard/pages/APIDockDoor.Page.al` |
-| `WHA API Yard Position` | page | 50456 | `app/src/DockYard/pages/APIYardPosition.Page.al` |
-| `WHA API Dock Appointment` | page | 50457 | `app/src/DockYard/pages/APIDockAppointment.Page.al` |
-| `WHA API Demo Dock` | page | 50458 | `app/src/DockYard/pages/APIDemoDock.Page.al` |
-| `WHA Dock Tests` | codeunit | 51012 | `test/src/codeunits/DockTests.Codeunit.al` |
-| `WHA Dock Activities Cue` | tableextension | 50451 | `app/src/DockYard/tableextensions/DockActivitiesCue.TableExt.al` |
-| `WHA Dock Activity Provider` | enumextension | 50451 | `app/src/DockYard/enumextensions/DockActivityProvider.EnumExt.al` |
-| `WHA Dock Activity Cues` | codeunit | 50457 | `app/src/DockYard/codeunits/DockActivityCues.Codeunit.al` |
-| `WHA Dock Activities` | pageextension | 50451 | `app/src/DockYard/pageextensions/DockActivities.PageExt.al` |
+| `WHA Dock Mgt.` | codeunit | 55450 | `app/src/DockYard/codeunits/DockMgt.Codeunit.al` |
+| `WHA Dock Appt. Logic` | codeunit | 55451 | `app/src/DockYard/codeunits/DockApptLogic.Codeunit.al` |
+| `WHA Dock Feature Setup` | codeunit | 55452 | `app/src/DockYard/codeunits/DockFeatureSetup.Codeunit.al` |
+| `WHA Dock App Area Sub.` | codeunit | 55453 | `app/src/DockYard/codeunits/DockAppAreaSub.Codeunit.al` |
+| `WHA Demo Dock` | codeunit | 55454 | `app/src/DockYard/codeunits/DemoDock.Codeunit.al` |
+| `WHA Door First Free` | codeunit | 55455 | `app/src/DockYard/codeunits/DoorFirstFree.Codeunit.al` |
+| `WHA Door Least Busy` | codeunit | 55456 | `app/src/DockYard/codeunits/DoorLeastBusy.Codeunit.al` |
+| `WHA Dock Appl. Area Setup` | tableextension | 55450 | `app/src/DockYard/tableextensions/DockApplAreaSetup.TableExt.al` |
+| `WHA Dock Setup` | page | 55450 | `app/src/DockYard/pages/DockSetup.Page.al` |
+| `WHA Dock Doors` | page | 55451 | `app/src/DockYard/pages/DockDoors.Page.al` |
+| `WHA Yard Positions` | page | 55452 | `app/src/DockYard/pages/YardPositions.Page.al` |
+| `WHA Dock Appointments` | page | 55453 | `app/src/DockYard/pages/DockAppointments.Page.al` |
+| `WHA Dock Appointment Card` | page | 55454 | `app/src/DockYard/pages/DockAppointmentCard.Page.al` |
+| `WHA API Dock Door` | page | 55455 | `app/src/DockYard/pages/APIDockDoor.Page.al` |
+| `WHA API Yard Position` | page | 55456 | `app/src/DockYard/pages/APIYardPosition.Page.al` |
+| `WHA API Dock Appointment` | page | 55457 | `app/src/DockYard/pages/APIDockAppointment.Page.al` |
+| `WHA API Demo Dock` | page | 55458 | `app/src/DockYard/pages/APIDemoDock.Page.al` |
+| `WHA Dock Tests` | codeunit | 59012 | `test/src/codeunits/DockTests.Codeunit.al` |
+| `WHA Dock Activities Cue` | tableextension | 55451 | `app/src/DockYard/tableextensions/DockActivitiesCue.TableExt.al` |
+| `WHA Dock Activity Provider` | enumextension | 55451 | `app/src/DockYard/enumextensions/DockActivityProvider.EnumExt.al` |
+| `WHA Dock Activity Cues` | codeunit | 55457 | `app/src/DockYard/codeunits/DockActivityCues.Codeunit.al` |
+| `WHA Dock Activities` | pageextension | 55451 | `app/src/DockYard/pageextensions/DockActivities.PageExt.al` |
 
-All in namespace `WarehouseAdvanced.DockYard`, from the reserved block `50450..50499`.
+All in namespace `WarehouseAdvanced.DockYard`, from the reserved block `55450..55499`.
 
 **Core changed in one place**: a `WHA Feature` enum value. The appointment numbering lives on this
 feature's own setup, so Core does not know this feature numbers anything.
@@ -198,7 +198,7 @@ recognised by the reference it carries. `Import()` builds the `WHA-DOCK` RapidSt
 
 ## Tests
 
-`WHA Dock Tests` (codeunit 51012), 15 tests: a door is chosen when nobody names one; a door only
+`WHA Dock Tests` (codeunit 59012), 15 tests: a door is chosen when nobody names one; a door only
 takes the direction it is for; a blocked door takes nothing and a booking with no usable door is
 still taken; two bookings cannot share a door in overlapping slots while a later slot on the same
 door is fine; checking in parks the trailer and fills the yard position; a yard position holds one

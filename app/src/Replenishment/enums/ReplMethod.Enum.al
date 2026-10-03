@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Replenishment;
 
-enum 50250 "WHA Repl. Method" implements "WHA IReplMethod"
+enum 55250 "WHA Repl. Method" implements "WHA IReplMethod"
 {
     Caption = 'Replenishment method';
     Extensible = true;

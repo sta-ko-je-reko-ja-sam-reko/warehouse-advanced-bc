@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-table 50001 "WHA Setup Step"
+table 55001 "WHA Setup Step"
 {
     Caption = 'Warehouse advanced setup step';
     TableType = Temporary;

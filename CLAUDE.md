@@ -75,7 +75,7 @@ rejects it with `AL0124`. The `bc-dev-templates` bootstrap instruction is wrong 
 | Distribution | **Per-tenant extension (PTE)** — not AppSource |
 | Publisher | `matr` |
 | Affix | `WHA` |
-| Object IDs | app `50000..50999`, test `51000..51999` |
+| Object IDs | app `55000..58999`, test `59000..59999` — this app's block in the PTE range shared by all the owner's apps, which must install side by side; never use IDs outside it (registry: bc-dev-templates) |
 
 The container is US while production is W1. Low risk for warehouse objects, but rebuild the
 container from a W1 artifact before working on posting or documents.

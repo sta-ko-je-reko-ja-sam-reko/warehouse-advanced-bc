@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Analytics;
 
-codeunit 50700 "WHA KPI Mgt."
+codeunit 55700 "WHA KPI Mgt."
 {
     Access = Public;
 

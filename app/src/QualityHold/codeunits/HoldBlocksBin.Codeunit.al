@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.QualityHold;
 using Microsoft.Warehouse.Structure;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50562 "WHA Hold Blocks Bin" implements "WHA IHoldStockPolicy"
+codeunit 55562 "WHA Hold Blocks Bin" implements "WHA IHoldStockPolicy"
 {
     Access = Public;
 

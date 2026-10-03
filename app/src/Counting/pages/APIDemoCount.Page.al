@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.Core;
 
-page 50506 "WHA API Demo Count"
+page 55506 "WHA API Demo Count"
 {
     PageType = API;
     APIPublisher = 'matr';

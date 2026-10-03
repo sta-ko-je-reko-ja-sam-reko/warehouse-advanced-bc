@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Registration;
 
-enum 50800 "WHA Whse. Reg. Method" implements "WHA IWhseRegistration"
+enum 55800 "WHA Whse. Reg. Method" implements "WHA IWhseRegistration"
 {
     Caption = 'Warehouse registration method';
     Extensible = true;

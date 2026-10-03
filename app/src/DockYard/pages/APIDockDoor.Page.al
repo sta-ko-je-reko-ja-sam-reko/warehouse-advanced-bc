@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-page 50455 "WHA API Dock Door"
+page 55455 "WHA API Dock Door"
 {
     PageType = API;
     APIPublisher = 'matr';

@@ -4,7 +4,7 @@ using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Location;
 using Microsoft.Inventory.Tracking;
 
-codeunit 50802 "WHA Whse. Reg. Mgt."
+codeunit 55802 "WHA Whse. Reg. Mgt."
 {
     Access = Public;
 

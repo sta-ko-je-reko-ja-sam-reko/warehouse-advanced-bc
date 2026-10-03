@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50556 "WHA Disp. Release" implements "WHA IHoldDisposition"
+codeunit 55556 "WHA Disp. Release" implements "WHA IHoldDisposition"
 {
     Access = Public;
 

@@ -1,4 +1,4 @@
-codeunit 51004 "WHA Wave Tests"
+codeunit 59004 "WHA Wave Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

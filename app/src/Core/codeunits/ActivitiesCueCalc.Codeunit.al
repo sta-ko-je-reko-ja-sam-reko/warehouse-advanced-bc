@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-codeunit 50009 "WHA Activities Cue Calc"
+codeunit 55009 "WHA Activities Cue Calc"
 {
     Access = Internal;
 

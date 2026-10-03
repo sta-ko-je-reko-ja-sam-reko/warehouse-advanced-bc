@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.LabourManagement;
 
 using WarehouseAdvanced.Core;
 
-page 50355 "WHA API Demo Labour"
+page 55355 "WHA API Demo Labour"
 {
     PageType = API;
     APIPublisher = 'matr';

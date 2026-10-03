@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-enum 50350 "WHA Labour Entry Type"
+enum 55350 "WHA Labour Entry Type"
 {
     Caption = 'Labour entry type';
     Extensible = true;

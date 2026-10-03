@@ -1,4 +1,4 @@
-codeunit 51000 "WHA Handling Unit Tests"
+codeunit 59000 "WHA Handling Unit Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

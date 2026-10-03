@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50552 "WHA QC Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55552 "WHA QC Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

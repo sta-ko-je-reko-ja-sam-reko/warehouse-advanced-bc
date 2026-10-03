@@ -5,7 +5,7 @@ using Microsoft.Warehouse.Structure;
 using System.Security.AccessControl;
 using WarehouseAdvanced.HandlingUnit;
 
-table 50551 "WHA Quality Hold"
+table 55551 "WHA Quality Hold"
 {
     Caption = 'Quality hold';
     DataClassification = CustomerContent;

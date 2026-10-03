@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Packing;
 using Microsoft.Inventory.Item;
 using WarehouseAdvanced.HandlingUnit;
 
-page 50403 "WHA Packing Station"
+page 55403 "WHA Packing Station"
 {
     PageType = Card;
     ApplicationArea = WHAPacking;

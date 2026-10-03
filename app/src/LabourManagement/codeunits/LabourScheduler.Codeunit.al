@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.LabourManagement;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Telemetry;
 
-codeunit 50358 "WHA Labour Scheduler"
+codeunit 55358 "WHA Labour Scheduler"
 {
     Access = Public;
     TableNo = "WHA Labour Entry";

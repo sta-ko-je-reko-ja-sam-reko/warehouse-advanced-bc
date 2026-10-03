@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50154 "WHA Wave Default Strategy" implements "WHA IWaveStrategy"
+codeunit 55154 "WHA Wave Default Strategy" implements "WHA IWaveStrategy"
 {
     Access = Public;
 

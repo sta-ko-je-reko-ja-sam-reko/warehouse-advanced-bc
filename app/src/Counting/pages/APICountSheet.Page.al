@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.Core;
 
-page 50504 "WHA API Count Sheet"
+page 55504 "WHA API Count Sheet"
 {
     PageType = API;
     APIPublisher = 'matr';

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using Microsoft.Inventory.Location;
 
-table 50152 "WHA Wave Template"
+table 55152 "WHA Wave Template"
 {
     Caption = 'Wave template';
     DataClassification = CustomerContent;

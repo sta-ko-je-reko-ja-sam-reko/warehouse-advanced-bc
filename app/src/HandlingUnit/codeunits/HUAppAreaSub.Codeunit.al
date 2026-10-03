@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50052 "WHA HU App Area Sub."
+codeunit 55052 "WHA HU App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

@@ -32,9 +32,9 @@ since `FEAT-TASK-001` shipped. **Nothing has ever read those four fields.** This
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Labour Setup` | 50350 | Single-record feature setup |
-| `WHA Labour Standard` | 50351 | How long a kind of job should take |
-| `WHA Labour Entry` | 50352 | One piece of recorded time |
+| `WHA Labour Setup` | 55350 | Single-record feature setup |
+| `WHA Labour Standard` | 55351 | How long a kind of job should take |
+| `WHA Labour Entry` | 55352 | One piece of recorded time |
 
 ### `WHA Labour Standard`
 
@@ -73,34 +73,34 @@ per day and per location per day are a `CalcSums` rather than a scan.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Labour Setup` | table | 50350 | `app/src/LabourManagement/tables/LabourSetup.Table.al` |
-| `WHA Labour Standard` | table | 50351 | `app/src/LabourManagement/tables/LabourStandard.Table.al` |
-| `WHA Labour Entry` | table | 50352 | `app/src/LabourManagement/tables/LabourEntry.Table.al` |
-| `WHA Labour Entry Type` | enum | 50350 | `app/src/LabourManagement/enums/LabourEntryType.Enum.al` |
-| `WHA Indirect Reason` | enum | 50351 | `app/src/LabourManagement/enums/IndirectReason.Enum.al` |
-| `WHA Labour Standard Basis` | enum | 50352 | `app/src/LabourManagement/enums/LabourStandardBasis.Enum.al` |
+| `WHA Labour Setup` | table | 55350 | `app/src/LabourManagement/tables/LabourSetup.Table.al` |
+| `WHA Labour Standard` | table | 55351 | `app/src/LabourManagement/tables/LabourStandard.Table.al` |
+| `WHA Labour Entry` | table | 55352 | `app/src/LabourManagement/tables/LabourEntry.Table.al` |
+| `WHA Labour Entry Type` | enum | 55350 | `app/src/LabourManagement/enums/LabourEntryType.Enum.al` |
+| `WHA Indirect Reason` | enum | 55351 | `app/src/LabourManagement/enums/IndirectReason.Enum.al` |
+| `WHA Labour Standard Basis` | enum | 55352 | `app/src/LabourManagement/enums/LabourStandardBasis.Enum.al` |
 | `WHA ILabourStandard` | interface | — | `app/src/LabourManagement/interfaces/ILabourStandard.Interface.al` |
 | `WHA ILabourStandardRule` | interface | — | `app/src/LabourManagement/interfaces/ILabourStandardRule.Interface.al` |
 | `WHA ILabourEntry` | interface | — | `app/src/LabourManagement/interfaces/ILabourEntry.Interface.al` |
-| `WHA Labour Std. Logic` | codeunit | 50350 | `app/src/LabourManagement/codeunits/LabourStdLogic.Codeunit.al` |
-| `WHA Labour Entry Logic` | codeunit | 50351 | `app/src/LabourManagement/codeunits/LabourEntryLogic.Codeunit.al` |
-| `WHA Labour Mgt.` | codeunit | 50352 | `app/src/LabourManagement/codeunits/LabourMgt.Codeunit.al` |
-| `WHA Lab. Feature Setup` | codeunit | 50353 | `app/src/LabourManagement/codeunits/LabFeatureSetup.Codeunit.al` |
-| `WHA Lab. App Area Sub.` | codeunit | 50354 | `app/src/LabourManagement/codeunits/LabAppAreaSub.Codeunit.al` |
-| `WHA Demo Labour` | codeunit | 50355 | `app/src/LabourManagement/codeunits/DemoLabour.Codeunit.al` |
-| `WHA Std. Fixed Plus Unit` | codeunit | 50356 | `app/src/LabourManagement/codeunits/StdFixedPlusUnit.Codeunit.al` |
-| `WHA Std. Fixed Only` | codeunit | 50357 | `app/src/LabourManagement/codeunits/StdFixedOnly.Codeunit.al` |
-| `WHA Labour Scheduler` | codeunit | 50358 | `app/src/LabourManagement/codeunits/LabourScheduler.Codeunit.al` |
-| `WHA Lab. Appl. Area Setup` | tableextension | 50350 | `app/src/LabourManagement/tableextensions/LabApplAreaSetup.TableExt.al` |
-| `WHA Labour Setup` | page | 50350 | `app/src/LabourManagement/pages/LabourSetup.Page.al` |
-| `WHA Labour Standards` | page | 50351 | `app/src/LabourManagement/pages/LabourStandards.Page.al` |
-| `WHA Labour Entries` | page | 50352 | `app/src/LabourManagement/pages/LabourEntries.Page.al` |
-| `WHA API Labour Entry` | page | 50353 | `app/src/LabourManagement/pages/APILabourEntry.Page.al` |
-| `WHA API Labour Standard` | page | 50354 | `app/src/LabourManagement/pages/APILabourStandard.Page.al` |
-| `WHA API Demo Labour` | page | 50355 | `app/src/LabourManagement/pages/APIDemoLabour.Page.al` |
-| `WHA Labour Tests` | codeunit | 51010 | `test/src/codeunits/LabourTests.Codeunit.al` |
+| `WHA Labour Std. Logic` | codeunit | 55350 | `app/src/LabourManagement/codeunits/LabourStdLogic.Codeunit.al` |
+| `WHA Labour Entry Logic` | codeunit | 55351 | `app/src/LabourManagement/codeunits/LabourEntryLogic.Codeunit.al` |
+| `WHA Labour Mgt.` | codeunit | 55352 | `app/src/LabourManagement/codeunits/LabourMgt.Codeunit.al` |
+| `WHA Lab. Feature Setup` | codeunit | 55353 | `app/src/LabourManagement/codeunits/LabFeatureSetup.Codeunit.al` |
+| `WHA Lab. App Area Sub.` | codeunit | 55354 | `app/src/LabourManagement/codeunits/LabAppAreaSub.Codeunit.al` |
+| `WHA Demo Labour` | codeunit | 55355 | `app/src/LabourManagement/codeunits/DemoLabour.Codeunit.al` |
+| `WHA Std. Fixed Plus Unit` | codeunit | 55356 | `app/src/LabourManagement/codeunits/StdFixedPlusUnit.Codeunit.al` |
+| `WHA Std. Fixed Only` | codeunit | 55357 | `app/src/LabourManagement/codeunits/StdFixedOnly.Codeunit.al` |
+| `WHA Labour Scheduler` | codeunit | 55358 | `app/src/LabourManagement/codeunits/LabourScheduler.Codeunit.al` |
+| `WHA Lab. Appl. Area Setup` | tableextension | 55350 | `app/src/LabourManagement/tableextensions/LabApplAreaSetup.TableExt.al` |
+| `WHA Labour Setup` | page | 55350 | `app/src/LabourManagement/pages/LabourSetup.Page.al` |
+| `WHA Labour Standards` | page | 55351 | `app/src/LabourManagement/pages/LabourStandards.Page.al` |
+| `WHA Labour Entries` | page | 55352 | `app/src/LabourManagement/pages/LabourEntries.Page.al` |
+| `WHA API Labour Entry` | page | 55353 | `app/src/LabourManagement/pages/APILabourEntry.Page.al` |
+| `WHA API Labour Standard` | page | 55354 | `app/src/LabourManagement/pages/APILabourStandard.Page.al` |
+| `WHA API Demo Labour` | page | 55355 | `app/src/LabourManagement/pages/APIDemoLabour.Page.al` |
+| `WHA Labour Tests` | codeunit | 59010 | `test/src/codeunits/LabourTests.Codeunit.al` |
 
-All in namespace `WarehouseAdvanced.LabourManagement`, from the reserved block `50350..50399`. Core
+All in namespace `WarehouseAdvanced.LabourManagement`, from the reserved block `55350..55399`. Core
 gained a `WHA Feature` enum value; **nothing else outside the feature changed, and nothing in
 directed work knows this exists**.
 
@@ -189,7 +189,7 @@ correct rather than a failure. `Import()` also builds the `WHA-LAB` RapidStart p
 
 ## Tests
 
-`WHA Labour Tests` (codeunit 51010), 15 tests. Two cover the scheduled run: it turns finished work
+`WHA Labour Tests` (codeunit 59010), 15 tests. Two cover the scheduled run: it turns finished work
 into measured time, and it refuses when labour management is switched off. The other 13: finished work
 becomes recorded time with the right
 minutes and the right person; the same job is never counted twice; work nobody held is not recorded; a

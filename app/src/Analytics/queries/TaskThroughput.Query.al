@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.DirectedWork;
 
-query 50700 "WHA Task Throughput"
+query 55700 "WHA Task Throughput"
 {
     QueryType = API;
     APIPublisher = 'matr';

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using Microsoft.Foundation.NoSeries;
 
-codeunit 50500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
+codeunit 55500 "WHA Count Sheet Logic" implements "WHA ICountSheet"
 {
     Access = Public;
 

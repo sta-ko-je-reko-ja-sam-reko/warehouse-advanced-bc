@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

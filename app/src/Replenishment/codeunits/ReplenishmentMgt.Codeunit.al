@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.WaveManagement;
 
-codeunit 50256 "WHA Replenishment Mgt."
+codeunit 55256 "WHA Replenishment Mgt."
 {
     Access = Public;
 

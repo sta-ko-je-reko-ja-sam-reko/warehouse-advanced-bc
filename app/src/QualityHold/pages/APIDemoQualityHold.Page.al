@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.Core;
 
-page 50554 "WHA API Demo Quality Hold"
+page 55554 "WHA API Demo Quality Hold"
 {
     PageType = API;
     APIPublisher = 'matr';

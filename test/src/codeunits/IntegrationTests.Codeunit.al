@@ -1,4 +1,4 @@
-codeunit 51002 "WHA Integration Tests"
+codeunit 59002 "WHA Integration Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

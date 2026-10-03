@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.Core;
 
-page 50254 "WHA API Demo Repl."
+page 55254 "WHA API Demo Repl."
 {
     PageType = API;
     APIPublisher = 'matr';

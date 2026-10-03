@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.Core;
 
-page 50650 "WHA Integration Setup"
+page 55650 "WHA Integration Setup"
 {
     PageType = Card;
     ApplicationArea = All;

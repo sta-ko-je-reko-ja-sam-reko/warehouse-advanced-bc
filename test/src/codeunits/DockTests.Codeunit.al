@@ -1,4 +1,4 @@
-codeunit 51012 "WHA Dock Tests"
+codeunit 59012 "WHA Dock Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

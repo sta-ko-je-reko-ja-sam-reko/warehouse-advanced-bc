@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.Core;
 
-page 50150 "WHA Wave Setup"
+page 55150 "WHA Wave Setup"
 {
     PageType = Card;
     ApplicationArea = All;

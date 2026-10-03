@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-enum 50352 "WHA Labour Standard Basis" implements "WHA ILabourStandard"
+enum 55352 "WHA Labour Standard Basis" implements "WHA ILabourStandard"
 {
     Caption = 'Standard basis';
     Extensible = true;

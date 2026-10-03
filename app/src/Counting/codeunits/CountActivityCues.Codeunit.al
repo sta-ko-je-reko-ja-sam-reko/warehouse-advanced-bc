@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50508 "WHA Count Activity Cues" implements "WHA IActivityCues"
+codeunit 55508 "WHA Count Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

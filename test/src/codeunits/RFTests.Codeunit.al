@@ -1,4 +1,4 @@
-codeunit 51003 "WHA RF Tests"
+codeunit 59003 "WHA RF Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

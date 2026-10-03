@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-page 50451 "WHA Dock Doors"
+page 55451 "WHA Dock Doors"
 {
     PageType = List;
     ApplicationArea = WHADockYard;

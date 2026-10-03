@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Posting;
 
-page 50550 "WHA Quality Hold Setup"
+page 55550 "WHA Quality Hold Setup"
 {
     PageType = Card;
     ApplicationArea = All;

@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Packing;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50402 "WHA Pack App Area Sub."
+codeunit 55402 "WHA Pack App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

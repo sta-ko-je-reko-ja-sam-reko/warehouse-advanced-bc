@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Core;
 
 using Microsoft.Foundation.NoSeries;
 
-codeunit 50007 "WHA No. Series Mgt."
+codeunit 55007 "WHA No. Series Mgt."
 {
     Access = Public;
 

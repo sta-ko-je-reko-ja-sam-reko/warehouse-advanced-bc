@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Telemetry;
 
-codeunit 50260 "WHA Repl. Scheduler"
+codeunit 55260 "WHA Repl. Scheduler"
 {
     Access = Public;
     TableNo = "WHA Replenishment Rule";

@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.LabourManagement;
 using Microsoft.Inventory.Location;
 using WarehouseAdvanced.DirectedWork;
 
-table 50351 "WHA Labour Standard"
+table 55351 "WHA Labour Standard"
 {
     Caption = 'Labour standard';
     DataClassification = CustomerContent;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-page 50301 "WHA Item Velocities"
+page 55301 "WHA Item Velocities"
 {
     PageType = List;
     ApplicationArea = WHASlotting;

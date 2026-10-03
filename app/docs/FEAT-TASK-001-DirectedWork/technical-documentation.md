@@ -57,8 +57,8 @@ the setting and the call site.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Warehouse Task Setup` | 50200 | Single-record feature setup: enablement and queue rules |
-| `WHA Warehouse Task` | 50201 | One piece of work |
+| `WHA Warehouse Task Setup` | 55200 | Single-record feature setup: enablement and queue rules |
+| `WHA Warehouse Task` | 55201 | One piece of work |
 
 ### `WHA Warehouse Task`
 
@@ -120,39 +120,39 @@ time and per-step durations; it would be the wrong shape to guess at now.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Warehouse Task Setup` | table | 50200 | `app/src/DirectedWork/tables/WarehouseTaskSetup.Table.al` |
-| `WHA Warehouse Task` | table | 50201 | `app/src/DirectedWork/tables/WarehouseTask.Table.al` |
-| `WHA Warehouse Task Type` | enum | 50200 | `app/src/DirectedWork/enums/WarehouseTaskType.Enum.al` |
-| `WHA Warehouse Task Status` | enum | 50201 | `app/src/DirectedWork/enums/WarehouseTaskStatus.Enum.al` |
+| `WHA Warehouse Task Setup` | table | 55200 | `app/src/DirectedWork/tables/WarehouseTaskSetup.Table.al` |
+| `WHA Warehouse Task` | table | 55201 | `app/src/DirectedWork/tables/WarehouseTask.Table.al` |
+| `WHA Warehouse Task Type` | enum | 55200 | `app/src/DirectedWork/enums/WarehouseTaskType.Enum.al` |
+| `WHA Warehouse Task Status` | enum | 55201 | `app/src/DirectedWork/enums/WarehouseTaskStatus.Enum.al` |
 | `WHA IWarehouseTask` | interface | — | `app/src/DirectedWork/interfaces/IWarehouseTask.Interface.al` |
-| `WHA Warehouse Task Logic` | codeunit | 50200 | `app/src/DirectedWork/codeunits/WarehouseTaskLogic.Codeunit.al` |
-| `WHA Task Feature Setup` | codeunit | 50201 | `app/src/DirectedWork/codeunits/TaskFeatureSetup.Codeunit.al` |
-| `WHA Task App Area Sub.` | codeunit | 50202 | `app/src/DirectedWork/codeunits/TaskAppAreaSub.Codeunit.al` |
-| `WHA Demo Warehouse Task` | codeunit | 50203 | `app/src/DirectedWork/codeunits/DemoWarehouseTask.Codeunit.al` |
-| `WHA Task Source` | enum | 50203 | `app/src/DirectedWork/enums/TaskSource.Enum.al` |
+| `WHA Warehouse Task Logic` | codeunit | 55200 | `app/src/DirectedWork/codeunits/WarehouseTaskLogic.Codeunit.al` |
+| `WHA Task Feature Setup` | codeunit | 55201 | `app/src/DirectedWork/codeunits/TaskFeatureSetup.Codeunit.al` |
+| `WHA Task App Area Sub.` | codeunit | 55202 | `app/src/DirectedWork/codeunits/TaskAppAreaSub.Codeunit.al` |
+| `WHA Demo Warehouse Task` | codeunit | 55203 | `app/src/DirectedWork/codeunits/DemoWarehouseTask.Codeunit.al` |
+| `WHA Task Source` | enum | 55203 | `app/src/DirectedWork/enums/TaskSource.Enum.al` |
 | `WHA ITaskSource` | interface | — | `app/src/DirectedWork/interfaces/ITaskSource.Interface.al` |
-| `WHA Src Manual` | codeunit | 50204 | `app/src/DirectedWork/codeunits/SrcManual.Codeunit.al` |
-| `WHA Src Whse. Receipt` | codeunit | 50205 | `app/src/DirectedWork/codeunits/SrcWhseReceipt.Codeunit.al` |
-| `WHA Src Whse. Shipment` | codeunit | 50206 | `app/src/DirectedWork/codeunits/SrcWhseShipment.Codeunit.al` |
-| `WHA Task Source Mgt.` | codeunit | 50207 | `app/src/DirectedWork/codeunits/TaskSourceMgt.Codeunit.al` |
-| `WHA Whse. Receipt Tasks` | pageextension | 50200 | `app/src/DirectedWork/pageextensions/WhseReceiptTasks.PageExt.al` |
-| `WHA Whse. Shipment Tasks` | pageextension | 50201 | `app/src/DirectedWork/pageextensions/WhseShipmentTasks.PageExt.al` |
-| `WHA Task Appl. Area Setup` | tableextension | 50200 | `app/src/DirectedWork/tableextensions/TaskApplAreaSetup.TableExt.al` |
-| `WHA Warehouse Task Setup` | page | 50200 | `app/src/DirectedWork/pages/WarehouseTaskSetup.Page.al` |
-| `WHA Warehouse Task Card` | page | 50201 | `app/src/DirectedWork/pages/WarehouseTaskCard.Page.al` |
-| `WHA Warehouse Tasks` | page | 50202 | `app/src/DirectedWork/pages/WarehouseTasks.Page.al` |
-| `WHA API Warehouse Task` | page | 50203 | `app/src/DirectedWork/pages/APIWarehouseTask.Page.al` |
-| `WHA API Demo Warehouse Task` | page | 50204 | `app/src/DirectedWork/pages/APIDemoWarehouseTask.Page.al` |
-| `WHA Warehouse Task Tests` | codeunit | 51001 | `test/src/codeunits/WarehouseTaskTests.Codeunit.al` |
-| `WHA Task Activities Cue` | tableextension | 50201 | `app/src/DirectedWork/tableextensions/TaskActivitiesCue.TableExt.al` |
-| `WHA Task Activity Provider` | enumextension | 50200 | `app/src/DirectedWork/enumextensions/TaskActivityProvider.EnumExt.al` |
-| `WHA Task Activity Cues` | codeunit | 50208 | `app/src/DirectedWork/codeunits/TaskActivityCues.Codeunit.al` |
-| `WHA Task Activities` | pageextension | 50202 | `app/src/DirectedWork/pageextensions/TaskActivities.PageExt.al` |
-| `WHA Task Whse. Registration` | codeunit | 50209 | `app/src/DirectedWork/codeunits/TaskWhseRegistration.Codeunit.al` |
-| `WHA Whse. Registration Tests` | codeunit | 51017 | `test/src/codeunits/WhseRegistrationTests.Codeunit.al` |
-| `WHA Test Whse. Reg. Recorder` | codeunit | 51016 | `test/src/codeunits/TestWhseRegRecorder.Codeunit.al` |
+| `WHA Src Manual` | codeunit | 55204 | `app/src/DirectedWork/codeunits/SrcManual.Codeunit.al` |
+| `WHA Src Whse. Receipt` | codeunit | 55205 | `app/src/DirectedWork/codeunits/SrcWhseReceipt.Codeunit.al` |
+| `WHA Src Whse. Shipment` | codeunit | 55206 | `app/src/DirectedWork/codeunits/SrcWhseShipment.Codeunit.al` |
+| `WHA Task Source Mgt.` | codeunit | 55207 | `app/src/DirectedWork/codeunits/TaskSourceMgt.Codeunit.al` |
+| `WHA Whse. Receipt Tasks` | pageextension | 55200 | `app/src/DirectedWork/pageextensions/WhseReceiptTasks.PageExt.al` |
+| `WHA Whse. Shipment Tasks` | pageextension | 55201 | `app/src/DirectedWork/pageextensions/WhseShipmentTasks.PageExt.al` |
+| `WHA Task Appl. Area Setup` | tableextension | 55200 | `app/src/DirectedWork/tableextensions/TaskApplAreaSetup.TableExt.al` |
+| `WHA Warehouse Task Setup` | page | 55200 | `app/src/DirectedWork/pages/WarehouseTaskSetup.Page.al` |
+| `WHA Warehouse Task Card` | page | 55201 | `app/src/DirectedWork/pages/WarehouseTaskCard.Page.al` |
+| `WHA Warehouse Tasks` | page | 55202 | `app/src/DirectedWork/pages/WarehouseTasks.Page.al` |
+| `WHA API Warehouse Task` | page | 55203 | `app/src/DirectedWork/pages/APIWarehouseTask.Page.al` |
+| `WHA API Demo Warehouse Task` | page | 55204 | `app/src/DirectedWork/pages/APIDemoWarehouseTask.Page.al` |
+| `WHA Warehouse Task Tests` | codeunit | 59001 | `test/src/codeunits/WarehouseTaskTests.Codeunit.al` |
+| `WHA Task Activities Cue` | tableextension | 55201 | `app/src/DirectedWork/tableextensions/TaskActivitiesCue.TableExt.al` |
+| `WHA Task Activity Provider` | enumextension | 55200 | `app/src/DirectedWork/enumextensions/TaskActivityProvider.EnumExt.al` |
+| `WHA Task Activity Cues` | codeunit | 55208 | `app/src/DirectedWork/codeunits/TaskActivityCues.Codeunit.al` |
+| `WHA Task Activities` | pageextension | 55202 | `app/src/DirectedWork/pageextensions/TaskActivities.PageExt.al` |
+| `WHA Task Whse. Registration` | codeunit | 55209 | `app/src/DirectedWork/codeunits/TaskWhseRegistration.Codeunit.al` |
+| `WHA Whse. Registration Tests` | codeunit | 59017 | `test/src/codeunits/WhseRegistrationTests.Codeunit.al` |
+| `WHA Test Whse. Reg. Recorder` | codeunit | 59016 | `test/src/codeunits/TestWhseRegRecorder.Codeunit.al` |
 
-All in namespace `WarehouseAdvanced.DirectedWork`, from the reserved block `50200..50249`.
+All in namespace `WarehouseAdvanced.DirectedWork`, from the reserved block `55200..55249`.
 
 Core objects changed in the same pass: `WHA Feature` gained a value. Numbering was originally added
 to Core as well; it has since moved to this feature's own setup, so Core no longer knows this feature
@@ -402,7 +402,7 @@ including the `Setup` table.
 
 ## Tests
 
-`WHA Warehouse Task Tests` (codeunit 51001). The validation rules are asserted directly against the
+`WHA Warehouse Task Tests` (codeunit 59001). The validation rules are asserted directly against the
 logic codeunit with unsaved records — no database writes; the life cycle, queue and cross-feature
 tests use real records and rely on the test runner's rollback.
 

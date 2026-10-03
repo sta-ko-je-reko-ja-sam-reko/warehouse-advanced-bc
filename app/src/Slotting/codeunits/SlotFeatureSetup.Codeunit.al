@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Slotting;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50302 "WHA Slot. Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55302 "WHA Slot. Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

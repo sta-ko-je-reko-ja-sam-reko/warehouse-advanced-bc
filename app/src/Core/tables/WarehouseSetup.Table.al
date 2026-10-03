@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-table 50000 "WHA Warehouse Setup"
+table 55000 "WHA Warehouse Setup"
 {
     Caption = 'Warehouse advanced setup';
     DataClassification = CustomerContent;

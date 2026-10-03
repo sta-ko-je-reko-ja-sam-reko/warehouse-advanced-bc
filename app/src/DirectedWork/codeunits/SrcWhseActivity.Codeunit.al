@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using Microsoft.Warehouse.Activity;
 using Microsoft.Warehouse.Journal;
 
-codeunit 50219 "WHA Src Whse. Activity" implements "WHA ITaskSource"
+codeunit 55219 "WHA Src Whse. Activity" implements "WHA ITaskSource"
 {
     Access = Public;
 

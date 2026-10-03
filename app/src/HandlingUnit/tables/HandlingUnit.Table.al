@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 
-table 50051 "WHA Handling Unit"
+table 55051 "WHA Handling Unit"
 {
     Caption = 'Handling unit';
     DataClassification = CustomerContent;

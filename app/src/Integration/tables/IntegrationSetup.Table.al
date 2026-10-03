@@ -4,7 +4,7 @@ using Microsoft.Foundation.AuditCodes;
 using Microsoft.Inventory.Journal;
 using WarehouseAdvanced.Posting;
 
-table 50650 "WHA Integration Setup"
+table 55650 "WHA Integration Setup"
 {
     Caption = 'Integration setup';
     DataClassification = CustomerContent;

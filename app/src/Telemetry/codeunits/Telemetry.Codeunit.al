@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Telemetry;
 
 using System.Telemetry;
 
-codeunit 50850 "WHA Telemetry"
+codeunit 55850 "WHA Telemetry"
 {
     Access = Public;
 

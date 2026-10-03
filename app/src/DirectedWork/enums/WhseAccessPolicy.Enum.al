@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-enum 50205 "WHA Whse. Access Policy" implements "WHA IWhseAccessPolicy"
+enum 55205 "WHA Whse. Access Policy" implements "WHA IWhseAccessPolicy"
 {
     Caption = 'Who may be given work';
     Extensible = true;

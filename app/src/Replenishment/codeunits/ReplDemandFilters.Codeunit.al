@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50261 "WHA Repl. Demand Filters"
+codeunit 55261 "WHA Repl. Demand Filters"
 {
     Access = Public;
 

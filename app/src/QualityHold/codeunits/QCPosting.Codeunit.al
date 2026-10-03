@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.QualityHold;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Posting;
 
-codeunit 50559 "WHA QC Posting"
+codeunit 55559 "WHA QC Posting"
 {
     Access = Public;
 

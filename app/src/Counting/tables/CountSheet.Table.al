@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Counting;
 using Microsoft.Inventory.Location;
 using System.Security.AccessControl;
 
-table 50501 "WHA Count Sheet"
+table 55501 "WHA Count Sheet"
 {
     Caption = 'Count sheet';
     DataClassification = CustomerContent;

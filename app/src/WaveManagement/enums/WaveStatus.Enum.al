@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.WaveManagement;
 
-enum 50150 "WHA Wave Status"
+enum 55150 "WHA Wave Status"
 {
     Caption = 'Wave status';
     Extensible = true;

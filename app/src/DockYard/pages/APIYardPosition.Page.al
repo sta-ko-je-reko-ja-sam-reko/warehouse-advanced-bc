@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-page 50456 "WHA API Yard Position"
+page 55456 "WHA API Yard Position"
 {
     PageType = API;
     APIPublisher = 'matr';

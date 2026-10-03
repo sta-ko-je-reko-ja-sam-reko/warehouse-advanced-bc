@@ -7,7 +7,7 @@ using System.IO;
 using System.Security.AccessControl;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50203 "WHA Demo Warehouse Task"
+codeunit 55203 "WHA Demo Warehouse Task"
 {
     Access = Public;
 

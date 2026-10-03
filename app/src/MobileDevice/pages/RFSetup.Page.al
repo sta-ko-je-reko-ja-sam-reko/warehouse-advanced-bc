@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.MobileDevice;
 
 using WarehouseAdvanced.Core;
 
-page 50100 "WHA RF Setup"
+page 55100 "WHA RF Setup"
 {
     PageType = Card;
     ApplicationArea = All;

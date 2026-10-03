@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50452 "WHA Dock Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55452 "WHA Dock Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

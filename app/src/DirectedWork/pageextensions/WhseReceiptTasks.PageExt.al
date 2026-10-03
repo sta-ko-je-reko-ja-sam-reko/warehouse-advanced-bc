@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using Microsoft.Warehouse.Document;
 using WarehouseAdvanced.Core;
 
-pageextension 50200 "WHA Whse. Receipt Tasks" extends "Warehouse Receipt"
+pageextension 55200 "WHA Whse. Receipt Tasks" extends "Warehouse Receipt"
 {
     actions
     {

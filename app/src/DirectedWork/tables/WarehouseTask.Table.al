@@ -7,7 +7,7 @@ using System.Security.AccessControl;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.WaveManagement;
 
-table 50201 "WHA Warehouse Task"
+table 55201 "WHA Warehouse Task"
 {
     Caption = 'Warehouse task';
     DataClassification = CustomerContent;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-enum 50451 "WHA Door Direction"
+enum 55451 "WHA Door Direction"
 {
     Caption = 'Door direction';
     Extensible = true;

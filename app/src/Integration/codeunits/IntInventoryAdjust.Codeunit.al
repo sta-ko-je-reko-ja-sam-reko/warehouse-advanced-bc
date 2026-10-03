@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.Posting;
 
-codeunit 50666 "WHA Int. Inventory Adjust" implements "WHA IIntMessageHandler"
+codeunit 55666 "WHA Int. Inventory Adjust" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

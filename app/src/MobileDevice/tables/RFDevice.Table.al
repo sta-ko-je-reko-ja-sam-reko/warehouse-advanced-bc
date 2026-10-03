@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.MobileDevice;
 using Microsoft.Inventory.Location;
 using System.Security.AccessControl;
 
-table 50101 "WHA RF Device"
+table 55101 "WHA RF Device"
 {
     Caption = 'Handheld device';
     DataClassification = CustomerContent;

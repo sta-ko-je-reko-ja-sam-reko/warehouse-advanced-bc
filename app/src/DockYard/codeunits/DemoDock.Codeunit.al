@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DockYard;
 using Microsoft.Inventory.Location;
 using System.IO;
 
-codeunit 50454 "WHA Demo Dock"
+codeunit 55454 "WHA Demo Dock"
 {
     Access = Public;
 

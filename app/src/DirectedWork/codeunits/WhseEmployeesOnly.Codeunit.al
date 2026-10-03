@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using Microsoft.Warehouse.Setup;
 
-codeunit 50215 "WHA Whse. Employees Only" implements "WHA IWhseAccessPolicy"
+codeunit 55215 "WHA Whse. Employees Only" implements "WHA IWhseAccessPolicy"
 {
     Access = Public;
 

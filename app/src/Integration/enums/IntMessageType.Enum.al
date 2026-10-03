@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-enum 50652 "WHA Int. Message Type" implements "WHA IIntMessageHandler"
+enum 55652 "WHA Int. Message Type" implements "WHA IIntMessageHandler"
 {
     Caption = 'Integration message type';
     Extensible = true;

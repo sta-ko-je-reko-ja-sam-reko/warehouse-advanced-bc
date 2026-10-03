@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50255 "WHA Repl. Handling Units" implements "WHA IReplMethod"
+codeunit 55255 "WHA Repl. Handling Units" implements "WHA IReplMethod"
 {
     Access = Public;
 

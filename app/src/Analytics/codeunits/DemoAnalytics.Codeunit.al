@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using System.IO;
 
-codeunit 50704 "WHA Demo Analytics"
+codeunit 55704 "WHA Demo Analytics"
 {
     Access = Public;
 

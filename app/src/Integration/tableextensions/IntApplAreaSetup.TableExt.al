@@ -2,11 +2,11 @@ namespace WarehouseAdvanced.Integration;
 
 using System.Environment.Configuration;
 
-tableextension 50650 "WHA Int. Appl. Area Setup" extends "Application Area Setup"
+tableextension 55650 "WHA Int. Appl. Area Setup" extends "Application Area Setup"
 {
     fields
     {
-        field(50650; "WHA Integration"; Boolean)
+        field(55650; "WHA Integration"; Boolean)
         {
             Caption = 'Integration';
             DataClassification = SystemMetadata;

@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Packing;
 using System.Security.AccessControl;
 using WarehouseAdvanced.HandlingUnit;
 
-table 50402 "WHA Pack Session"
+table 55402 "WHA Pack Session"
 {
     Caption = 'Packing session';
     DataClassification = CustomerContent;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Labelling;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50604 "WHA Label Mgt."
+codeunit 55604 "WHA Label Mgt."
 {
     Access = Public;
 

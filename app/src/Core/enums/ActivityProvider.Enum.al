@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-enum 50002 "WHA Activity Provider" implements "WHA IActivityCues"
+enum 55002 "WHA Activity Provider" implements "WHA IActivityCues"
 {
     Caption = 'Activity provider';
     Extensible = true;

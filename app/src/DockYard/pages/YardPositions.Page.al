@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-page 50452 "WHA Yard Positions"
+page 55452 "WHA Yard Positions"
 {
     PageType = List;
     ApplicationArea = WHADockYard;

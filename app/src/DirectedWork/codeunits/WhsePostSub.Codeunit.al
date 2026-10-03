@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using Microsoft.Warehouse.Document;
 
-codeunit 50212 "WHA Whse. Post Sub."
+codeunit 55212 "WHA Whse. Post Sub."
 {
     Access = Internal;
 

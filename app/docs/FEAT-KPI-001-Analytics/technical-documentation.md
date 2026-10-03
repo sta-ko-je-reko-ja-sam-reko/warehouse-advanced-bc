@@ -69,8 +69,8 @@ in a KPI codeunit.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Analytics Setup` | 50700 | Single-record feature setup |
-| `WHA KPI Snapshot` | 50701 | One figure, for one measure, one site and one period |
+| `WHA Analytics Setup` | 55700 | Single-record feature setup |
+| `WHA KPI Snapshot` | 55701 | One figure, for one measure, one site and one period |
 
 ### `WHA KPI Snapshot`
 
@@ -89,32 +89,32 @@ flattering one.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Analytics Setup` | table | 50700 | `app/src/Analytics/tables/AnalyticsSetup.Table.al` |
-| `WHA KPI Snapshot` | table | 50701 | `app/src/Analytics/tables/KPISnapshot.Table.al` |
-| `WHA KPI Measure` | enum | 50700 | `app/src/Analytics/enums/KPIMeasure.Enum.al` |
+| `WHA Analytics Setup` | table | 55700 | `app/src/Analytics/tables/AnalyticsSetup.Table.al` |
+| `WHA KPI Snapshot` | table | 55701 | `app/src/Analytics/tables/KPISnapshot.Table.al` |
+| `WHA KPI Measure` | enum | 55700 | `app/src/Analytics/enums/KPIMeasure.Enum.al` |
 | `WHA IKpiMeasure` | interface | — | `app/src/Analytics/interfaces/IKpiMeasure.Interface.al` |
 | `WHA IKpiSnapshot` | interface | — | `app/src/Analytics/interfaces/IKpiSnapshot.Interface.al` |
-| `WHA KPI Mgt.` | codeunit | 50700 | `app/src/Analytics/codeunits/KPIMgt.Codeunit.al` |
-| `WHA KPI Snapshot Logic` | codeunit | 50701 | `app/src/Analytics/codeunits/KPISnapshotLogic.Codeunit.al` |
-| `WHA KPI Feature Setup` | codeunit | 50702 | `app/src/Analytics/codeunits/KPIFeatureSetup.Codeunit.al` |
-| `WHA KPI App Area Sub.` | codeunit | 50703 | `app/src/Analytics/codeunits/KPIAppAreaSub.Codeunit.al` |
-| `WHA Demo Analytics` | codeunit | 50704 | `app/src/Analytics/codeunits/DemoAnalytics.Codeunit.al` |
-| `WHA KPI Tasks Completed` | codeunit | 50705 | `app/src/Analytics/codeunits/KPITasksCompleted.Codeunit.al` |
-| `WHA KPI Put-away Lead` | codeunit | 50706 | `app/src/Analytics/codeunits/KPIPutawayLead.Codeunit.al` |
-| `WHA KPI Pick Short Rate` | codeunit | 50707 | `app/src/Analytics/codeunits/KPIPickShortRate.Codeunit.al` |
-| `WHA KPI Trailer Turnaround` | codeunit | 50708 | `app/src/Analytics/codeunits/KPITrailerTurnaround.Codeunit.al` |
-| `WHA KPI Door Wait` | codeunit | 50709 | `app/src/Analytics/codeunits/KPIDoorWait.Codeunit.al` |
-| `WHA KPI Scheduler` | codeunit | 50710 | `app/src/Analytics/codeunits/KPIScheduler.Codeunit.al` |
-| `WHA Task Throughput` | query | 50700 | `app/src/Analytics/queries/TaskThroughput.Query.al` |
-| `WHA KPI Appl. Area Setup` | tableextension | 50700 | `app/src/Analytics/tableextensions/KPIApplAreaSetup.TableExt.al` |
-| `WHA Analytics Setup` | page | 50700 | `app/src/Analytics/pages/AnalyticsSetup.Page.al` |
-| `WHA Warehouse KPIs` | page | 50701 | `app/src/Analytics/pages/WarehouseKPIs.Page.al` |
-| `WHA KPI Snapshots` | page | 50702 | `app/src/Analytics/pages/KPISnapshots.Page.al` |
-| `WHA API KPI Snapshot` | page | 50703 | `app/src/Analytics/pages/APIKPISnapshot.Page.al` |
-| `WHA API Demo Analytics` | page | 50704 | `app/src/Analytics/pages/APIDemoAnalytics.Page.al` |
-| `WHA Analytics Tests` | codeunit | 51013 | `test/src/codeunits/AnalyticsTests.Codeunit.al` |
+| `WHA KPI Mgt.` | codeunit | 55700 | `app/src/Analytics/codeunits/KPIMgt.Codeunit.al` |
+| `WHA KPI Snapshot Logic` | codeunit | 55701 | `app/src/Analytics/codeunits/KPISnapshotLogic.Codeunit.al` |
+| `WHA KPI Feature Setup` | codeunit | 55702 | `app/src/Analytics/codeunits/KPIFeatureSetup.Codeunit.al` |
+| `WHA KPI App Area Sub.` | codeunit | 55703 | `app/src/Analytics/codeunits/KPIAppAreaSub.Codeunit.al` |
+| `WHA Demo Analytics` | codeunit | 55704 | `app/src/Analytics/codeunits/DemoAnalytics.Codeunit.al` |
+| `WHA KPI Tasks Completed` | codeunit | 55705 | `app/src/Analytics/codeunits/KPITasksCompleted.Codeunit.al` |
+| `WHA KPI Put-away Lead` | codeunit | 55706 | `app/src/Analytics/codeunits/KPIPutawayLead.Codeunit.al` |
+| `WHA KPI Pick Short Rate` | codeunit | 55707 | `app/src/Analytics/codeunits/KPIPickShortRate.Codeunit.al` |
+| `WHA KPI Trailer Turnaround` | codeunit | 55708 | `app/src/Analytics/codeunits/KPITrailerTurnaround.Codeunit.al` |
+| `WHA KPI Door Wait` | codeunit | 55709 | `app/src/Analytics/codeunits/KPIDoorWait.Codeunit.al` |
+| `WHA KPI Scheduler` | codeunit | 55710 | `app/src/Analytics/codeunits/KPIScheduler.Codeunit.al` |
+| `WHA Task Throughput` | query | 55700 | `app/src/Analytics/queries/TaskThroughput.Query.al` |
+| `WHA KPI Appl. Area Setup` | tableextension | 55700 | `app/src/Analytics/tableextensions/KPIApplAreaSetup.TableExt.al` |
+| `WHA Analytics Setup` | page | 55700 | `app/src/Analytics/pages/AnalyticsSetup.Page.al` |
+| `WHA Warehouse KPIs` | page | 55701 | `app/src/Analytics/pages/WarehouseKPIs.Page.al` |
+| `WHA KPI Snapshots` | page | 55702 | `app/src/Analytics/pages/KPISnapshots.Page.al` |
+| `WHA API KPI Snapshot` | page | 55703 | `app/src/Analytics/pages/APIKPISnapshot.Page.al` |
+| `WHA API Demo Analytics` | page | 55704 | `app/src/Analytics/pages/APIDemoAnalytics.Page.al` |
+| `WHA Analytics Tests` | codeunit | 59013 | `test/src/codeunits/AnalyticsTests.Codeunit.al` |
 
-All in namespace `WarehouseAdvanced.Analytics`, from the reserved block `50700..50749`. Core gained a
+All in namespace `WarehouseAdvanced.Analytics`, from the reserved block `55700..55749`. Core gained a
 `WHA Feature` enum value; nothing else outside the feature changed.
 
 ## Live figures and kept figures
@@ -169,7 +169,7 @@ rather than adding a second set. `Import()` builds the `WHA-KPI` RapidStart pack
 
 ## Tests
 
-`WHA Analytics Tests` (codeunit 51013), 14 tests. Two cover the scheduled capture: it keeps the
+`WHA Analytics Tests` (codeunit 59013), 14 tests. Two cover the scheduled capture: it keeps the
 period's figures, and it refuses when analytics is switched off. The other 12: jobs finished counts
 only what was finished inside
 the period; nothing to measure is zero rather than a failure; the short rate is the share of picks

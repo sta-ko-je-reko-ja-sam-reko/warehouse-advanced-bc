@@ -55,30 +55,30 @@ the affix.
 
 ## Object ID allocation
 
-The app is registered for `50000..50999`. Blocks are reserved per module so parallel work
-in different modules cannot collide. Test objects use `51000..51999`.
+The app is registered for `55000..58999`. Blocks are reserved per module so parallel work
+in different modules cannot collide. Test objects use `59000..59999`.
 
 | Module | Folder | IDs | Standard BC today | Candidate gap to build |
 |---|---|---|---|---|
-| Foundation | `Core` | 50000–50049 | — | Setup record, guided setup hub and wizard, feature facade, permission sets, shared enums, and the generic ability to create a number series. No feature knowledge and no business logic — numbering belongs to the feature that uses it. |
-| Handling units | `HandlingUnit` | 50050–50099 | No first-class pallet/container entity; item tracking is lot/serial only | License plate / SSCC-identified handling unit, nesting, move-as-one, unit history |
-| Mobile device | `MobileDevice` | 50100–50149 | No RF/handheld UI; web client is desktop-shaped | Scanner-optimised page set, step-driven flows, offline-tolerant confirm, device registration |
-| Wave management | `WaveManagement` | 50150–50199 | Pick worksheet, release-to-pick; no wave entity | Wave definition, release strategies, wave templates, workload balancing |
-| Directed work | `DirectedWork` | 50200–50249 | Put-away templates, bin ranking, directed put-away and pick | Task queue with priority, operator assignment, task interleaving, travel-path sequencing |
-| Replenishment | `Replenishment` | 50250–50299 | Bin replenishment via movement worksheet | Demand-driven and min/max replenishment triggers, wave-aware pre-replenishment |
-| Slotting | `Slotting` | 50300–50349 | Static bin ranking / warehouse classes | Velocity (ABC) analysis, slotting proposals, re-slotting worksheet |
-| Labour management | `LabourManagement` | 50350–50399 | None | Engineered standards, operator performance, indirect time capture |
-| Packing | `Packing` | 50400–50449 | Basic shipment posting | Packing station UI, cartonisation, pack verification, packing list output |
-| Dock & yard | `DockYard` | 50450–50499 | None | Dock door master, appointment/slot booking, trailer and yard position tracking |
-| Counting | `Counting` | 50500–50549 | Physical inventory journal, warehouse physical inventory | Perpetual cycle counting by ABC/trigger, count tolerance and approval, blind counts |
-| Quality hold | `QualityHold` | 50550–50599 | Blocked items, bin blocking | Quarantine workflow, inspection disposition, hold/release audit trail |
-| Labelling | `Labelling` | 50600–50649 | Basic report layouts | GS1-128 / SSCC generation, label templates, printer routing per zone |
-| Integration | `Integration` | 50650–50699 | Standard APIs | API pages and event contracts for the replacement interface and downstream automation |
-| Analytics | `Analytics` | 50700–50749 | Standard warehouse reports | Operational KPI queries, throughput and dock-to-stock measures |
-| Posting | `Posting` | 50750–50799 | Item journal, physical inventory journal | A shared way for any feature to change what Business Central believes is in stock, chosen per feature: not at all, a journal line somebody posts, or straight to the ledger. **Not a feature** — no toggle, no wizard step, no application area of its own |
-| Warehouse registration | `Registration` | 50800–50849 | Warehouse journal, warehouse activity registering | A shared way for any feature to tell Business Central what happened to the goods in a bin — moved between two bins, added to one, or taken out of one. A move is chosen per feature; an adjustment is the other half of writing to the item ledger and is not optional. **Not a feature** — no toggle, no wizard step, no application area of its own |
-| Telemetry | `Telemetry` | 50850–50899 | Application Insights, `Feature Telemetry` | A shared way for the app's unattended runs to say what they did. **Not a feature** — no toggle, no wizard step, no application area of its own. Emits system metadata only, by the shape of its procedures |
-| _reserved_ | — | 50900–50999 | — | Unallocated headroom |
+| Foundation | `Core` | 55000–55049 | — | Setup record, guided setup hub and wizard, feature facade, permission sets, shared enums, and the generic ability to create a number series. No feature knowledge and no business logic — numbering belongs to the feature that uses it. |
+| Handling units | `HandlingUnit` | 55050–55099 | No first-class pallet/container entity; item tracking is lot/serial only | License plate / SSCC-identified handling unit, nesting, move-as-one, unit history |
+| Mobile device | `MobileDevice` | 55100–55149 | No RF/handheld UI; web client is desktop-shaped | Scanner-optimised page set, step-driven flows, offline-tolerant confirm, device registration |
+| Wave management | `WaveManagement` | 55150–55199 | Pick worksheet, release-to-pick; no wave entity | Wave definition, release strategies, wave templates, workload balancing |
+| Directed work | `DirectedWork` | 55200–55249 | Put-away templates, bin ranking, directed put-away and pick | Task queue with priority, operator assignment, task interleaving, travel-path sequencing |
+| Replenishment | `Replenishment` | 55250–55299 | Bin replenishment via movement worksheet | Demand-driven and min/max replenishment triggers, wave-aware pre-replenishment |
+| Slotting | `Slotting` | 55300–55349 | Static bin ranking / warehouse classes | Velocity (ABC) analysis, slotting proposals, re-slotting worksheet |
+| Labour management | `LabourManagement` | 55350–55399 | None | Engineered standards, operator performance, indirect time capture |
+| Packing | `Packing` | 55400–55449 | Basic shipment posting | Packing station UI, cartonisation, pack verification, packing list output |
+| Dock & yard | `DockYard` | 55450–55499 | None | Dock door master, appointment/slot booking, trailer and yard position tracking |
+| Counting | `Counting` | 55500–55549 | Physical inventory journal, warehouse physical inventory | Perpetual cycle counting by ABC/trigger, count tolerance and approval, blind counts |
+| Quality hold | `QualityHold` | 55550–55599 | Blocked items, bin blocking | Quarantine workflow, inspection disposition, hold/release audit trail |
+| Labelling | `Labelling` | 55600–55649 | Basic report layouts | GS1-128 / SSCC generation, label templates, printer routing per zone |
+| Integration | `Integration` | 55650–55699 | Standard APIs | API pages and event contracts for the replacement interface and downstream automation |
+| Analytics | `Analytics` | 55700–55749 | Standard warehouse reports | Operational KPI queries, throughput and dock-to-stock measures |
+| Posting | `Posting` | 55750–55799 | Item journal, physical inventory journal | A shared way for any feature to change what Business Central believes is in stock, chosen per feature: not at all, a journal line somebody posts, or straight to the ledger. **Not a feature** — no toggle, no wizard step, no application area of its own |
+| Warehouse registration | `Registration` | 55800–55849 | Warehouse journal, warehouse activity registering | A shared way for any feature to tell Business Central what happened to the goods in a bin — moved between two bins, added to one, or taken out of one. A move is chosen per feature; an adjustment is the other half of writing to the item ledger and is not optional. **Not a feature** — no toggle, no wizard step, no application area of its own |
+| Telemetry | `Telemetry` | 55850–55899 | Application Insights, `Feature Telemetry` | A shared way for the app's unattended runs to say what they did. **Not a feature** — no toggle, no wizard step, no application area of its own. Emits system metadata only, by the shape of its procedures |
+| _reserved_ | — | 55900–58999 | — | Unallocated headroom |
 
 ## Sequencing note
 

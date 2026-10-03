@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Packing;
 
-page 50404 "WHA Pack Sessions"
+page 55404 "WHA Pack Sessions"
 {
     PageType = List;
     ApplicationArea = WHAPacking;

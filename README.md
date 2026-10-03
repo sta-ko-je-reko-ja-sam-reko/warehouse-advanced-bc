@@ -20,7 +20,7 @@ against the customer's live WMS usage before implementation — see
 warehouse-advanced-bc.code-workspace   Open THIS in VS Code, not the repo folder
 .bc-conventions/        Shared BC conventions — gitignored, wired in locally (see below)
 app/                    Main extension — an AL project root
-  app.json              Manifest — object range 50000..50999, target Cloud
+  app.json              Manifest — object range 55000..58999, target Cloud
   AppSourceCop.json     Affix enforcement (WHA)
   .vscode/              AL settings + launch config (launch.json is local-only)
   img/AppLogo.png       App logo (placeholder)
@@ -32,7 +32,7 @@ app/                    Main extension — an AL project root
     PermissionSet/      Permission set objects
     <Feature>/          One folder per shipped feature, same subfolder shape
 test/                   Test extension — an AL project root
-  app.json              Manifest — object range 51000..51999
+  app.json              Manifest — object range 59000..59999
   src/codeunits/        Test codeunits
 ```
 

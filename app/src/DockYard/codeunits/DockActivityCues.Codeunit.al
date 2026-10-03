@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50457 "WHA Dock Activity Cues" implements "WHA IActivityCues"
+codeunit 55457 "WHA Dock Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

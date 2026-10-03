@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50506 "WHA Count HU Selection" implements "WHA ICountSelection"
+codeunit 55506 "WHA Count HU Selection" implements "WHA ICountSelection"
 {
     Access = Public;
 

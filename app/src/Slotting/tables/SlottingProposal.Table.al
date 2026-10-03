@@ -6,7 +6,7 @@ using Microsoft.Warehouse.Structure;
 using System.Security.AccessControl;
 using WarehouseAdvanced.DirectedWork;
 
-table 50302 "WHA Slotting Proposal"
+table 55302 "WHA Slotting Proposal"
 {
     Caption = 'Slotting proposal';
     DataClassification = CustomerContent;

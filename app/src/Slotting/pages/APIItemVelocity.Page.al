@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-page 50303 "WHA API Item Velocity"
+page 55303 "WHA API Item Velocity"
 {
     PageType = API;
     APIPublisher = 'matr';

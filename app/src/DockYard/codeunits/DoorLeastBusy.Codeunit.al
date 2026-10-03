@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-codeunit 50456 "WHA Door Least Busy" implements "WHA IDoorSelection"
+codeunit 55456 "WHA Door Least Busy" implements "WHA IDoorSelection"
 {
     Access = Public;
 

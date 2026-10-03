@@ -44,9 +44,9 @@ though it can still be configured as one, and that is the setting a new installa
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Count Setup` | 50500 | Single-record feature setup, including how differences are posted |
-| `WHA Count Sheet` | 50501 | One slice of the warehouse to count |
-| `WHA Count Sheet Line` | 50502 | One thing to count, and what was found |
+| `WHA Count Setup` | 55500 | Single-record feature setup, including how differences are posted |
+| `WHA Count Sheet` | 55501 | One slice of the warehouse to count |
+| `WHA Count Sheet Line` | 55502 | One thing to count, and what was found |
 
 ### `WHA Count Sheet`
 
@@ -110,39 +110,39 @@ first one meant it.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Count Setup` | table | 50500 | `app/src/Counting/tables/CountSetup.Table.al` |
-| `WHA Count Sheet` | table | 50501 | `app/src/Counting/tables/CountSheet.Table.al` |
-| `WHA Count Sheet Line` | table | 50502 | `app/src/Counting/tables/CountSheetLine.Table.al` |
-| `WHA Count Status` | enum | 50500 | `app/src/Counting/enums/CountStatus.Enum.al` |
-| `WHA Count Selection` | enum | 50501 | `app/src/Counting/enums/CountSelection.Enum.al` |
+| `WHA Count Setup` | table | 55500 | `app/src/Counting/tables/CountSetup.Table.al` |
+| `WHA Count Sheet` | table | 55501 | `app/src/Counting/tables/CountSheet.Table.al` |
+| `WHA Count Sheet Line` | table | 55502 | `app/src/Counting/tables/CountSheetLine.Table.al` |
+| `WHA Count Status` | enum | 55500 | `app/src/Counting/enums/CountStatus.Enum.al` |
+| `WHA Count Selection` | enum | 55501 | `app/src/Counting/enums/CountSelection.Enum.al` |
 | `WHA ICountSheet` | interface | — | `app/src/Counting/interfaces/ICountSheet.Interface.al` |
 | `WHA ICountSheetLine` | interface | — | `app/src/Counting/interfaces/ICountSheetLine.Interface.al` |
 | `WHA ICountSelection` | interface | — | `app/src/Counting/interfaces/ICountSelection.Interface.al` |
-| `WHA Count Sheet Logic` | codeunit | 50500 | `app/src/Counting/codeunits/CountSheetLogic.Codeunit.al` |
-| `WHA Count Line Logic` | codeunit | 50501 | `app/src/Counting/codeunits/CountLineLogic.Codeunit.al` |
-| `WHA Count Feature Setup` | codeunit | 50502 | `app/src/Counting/codeunits/CountFeatureSetup.Codeunit.al` |
-| `WHA Count App Area Sub.` | codeunit | 50503 | `app/src/Counting/codeunits/CountAppAreaSub.Codeunit.al` |
-| `WHA Demo Count` | codeunit | 50504 | `app/src/Counting/codeunits/DemoCount.Codeunit.al` |
-| `WHA Count Bin Selection` | codeunit | 50505 | `app/src/Counting/codeunits/CountBinSelection.Codeunit.al` |
-| `WHA Count HU Selection` | codeunit | 50506 | `app/src/Counting/codeunits/CountHUSelection.Codeunit.al` |
-| `WHA Count Bin Lot Selection` | codeunit | 50509 | `app/src/Counting/codeunits/CountBinLotSelection.Codeunit.al` |
-| `WHA Whse Stock By Lot` | query | 50509 | `app/src/Counting/queries/WhseStockByLot.Query.al` |
-| `WHA Count Posting` | codeunit | 50507 | `app/src/Counting/codeunits/CountPosting.Codeunit.al` |
-| `WHA Count Appl. Area Setup` | tableextension | 50500 | `app/src/Counting/tableextensions/CountApplAreaSetup.TableExt.al` |
-| `WHA Count Setup` | page | 50500 | `app/src/Counting/pages/CountSetup.Page.al` |
-| `WHA Count Sheets` | page | 50501 | `app/src/Counting/pages/CountSheets.Page.al` |
-| `WHA Count Sheet Card` | page | 50502 | `app/src/Counting/pages/CountSheetCard.Page.al` |
-| `WHA Count Sheet Subform` | page | 50503 | `app/src/Counting/pages/CountSheetSubform.Page.al` |
-| `WHA API Count Sheet` | page | 50504 | `app/src/Counting/pages/APICountSheet.Page.al` |
-| `WHA API Count Sheet Line` | page | 50505 | `app/src/Counting/pages/APICountSheetLine.Page.al` |
-| `WHA API Demo Count` | page | 50506 | `app/src/Counting/pages/APIDemoCount.Page.al` |
-| `WHA Counting Tests` | codeunit | 51008 | `test/src/codeunits/CountingTests.Codeunit.al` |
-| `WHA Count Activities Cue` | tableextension | 50501 | `app/src/Counting/tableextensions/CountActivitiesCue.TableExt.al` |
-| `WHA Count Activity Provider` | enumextension | 50501 | `app/src/Counting/enumextensions/CountActivityProvider.EnumExt.al` |
-| `WHA Count Activity Cues` | codeunit | 50508 | `app/src/Counting/codeunits/CountActivityCues.Codeunit.al` |
-| `WHA Count Activities` | pageextension | 50501 | `app/src/Counting/pageextensions/CountActivities.PageExt.al` |
+| `WHA Count Sheet Logic` | codeunit | 55500 | `app/src/Counting/codeunits/CountSheetLogic.Codeunit.al` |
+| `WHA Count Line Logic` | codeunit | 55501 | `app/src/Counting/codeunits/CountLineLogic.Codeunit.al` |
+| `WHA Count Feature Setup` | codeunit | 55502 | `app/src/Counting/codeunits/CountFeatureSetup.Codeunit.al` |
+| `WHA Count App Area Sub.` | codeunit | 55503 | `app/src/Counting/codeunits/CountAppAreaSub.Codeunit.al` |
+| `WHA Demo Count` | codeunit | 55504 | `app/src/Counting/codeunits/DemoCount.Codeunit.al` |
+| `WHA Count Bin Selection` | codeunit | 55505 | `app/src/Counting/codeunits/CountBinSelection.Codeunit.al` |
+| `WHA Count HU Selection` | codeunit | 55506 | `app/src/Counting/codeunits/CountHUSelection.Codeunit.al` |
+| `WHA Count Bin Lot Selection` | codeunit | 55509 | `app/src/Counting/codeunits/CountBinLotSelection.Codeunit.al` |
+| `WHA Whse Stock By Lot` | query | 55509 | `app/src/Counting/queries/WhseStockByLot.Query.al` |
+| `WHA Count Posting` | codeunit | 55507 | `app/src/Counting/codeunits/CountPosting.Codeunit.al` |
+| `WHA Count Appl. Area Setup` | tableextension | 55500 | `app/src/Counting/tableextensions/CountApplAreaSetup.TableExt.al` |
+| `WHA Count Setup` | page | 55500 | `app/src/Counting/pages/CountSetup.Page.al` |
+| `WHA Count Sheets` | page | 55501 | `app/src/Counting/pages/CountSheets.Page.al` |
+| `WHA Count Sheet Card` | page | 55502 | `app/src/Counting/pages/CountSheetCard.Page.al` |
+| `WHA Count Sheet Subform` | page | 55503 | `app/src/Counting/pages/CountSheetSubform.Page.al` |
+| `WHA API Count Sheet` | page | 55504 | `app/src/Counting/pages/APICountSheet.Page.al` |
+| `WHA API Count Sheet Line` | page | 55505 | `app/src/Counting/pages/APICountSheetLine.Page.al` |
+| `WHA API Demo Count` | page | 55506 | `app/src/Counting/pages/APIDemoCount.Page.al` |
+| `WHA Counting Tests` | codeunit | 59008 | `test/src/codeunits/CountingTests.Codeunit.al` |
+| `WHA Count Activities Cue` | tableextension | 55501 | `app/src/Counting/tableextensions/CountActivitiesCue.TableExt.al` |
+| `WHA Count Activity Provider` | enumextension | 55501 | `app/src/Counting/enumextensions/CountActivityProvider.EnumExt.al` |
+| `WHA Count Activity Cues` | codeunit | 55508 | `app/src/Counting/codeunits/CountActivityCues.Codeunit.al` |
+| `WHA Count Activities` | pageextension | 55501 | `app/src/Counting/pageextensions/CountActivities.PageExt.al` |
 
-All in namespace `WarehouseAdvanced.Counting`, from the reserved block `50500..50549`. Core gained a
+All in namespace `WarehouseAdvanced.Counting`, from the reserved block `55500..55549`. Core gained a
 `WHA Feature` enum value; the count sheet numbering lives on this feature's own setup.
 
 Segment 2 added one codeunit here and nothing else new: the posting engine itself is shared, lives in
@@ -319,7 +319,7 @@ data first. `Import()` also builds the `WHA-COUNT` RapidStart package.
 
 ## Tests
 
-`WHA Counting Tests` (codeunit 51008), 23 tests.
+`WHA Counting Tests` (codeunit 59008), 23 tests.
 
 **Segment 1**, 16 tests: filling from handling units takes what each unit says it holds, with the bin
 it is standing in; a count that matches leaves no difference; a count of nothing is still a count and

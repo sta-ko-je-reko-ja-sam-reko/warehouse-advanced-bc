@@ -42,9 +42,9 @@ that nothing has been picked yet.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Slotting Setup` | 50300 | Single-record feature setup |
-| `WHA Item Velocity` | 50301 | How much one item moved at one location |
-| `WHA Slotting Proposal` | 50302 | One suggested move, and what was decided |
+| `WHA Slotting Setup` | 55300 | Single-record feature setup |
+| `WHA Item Velocity` | 55301 | How much one item moved at one location |
+| `WHA Slotting Proposal` | 55302 | One suggested move, and what was decided |
 
 ### `WHA Item Velocity`
 
@@ -70,36 +70,36 @@ ranking beside it. That pair is what a proposal is about.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Slotting Setup` | table | 50300 | `app/src/Slotting/tables/SlottingSetup.Table.al` |
-| `WHA Item Velocity` | table | 50301 | `app/src/Slotting/tables/ItemVelocity.Table.al` |
-| `WHA Slotting Proposal` | table | 50302 | `app/src/Slotting/tables/SlottingProposal.Table.al` |
-| `WHA Velocity Class` | enum | 50300 | `app/src/Slotting/enums/VelocityClass.Enum.al` |
-| `WHA Velocity Basis` | enum | 50301 | `app/src/Slotting/enums/VelocityBasis.Enum.al` |
-| `WHA Proposal Status` | enum | 50302 | `app/src/Slotting/enums/ProposalStatus.Enum.al` |
+| `WHA Slotting Setup` | table | 55300 | `app/src/Slotting/tables/SlottingSetup.Table.al` |
+| `WHA Item Velocity` | table | 55301 | `app/src/Slotting/tables/ItemVelocity.Table.al` |
+| `WHA Slotting Proposal` | table | 55302 | `app/src/Slotting/tables/SlottingProposal.Table.al` |
+| `WHA Velocity Class` | enum | 55300 | `app/src/Slotting/enums/VelocityClass.Enum.al` |
+| `WHA Velocity Basis` | enum | 55301 | `app/src/Slotting/enums/VelocityBasis.Enum.al` |
+| `WHA Proposal Status` | enum | 55302 | `app/src/Slotting/enums/ProposalStatus.Enum.al` |
 | `WHA IVelocityBasis` | interface | — | `app/src/Slotting/interfaces/IVelocityBasis.Interface.al` |
 | `WHA ISlottingProposal` | interface | — | `app/src/Slotting/interfaces/ISlottingProposal.Interface.al` |
-| `WHA Slotting Mgt.` | codeunit | 50300 | `app/src/Slotting/codeunits/SlottingMgt.Codeunit.al` |
-| `WHA Slotting Prop. Logic` | codeunit | 50301 | `app/src/Slotting/codeunits/SlottingPropLogic.Codeunit.al` |
-| `WHA Slot. Feature Setup` | codeunit | 50302 | `app/src/Slotting/codeunits/SlotFeatureSetup.Codeunit.al` |
-| `WHA Slot. App Area Sub.` | codeunit | 50303 | `app/src/Slotting/codeunits/SlotAppAreaSub.Codeunit.al` |
-| `WHA Demo Slotting` | codeunit | 50304 | `app/src/Slotting/codeunits/DemoSlotting.Codeunit.al` |
-| `WHA Velocity By Movements` | codeunit | 50305 | `app/src/Slotting/codeunits/VelocityByMovements.Codeunit.al` |
-| `WHA Velocity By Quantity` | codeunit | 50306 | `app/src/Slotting/codeunits/VelocityByQuantity.Codeunit.al` |
-| `WHA Slotting Scheduler` | codeunit | 50307 | `app/src/Slotting/codeunits/SlottingScheduler.Codeunit.al` |
-| `WHA Slot. Appl. Area Setup` | tableextension | 50300 | `app/src/Slotting/tableextensions/SlotApplAreaSetup.TableExt.al` |
-| `WHA Slotting Setup` | page | 50300 | `app/src/Slotting/pages/SlottingSetup.Page.al` |
-| `WHA Item Velocities` | page | 50301 | `app/src/Slotting/pages/ItemVelocities.Page.al` |
-| `WHA Slotting Proposals` | page | 50302 | `app/src/Slotting/pages/SlottingProposals.Page.al` |
-| `WHA API Item Velocity` | page | 50303 | `app/src/Slotting/pages/APIItemVelocity.Page.al` |
-| `WHA API Slotting Proposal` | page | 50304 | `app/src/Slotting/pages/APISlottingProposal.Page.al` |
-| `WHA API Demo Slotting` | page | 50305 | `app/src/Slotting/pages/APIDemoSlotting.Page.al` |
-| `WHA Slotting Tests` | codeunit | 51011 | `test/src/codeunits/SlottingTests.Codeunit.al` |
-| `WHA Slot Activities Cue` | tableextension | 50301 | `app/src/Slotting/tableextensions/SlotActivitiesCue.TableExt.al` |
-| `WHA Slot Activity Provider` | enumextension | 50301 | `app/src/Slotting/enumextensions/SlotActivityProvider.EnumExt.al` |
-| `WHA Slot Activity Cues` | codeunit | 50308 | `app/src/Slotting/codeunits/SlotActivityCues.Codeunit.al` |
-| `WHA Slot Activities` | pageextension | 50301 | `app/src/Slotting/pageextensions/SlotActivities.PageExt.al` |
+| `WHA Slotting Mgt.` | codeunit | 55300 | `app/src/Slotting/codeunits/SlottingMgt.Codeunit.al` |
+| `WHA Slotting Prop. Logic` | codeunit | 55301 | `app/src/Slotting/codeunits/SlottingPropLogic.Codeunit.al` |
+| `WHA Slot. Feature Setup` | codeunit | 55302 | `app/src/Slotting/codeunits/SlotFeatureSetup.Codeunit.al` |
+| `WHA Slot. App Area Sub.` | codeunit | 55303 | `app/src/Slotting/codeunits/SlotAppAreaSub.Codeunit.al` |
+| `WHA Demo Slotting` | codeunit | 55304 | `app/src/Slotting/codeunits/DemoSlotting.Codeunit.al` |
+| `WHA Velocity By Movements` | codeunit | 55305 | `app/src/Slotting/codeunits/VelocityByMovements.Codeunit.al` |
+| `WHA Velocity By Quantity` | codeunit | 55306 | `app/src/Slotting/codeunits/VelocityByQuantity.Codeunit.al` |
+| `WHA Slotting Scheduler` | codeunit | 55307 | `app/src/Slotting/codeunits/SlottingScheduler.Codeunit.al` |
+| `WHA Slot. Appl. Area Setup` | tableextension | 55300 | `app/src/Slotting/tableextensions/SlotApplAreaSetup.TableExt.al` |
+| `WHA Slotting Setup` | page | 55300 | `app/src/Slotting/pages/SlottingSetup.Page.al` |
+| `WHA Item Velocities` | page | 55301 | `app/src/Slotting/pages/ItemVelocities.Page.al` |
+| `WHA Slotting Proposals` | page | 55302 | `app/src/Slotting/pages/SlottingProposals.Page.al` |
+| `WHA API Item Velocity` | page | 55303 | `app/src/Slotting/pages/APIItemVelocity.Page.al` |
+| `WHA API Slotting Proposal` | page | 55304 | `app/src/Slotting/pages/APISlottingProposal.Page.al` |
+| `WHA API Demo Slotting` | page | 55305 | `app/src/Slotting/pages/APIDemoSlotting.Page.al` |
+| `WHA Slotting Tests` | codeunit | 59011 | `test/src/codeunits/SlottingTests.Codeunit.al` |
+| `WHA Slot Activities Cue` | tableextension | 55301 | `app/src/Slotting/tableextensions/SlotActivitiesCue.TableExt.al` |
+| `WHA Slot Activity Provider` | enumextension | 55301 | `app/src/Slotting/enumextensions/SlotActivityProvider.EnumExt.al` |
+| `WHA Slot Activity Cues` | codeunit | 55308 | `app/src/Slotting/codeunits/SlotActivityCues.Codeunit.al` |
+| `WHA Slot Activities` | pageextension | 55301 | `app/src/Slotting/pageextensions/SlotActivities.PageExt.al` |
 
-All in namespace `WarehouseAdvanced.Slotting`, from the reserved block `50300..50349`. Core gained a
+All in namespace `WarehouseAdvanced.Slotting`, from the reserved block `55300..55349`. Core gained a
 `WHA Feature` enum value; nothing else outside the feature changed.
 
 ## Bases — what counts as work
@@ -195,7 +195,7 @@ the import correctly produces nothing. `Import()` builds the `WHA-SLOT` RapidSta
 
 ## Tests
 
-`WHA Slotting Tests` (codeunit 51011), 16 tests. Three cover the scheduled run: it refuses to sweep
+`WHA Slotting Tests` (codeunit 59011), 16 tests. Three cover the scheduled run: it refuses to sweep
 every location, it analyses and proposes for the location its filter names, and it refuses when
 slotting is switched off. The other 13: velocity is measured from the picks already done,
 including where the item is picked from; the fastest items are class A; an item picked too few times is

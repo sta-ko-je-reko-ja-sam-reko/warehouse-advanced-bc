@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50651 "WHA Int Activities" extends "WHA Warehouse Activities"
+pageextension 55651 "WHA Int Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

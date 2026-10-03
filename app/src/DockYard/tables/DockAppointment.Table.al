@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DockYard;
 using Microsoft.Inventory.Location;
 using System.Security.AccessControl;
 
-table 50453 "WHA Dock Appointment"
+table 55453 "WHA Dock Appointment"
 {
     Caption = 'Dock appointment';
     DataClassification = CustomerContent;

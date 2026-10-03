@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
-enum 50050 "WHA Handling Unit Status"
+enum 55050 "WHA Handling Unit Status"
 {
     Caption = 'Handling unit status';
     Extensible = true;

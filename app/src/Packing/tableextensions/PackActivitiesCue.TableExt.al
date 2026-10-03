@@ -2,11 +2,11 @@ namespace WarehouseAdvanced.Packing;
 
 using WarehouseAdvanced.Core;
 
-tableextension 50401 "WHA Pack Activities Cue" extends "WHA Activities Cue"
+tableextension 55401 "WHA Pack Activities Cue" extends "WHA Activities Cue"
 {
     fields
     {
-        field(50400; "WHA Cartons Being Packed"; Integer)
+        field(55400; "WHA Cartons Being Packed"; Integer)
         {
             Caption = 'Cartons being packed';
             DataClassification = SystemMetadata;

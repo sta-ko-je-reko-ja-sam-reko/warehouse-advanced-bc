@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-table 50003 "WHA Activities Cue"
+table 55003 "WHA Activities Cue"
 {
     Caption = 'Warehouse advanced activities';
     DataClassification = SystemMetadata;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.MobileDevice;
 
-page 50101 "WHA RF Devices"
+page 55101 "WHA RF Devices"
 {
     PageType = List;
     ApplicationArea = WHAMobileDevice;

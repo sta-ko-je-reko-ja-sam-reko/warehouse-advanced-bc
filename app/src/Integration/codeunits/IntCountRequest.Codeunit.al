@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.Counting;
 
-codeunit 50667 "WHA Int. Count Request" implements "WHA IIntMessageHandler"
+codeunit 55667 "WHA Int. Count Request" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

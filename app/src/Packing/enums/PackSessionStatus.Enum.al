@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Packing;
 
-enum 50400 "WHA Pack Session Status"
+enum 55400 "WHA Pack Session Status"
 {
     Caption = 'Packing status';
     Extensible = true;

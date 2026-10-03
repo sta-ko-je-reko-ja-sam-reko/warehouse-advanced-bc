@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50451 "WHA Dock Activities" extends "WHA Warehouse Activities"
+pageextension 55451 "WHA Dock Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

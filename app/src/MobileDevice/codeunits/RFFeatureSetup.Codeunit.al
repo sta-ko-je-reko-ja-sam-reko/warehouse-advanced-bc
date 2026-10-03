@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.MobileDevice;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50101 "WHA RF Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55101 "WHA RF Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

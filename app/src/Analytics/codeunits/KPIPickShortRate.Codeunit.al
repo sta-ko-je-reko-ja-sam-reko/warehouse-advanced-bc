@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50707 "WHA KPI Pick Short Rate" implements "WHA IKpiMeasure"
+codeunit 55707 "WHA KPI Pick Short Rate" implements "WHA IKpiMeasure"
 {
     Access = Public;
 

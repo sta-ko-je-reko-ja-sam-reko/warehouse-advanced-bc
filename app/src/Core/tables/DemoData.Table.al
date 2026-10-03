@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-table 50002 "WHA Demo Data"
+table 55002 "WHA Demo Data"
 {
     Caption = 'Demo data';
     DataClassification = SystemMetadata;

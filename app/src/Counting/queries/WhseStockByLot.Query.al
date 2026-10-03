@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using Microsoft.Warehouse.Ledger;
 
-query 50509 "WHA Whse Stock By Lot"
+query 55509 "WHA Whse Stock By Lot"
 {
     QueryType = Normal;
     Caption = 'Warehouse stock by lot';

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-page 50501 "WHA Count Sheets"
+page 55501 "WHA Count Sheets"
 {
     PageType = List;
     ApplicationArea = WHACounting;

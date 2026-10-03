@@ -1,4 +1,4 @@
-codeunit 51006 "WHA Packing Tests"
+codeunit 59006 "WHA Packing Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

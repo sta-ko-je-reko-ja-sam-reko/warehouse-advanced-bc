@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using WarehouseAdvanced.HandlingUnit;
 
-page 50201 "WHA Warehouse Task Card"
+page 55201 "WHA Warehouse Task Card"
 {
     PageType = Card;
     ApplicationArea = WHADirectedWork;

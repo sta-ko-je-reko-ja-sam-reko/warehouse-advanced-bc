@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Packing;
 
 using WarehouseAdvanced.Core;
 
-page 50407 "WHA API Demo Pack"
+page 55407 "WHA API Demo Pack"
 {
     PageType = API;
     APIPublisher = 'matr';

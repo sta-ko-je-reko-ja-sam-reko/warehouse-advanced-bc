@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Telemetry;
 
-codeunit 50307 "WHA Slotting Scheduler"
+codeunit 55307 "WHA Slotting Scheduler"
 {
     Access = Public;
     TableNo = "WHA Item Velocity";

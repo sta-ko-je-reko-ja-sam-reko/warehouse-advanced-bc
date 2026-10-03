@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-codeunit 50005 "WHA Default Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55005 "WHA Default Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

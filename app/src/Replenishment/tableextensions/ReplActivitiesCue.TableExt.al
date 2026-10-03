@@ -2,11 +2,11 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.Core;
 
-tableextension 50251 "WHA Repl Activities Cue" extends "WHA Activities Cue"
+tableextension 55251 "WHA Repl Activities Cue" extends "WHA Activities Cue"
 {
     fields
     {
-        field(50250; "WHA Repl. Rules Blocked"; Integer)
+        field(55250; "WHA Repl. Rules Blocked"; Integer)
         {
             Caption = 'Replenishment rules switched off';
             DataClassification = SystemMetadata;

@@ -2,11 +2,11 @@ namespace WarehouseAdvanced.Slotting;
 
 using WarehouseAdvanced.Core;
 
-tableextension 50301 "WHA Slot Activities Cue" extends "WHA Activities Cue"
+tableextension 55301 "WHA Slot Activities Cue" extends "WHA Activities Cue"
 {
     fields
     {
-        field(50300; "WHA Slotting Proposals Open"; Integer)
+        field(55300; "WHA Slotting Proposals Open"; Integer)
         {
             Caption = 'Slotting proposals waiting';
             DataClassification = SystemMetadata;

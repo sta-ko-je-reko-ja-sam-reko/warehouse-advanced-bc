@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using Microsoft.Inventory.Item;
 
-codeunit 50263 "WHA Repl. Unit Convert"
+codeunit 55263 "WHA Repl. Unit Convert"
 {
     Access = Public;
 

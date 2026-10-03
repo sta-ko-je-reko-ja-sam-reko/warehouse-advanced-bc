@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.WaveManagement;
 
-page 50155 "WHA Wave Templates"
+page 55155 "WHA Wave Templates"
 {
     PageType = List;
     ApplicationArea = WHAWaveManagement;

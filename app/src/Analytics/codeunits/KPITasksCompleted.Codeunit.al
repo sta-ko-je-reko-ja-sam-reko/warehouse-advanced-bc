@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50705 "WHA KPI Tasks Completed" implements "WHA IKpiMeasure"
+codeunit 55705 "WHA KPI Tasks Completed" implements "WHA IKpiMeasure"
 {
     Access = Public;
 

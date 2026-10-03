@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-enum 50650 "WHA Int. Direction"
+enum 55650 "WHA Int. Direction"
 {
     Caption = 'Integration direction';
     Extensible = false;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Labelling;
 
-codeunit 50600 "WHA SSCC Format" implements "WHA ILabelCodeFormat"
+codeunit 55600 "WHA SSCC Format" implements "WHA ILabelCodeFormat"
 {
     Access = Public;
 

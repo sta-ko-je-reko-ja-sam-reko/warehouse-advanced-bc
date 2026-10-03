@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-enum 50300 "WHA Velocity Class"
+enum 55300 "WHA Velocity Class"
 {
     Caption = 'Velocity class';
     Extensible = true;

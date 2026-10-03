@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Packing;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50401 "WHA Pack Activities" extends "WHA Warehouse Activities"
+pageextension 55401 "WHA Pack Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

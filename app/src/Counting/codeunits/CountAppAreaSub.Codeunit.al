@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Counting;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50503 "WHA Count App Area Sub."
+codeunit 55503 "WHA Count App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Slotting;
 using Microsoft.Inventory.Location;
 using System.IO;
 
-codeunit 50304 "WHA Demo Slotting"
+codeunit 55304 "WHA Demo Slotting"
 {
     Access = Public;
 

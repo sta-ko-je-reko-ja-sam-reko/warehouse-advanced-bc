@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.Core;
 
-page 50700 "WHA Analytics Setup"
+page 55700 "WHA Analytics Setup"
 {
     PageType = Card;
     ApplicationArea = All;

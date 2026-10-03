@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Core;
 using System.Environment.Configuration;
 using System.Media;
 
-codeunit 50002 "WHA Guided Setup"
+codeunit 55002 "WHA Guided Setup"
 {
     Access = Internal;
 

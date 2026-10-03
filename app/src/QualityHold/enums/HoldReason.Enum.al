@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.QualityHold;
 
-enum 50550 "WHA Hold Reason"
+enum 55550 "WHA Hold Reason"
 {
     Caption = 'Hold reason';
     Extensible = true;

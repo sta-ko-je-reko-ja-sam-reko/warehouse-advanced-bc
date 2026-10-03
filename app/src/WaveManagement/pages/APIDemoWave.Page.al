@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.Core;
 
-page 50154 "WHA API Demo Wave"
+page 55154 "WHA API Demo Wave"
 {
     PageType = API;
     APIPublisher = 'matr';

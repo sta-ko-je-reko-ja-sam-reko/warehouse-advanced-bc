@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-codeunit 50350 "WHA Labour Std. Logic" implements "WHA ILabourStandardRule"
+codeunit 55350 "WHA Labour Std. Logic" implements "WHA ILabourStandardRule"
 {
     Access = Public;
 

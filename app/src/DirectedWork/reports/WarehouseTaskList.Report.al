@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-report 50218 "WHA Warehouse Task List"
+report 55218 "WHA Warehouse Task List"
 {
     Caption = 'Warehouse task list';
     ApplicationArea = WHADirectedWork;

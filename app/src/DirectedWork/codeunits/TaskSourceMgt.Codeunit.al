@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-codeunit 50207 "WHA Task Source Mgt."
+codeunit 55207 "WHA Task Source Mgt."
 {
     Access = Public;
 

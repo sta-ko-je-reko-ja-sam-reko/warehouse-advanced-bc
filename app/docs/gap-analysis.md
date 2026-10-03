@@ -393,7 +393,7 @@ Drops, recorded one by one, because they are the rows that get re-opened:
 
 ## Decisions taken
 
-- **Distribution: per-tenant extension (PTE).** Not AppSource. The `50000..50999` range
+- **Distribution: per-tenant extension (PTE).** Not AppSource. The `55000..58999` range
   and the `WHA` affix therefore stand as-is — no ID range or affix registration with
   Microsoft is required. The affix is kept anyway: it prevents collision with other
   extensions installed in the same tenant, which is a real risk in a customer environment,

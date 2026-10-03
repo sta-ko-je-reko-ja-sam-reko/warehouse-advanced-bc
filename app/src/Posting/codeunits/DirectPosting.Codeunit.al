@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Posting;
 using Microsoft.Inventory.Journal;
 using Microsoft.Inventory.Posting;
 
-codeunit 50752 "WHA Direct Posting" implements "WHA IInvtPosting"
+codeunit 55752 "WHA Direct Posting" implements "WHA IInvtPosting"
 {
     Access = Public;
 

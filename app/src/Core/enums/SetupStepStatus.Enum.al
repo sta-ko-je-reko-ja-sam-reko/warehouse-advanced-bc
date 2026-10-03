@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-enum 50001 "WHA Setup Step Status"
+enum 55001 "WHA Setup Step Status"
 {
     Caption = 'Warehouse advanced setup step status';
     Extensible = false;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Slotting;
 
 using WarehouseAdvanced.Core;
 
-page 50305 "WHA API Demo Slotting"
+page 55305 "WHA API Demo Slotting"
 {
     PageType = API;
     APIPublisher = 'matr';

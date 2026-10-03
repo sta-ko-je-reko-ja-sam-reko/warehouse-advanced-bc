@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-page 50302 "WHA Slotting Proposals"
+page 55302 "WHA Slotting Proposals"
 {
     PageType = List;
     ApplicationArea = WHASlotting;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-codeunit 50450 "WHA Dock Mgt."
+codeunit 55450 "WHA Dock Mgt."
 {
     Access = Public;
 

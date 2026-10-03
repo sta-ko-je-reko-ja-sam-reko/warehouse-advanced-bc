@@ -15,7 +15,7 @@ using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.WaveManagement;
 
-permissionset 50001 "WHA Read"
+permissionset 55001 "WHA Read"
 {
     Assignable = true;
     Caption = 'Warehouse Advanced - Read', Locked = true;

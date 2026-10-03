@@ -6,7 +6,7 @@ using Microsoft.Inventory.Ledger;
 using Microsoft.Inventory.Tracking;
 using WarehouseAdvanced.Registration;
 
-codeunit 50753 "WHA Posting Mgt."
+codeunit 55753 "WHA Posting Mgt."
 {
     Access = Public;
 

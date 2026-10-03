@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.QualityHold;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50553 "WHA QC App Area Sub."
+codeunit 55553 "WHA QC App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

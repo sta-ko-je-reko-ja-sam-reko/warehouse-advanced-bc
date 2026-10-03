@@ -4,7 +4,7 @@ using Microsoft.Inventory.Location;
 using System.Security.AccessControl;
 using WarehouseAdvanced.DirectedWork;
 
-table 50352 "WHA Labour Entry"
+table 55352 "WHA Labour Entry"
 {
     Caption = 'Labour entry';
     DataClassification = CustomerContent;

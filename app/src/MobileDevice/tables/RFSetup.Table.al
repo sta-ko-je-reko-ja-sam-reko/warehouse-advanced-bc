@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.MobileDevice;
 
-table 50100 "WHA RF Setup"
+table 55100 "WHA RF Setup"
 {
     Caption = 'Handheld setup';
     DataClassification = CustomerContent;

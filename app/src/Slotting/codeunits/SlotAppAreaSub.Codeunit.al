@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Slotting;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50303 "WHA Slot. App Area Sub."
+codeunit 55303 "WHA Slot. App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

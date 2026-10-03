@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50501 "WHA Count Activities" extends "WHA Warehouse Activities"
+pageextension 55501 "WHA Count Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

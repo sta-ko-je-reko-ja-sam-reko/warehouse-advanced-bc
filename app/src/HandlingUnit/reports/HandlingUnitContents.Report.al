@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
-report 50057 "WHA Handling Unit Contents"
+report 55057 "WHA Handling Unit Contents"
 {
     Caption = 'Handling unit contents';
     ApplicationArea = WHAHandlingUnits;

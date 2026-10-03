@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using Microsoft.Foundation.NoSeries;
 
-table 50450 "WHA Dock Setup"
+table 55450 "WHA Dock Setup"
 {
     Caption = 'Dock and yard setup';
     DataClassification = CustomerContent;

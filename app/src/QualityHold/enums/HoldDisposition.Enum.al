@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.QualityHold;
 
-enum 50552 "WHA Hold Disposition" implements "WHA IHoldDisposition"
+enum 55552 "WHA Hold Disposition" implements "WHA IHoldDisposition"
 {
     Caption = 'Disposition';
     Extensible = true;

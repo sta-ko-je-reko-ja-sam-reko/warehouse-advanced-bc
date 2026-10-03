@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-table 50350 "WHA Labour Setup"
+table 55350 "WHA Labour Setup"
 {
     Caption = 'Labour setup';
     DataClassification = CustomerContent;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50663 "WHA Int Activity Cues" implements "WHA IActivityCues"
+codeunit 55663 "WHA Int Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

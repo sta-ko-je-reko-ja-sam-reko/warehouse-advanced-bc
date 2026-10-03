@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-enum 50200 "WHA Warehouse Task Type"
+enum 55200 "WHA Warehouse Task Type"
 {
     Caption = 'Warehouse task type';
     Extensible = true;

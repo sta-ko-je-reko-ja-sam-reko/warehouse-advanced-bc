@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-report 50510 "WHA Count Sheet Print"
+report 55510 "WHA Count Sheet Print"
 {
     Caption = 'Count sheet';
     ApplicationArea = WHACounting;

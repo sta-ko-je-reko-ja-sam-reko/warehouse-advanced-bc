@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-page 50503 "WHA Count Sheet Subform"
+page 55503 "WHA Count Sheet Subform"
 {
     PageType = ListPart;
     ApplicationArea = WHACounting;

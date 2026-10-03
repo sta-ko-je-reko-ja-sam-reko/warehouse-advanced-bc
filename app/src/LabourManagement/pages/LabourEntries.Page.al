@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-page 50352 "WHA Labour Entries"
+page 55352 "WHA Labour Entries"
 {
     PageType = List;
     ApplicationArea = WHALabourManagement;

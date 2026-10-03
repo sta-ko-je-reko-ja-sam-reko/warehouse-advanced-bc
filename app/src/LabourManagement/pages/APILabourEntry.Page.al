@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-page 50353 "WHA API Labour Entry"
+page 55353 "WHA API Labour Entry"
 {
     PageType = API;
     APIPublisher = 'matr';

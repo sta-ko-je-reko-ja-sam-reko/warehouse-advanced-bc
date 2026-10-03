@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Analytics;
 
-codeunit 50701 "WHA KPI Snapshot Logic" implements "WHA IKpiSnapshot"
+codeunit 55701 "WHA KPI Snapshot Logic" implements "WHA IKpiSnapshot"
 {
     Access = Public;
 

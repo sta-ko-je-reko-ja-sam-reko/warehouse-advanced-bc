@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50104 "WHA RF Terminal State"
+codeunit 55104 "WHA RF Terminal State"
 {
     Access = Public;
 

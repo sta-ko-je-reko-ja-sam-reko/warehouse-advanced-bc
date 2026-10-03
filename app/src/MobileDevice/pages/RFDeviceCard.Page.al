@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.MobileDevice;
 
-page 50102 "WHA RF Device Card"
+page 55102 "WHA RF Device Card"
 {
     PageType = Card;
     ApplicationArea = WHAMobileDevice;

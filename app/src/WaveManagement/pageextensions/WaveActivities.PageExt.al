@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50151 "WHA Wave Activities" extends "WHA Warehouse Activities"
+pageextension 55151 "WHA Wave Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

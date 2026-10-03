@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using Microsoft.Warehouse.Worksheet;
 using WarehouseAdvanced.Registration;
 
-codeunit 50217 "WHA Src Movement Wksh." implements "WHA ITaskSource"
+codeunit 55217 "WHA Src Movement Wksh." implements "WHA ITaskSource"
 {
     Access = Public;
 

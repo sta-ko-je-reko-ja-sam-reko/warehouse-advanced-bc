@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Analytics;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50703 "WHA KPI App Area Sub."
+codeunit 55703 "WHA KPI App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

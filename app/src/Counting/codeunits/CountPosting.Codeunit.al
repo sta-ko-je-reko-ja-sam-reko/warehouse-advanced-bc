@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.Posting;
 
-codeunit 50507 "WHA Count Posting"
+codeunit 55507 "WHA Count Posting"
 {
     Access = Public;
 

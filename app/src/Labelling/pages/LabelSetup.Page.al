@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Labelling;
 
 using WarehouseAdvanced.Core;
 
-page 50600 "WHA Label Setup"
+page 55600 "WHA Label Setup"
 {
     PageType = Card;
     ApplicationArea = All;

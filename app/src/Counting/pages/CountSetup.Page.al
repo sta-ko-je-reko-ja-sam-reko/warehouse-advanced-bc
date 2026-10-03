@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Counting;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Posting;
 
-page 50500 "WHA Count Setup"
+page 55500 "WHA Count Setup"
 {
     PageType = Card;
     ApplicationArea = All;

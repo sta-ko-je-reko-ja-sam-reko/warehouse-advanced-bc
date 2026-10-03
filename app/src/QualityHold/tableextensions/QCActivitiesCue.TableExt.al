@@ -2,18 +2,18 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.Core;
 
-tableextension 50551 "WHA QC Activities Cue" extends "WHA Activities Cue"
+tableextension 55551 "WHA QC Activities Cue" extends "WHA Activities Cue"
 {
     fields
     {
-        field(50550; "WHA Goods On Hold"; Integer)
+        field(55550; "WHA Goods On Hold"; Integer)
         {
             Caption = 'Goods on hold';
             DataClassification = SystemMetadata;
             ToolTip = 'Specifies how many handling units are stopped and cannot be used.';
             Editable = false;
         }
-        field(50551; "WHA Holds To Decide"; Integer)
+        field(55551; "WHA Holds To Decide"; Integer)
         {
             Caption = 'Holds waiting for a decision';
             DataClassification = SystemMetadata;

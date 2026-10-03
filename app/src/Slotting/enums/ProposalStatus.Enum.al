@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-enum 50302 "WHA Proposal Status"
+enum 55302 "WHA Proposal Status"
 {
     Caption = 'Proposal status';
     Extensible = true;

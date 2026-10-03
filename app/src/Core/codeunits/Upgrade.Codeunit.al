@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-codeunit 50004 "WHA Upgrade"
+codeunit 55004 "WHA Upgrade"
 {
     Access = Internal;
     Subtype = Upgrade;

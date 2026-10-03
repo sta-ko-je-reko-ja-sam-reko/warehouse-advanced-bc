@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using Microsoft.Warehouse.Document;
 using WarehouseAdvanced.Core;
 
-pageextension 50201 "WHA Whse. Shipment Tasks" extends "Warehouse Shipment"
+pageextension 55201 "WHA Whse. Shipment Tasks" extends "Warehouse Shipment"
 {
     actions
     {

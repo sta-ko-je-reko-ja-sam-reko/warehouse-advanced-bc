@@ -18,7 +18,7 @@ using WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.Telemetry;
 using WarehouseAdvanced.WaveManagement;
 
-permissionset 50000 "WHA Objects"
+permissionset 55000 "WHA Objects"
 {
     Assignable = false;
     Caption = 'Warehouse Advanced - Objects', Locked = true;

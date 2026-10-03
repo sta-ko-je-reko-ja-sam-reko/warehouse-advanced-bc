@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50251 "WHA Repl Activities" extends "WHA Warehouse Activities"
+pageextension 55251 "WHA Repl Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

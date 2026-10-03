@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-codeunit 50660 "WHA Int. Message Runner"
+codeunit 55660 "WHA Int. Message Runner"
 {
     Access = Internal;
     TableNo = "WHA Integration Message";

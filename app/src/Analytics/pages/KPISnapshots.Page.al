@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Analytics;
 
-page 50702 "WHA KPI Snapshots"
+page 55702 "WHA KPI Snapshots"
 {
     PageType = List;
     ApplicationArea = WHAAnalytics;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 
 using WarehouseAdvanced.Core;
 
-page 50054 "WHA API Demo Handling Unit"
+page 55054 "WHA API Demo Handling Unit"
 {
     PageType = API;
     APIPublisher = 'matr';

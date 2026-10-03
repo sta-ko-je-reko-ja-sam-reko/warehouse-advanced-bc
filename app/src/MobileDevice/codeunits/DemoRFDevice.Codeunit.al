@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.MobileDevice;
 using Microsoft.Inventory.Location;
 using System.IO;
 
-codeunit 50103 "WHA Demo RF Device"
+codeunit 55103 "WHA Demo RF Device"
 {
     Access = Public;
 

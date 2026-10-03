@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-page 50001 "WHA Setup Hub"
+page 55001 "WHA Setup Hub"
 {
     PageType = List;
     ApplicationArea = All;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.DockYard;
 
-codeunit 50708 "WHA KPI Trailer Turnaround" implements "WHA IKpiMeasure"
+codeunit 55708 "WHA KPI Trailer Turnaround" implements "WHA IKpiMeasure"
 {
     Access = Public;
 

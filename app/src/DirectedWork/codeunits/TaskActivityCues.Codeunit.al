@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50208 "WHA Task Activity Cues" implements "WHA IActivityCues"
+codeunit 55208 "WHA Task Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

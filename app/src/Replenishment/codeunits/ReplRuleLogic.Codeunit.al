@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using Microsoft.Inventory.Item;
 
-codeunit 50250 "WHA Repl. Rule Logic" implements "WHA IReplenishment"
+codeunit 55250 "WHA Repl. Rule Logic" implements "WHA IReplenishment"
 {
     Access = Public;
 

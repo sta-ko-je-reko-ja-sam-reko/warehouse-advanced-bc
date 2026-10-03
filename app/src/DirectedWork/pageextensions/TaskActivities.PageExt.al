@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50202 "WHA Task Activities" extends "WHA Warehouse Activities"
+pageextension 55202 "WHA Task Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.WaveManagement;
 
-enum 50151 "WHA Wave Strategy" implements "WHA IWaveStrategy"
+enum 55151 "WHA Wave Strategy" implements "WHA IWaveStrategy"
 {
     Caption = 'Wave strategy';
     Extensible = true;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-enum 50501 "WHA Count Selection" implements "WHA ICountSelection"
+enum 55501 "WHA Count Selection" implements "WHA ICountSelection"
 {
     Caption = 'Count selection';
     Extensible = true;

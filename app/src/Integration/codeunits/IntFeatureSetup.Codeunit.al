@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50651 "WHA Int. Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55651 "WHA Int. Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

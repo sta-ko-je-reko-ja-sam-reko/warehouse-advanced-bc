@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-enum 50351 "WHA Indirect Reason"
+enum 55351 "WHA Indirect Reason"
 {
     Caption = 'Indirect reason';
     Extensible = true;

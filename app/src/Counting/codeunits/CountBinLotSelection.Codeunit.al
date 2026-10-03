@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-codeunit 50509 "WHA Count Bin Lot Selection" implements "WHA ICountSelection"
+codeunit 55509 "WHA Count Bin Lot Selection" implements "WHA ICountSelection"
 {
     Access = Public;
 

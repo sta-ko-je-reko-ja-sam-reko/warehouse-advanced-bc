@@ -5,7 +5,7 @@ using Microsoft.Foundation.NoSeries;
 using Microsoft.Inventory.Journal;
 using WarehouseAdvanced.Posting;
 
-table 50500 "WHA Count Setup"
+table 55500 "WHA Count Setup"
 {
     Caption = 'Counting setup';
     DataClassification = CustomerContent;

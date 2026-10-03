@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50706 "WHA KPI Put-away Lead" implements "WHA IKpiMeasure"
+codeunit 55706 "WHA KPI Put-away Lead" implements "WHA IKpiMeasure"
 {
     Access = Public;
 

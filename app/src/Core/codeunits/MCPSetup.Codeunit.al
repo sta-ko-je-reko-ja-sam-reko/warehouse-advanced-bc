@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Core;
 
 using System.MCP;
 
-codeunit 50006 "WHA MCP Setup"
+codeunit 55006 "WHA MCP Setup"
 {
     Access = Internal;
 

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Slotting;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50301 "WHA Slot Activities" extends "WHA Warehouse Activities"
+pageextension 55301 "WHA Slot Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

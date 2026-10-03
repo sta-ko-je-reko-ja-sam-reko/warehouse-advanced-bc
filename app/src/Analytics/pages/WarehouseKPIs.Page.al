@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using Microsoft.Inventory.Location;
 
-page 50701 "WHA Warehouse KPIs"
+page 55701 "WHA Warehouse KPIs"
 {
     PageType = Worksheet;
     ApplicationArea = WHAAnalytics;

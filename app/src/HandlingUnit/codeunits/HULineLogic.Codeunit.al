@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 
 using Microsoft.Inventory.Item;
 
-codeunit 50054 "WHA HU Line Logic" implements "WHA IHandlingUnitLine"
+codeunit 55054 "WHA HU Line Logic" implements "WHA IHandlingUnitLine"
 {
     Access = Public;
 

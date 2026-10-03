@@ -4,7 +4,7 @@ using Microsoft.Inventory.Location;
 using System.IO;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50504 "WHA Demo Count"
+codeunit 55504 "WHA Demo Count"
 {
     Access = Public;
 

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.LabourManagement;
 
 using WarehouseAdvanced.Core;
 
-page 50350 "WHA Labour Setup"
+page 55350 "WHA Labour Setup"
 {
     PageType = Card;
     ApplicationArea = All;

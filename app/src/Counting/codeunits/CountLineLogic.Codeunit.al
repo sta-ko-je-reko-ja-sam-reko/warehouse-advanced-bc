@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-codeunit 50501 "WHA Count Line Logic" implements "WHA ICountSheetLine"
+codeunit 55501 "WHA Count Line Logic" implements "WHA ICountSheetLine"
 {
     Access = Public;
 

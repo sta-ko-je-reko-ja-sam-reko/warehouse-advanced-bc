@@ -45,8 +45,8 @@ job asks for.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA RF Setup` | 50100 | Single-record feature setup: enablement and how the flow behaves |
-| `WHA RF Device` | 50101 | One registered handheld |
+| `WHA RF Setup` | 55100 | Single-record feature setup: enablement and how the flow behaves |
+| `WHA RF Device` | 55101 | One registered handheld |
 
 ### `WHA RF Device`
 
@@ -77,27 +77,27 @@ keeps the operator's place on the page, in their own session — see "Not done".
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA RF Setup` | table | 50100 | `app/src/MobileDevice/tables/RFSetup.Table.al` |
-| `WHA RF Device` | table | 50101 | `app/src/MobileDevice/tables/RFDevice.Table.al` |
-| `WHA RF Step` | enum | 50100 | `app/src/MobileDevice/enums/RFStep.Enum.al` |
-| `WHA RF Flow` | enum | 50101 | `app/src/MobileDevice/enums/RFFlow.Enum.al` |
+| `WHA RF Setup` | table | 55100 | `app/src/MobileDevice/tables/RFSetup.Table.al` |
+| `WHA RF Device` | table | 55101 | `app/src/MobileDevice/tables/RFDevice.Table.al` |
+| `WHA RF Step` | enum | 55100 | `app/src/MobileDevice/enums/RFStep.Enum.al` |
+| `WHA RF Flow` | enum | 55101 | `app/src/MobileDevice/enums/RFFlow.Enum.al` |
 | `WHA IRFFlow` | interface | — | `app/src/MobileDevice/interfaces/IRFFlow.Interface.al` |
-| `WHA RF Standard Flow` | codeunit | 50100 | `app/src/MobileDevice/codeunits/RFStandardFlow.Codeunit.al` |
-| `WHA RF Feature Setup` | codeunit | 50101 | `app/src/MobileDevice/codeunits/RFFeatureSetup.Codeunit.al` |
-| `WHA RF App Area Sub.` | codeunit | 50102 | `app/src/MobileDevice/codeunits/RFAppAreaSub.Codeunit.al` |
-| `WHA Demo RF Device` | codeunit | 50103 | `app/src/MobileDevice/codeunits/DemoRFDevice.Codeunit.al` |
-| `WHA RF Appl. Area Setup` | tableextension | 50100 | `app/src/MobileDevice/tableextensions/RFApplAreaSetup.TableExt.al` |
-| `WHA RF Setup` | page | 50100 | `app/src/MobileDevice/pages/RFSetup.Page.al` |
-| `WHA RF Devices` | page | 50101 | `app/src/MobileDevice/pages/RFDevices.Page.al` |
-| `WHA RF Device Card` | page | 50102 | `app/src/MobileDevice/pages/RFDeviceCard.Page.al` |
-| `WHA RF Handheld` | page | 50103 | `app/src/MobileDevice/pages/RFHandheld.Page.al` |
+| `WHA RF Standard Flow` | codeunit | 55100 | `app/src/MobileDevice/codeunits/RFStandardFlow.Codeunit.al` |
+| `WHA RF Feature Setup` | codeunit | 55101 | `app/src/MobileDevice/codeunits/RFFeatureSetup.Codeunit.al` |
+| `WHA RF App Area Sub.` | codeunit | 55102 | `app/src/MobileDevice/codeunits/RFAppAreaSub.Codeunit.al` |
+| `WHA Demo RF Device` | codeunit | 55103 | `app/src/MobileDevice/codeunits/DemoRFDevice.Codeunit.al` |
+| `WHA RF Appl. Area Setup` | tableextension | 55100 | `app/src/MobileDevice/tableextensions/RFApplAreaSetup.TableExt.al` |
+| `WHA RF Setup` | page | 55100 | `app/src/MobileDevice/pages/RFSetup.Page.al` |
+| `WHA RF Devices` | page | 55101 | `app/src/MobileDevice/pages/RFDevices.Page.al` |
+| `WHA RF Device Card` | page | 55102 | `app/src/MobileDevice/pages/RFDeviceCard.Page.al` |
+| `WHA RF Handheld` | page | 55103 | `app/src/MobileDevice/pages/RFHandheld.Page.al` |
 | `WHA RF Terminal` | controladdin | — | `app/src/MobileDevice/controladdins/RFTerminal.ControlAddIn.al` |
-| `WHA RF Terminal State` | codeunit | 50104 | `app/src/MobileDevice/codeunits/RFTerminalState.Codeunit.al` |
-| `WHA API RF Device` | page | 50104 | `app/src/MobileDevice/pages/APIRFDevice.Page.al` |
-| `WHA API Demo RF Device` | page | 50105 | `app/src/MobileDevice/pages/APIDemoRFDevice.Page.al` |
-| `WHA RF Tests` | codeunit | 51003 | `test/src/codeunits/RFTests.Codeunit.al` |
+| `WHA RF Terminal State` | codeunit | 55104 | `app/src/MobileDevice/codeunits/RFTerminalState.Codeunit.al` |
+| `WHA API RF Device` | page | 55104 | `app/src/MobileDevice/pages/APIRFDevice.Page.al` |
+| `WHA API Demo RF Device` | page | 55105 | `app/src/MobileDevice/pages/APIDemoRFDevice.Page.al` |
+| `WHA RF Tests` | codeunit | 59003 | `test/src/codeunits/RFTests.Codeunit.al` |
 
-All in namespace `WarehouseAdvanced.MobileDevice`, from the reserved block `50100..50149`.
+All in namespace `WarehouseAdvanced.MobileDevice`, from the reserved block `55100..55149`.
 Core changed only by gaining a `WHA Feature` enum value.
 
 ## The flow interface — where the guess lives
@@ -275,7 +275,7 @@ location, one that works anywhere, and one blocked. Each insert is guarded by
 
 ## Tests
 
-`WHA RF Tests` (codeunit 51003), 16 tests. The flow is a codeunit, so most of it is asserted
+`WHA RF Tests` (codeunit 59003), 16 tests. The flow is a codeunit, so most of it is asserted
 directly with unsaved task records and no database writes:
 
 | Test | Asserts |

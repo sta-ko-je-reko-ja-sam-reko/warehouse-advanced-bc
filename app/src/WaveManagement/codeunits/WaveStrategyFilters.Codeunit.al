@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50156 "WHA Wave Strategy Filters"
+codeunit 55156 "WHA Wave Strategy Filters"
 {
     Access = Public;
 

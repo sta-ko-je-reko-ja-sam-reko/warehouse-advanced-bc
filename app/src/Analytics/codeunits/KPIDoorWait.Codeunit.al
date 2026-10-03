@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.DockYard;
 
-codeunit 50709 "WHA KPI Door Wait" implements "WHA IKpiMeasure"
+codeunit 55709 "WHA KPI Door Wait" implements "WHA IKpiMeasure"
 {
     Access = Public;
 

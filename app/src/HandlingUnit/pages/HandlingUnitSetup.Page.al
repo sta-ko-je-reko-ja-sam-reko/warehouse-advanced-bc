@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 
 using WarehouseAdvanced.Core;
 
-page 50050 "WHA Handling Unit Setup"
+page 55050 "WHA Handling Unit Setup"
 {
     PageType = Card;
     ApplicationArea = All;

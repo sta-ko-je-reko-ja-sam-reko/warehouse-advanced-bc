@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-codeunit 50003 "WHA Install"
+codeunit 55003 "WHA Install"
 {
     Access = Internal;
     Subtype = Install;

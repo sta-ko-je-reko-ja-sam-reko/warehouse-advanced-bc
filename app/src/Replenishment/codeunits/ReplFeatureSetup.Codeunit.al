@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50251 "WHA Repl. Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55251 "WHA Repl. Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

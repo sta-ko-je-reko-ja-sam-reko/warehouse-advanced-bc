@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.HandlingUnit;
 
-query 50672 "WHA HU Stock By Location"
+query 55672 "WHA HU Stock By Location"
 {
     QueryType = Normal;
     Caption = 'Handling unit stock by location';

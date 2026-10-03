@@ -59,8 +59,8 @@ the customer may not even want a dependency of the task queue.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Quality Hold Setup` | 50550 | Single-record feature setup, including how scrapped goods are written off |
-| `WHA Quality Hold` | 50551 | One hold on one handling unit, and what it wrote off |
+| `WHA Quality Hold Setup` | 55550 | Single-record feature setup, including how scrapped goods are written off |
+| `WHA Quality Hold` | 55551 | One hold on one handling unit, and what it wrote off |
 
 ### `WHA Quality Hold`
 
@@ -95,33 +95,33 @@ the customer may not even want a dependency of the task queue.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Quality Hold Setup` | table | 50550 | `app/src/QualityHold/tables/QualityHoldSetup.Table.al` |
-| `WHA Quality Hold` | table | 50551 | `app/src/QualityHold/tables/QualityHold.Table.al` |
-| `WHA Hold Reason` | enum | 50550 | `app/src/QualityHold/enums/HoldReason.Enum.al` |
-| `WHA Hold Status` | enum | 50551 | `app/src/QualityHold/enums/HoldStatus.Enum.al` |
-| `WHA Hold Disposition` | enum | 50552 | `app/src/QualityHold/enums/HoldDisposition.Enum.al` |
-| `WHA HU Status Hold` | enumextension | 50550 | `app/src/QualityHold/enumextensions/HUStatusHold.EnumExt.al` |
+| `WHA Quality Hold Setup` | table | 55550 | `app/src/QualityHold/tables/QualityHoldSetup.Table.al` |
+| `WHA Quality Hold` | table | 55551 | `app/src/QualityHold/tables/QualityHold.Table.al` |
+| `WHA Hold Reason` | enum | 55550 | `app/src/QualityHold/enums/HoldReason.Enum.al` |
+| `WHA Hold Status` | enum | 55551 | `app/src/QualityHold/enums/HoldStatus.Enum.al` |
+| `WHA Hold Disposition` | enum | 55552 | `app/src/QualityHold/enums/HoldDisposition.Enum.al` |
+| `WHA HU Status Hold` | enumextension | 55550 | `app/src/QualityHold/enumextensions/HUStatusHold.EnumExt.al` |
 | `WHA IQualityHold` | interface | — | `app/src/QualityHold/interfaces/IQualityHold.Interface.al` |
 | `WHA IHoldDisposition` | interface | — | `app/src/QualityHold/interfaces/IHoldDisposition.Interface.al` |
-| `WHA Quality Hold Logic` | codeunit | 50550 | `app/src/QualityHold/codeunits/QualityHoldLogic.Codeunit.al` |
-| `WHA Quality Hold Mgt.` | codeunit | 50551 | `app/src/QualityHold/codeunits/QualityHoldMgt.Codeunit.al` |
-| `WHA QC Feature Setup` | codeunit | 50552 | `app/src/QualityHold/codeunits/QCFeatureSetup.Codeunit.al` |
-| `WHA QC App Area Sub.` | codeunit | 50553 | `app/src/QualityHold/codeunits/QCAppAreaSub.Codeunit.al` |
-| `WHA Demo Quality Hold` | codeunit | 50554 | `app/src/QualityHold/codeunits/DemoQualityHold.Codeunit.al` |
-| `WHA Disp. Pending` | codeunit | 50555 | `app/src/QualityHold/codeunits/DispPending.Codeunit.al` |
-| `WHA Disp. Release` | codeunit | 50556 | `app/src/QualityHold/codeunits/DispRelease.Codeunit.al` |
-| `WHA Disp. Rework` | codeunit | 50557 | `app/src/QualityHold/codeunits/DispRework.Codeunit.al` |
-| `WHA Disp. Scrap` | codeunit | 50558 | `app/src/QualityHold/codeunits/DispScrap.Codeunit.al` |
-| `WHA QC Posting` | codeunit | 50559 | `app/src/QualityHold/codeunits/QCPosting.Codeunit.al` |
-| `WHA QC Appl. Area Setup` | tableextension | 50550 | `app/src/QualityHold/tableextensions/QCApplAreaSetup.TableExt.al` |
-| `WHA Quality Hold Setup` | page | 50550 | `app/src/QualityHold/pages/QualityHoldSetup.Page.al` |
-| `WHA Quality Holds` | page | 50551 | `app/src/QualityHold/pages/QualityHolds.Page.al` |
-| `WHA Quality Hold Card` | page | 50552 | `app/src/QualityHold/pages/QualityHoldCard.Page.al` |
-| `WHA API Quality Hold` | page | 50553 | `app/src/QualityHold/pages/APIQualityHold.Page.al` |
-| `WHA API Demo Quality Hold` | page | 50554 | `app/src/QualityHold/pages/APIDemoQualityHold.Page.al` |
-| `WHA Quality Hold Tests` | codeunit | 51009 | `test/src/codeunits/QualityHoldTests.Codeunit.al` |
+| `WHA Quality Hold Logic` | codeunit | 55550 | `app/src/QualityHold/codeunits/QualityHoldLogic.Codeunit.al` |
+| `WHA Quality Hold Mgt.` | codeunit | 55551 | `app/src/QualityHold/codeunits/QualityHoldMgt.Codeunit.al` |
+| `WHA QC Feature Setup` | codeunit | 55552 | `app/src/QualityHold/codeunits/QCFeatureSetup.Codeunit.al` |
+| `WHA QC App Area Sub.` | codeunit | 55553 | `app/src/QualityHold/codeunits/QCAppAreaSub.Codeunit.al` |
+| `WHA Demo Quality Hold` | codeunit | 55554 | `app/src/QualityHold/codeunits/DemoQualityHold.Codeunit.al` |
+| `WHA Disp. Pending` | codeunit | 55555 | `app/src/QualityHold/codeunits/DispPending.Codeunit.al` |
+| `WHA Disp. Release` | codeunit | 55556 | `app/src/QualityHold/codeunits/DispRelease.Codeunit.al` |
+| `WHA Disp. Rework` | codeunit | 55557 | `app/src/QualityHold/codeunits/DispRework.Codeunit.al` |
+| `WHA Disp. Scrap` | codeunit | 55558 | `app/src/QualityHold/codeunits/DispScrap.Codeunit.al` |
+| `WHA QC Posting` | codeunit | 55559 | `app/src/QualityHold/codeunits/QCPosting.Codeunit.al` |
+| `WHA QC Appl. Area Setup` | tableextension | 55550 | `app/src/QualityHold/tableextensions/QCApplAreaSetup.TableExt.al` |
+| `WHA Quality Hold Setup` | page | 55550 | `app/src/QualityHold/pages/QualityHoldSetup.Page.al` |
+| `WHA Quality Holds` | page | 55551 | `app/src/QualityHold/pages/QualityHolds.Page.al` |
+| `WHA Quality Hold Card` | page | 55552 | `app/src/QualityHold/pages/QualityHoldCard.Page.al` |
+| `WHA API Quality Hold` | page | 55553 | `app/src/QualityHold/pages/APIQualityHold.Page.al` |
+| `WHA API Demo Quality Hold` | page | 55554 | `app/src/QualityHold/pages/APIDemoQualityHold.Page.al` |
+| `WHA Quality Hold Tests` | codeunit | 59009 | `test/src/codeunits/QualityHoldTests.Codeunit.al` |
 
-All in namespace `WarehouseAdvanced.QualityHold`, from the reserved block `50550..50599`.
+All in namespace `WarehouseAdvanced.QualityHold`, from the reserved block `55550..55599`.
 
 Segment 2 added one codeunit here and nothing else new: the posting engine itself is shared with
 counting, lives in `app/src/Posting/`, and is described in
@@ -135,10 +135,10 @@ counting, lives in `app/src/Posting/`, and is described in
 | `WHA Warehouse Task Logic` (Directed work) | Refuses work for a unit that is not open or closed. Does not name a hold |
 | `WHA Repl. Handling Units` (Replenishment) | Measures only units that are open or closed. Does not name a hold |
 | `WHA Handling Unit Card` (Handling units) | **Put on hold** and **Quality holds** actions, carrying this feature's application area and `AccessByPermission`, exactly as labelling's action does |
-| `WHA QC Activities Cue` | tableextension | 50551 | `app/src/QualityHold/tableextensions/QCActivitiesCue.TableExt.al` |
-| `WHA QC Activity Provider` | enumextension | 50551 | `app/src/QualityHold/enumextensions/QCActivityProvider.EnumExt.al` |
-| `WHA QC Activity Cues` | codeunit | 50560 | `app/src/QualityHold/codeunits/QCActivityCues.Codeunit.al` |
-| `WHA QC Activities` | pageextension | 50551 | `app/src/QualityHold/pageextensions/QCActivities.PageExt.al` |
+| `WHA QC Activities Cue` | tableextension | 55551 | `app/src/QualityHold/tableextensions/QCActivitiesCue.TableExt.al` |
+| `WHA QC Activity Provider` | enumextension | 55551 | `app/src/QualityHold/enumextensions/QCActivityProvider.EnumExt.al` |
+| `WHA QC Activity Cues` | codeunit | 55560 | `app/src/QualityHold/codeunits/QCActivityCues.Codeunit.al` |
+| `WHA QC Activities` | pageextension | 55551 | `app/src/QualityHold/pageextensions/QCActivities.PageExt.al` |
 
 ## Dispositions — one thing each
 
@@ -264,7 +264,7 @@ The demo data was already right; the reason it is right got stronger.
 
 ## Tests
 
-`WHA Quality Hold Tests` (codeunit 51009), 21 tests.
+`WHA Quality Hold Tests` (codeunit 59009), 21 tests.
 
 **Segment 1**, 17 tests: holding a unit takes it out of use and stamps who
 and when; no work can be planned for a held unit; held stock stops counting as available pick-face

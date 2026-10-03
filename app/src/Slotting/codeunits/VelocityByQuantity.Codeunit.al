@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-codeunit 50306 "WHA Velocity By Quantity" implements "WHA IVelocityBasis"
+codeunit 55306 "WHA Velocity By Quantity" implements "WHA IVelocityBasis"
 {
     Access = Public;
 

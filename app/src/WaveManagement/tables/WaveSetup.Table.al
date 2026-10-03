@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using Microsoft.Foundation.NoSeries;
 
-table 50150 "WHA Wave Setup"
+table 55150 "WHA Wave Setup"
 {
     Caption = 'Wave setup';
     DataClassification = CustomerContent;

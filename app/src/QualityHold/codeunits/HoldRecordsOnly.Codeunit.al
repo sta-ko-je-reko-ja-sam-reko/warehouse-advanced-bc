@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50561 "WHA Hold Records Only" implements "WHA IHoldStockPolicy"
+codeunit 55561 "WHA Hold Records Only" implements "WHA IHoldStockPolicy"
 {
     Access = Public;
 

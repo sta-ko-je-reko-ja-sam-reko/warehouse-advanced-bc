@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.DirectedWork;
 
-page 50252 "WHA Repl. Rule Card"
+page 55252 "WHA Repl. Rule Card"
 {
     PageType = Card;
     ApplicationArea = WHAReplenishment;

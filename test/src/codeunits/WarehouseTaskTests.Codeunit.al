@@ -1,4 +1,4 @@
-codeunit 51001 "WHA Warehouse Task Tests"
+codeunit 59001 "WHA Warehouse Task Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

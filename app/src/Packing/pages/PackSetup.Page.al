@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Packing;
 
 using WarehouseAdvanced.Core;
 
-page 50400 "WHA Pack Setup"
+page 55400 "WHA Pack Setup"
 {
     PageType = Card;
     ApplicationArea = All;

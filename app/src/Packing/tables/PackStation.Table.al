@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Packing;
 using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 
-table 50401 "WHA Pack Station"
+table 55401 "WHA Pack Station"
 {
     Caption = 'Packing station';
     DataClassification = CustomerContent;

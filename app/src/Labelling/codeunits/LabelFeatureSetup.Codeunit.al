@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Labelling;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50601 "WHA Label Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55601 "WHA Label Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

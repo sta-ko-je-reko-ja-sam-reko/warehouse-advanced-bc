@@ -1,4 +1,4 @@
-codeunit 51014 "WHA Test Posting Recorder" implements "WHA IInvtPosting"
+codeunit 59014 "WHA Test Posting Recorder" implements "WHA IInvtPosting"
 {
     Access = Public;
     SingleInstance = true;

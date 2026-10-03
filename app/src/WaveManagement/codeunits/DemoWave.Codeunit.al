@@ -4,7 +4,7 @@ using Microsoft.Inventory.Location;
 using System.IO;
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50153 "WHA Demo Wave"
+codeunit 55153 "WHA Demo Wave"
 {
     Access = Public;
 

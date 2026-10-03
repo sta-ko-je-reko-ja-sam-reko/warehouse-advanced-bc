@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Analytics;
 
-page 50703 "WHA API KPI Snapshot"
+page 55703 "WHA API KPI Snapshot"
 {
     PageType = API;
     APIPublisher = 'matr';

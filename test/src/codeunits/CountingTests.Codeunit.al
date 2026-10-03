@@ -1,4 +1,4 @@
-codeunit 51008 "WHA Counting Tests"
+codeunit 59008 "WHA Counting Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

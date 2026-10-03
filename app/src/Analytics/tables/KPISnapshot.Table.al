@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Analytics;
 using Microsoft.Inventory.Location;
 using System.Security.AccessControl;
 
-table 50701 "WHA KPI Snapshot"
+table 55701 "WHA KPI Snapshot"
 {
     Caption = 'KPI snapshot';
     DataClassification = CustomerContent;

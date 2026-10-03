@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.LabourManagement;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50353 "WHA Lab. Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55353 "WHA Lab. Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

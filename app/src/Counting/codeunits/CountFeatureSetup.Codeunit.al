@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

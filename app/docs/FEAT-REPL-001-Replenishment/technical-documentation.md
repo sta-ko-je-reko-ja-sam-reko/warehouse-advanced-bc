@@ -39,8 +39,8 @@ only against what is in it, pre-replenishment for one wave, and a codeunit a job
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Repl. Setup` | 50250 | Single-record feature setup |
-| `WHA Replenishment Rule` | 50251 | One bin kept stocked |
+| `WHA Repl. Setup` | 55250 | Single-record feature setup |
+| `WHA Replenishment Rule` | 55251 | One bin kept stocked |
 
 ### `WHA Replenishment Rule`
 
@@ -79,38 +79,38 @@ content while the setup says handling units has to be changed after it is create
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Repl. Setup` | table | 50250 | `app/src/Replenishment/tables/ReplSetup.Table.al` |
-| `WHA Replenishment Rule` | table | 50251 | `app/src/Replenishment/tables/ReplenishmentRule.Table.al` |
-| `WHA Repl. Method` | enum | 50250 | `app/src/Replenishment/enums/ReplMethod.Enum.al` |
+| `WHA Repl. Setup` | table | 55250 | `app/src/Replenishment/tables/ReplSetup.Table.al` |
+| `WHA Replenishment Rule` | table | 55251 | `app/src/Replenishment/tables/ReplenishmentRule.Table.al` |
+| `WHA Repl. Method` | enum | 55250 | `app/src/Replenishment/enums/ReplMethod.Enum.al` |
 | `WHA IReplenishment` | interface | — | `app/src/Replenishment/interfaces/IReplenishment.Interface.al` |
 | `WHA IReplMethod` | interface | — | `app/src/Replenishment/interfaces/IReplMethod.Interface.al` |
-| `WHA Repl. Rule Logic` | codeunit | 50250 | `app/src/Replenishment/codeunits/ReplRuleLogic.Codeunit.al` |
-| `WHA Repl. Feature Setup` | codeunit | 50251 | `app/src/Replenishment/codeunits/ReplFeatureSetup.Codeunit.al` |
-| `WHA Repl. App Area Sub.` | codeunit | 50252 | `app/src/Replenishment/codeunits/ReplAppAreaSub.Codeunit.al` |
-| `WHA Demo Replenishment` | codeunit | 50253 | `app/src/Replenishment/codeunits/DemoReplenishment.Codeunit.al` |
-| `WHA Repl. Bin Content` | codeunit | 50254 | `app/src/Replenishment/codeunits/ReplBinContent.Codeunit.al` |
-| `WHA Repl. Handling Units` | codeunit | 50255 | `app/src/Replenishment/codeunits/ReplHandlingUnits.Codeunit.al` |
-| `WHA Repl. Demand` | enum | 50251 | `app/src/Replenishment/enums/ReplDemand.Enum.al` |
+| `WHA Repl. Rule Logic` | codeunit | 55250 | `app/src/Replenishment/codeunits/ReplRuleLogic.Codeunit.al` |
+| `WHA Repl. Feature Setup` | codeunit | 55251 | `app/src/Replenishment/codeunits/ReplFeatureSetup.Codeunit.al` |
+| `WHA Repl. App Area Sub.` | codeunit | 55252 | `app/src/Replenishment/codeunits/ReplAppAreaSub.Codeunit.al` |
+| `WHA Demo Replenishment` | codeunit | 55253 | `app/src/Replenishment/codeunits/DemoReplenishment.Codeunit.al` |
+| `WHA Repl. Bin Content` | codeunit | 55254 | `app/src/Replenishment/codeunits/ReplBinContent.Codeunit.al` |
+| `WHA Repl. Handling Units` | codeunit | 55255 | `app/src/Replenishment/codeunits/ReplHandlingUnits.Codeunit.al` |
+| `WHA Repl. Demand` | enum | 55251 | `app/src/Replenishment/enums/ReplDemand.Enum.al` |
 | `WHA IReplDemand` | interface | — | `app/src/Replenishment/interfaces/IReplDemand.Interface.al` |
-| `WHA Repl. No Demand` | codeunit | 50257 | `app/src/Replenishment/codeunits/ReplNoDemand.Codeunit.al` |
-| `WHA Repl. Pick Demand` | codeunit | 50258 | `app/src/Replenishment/codeunits/ReplPickDemand.Codeunit.al` |
-| `WHA Repl. Wave Demand` | codeunit | 50259 | `app/src/Replenishment/codeunits/ReplWaveDemand.Codeunit.al` |
-| `WHA Repl. Scheduler` | codeunit | 50260 | `app/src/Replenishment/codeunits/ReplScheduler.Codeunit.al` |
-| `WHA Repl. Demand Filters` | codeunit | 50261 | `app/src/Replenishment/codeunits/ReplDemandFilters.Codeunit.al` |
-| `WHA Replenishment Mgt.` | codeunit | 50256 | `app/src/Replenishment/codeunits/ReplenishmentMgt.Codeunit.al` |
-| `WHA Repl. Appl. Area Setup` | tableextension | 50250 | `app/src/Replenishment/tableextensions/ReplApplAreaSetup.TableExt.al` |
-| `WHA Repl. Setup` | page | 50250 | `app/src/Replenishment/pages/ReplSetup.Page.al` |
-| `WHA Replenishment Rules` | page | 50251 | `app/src/Replenishment/pages/ReplenishmentRules.Page.al` |
-| `WHA Repl. Rule Card` | page | 50252 | `app/src/Replenishment/pages/ReplRuleCard.Page.al` |
-| `WHA API Repl. Rule` | page | 50253 | `app/src/Replenishment/pages/APIReplRule.Page.al` |
-| `WHA API Demo Repl.` | page | 50254 | `app/src/Replenishment/pages/APIDemoRepl.Page.al` |
-| `WHA Replenishment Tests` | codeunit | 51007 | `test/src/codeunits/ReplenishmentTests.Codeunit.al` |
-| `WHA Repl Activities Cue` | tableextension | 50251 | `app/src/Replenishment/tableextensions/ReplActivitiesCue.TableExt.al` |
-| `WHA Repl Activity Provider` | enumextension | 50251 | `app/src/Replenishment/enumextensions/ReplActivityProvider.EnumExt.al` |
-| `WHA Repl Activity Cues` | codeunit | 50262 | `app/src/Replenishment/codeunits/ReplActivityCues.Codeunit.al` |
-| `WHA Repl Activities` | pageextension | 50251 | `app/src/Replenishment/pageextensions/ReplActivities.PageExt.al` |
+| `WHA Repl. No Demand` | codeunit | 55257 | `app/src/Replenishment/codeunits/ReplNoDemand.Codeunit.al` |
+| `WHA Repl. Pick Demand` | codeunit | 55258 | `app/src/Replenishment/codeunits/ReplPickDemand.Codeunit.al` |
+| `WHA Repl. Wave Demand` | codeunit | 55259 | `app/src/Replenishment/codeunits/ReplWaveDemand.Codeunit.al` |
+| `WHA Repl. Scheduler` | codeunit | 55260 | `app/src/Replenishment/codeunits/ReplScheduler.Codeunit.al` |
+| `WHA Repl. Demand Filters` | codeunit | 55261 | `app/src/Replenishment/codeunits/ReplDemandFilters.Codeunit.al` |
+| `WHA Replenishment Mgt.` | codeunit | 55256 | `app/src/Replenishment/codeunits/ReplenishmentMgt.Codeunit.al` |
+| `WHA Repl. Appl. Area Setup` | tableextension | 55250 | `app/src/Replenishment/tableextensions/ReplApplAreaSetup.TableExt.al` |
+| `WHA Repl. Setup` | page | 55250 | `app/src/Replenishment/pages/ReplSetup.Page.al` |
+| `WHA Replenishment Rules` | page | 55251 | `app/src/Replenishment/pages/ReplenishmentRules.Page.al` |
+| `WHA Repl. Rule Card` | page | 55252 | `app/src/Replenishment/pages/ReplRuleCard.Page.al` |
+| `WHA API Repl. Rule` | page | 55253 | `app/src/Replenishment/pages/APIReplRule.Page.al` |
+| `WHA API Demo Repl.` | page | 55254 | `app/src/Replenishment/pages/APIDemoRepl.Page.al` |
+| `WHA Replenishment Tests` | codeunit | 59007 | `test/src/codeunits/ReplenishmentTests.Codeunit.al` |
+| `WHA Repl Activities Cue` | tableextension | 55251 | `app/src/Replenishment/tableextensions/ReplActivitiesCue.TableExt.al` |
+| `WHA Repl Activity Provider` | enumextension | 55251 | `app/src/Replenishment/enumextensions/ReplActivityProvider.EnumExt.al` |
+| `WHA Repl Activity Cues` | codeunit | 55262 | `app/src/Replenishment/codeunits/ReplActivityCues.Codeunit.al` |
+| `WHA Repl Activities` | pageextension | 55251 | `app/src/Replenishment/pageextensions/ReplActivities.PageExt.al` |
 
-All in namespace `WarehouseAdvanced.Replenishment`, from the reserved block `50250..50299`. Core
+All in namespace `WarehouseAdvanced.Replenishment`, from the reserved block `55250..55299`. Core
 gained a `WHA Feature` enum value; nothing else outside the feature changed.
 
 ## Demand — what is already promised out of the bin
@@ -284,7 +284,7 @@ so it seeds nothing at all rather than something wrong on a company with no bins
 
 ## Tests
 
-`WHA Replenishment Tests` (codeunit 51007), 23 tests. Four cover units of measure: a pallet line and a
+`WHA Replenishment Tests` (codeunit 59007), 23 tests. Four cover units of measure: a pallet line and a
 loose-pieces line on one unit are not added together; a rule written in pallets is measured in pallets;
 stock held in another unit is seen rather than ignored; and a unit nobody set up falls back to base
 instead of stopping the run.

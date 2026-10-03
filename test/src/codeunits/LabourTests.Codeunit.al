@@ -1,4 +1,4 @@
-codeunit 51010 "WHA Labour Tests"
+codeunit 59010 "WHA Labour Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

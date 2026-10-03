@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.Core;
 
-page 50250 "WHA Repl. Setup"
+page 55250 "WHA Repl. Setup"
 {
     PageType = Card;
     ApplicationArea = All;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50564 "WHA Hold Stock Mgt."
+codeunit 55564 "WHA Hold Stock Mgt."
 {
     Access = Public;
 

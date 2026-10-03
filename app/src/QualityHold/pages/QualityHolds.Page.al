@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.QualityHold;
 
-page 50551 "WHA Quality Holds"
+page 55551 "WHA Quality Holds"
 {
     PageType = List;
     ApplicationArea = WHAQualityHold;

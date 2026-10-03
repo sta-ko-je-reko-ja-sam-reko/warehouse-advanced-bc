@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using WarehouseAdvanced.Core;
 
-page 50457 "WHA API Dock Appointment"
+page 55457 "WHA API Dock Appointment"
 {
     PageType = API;
     APIPublisher = 'matr';

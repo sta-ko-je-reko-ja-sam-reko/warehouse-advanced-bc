@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.QualityHold;
 
-enum 50553 "WHA Hold Stock Policy" implements "WHA IHoldStockPolicy"
+enum 55553 "WHA Hold Stock Policy" implements "WHA IHoldStockPolicy"
 {
     Caption = 'What a hold does to stock';
     Extensible = true;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.Core;
 
-page 50704 "WHA API Demo Analytics"
+page 55704 "WHA API Demo Analytics"
 {
     PageType = API;
     APIPublisher = 'matr';

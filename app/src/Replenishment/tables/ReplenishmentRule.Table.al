@@ -5,7 +5,7 @@ using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 using WarehouseAdvanced.DirectedWork;
 
-table 50251 "WHA Replenishment Rule"
+table 55251 "WHA Replenishment Rule"
 {
     Caption = 'Replenishment rule';
     DataClassification = CustomerContent;

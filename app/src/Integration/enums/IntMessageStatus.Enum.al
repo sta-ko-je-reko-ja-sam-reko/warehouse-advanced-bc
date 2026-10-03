@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-enum 50651 "WHA Int. Message Status"
+enum 55651 "WHA Int. Message Status"
 {
     Caption = 'Integration message status';
     Extensible = true;

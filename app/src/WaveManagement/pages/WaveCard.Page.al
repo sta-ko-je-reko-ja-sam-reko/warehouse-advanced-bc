@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.WaveManagement;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.Replenishment;
 
-page 50152 "WHA Wave Card"
+page 55152 "WHA Wave Card"
 {
     PageType = Card;
     ApplicationArea = WHAWaveManagement;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50550 "WHA Quality Hold Logic" implements "WHA IQualityHold"
+codeunit 55550 "WHA Quality Hold Logic" implements "WHA IQualityHold"
 {
     Access = Public;
 

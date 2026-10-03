@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-table 50300 "WHA Slotting Setup"
+table 55300 "WHA Slotting Setup"
 {
     Caption = 'Slotting setup';
     DataClassification = CustomerContent;

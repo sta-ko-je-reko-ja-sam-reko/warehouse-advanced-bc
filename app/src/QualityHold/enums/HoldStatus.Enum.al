@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.QualityHold;
 
-enum 50551 "WHA Hold Status"
+enum 55551 "WHA Hold Status"
 {
     Caption = 'Hold status';
     Extensible = true;

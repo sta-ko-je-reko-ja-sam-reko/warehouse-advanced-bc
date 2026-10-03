@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-codeunit 50650 "WHA Integration Msg. Logic" implements "WHA IIntegrationMessage"
+codeunit 55650 "WHA Integration Msg. Logic" implements "WHA IIntegrationMessage"
 {
     Access = Public;
 

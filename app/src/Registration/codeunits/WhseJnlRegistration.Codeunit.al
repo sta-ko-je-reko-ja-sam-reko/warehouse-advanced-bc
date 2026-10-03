@@ -8,7 +8,7 @@ using Microsoft.Warehouse.Journal;
 using Microsoft.Warehouse.Setup;
 using Microsoft.Warehouse.Structure;
 
-codeunit 50801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
+codeunit 55801 "WHA Whse. Jnl. Registration" implements "WHA IWhseRegistration"
 {
     Access = Public;
 

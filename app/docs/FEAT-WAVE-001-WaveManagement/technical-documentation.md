@@ -41,9 +41,9 @@ than in a count of jobs.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Wave Setup` | 50150 | Single-record feature setup |
-| `WHA Wave` | 50151 | One batch of work |
-| `WHA Wave Template` | 50152 | A reusable definition of a wave, and the thing a schedule runs |
+| `WHA Wave Setup` | 55150 | Single-record feature setup |
+| `WHA Wave` | 55151 | One batch of work |
+| `WHA Wave Template` | 55152 | A reusable definition of a wave, and the thing a schedule runs |
 
 ### `WHA Wave`
 
@@ -95,39 +95,39 @@ answers is "what is still outstanding", and a withdrawn job is not.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Wave Setup` | table | 50150 | `app/src/WaveManagement/tables/WaveSetup.Table.al` |
-| `WHA Wave` | table | 50151 | `app/src/WaveManagement/tables/Wave.Table.al` |
-| `WHA Wave Status` | enum | 50150 | `app/src/WaveManagement/enums/WaveStatus.Enum.al` |
-| `WHA Wave Strategy` | enum | 50151 | `app/src/WaveManagement/enums/WaveStrategy.Enum.al` |
+| `WHA Wave Setup` | table | 55150 | `app/src/WaveManagement/tables/WaveSetup.Table.al` |
+| `WHA Wave` | table | 55151 | `app/src/WaveManagement/tables/Wave.Table.al` |
+| `WHA Wave Status` | enum | 55150 | `app/src/WaveManagement/enums/WaveStatus.Enum.al` |
+| `WHA Wave Strategy` | enum | 55151 | `app/src/WaveManagement/enums/WaveStrategy.Enum.al` |
 | `WHA IWave` | interface | — | `app/src/WaveManagement/interfaces/IWave.Interface.al` |
 | `WHA IWaveStrategy` | interface | — | `app/src/WaveManagement/interfaces/IWaveStrategy.Interface.al` |
-| `WHA Wave Logic` | codeunit | 50150 | `app/src/WaveManagement/codeunits/WaveLogic.Codeunit.al` |
-| `WHA Wave Feature Setup` | codeunit | 50151 | `app/src/WaveManagement/codeunits/WaveFeatureSetup.Codeunit.al` |
-| `WHA Wave App Area Sub.` | codeunit | 50152 | `app/src/WaveManagement/codeunits/WaveAppAreaSub.Codeunit.al` |
-| `WHA Demo Wave` | codeunit | 50153 | `app/src/WaveManagement/codeunits/DemoWave.Codeunit.al` |
-| `WHA Wave Default Strategy` | codeunit | 50154 | `app/src/WaveManagement/codeunits/WaveDefaultStrategy.Codeunit.al` |
-| `WHA Wave Due Strategy` | codeunit | 50155 | `app/src/WaveManagement/codeunits/WaveDueStrategy.Codeunit.al` |
-| `WHA Wave Strategy Filters` | codeunit | 50156 | `app/src/WaveManagement/codeunits/WaveStrategyFilters.Codeunit.al` |
-| `WHA Wave Template` | table | 50152 | `app/src/WaveManagement/tables/WaveTemplate.Table.al` |
+| `WHA Wave Logic` | codeunit | 55150 | `app/src/WaveManagement/codeunits/WaveLogic.Codeunit.al` |
+| `WHA Wave Feature Setup` | codeunit | 55151 | `app/src/WaveManagement/codeunits/WaveFeatureSetup.Codeunit.al` |
+| `WHA Wave App Area Sub.` | codeunit | 55152 | `app/src/WaveManagement/codeunits/WaveAppAreaSub.Codeunit.al` |
+| `WHA Demo Wave` | codeunit | 55153 | `app/src/WaveManagement/codeunits/DemoWave.Codeunit.al` |
+| `WHA Wave Default Strategy` | codeunit | 55154 | `app/src/WaveManagement/codeunits/WaveDefaultStrategy.Codeunit.al` |
+| `WHA Wave Due Strategy` | codeunit | 55155 | `app/src/WaveManagement/codeunits/WaveDueStrategy.Codeunit.al` |
+| `WHA Wave Strategy Filters` | codeunit | 55156 | `app/src/WaveManagement/codeunits/WaveStrategyFilters.Codeunit.al` |
+| `WHA Wave Template` | table | 55152 | `app/src/WaveManagement/tables/WaveTemplate.Table.al` |
 | `WHA IWaveTemplate` | interface | — | `app/src/WaveManagement/interfaces/IWaveTemplate.Interface.al` |
-| `WHA Wave Template Logic` | codeunit | 50157 | `app/src/WaveManagement/codeunits/WaveTemplateLogic.Codeunit.al` |
-| `WHA Wave Scheduler` | codeunit | 50158 | `app/src/WaveManagement/codeunits/WaveScheduler.Codeunit.al` |
-| `WHA Wave Templates` | page | 50155 | `app/src/WaveManagement/pages/WaveTemplates.Page.al` |
-| `WHA Wave Template Card` | page | 50156 | `app/src/WaveManagement/pages/WaveTemplateCard.Page.al` |
-| `WHA API Wave Template` | page | 50157 | `app/src/WaveManagement/pages/APIWaveTemplate.Page.al` |
-| `WHA Wave Appl. Area Setup` | tableextension | 50150 | `app/src/WaveManagement/tableextensions/WaveApplAreaSetup.TableExt.al` |
-| `WHA Wave Setup` | page | 50150 | `app/src/WaveManagement/pages/WaveSetup.Page.al` |
-| `WHA Waves` | page | 50151 | `app/src/WaveManagement/pages/Waves.Page.al` |
-| `WHA Wave Card` | page | 50152 | `app/src/WaveManagement/pages/WaveCard.Page.al` |
-| `WHA API Wave` | page | 50153 | `app/src/WaveManagement/pages/APIWave.Page.al` |
-| `WHA API Demo Wave` | page | 50154 | `app/src/WaveManagement/pages/APIDemoWave.Page.al` |
-| `WHA Wave Tests` | codeunit | 51004 | `test/src/codeunits/WaveTests.Codeunit.al` |
-| `WHA Wave Activities Cue` | tableextension | 50151 | `app/src/WaveManagement/tableextensions/WaveActivitiesCue.TableExt.al` |
-| `WHA Wave Activity Provider` | enumextension | 50151 | `app/src/WaveManagement/enumextensions/WaveActivityProvider.EnumExt.al` |
-| `WHA Wave Activity Cues` | codeunit | 50159 | `app/src/WaveManagement/codeunits/WaveActivityCues.Codeunit.al` |
-| `WHA Wave Activities` | pageextension | 50151 | `app/src/WaveManagement/pageextensions/WaveActivities.PageExt.al` |
+| `WHA Wave Template Logic` | codeunit | 55157 | `app/src/WaveManagement/codeunits/WaveTemplateLogic.Codeunit.al` |
+| `WHA Wave Scheduler` | codeunit | 55158 | `app/src/WaveManagement/codeunits/WaveScheduler.Codeunit.al` |
+| `WHA Wave Templates` | page | 55155 | `app/src/WaveManagement/pages/WaveTemplates.Page.al` |
+| `WHA Wave Template Card` | page | 55156 | `app/src/WaveManagement/pages/WaveTemplateCard.Page.al` |
+| `WHA API Wave Template` | page | 55157 | `app/src/WaveManagement/pages/APIWaveTemplate.Page.al` |
+| `WHA Wave Appl. Area Setup` | tableextension | 55150 | `app/src/WaveManagement/tableextensions/WaveApplAreaSetup.TableExt.al` |
+| `WHA Wave Setup` | page | 55150 | `app/src/WaveManagement/pages/WaveSetup.Page.al` |
+| `WHA Waves` | page | 55151 | `app/src/WaveManagement/pages/Waves.Page.al` |
+| `WHA Wave Card` | page | 55152 | `app/src/WaveManagement/pages/WaveCard.Page.al` |
+| `WHA API Wave` | page | 55153 | `app/src/WaveManagement/pages/APIWave.Page.al` |
+| `WHA API Demo Wave` | page | 55154 | `app/src/WaveManagement/pages/APIDemoWave.Page.al` |
+| `WHA Wave Tests` | codeunit | 59004 | `test/src/codeunits/WaveTests.Codeunit.al` |
+| `WHA Wave Activities Cue` | tableextension | 55151 | `app/src/WaveManagement/tableextensions/WaveActivitiesCue.TableExt.al` |
+| `WHA Wave Activity Provider` | enumextension | 55151 | `app/src/WaveManagement/enumextensions/WaveActivityProvider.EnumExt.al` |
+| `WHA Wave Activity Cues` | codeunit | 55159 | `app/src/WaveManagement/codeunits/WaveActivityCues.Codeunit.al` |
+| `WHA Wave Activities` | pageextension | 55151 | `app/src/WaveManagement/pageextensions/WaveActivities.PageExt.al` |
 
-All in namespace `WarehouseAdvanced.WaveManagement`, from the reserved block `50150..50199`.
+All in namespace `WarehouseAdvanced.WaveManagement`, from the reserved block `55150..55199`.
 Directed work gained `Wave No.` and two keys; foundation gained the `Wave Nos.` series; Core gained
 a `WHA Feature` enum value.
 
@@ -300,7 +300,7 @@ itself once somebody wires up a job queue entry is worse than sample data with a
 
 ## Tests
 
-`WHA Wave Tests` (codeunit 51004), 27 tests.
+`WHA Wave Tests` (codeunit 59004), 27 tests.
 
 **Segment 1**, 17 tests: filling takes the most urgent work first and stops at the cap; work at other
 locations, drafts, and work already in a wave are left alone; drafts are gathered and released when

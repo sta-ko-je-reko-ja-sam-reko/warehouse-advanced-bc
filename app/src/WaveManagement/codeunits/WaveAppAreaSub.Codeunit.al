@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.WaveManagement;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50152 "WHA Wave App Area Sub."
+codeunit 55152 "WHA Wave App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

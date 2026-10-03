@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-enum 50201 "WHA Warehouse Task Status"
+enum 55201 "WHA Warehouse Task Status"
 {
     Caption = 'Warehouse task status';
     Extensible = true;

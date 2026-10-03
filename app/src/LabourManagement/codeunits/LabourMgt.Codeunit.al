@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.LabourManagement;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50352 "WHA Labour Mgt."
+codeunit 55352 "WHA Labour Mgt."
 {
     Access = Public;
 

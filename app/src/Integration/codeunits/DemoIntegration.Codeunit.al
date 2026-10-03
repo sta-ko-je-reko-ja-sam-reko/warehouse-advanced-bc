@@ -4,7 +4,7 @@ using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Location;
 using System.IO;
 
-codeunit 50659 "WHA Demo Integration"
+codeunit 55659 "WHA Demo Integration"
 {
     Access = Public;
 

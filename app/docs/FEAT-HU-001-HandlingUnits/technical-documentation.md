@@ -35,9 +35,9 @@ Nesting is configurable — it can be switched off entirely, or limited to a max
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Handling Unit Setup` | 50050 | Single-record feature setup: enablement and nesting rules |
-| `WHA Handling Unit` | 50051 | The unit itself |
-| `WHA Handling Unit Line` | 50052 | What a unit holds — one line per item, variant, lot or serial |
+| `WHA Handling Unit Setup` | 55050 | Single-record feature setup: enablement and nesting rules |
+| `WHA Handling Unit` | 55051 | The unit itself |
+| `WHA Handling Unit Line` | 55052 | What a unit holds — one line per item, variant, lot or serial |
 
 ### `WHA Handling Unit`
 
@@ -90,28 +90,28 @@ that cost behind a field would mislead.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Handling Unit Setup` | table | 50050 | `app/src/HandlingUnit/tables/HandlingUnitSetup.Table.al` |
-| `WHA Handling Unit` | table | 50051 | `app/src/HandlingUnit/tables/HandlingUnit.Table.al` |
-| `WHA Handling Unit Status` | enum | 50050 | `app/src/HandlingUnit/enums/HandlingUnitStatus.Enum.al` |
+| `WHA Handling Unit Setup` | table | 55050 | `app/src/HandlingUnit/tables/HandlingUnitSetup.Table.al` |
+| `WHA Handling Unit` | table | 55051 | `app/src/HandlingUnit/tables/HandlingUnit.Table.al` |
+| `WHA Handling Unit Status` | enum | 55050 | `app/src/HandlingUnit/enums/HandlingUnitStatus.Enum.al` |
 | `WHA IHandlingUnit` | interface | — | `app/src/HandlingUnit/interfaces/IHandlingUnit.Interface.al` |
-| `WHA Handling Unit Logic` | codeunit | 50050 | `app/src/HandlingUnit/codeunits/HandlingUnitLogic.Codeunit.al` |
-| `WHA HU Feature Setup` | codeunit | 50051 | `app/src/HandlingUnit/codeunits/HUFeatureSetup.Codeunit.al` |
-| `WHA HU App Area Sub.` | codeunit | 50052 | `app/src/HandlingUnit/codeunits/HUAppAreaSub.Codeunit.al` |
-| `WHA Appl. Area Setup` | tableextension | 50050 | `app/src/HandlingUnit/tableextensions/ApplAreaSetup.TableExt.al` |
-| `WHA Handling Unit Setup` | page | 50050 | `app/src/HandlingUnit/pages/HandlingUnitSetup.Page.al` |
-| `WHA Handling Unit Card` | page | 50051 | `app/src/HandlingUnit/pages/HandlingUnitCard.Page.al` |
-| `WHA Handling Units` | page | 50052 | `app/src/HandlingUnit/pages/HandlingUnits.Page.al` |
-| `WHA API Handling Unit` | page | 50053 | `app/src/HandlingUnit/pages/APIHandlingUnit.Page.al` |
-| `WHA Handling Unit Line` | table | 50052 | `app/src/HandlingUnit/tables/HandlingUnitLine.Table.al` |
+| `WHA Handling Unit Logic` | codeunit | 55050 | `app/src/HandlingUnit/codeunits/HandlingUnitLogic.Codeunit.al` |
+| `WHA HU Feature Setup` | codeunit | 55051 | `app/src/HandlingUnit/codeunits/HUFeatureSetup.Codeunit.al` |
+| `WHA HU App Area Sub.` | codeunit | 55052 | `app/src/HandlingUnit/codeunits/HUAppAreaSub.Codeunit.al` |
+| `WHA Appl. Area Setup` | tableextension | 55050 | `app/src/HandlingUnit/tableextensions/ApplAreaSetup.TableExt.al` |
+| `WHA Handling Unit Setup` | page | 55050 | `app/src/HandlingUnit/pages/HandlingUnitSetup.Page.al` |
+| `WHA Handling Unit Card` | page | 55051 | `app/src/HandlingUnit/pages/HandlingUnitCard.Page.al` |
+| `WHA Handling Units` | page | 55052 | `app/src/HandlingUnit/pages/HandlingUnits.Page.al` |
+| `WHA API Handling Unit` | page | 55053 | `app/src/HandlingUnit/pages/APIHandlingUnit.Page.al` |
+| `WHA Handling Unit Line` | table | 55052 | `app/src/HandlingUnit/tables/HandlingUnitLine.Table.al` |
 | `WHA IHandlingUnitLine` | interface | — | `app/src/HandlingUnit/interfaces/IHandlingUnitLine.Interface.al` |
-| `WHA HU Line Logic` | codeunit | 50054 | `app/src/HandlingUnit/codeunits/HULineLogic.Codeunit.al` |
-| `WHA Handling Unit Lines` | page | 50055 | `app/src/HandlingUnit/pages/HandlingUnitLines.Page.al` |
-| `WHA API Handling Unit Line` | page | 50056 | `app/src/HandlingUnit/pages/APIHandlingUnitLine.Page.al` |
-| `WHA Demo Handling Unit` | codeunit | 50053 | `app/src/HandlingUnit/codeunits/DemoHandlingUnit.Codeunit.al` |
-| `WHA API Demo Handling Unit` | page | 50054 | `app/src/HandlingUnit/pages/APIDemoHandlingUnit.Page.al` |
-| `WHA Handling Unit Tests` | codeunit | 51000 | `test/src/codeunits/HandlingUnit.Test.Codeunit.al` |
+| `WHA HU Line Logic` | codeunit | 55054 | `app/src/HandlingUnit/codeunits/HULineLogic.Codeunit.al` |
+| `WHA Handling Unit Lines` | page | 55055 | `app/src/HandlingUnit/pages/HandlingUnitLines.Page.al` |
+| `WHA API Handling Unit Line` | page | 55056 | `app/src/HandlingUnit/pages/APIHandlingUnitLine.Page.al` |
+| `WHA Demo Handling Unit` | codeunit | 55053 | `app/src/HandlingUnit/codeunits/DemoHandlingUnit.Codeunit.al` |
+| `WHA API Demo Handling Unit` | page | 55054 | `app/src/HandlingUnit/pages/APIDemoHandlingUnit.Page.al` |
+| `WHA Handling Unit Tests` | codeunit | 59000 | `test/src/codeunits/HandlingUnit.Test.Codeunit.al` |
 
-All in namespace `WarehouseAdvanced.HandlingUnit`, from the reserved block `50050..50099`.
+All in namespace `WarehouseAdvanced.HandlingUnit`, from the reserved block `55050..55099`.
 
 ## Logic
 
@@ -203,12 +203,12 @@ built **inside `Import()`** — so it exists only when the user opted into sampl
 on install — and it **never** includes the feature's `Setup` table. It is idempotent on the package
 code.
 
-The shared dummy source table `WHA Demo Data` (Core, 50002) exists because the API page's value is
+The shared dummy source table `WHA Demo Data` (Core, 55002) exists because the API page's value is
 its bound action, not its rows.
 
 ## Tests
 
-`WHA Handling Unit Tests` (codeunit 51000) covers the segment's logic directly, with no database
+`WHA Handling Unit Tests` (codeunit 59000) covers the segment's logic directly, with no database
 writes — the procedures take records by reference, so unsaved records can be passed in:
 
 | Test | Asserts |

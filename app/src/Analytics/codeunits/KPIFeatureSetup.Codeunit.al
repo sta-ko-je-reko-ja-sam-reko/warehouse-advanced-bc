@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50702 "WHA KPI Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55702 "WHA KPI Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

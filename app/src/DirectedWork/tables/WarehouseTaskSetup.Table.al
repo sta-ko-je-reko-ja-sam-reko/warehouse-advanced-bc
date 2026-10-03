@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using Microsoft.Foundation.NoSeries;
 using WarehouseAdvanced.Registration;
 
-table 50200 "WHA Warehouse Task Setup"
+table 55200 "WHA Warehouse Task Setup"
 {
     Caption = 'Warehouse task setup';
     DataClassification = CustomerContent;

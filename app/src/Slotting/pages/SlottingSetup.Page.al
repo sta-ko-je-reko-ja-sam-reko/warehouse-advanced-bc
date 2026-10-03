@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Slotting;
 
 using WarehouseAdvanced.Core;
 
-page 50300 "WHA Slotting Setup"
+page 55300 "WHA Slotting Setup"
 {
     PageType = Card;
     ApplicationArea = All;

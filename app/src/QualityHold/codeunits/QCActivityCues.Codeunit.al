@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50560 "WHA QC Activity Cues" implements "WHA IActivityCues"
+codeunit 55560 "WHA QC Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

@@ -6,7 +6,7 @@ using Microsoft.Inventory.Journal;
 using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 
-table 50750 "WHA Posting Request"
+table 55750 "WHA Posting Request"
 {
     Caption = 'Posting request';
     DataClassification = CustomerContent;

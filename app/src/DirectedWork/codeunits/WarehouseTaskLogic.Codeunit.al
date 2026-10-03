@@ -4,7 +4,7 @@ using Microsoft.Foundation.NoSeries;
 using Microsoft.Inventory.Item;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
+codeunit 55200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
 {
     Access = Public;
 

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Replenishment;
 
-codeunit 50257 "WHA Repl. No Demand" implements "WHA IReplDemand"
+codeunit 55257 "WHA Repl. No Demand" implements "WHA IReplDemand"
 {
     Access = Public;
 

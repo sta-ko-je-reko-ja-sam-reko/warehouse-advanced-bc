@@ -15,7 +15,7 @@ using WarehouseAdvanced.Replenishment;
 using WarehouseAdvanced.Slotting;
 using WarehouseAdvanced.WaveManagement;
 
-enum 50000 "WHA Feature" implements "WHA IFeatureSetup"
+enum 55000 "WHA Feature" implements "WHA IFeatureSetup"
 {
     Caption = 'Warehouse advanced feature';
     Extensible = true;

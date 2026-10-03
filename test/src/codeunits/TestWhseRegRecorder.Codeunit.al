@@ -1,4 +1,4 @@
-codeunit 51016 "WHA Test Whse. Reg. Recorder" implements "WHA IWhseRegistration"
+codeunit 59016 "WHA Test Whse. Reg. Recorder" implements "WHA IWhseRegistration"
 {
     Access = Public;
     SingleInstance = true;

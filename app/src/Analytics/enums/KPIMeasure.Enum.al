@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Analytics;
 
-enum 50700 "WHA KPI Measure" implements "WHA IKpiMeasure"
+enum 55700 "WHA KPI Measure" implements "WHA IKpiMeasure"
 {
     Caption = 'KPI measure';
     Extensible = true;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Posting;
 
-enum 50751 "WHA Posting Method" implements "WHA IInvtPosting"
+enum 55751 "WHA Posting Method" implements "WHA IInvtPosting"
 {
     Caption = 'Posting method';
     Extensible = true;

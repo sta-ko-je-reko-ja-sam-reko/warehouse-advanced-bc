@@ -4,7 +4,7 @@ using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 
-table 50800 "WHA Whse. Move Request"
+table 55800 "WHA Whse. Move Request"
 {
     Caption = 'Warehouse move request';
     DataClassification = CustomerContent;

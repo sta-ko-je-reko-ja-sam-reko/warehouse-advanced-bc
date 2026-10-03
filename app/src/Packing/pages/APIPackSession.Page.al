@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Packing;
 
-page 50406 "WHA API Pack Session"
+page 55406 "WHA API Pack Session"
 {
     PageType = API;
     APIPublisher = 'matr';

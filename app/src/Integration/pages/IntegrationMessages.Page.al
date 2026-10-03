@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-page 50651 "WHA Integration Messages"
+page 55651 "WHA Integration Messages"
 {
     PageType = List;
     ApplicationArea = WHAIntegration;

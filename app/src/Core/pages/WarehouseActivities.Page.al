@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-page 50003 "WHA Warehouse Activities"
+page 55003 "WHA Warehouse Activities"
 {
     PageType = CardPart;
     ApplicationArea = All;

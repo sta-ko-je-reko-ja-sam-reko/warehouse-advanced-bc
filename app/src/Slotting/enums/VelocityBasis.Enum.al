@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-enum 50301 "WHA Velocity Basis" implements "WHA IVelocityBasis"
+enum 55301 "WHA Velocity Basis" implements "WHA IVelocityBasis"
 {
     Caption = 'Velocity basis';
     Extensible = true;

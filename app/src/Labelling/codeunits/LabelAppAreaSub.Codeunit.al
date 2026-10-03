@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Labelling;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50602 "WHA Label App Area Sub."
+codeunit 55602 "WHA Label App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

@@ -34,7 +34,7 @@ then it is printed on a sticker.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Label Setup` | 50600 | Single-record feature setup, including the counter |
+| `WHA Label Setup` | 55600 | Single-record feature setup, including the counter |
 
 **This feature owns no transactional table.** The code it produces lives on
 `WHA Handling Unit.SSCC`, which already existed. Adding a "label" record would have created a second
@@ -56,22 +56,22 @@ somebody else. Generation errors until it is filled in.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Label Setup` | table | 50600 | `app/src/Labelling/tables/LabelSetup.Table.al` |
-| `WHA Label Code Format` | enum | 50600 | `app/src/Labelling/enums/LabelCodeFormat.Enum.al` |
+| `WHA Label Setup` | table | 55600 | `app/src/Labelling/tables/LabelSetup.Table.al` |
+| `WHA Label Code Format` | enum | 55600 | `app/src/Labelling/enums/LabelCodeFormat.Enum.al` |
 | `WHA ILabelCodeFormat` | interface | — | `app/src/Labelling/interfaces/ILabelCodeFormat.Interface.al` |
-| `WHA SSCC Format` | codeunit | 50600 | `app/src/Labelling/codeunits/SSCCFormat.Codeunit.al` |
-| `WHA Label Feature Setup` | codeunit | 50601 | `app/src/Labelling/codeunits/LabelFeatureSetup.Codeunit.al` |
-| `WHA Label App Area Sub.` | codeunit | 50602 | `app/src/Labelling/codeunits/LabelAppAreaSub.Codeunit.al` |
-| `WHA Demo Label` | codeunit | 50603 | `app/src/Labelling/codeunits/DemoLabel.Codeunit.al` |
-| `WHA Label Mgt.` | codeunit | 50604 | `app/src/Labelling/codeunits/LabelMgt.Codeunit.al` |
-| `WHA Sequential Format` | codeunit | 50605 | `app/src/Labelling/codeunits/SequentialFormat.Codeunit.al` |
-| `WHA Label Appl. Area Setup` | tableextension | 50600 | `app/src/Labelling/tableextensions/LabelApplAreaSetup.TableExt.al` |
-| `WHA Label Setup` | page | 50600 | `app/src/Labelling/pages/LabelSetup.Page.al` |
-| `WHA API Label` | page | 50601 | `app/src/Labelling/pages/APILabel.Page.al` |
-| `WHA API Demo Label` | page | 50602 | `app/src/Labelling/pages/APIDemoLabel.Page.al` |
-| `WHA Labelling Tests` | codeunit | 51005 | `test/src/codeunits/LabellingTests.Codeunit.al` |
+| `WHA SSCC Format` | codeunit | 55600 | `app/src/Labelling/codeunits/SSCCFormat.Codeunit.al` |
+| `WHA Label Feature Setup` | codeunit | 55601 | `app/src/Labelling/codeunits/LabelFeatureSetup.Codeunit.al` |
+| `WHA Label App Area Sub.` | codeunit | 55602 | `app/src/Labelling/codeunits/LabelAppAreaSub.Codeunit.al` |
+| `WHA Demo Label` | codeunit | 55603 | `app/src/Labelling/codeunits/DemoLabel.Codeunit.al` |
+| `WHA Label Mgt.` | codeunit | 55604 | `app/src/Labelling/codeunits/LabelMgt.Codeunit.al` |
+| `WHA Sequential Format` | codeunit | 55605 | `app/src/Labelling/codeunits/SequentialFormat.Codeunit.al` |
+| `WHA Label Appl. Area Setup` | tableextension | 55600 | `app/src/Labelling/tableextensions/LabelApplAreaSetup.TableExt.al` |
+| `WHA Label Setup` | page | 55600 | `app/src/Labelling/pages/LabelSetup.Page.al` |
+| `WHA API Label` | page | 55601 | `app/src/Labelling/pages/APILabel.Page.al` |
+| `WHA API Demo Label` | page | 55602 | `app/src/Labelling/pages/APIDemoLabel.Page.al` |
+| `WHA Labelling Tests` | codeunit | 59005 | `test/src/codeunits/LabellingTests.Codeunit.al` |
 
-All in namespace `WarehouseAdvanced.Labelling`, from the reserved block `50600..50649`.
+All in namespace `WarehouseAdvanced.Labelling`, from the reserved block `55600..55649`.
 
 ## A format is a pure function
 
@@ -162,7 +162,7 @@ would silently invalidate a sticker. `Import()` also builds the `WHA-LBL` RapidS
 
 ## Tests
 
-`WHA Labelling Tests` (codeunit 51005), 15 tests. Most touch no database at all, because `Build` is
+`WHA Labelling Tests` (codeunit 59005), 15 tests. Most touch no database at all, because `Build` is
 a pure function: the check digit against a published barcode and three hand-worked cases; an
 18-digit valid code; the same reference giving the same code twice; the extension digit and prefix
 appearing where they should; a tampered check digit, a short code, letters, and an empty code all

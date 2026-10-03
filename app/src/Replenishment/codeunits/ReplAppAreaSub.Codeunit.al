@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Replenishment;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50252 "WHA Repl. App Area Sub."
+codeunit 55252 "WHA Repl. App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

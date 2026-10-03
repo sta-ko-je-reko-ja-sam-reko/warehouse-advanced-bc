@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.MobileDevice;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50100 "WHA RF Standard Flow" implements "WHA IRFFlow"
+codeunit 55100 "WHA RF Standard Flow" implements "WHA IRFFlow"
 {
     Access = Public;
 

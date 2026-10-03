@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Packing;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50404 "WHA Pack Activity Cues" implements "WHA IActivityCues"
+codeunit 55404 "WHA Pack Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

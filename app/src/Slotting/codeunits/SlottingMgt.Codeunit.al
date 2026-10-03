@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Slotting;
 using Microsoft.Warehouse.Structure;
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50300 "WHA Slotting Mgt."
+codeunit 55300 "WHA Slotting Mgt."
 {
     Access = Public;
 

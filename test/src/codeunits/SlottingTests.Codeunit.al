@@ -1,4 +1,4 @@
-codeunit 51011 "WHA Slotting Tests"
+codeunit 59011 "WHA Slotting Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

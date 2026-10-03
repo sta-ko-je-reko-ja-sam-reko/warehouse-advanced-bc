@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Posting;
 
-codeunit 50750 "WHA No Invt. Posting" implements "WHA IInvtPosting"
+codeunit 55750 "WHA No Invt. Posting" implements "WHA IInvtPosting"
 {
     Access = Public;
 

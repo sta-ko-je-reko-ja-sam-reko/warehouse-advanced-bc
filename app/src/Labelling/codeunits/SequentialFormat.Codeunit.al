@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Labelling;
 
-codeunit 50605 "WHA Sequential Format" implements "WHA ILabelCodeFormat"
+codeunit 55605 "WHA Sequential Format" implements "WHA ILabelCodeFormat"
 {
     Access = Public;
 

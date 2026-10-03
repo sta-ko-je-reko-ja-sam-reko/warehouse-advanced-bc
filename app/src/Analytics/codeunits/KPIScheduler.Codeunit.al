@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Analytics;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Telemetry;
 
-codeunit 50710 "WHA KPI Scheduler"
+codeunit 55710 "WHA KPI Scheduler"
 {
     Access = Public;
     TableNo = "WHA KPI Snapshot";

@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DockYard;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50453 "WHA Dock App Area Sub."
+codeunit 55453 "WHA Dock App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

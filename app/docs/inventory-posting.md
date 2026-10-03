@@ -37,7 +37,7 @@ rather than leaving the next reader to infer it from the absence of a setup page
 
 ## The buffer
 
-`WHA Posting Request` (table 50750, `TableType = Temporary`) is what a feature hands over. One row is
+`WHA Posting Request` (table 55750, `TableType = Temporary`) is what a feature hands over. One row is
 one line of stock to add or remove:
 
 | Field | Purpose |
@@ -62,7 +62,7 @@ which is exactly what the test project supplies. See *Testing*, below.
 
 ## The three ways of posting
 
-`WHA Posting Method` (enum 50751) is extensible and binds each value to its own implementation of
+`WHA Posting Method` (enum 55751) is extensible and binds each value to its own implementation of
 `WHA IInvtPosting`:
 
 | Value | Implementation | What it does |

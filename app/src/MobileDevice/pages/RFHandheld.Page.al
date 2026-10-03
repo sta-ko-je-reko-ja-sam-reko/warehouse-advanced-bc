@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.MobileDevice;
 
 using WarehouseAdvanced.DirectedWork;
 
-page 50103 "WHA RF Handheld"
+page 55103 "WHA RF Handheld"
 {
     PageType = Card;
     ApplicationArea = WHAMobileDevice;

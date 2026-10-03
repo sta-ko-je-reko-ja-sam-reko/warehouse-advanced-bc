@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50259 "WHA Repl. Wave Demand" implements "WHA IReplDemand"
+codeunit 55259 "WHA Repl. Wave Demand" implements "WHA IReplDemand"
 {
     Access = Public;
 

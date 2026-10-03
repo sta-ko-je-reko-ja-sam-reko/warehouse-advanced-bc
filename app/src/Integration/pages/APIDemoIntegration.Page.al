@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.Core;
 
-page 50654 "WHA API Demo Integration"
+page 55654 "WHA API Demo Integration"
 {
     PageType = API;
     APIPublisher = 'matr';

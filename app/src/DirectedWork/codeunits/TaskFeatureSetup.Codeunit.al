@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

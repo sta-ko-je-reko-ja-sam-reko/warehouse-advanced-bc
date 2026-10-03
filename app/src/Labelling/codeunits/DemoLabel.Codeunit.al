@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Labelling;
 using System.IO;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50603 "WHA Demo Label"
+codeunit 55603 "WHA Demo Label"
 {
     Access = Public;
 

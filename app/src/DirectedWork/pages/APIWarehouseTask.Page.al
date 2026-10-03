@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DirectedWork;
 
 using WarehouseAdvanced.Core;
 
-page 50203 "WHA API Warehouse Task"
+page 55203 "WHA API Warehouse Task"
 {
     PageType = API;
     APIPublisher = 'matr';

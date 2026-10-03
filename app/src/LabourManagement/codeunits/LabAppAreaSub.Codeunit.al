@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.LabourManagement;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50354 "WHA Lab. App Area Sub."
+codeunit 55354 "WHA Lab. App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

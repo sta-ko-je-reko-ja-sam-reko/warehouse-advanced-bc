@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Packing;
 
-page 50402 "WHA Pack Station Card"
+page 55402 "WHA Pack Station Card"
 {
     PageType = Card;
     ApplicationArea = WHAPacking;

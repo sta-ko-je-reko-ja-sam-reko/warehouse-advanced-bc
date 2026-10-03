@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Analytics;
 
 using Microsoft.Inventory.Location;
 
-table 50700 "WHA Analytics Setup"
+table 55700 "WHA Analytics Setup"
 {
     Caption = 'Analytics setup';
     DataClassification = CustomerContent;

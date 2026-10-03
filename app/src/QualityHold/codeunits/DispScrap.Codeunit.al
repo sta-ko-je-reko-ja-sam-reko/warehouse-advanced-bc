@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50558 "WHA Disp. Scrap" implements "WHA IHoldDisposition"
+codeunit 55558 "WHA Disp. Scrap" implements "WHA IHoldDisposition"
 {
     Access = Public;
 

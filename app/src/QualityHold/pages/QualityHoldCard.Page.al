@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.HandlingUnit;
 
-page 50552 "WHA Quality Hold Card"
+page 55552 "WHA Quality Hold Card"
 {
     PageType = Card;
     ApplicationArea = WHAQualityHold;

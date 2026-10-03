@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.WaveManagement;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50159 "WHA Wave Activity Cues" implements "WHA IActivityCues"
+codeunit 55159 "WHA Wave Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

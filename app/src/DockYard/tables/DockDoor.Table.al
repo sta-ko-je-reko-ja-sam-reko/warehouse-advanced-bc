@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using Microsoft.Inventory.Location;
 
-table 50451 "WHA Dock Door"
+table 55451 "WHA Dock Door"
 {
     Caption = 'Dock door';
     DataClassification = CustomerContent;

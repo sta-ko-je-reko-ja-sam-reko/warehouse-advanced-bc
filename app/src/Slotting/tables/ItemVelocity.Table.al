@@ -4,7 +4,7 @@ using Microsoft.Inventory.Item;
 using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 
-table 50301 "WHA Item Velocity"
+table 55301 "WHA Item Velocity"
 {
     Caption = 'Item velocity';
     DataClassification = CustomerContent;

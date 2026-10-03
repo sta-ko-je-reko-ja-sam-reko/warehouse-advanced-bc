@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Packing;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50401 "WHA Pack Feature Setup" implements "WHA IFeatureSetup"
+codeunit 55401 "WHA Pack Feature Setup" implements "WHA IFeatureSetup"
 {
     Access = Public;
 

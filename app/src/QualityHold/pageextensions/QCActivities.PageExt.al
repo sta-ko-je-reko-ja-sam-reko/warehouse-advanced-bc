@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.Core;
 
-pageextension 50551 "WHA QC Activities" extends "WHA Warehouse Activities"
+pageextension 55551 "WHA QC Activities" extends "WHA Warehouse Activities"
 {
     layout
     {

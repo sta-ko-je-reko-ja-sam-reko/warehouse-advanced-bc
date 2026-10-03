@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Posting;
 
-enum 50750 "WHA Posting Type"
+enum 55750 "WHA Posting Type"
 {
     Caption = 'Posting type';
     Extensible = true;

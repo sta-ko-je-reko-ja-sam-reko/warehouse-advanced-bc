@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using Microsoft.Foundation.NoSeries;
 
-codeunit 50451 "WHA Dock Appt. Logic" implements "WHA IDockAppointment"
+codeunit 55451 "WHA Dock Appt. Logic" implements "WHA IDockAppointment"
 {
     Access = Public;
 

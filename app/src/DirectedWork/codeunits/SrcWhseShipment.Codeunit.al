@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using Microsoft.Warehouse.Document;
 using WarehouseAdvanced.Registration;
 
-codeunit 50206 "WHA Src Whse. Shipment" implements "WHA ITaskSource"
+codeunit 55206 "WHA Src Whse. Shipment" implements "WHA ITaskSource"
 {
     Access = Public;
 

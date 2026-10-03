@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Registration;
 
-codeunit 50209 "WHA Task Whse. Registration"
+codeunit 55209 "WHA Task Whse. Registration"
 {
     Access = Public;
 

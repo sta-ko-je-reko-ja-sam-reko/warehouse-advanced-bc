@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-codeunit 50216 "WHA Whse. Access Mgt."
+codeunit 55216 "WHA Whse. Access Mgt."
 {
     Access = Public;
 

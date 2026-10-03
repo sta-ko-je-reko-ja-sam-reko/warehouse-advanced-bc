@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-enum 50500 "WHA Count Status"
+enum 55500 "WHA Count Status"
 {
     Caption = 'Count sheet status';
     Extensible = true;

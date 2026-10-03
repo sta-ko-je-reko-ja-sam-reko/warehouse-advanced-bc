@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 using WarehouseAdvanced.Labelling;
 using WarehouseAdvanced.QualityHold;
 
-page 50051 "WHA Handling Unit Card"
+page 55051 "WHA Handling Unit Card"
 {
     PageType = Card;
     ApplicationArea = WHAHandlingUnits;

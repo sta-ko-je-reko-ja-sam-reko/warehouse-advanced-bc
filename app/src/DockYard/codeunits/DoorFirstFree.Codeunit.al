@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-codeunit 50455 "WHA Door First Free" implements "WHA IDoorSelection"
+codeunit 55455 "WHA Door First Free" implements "WHA IDoorSelection"
 {
     Access = Public;
 

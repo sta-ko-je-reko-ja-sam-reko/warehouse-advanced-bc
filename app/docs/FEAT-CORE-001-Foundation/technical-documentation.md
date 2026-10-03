@@ -40,10 +40,10 @@ whether it is on, without a single branch.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Warehouse Setup` | 50000 | The foundation's own single-record setup |
-| `WHA Setup Step` | 50001 | **`TableType = Temporary`.** One row per step in the guided setup list |
-| `WHA Demo Data` | 50002 | Records which sample data sets have been loaded, so importing twice creates nothing |
-| `WHA Activities Cue` | 50003 | **`TableType = Temporary`.** The row the role centre tiles bind to |
+| `WHA Warehouse Setup` | 55000 | The foundation's own single-record setup |
+| `WHA Setup Step` | 55001 | **`TableType = Temporary`.** One row per step in the guided setup list |
+| `WHA Demo Data` | 55002 | Records which sample data sets have been loaded, so importing twice creates nothing |
+| `WHA Activities Cue` | 55003 | **`TableType = Temporary`.** The row the role centre tiles bind to |
 
 ### `WHA Warehouse Setup` holds almost nothing, on purpose
 
@@ -70,35 +70,35 @@ is stored, so a step cannot go stale and a feature cannot leave a row behind whe
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Warehouse Setup` | table | 50000 | `app/src/Core/tables/WarehouseSetup.Table.al` |
-| `WHA Setup Step` | table | 50001 | `app/src/Core/tables/SetupStep.Table.al` |
-| `WHA Demo Data` | table | 50002 | `app/src/Core/tables/DemoData.Table.al` |
-| `WHA Activities Cue` | table | 50003 | `app/src/Core/tables/ActivitiesCue.Table.al` |
-| `WHA Feature` | enum | 50000 | `app/src/Core/enums/Feature.Enum.al` |
-| `WHA Setup Step Status` | enum | 50001 | `app/src/Core/enums/SetupStepStatus.Enum.al` |
-| `WHA Activity Provider` | enum | 50002 | `app/src/Core/enums/ActivityProvider.Enum.al` |
+| `WHA Warehouse Setup` | table | 55000 | `app/src/Core/tables/WarehouseSetup.Table.al` |
+| `WHA Setup Step` | table | 55001 | `app/src/Core/tables/SetupStep.Table.al` |
+| `WHA Demo Data` | table | 55002 | `app/src/Core/tables/DemoData.Table.al` |
+| `WHA Activities Cue` | table | 55003 | `app/src/Core/tables/ActivitiesCue.Table.al` |
+| `WHA Feature` | enum | 55000 | `app/src/Core/enums/Feature.Enum.al` |
+| `WHA Setup Step Status` | enum | 55001 | `app/src/Core/enums/SetupStepStatus.Enum.al` |
+| `WHA Activity Provider` | enum | 55002 | `app/src/Core/enums/ActivityProvider.Enum.al` |
 | `WHA IWarehouseSetup` | interface | — | `app/src/Core/interfaces/IWarehouseSetup.Interface.al` |
 | `WHA IFeatureSetup` | interface | — | `app/src/Core/interfaces/IFeatureSetup.Interface.al` |
 | `WHA IActivityCues` | interface | — | `app/src/Core/interfaces/IActivityCues.Interface.al` |
-| `WHA Warehouse Setup Logic` | codeunit | 50000 | `app/src/Core/codeunits/WarehouseSetupLogic.Codeunit.al` |
-| `WHA Feature Mgt.` | codeunit | 50001 | `app/src/Core/codeunits/FeatureMgt.Codeunit.al` |
-| `WHA Guided Setup` | codeunit | 50002 | `app/src/Core/codeunits/GuidedSetup.Codeunit.al` |
-| `WHA Install` | codeunit | 50003 | `app/src/Core/codeunits/Install.Codeunit.al` |
-| `WHA Upgrade` | codeunit | 50004 | `app/src/Core/codeunits/Upgrade.Codeunit.al` |
-| `WHA Default Feature Setup` | codeunit | 50005 | `app/src/Core/codeunits/DefaultFeatureSetup.Codeunit.al` |
-| `WHA MCP Setup` | codeunit | 50006 | `app/src/Core/codeunits/MCPSetup.Codeunit.al` |
-| `WHA No. Series Mgt.` | codeunit | 50007 | `app/src/Core/codeunits/NoSeriesMgt.Codeunit.al` |
-| `WHA No Activity Cues` | codeunit | 50008 | `app/src/Core/codeunits/NoActivityCues.Codeunit.al` |
-| `WHA Activities Cue Calc` | codeunit | 50009 | `app/src/Core/codeunits/ActivitiesCueCalc.Codeunit.al` |
-| `WHA Warehouse Setup` | page | 50000 | `app/src/Core/pages/WarehouseSetup.Page.al` |
-| `WHA Setup Hub` | page | 50001 | `app/src/Core/pages/SetupHub.Page.al` |
-| `WHA Feature Setup Wizard` | page | 50002 | `app/src/Core/pages/FeatureSetupWizard.Page.al` |
-| `WHA Warehouse Activities` | page | 50003 | `app/src/Core/pages/WarehouseActivities.Page.al` |
-| `WHA Warehouse Manager RC` | page | 50004 | `app/src/Core/pages/WarehouseManagerRC.Page.al` |
+| `WHA Warehouse Setup Logic` | codeunit | 55000 | `app/src/Core/codeunits/WarehouseSetupLogic.Codeunit.al` |
+| `WHA Feature Mgt.` | codeunit | 55001 | `app/src/Core/codeunits/FeatureMgt.Codeunit.al` |
+| `WHA Guided Setup` | codeunit | 55002 | `app/src/Core/codeunits/GuidedSetup.Codeunit.al` |
+| `WHA Install` | codeunit | 55003 | `app/src/Core/codeunits/Install.Codeunit.al` |
+| `WHA Upgrade` | codeunit | 55004 | `app/src/Core/codeunits/Upgrade.Codeunit.al` |
+| `WHA Default Feature Setup` | codeunit | 55005 | `app/src/Core/codeunits/DefaultFeatureSetup.Codeunit.al` |
+| `WHA MCP Setup` | codeunit | 55006 | `app/src/Core/codeunits/MCPSetup.Codeunit.al` |
+| `WHA No. Series Mgt.` | codeunit | 55007 | `app/src/Core/codeunits/NoSeriesMgt.Codeunit.al` |
+| `WHA No Activity Cues` | codeunit | 55008 | `app/src/Core/codeunits/NoActivityCues.Codeunit.al` |
+| `WHA Activities Cue Calc` | codeunit | 55009 | `app/src/Core/codeunits/ActivitiesCueCalc.Codeunit.al` |
+| `WHA Warehouse Setup` | page | 55000 | `app/src/Core/pages/WarehouseSetup.Page.al` |
+| `WHA Setup Hub` | page | 55001 | `app/src/Core/pages/SetupHub.Page.al` |
+| `WHA Feature Setup Wizard` | page | 55002 | `app/src/Core/pages/FeatureSetupWizard.Page.al` |
+| `WHA Warehouse Activities` | page | 55003 | `app/src/Core/pages/WarehouseActivities.Page.al` |
+| `WHA Warehouse Manager RC` | page | 55004 | `app/src/Core/pages/WarehouseManagerRC.Page.al` |
 | `WHA Warehouse Manager` | profile | — | `app/src/Core/profiles/WarehouseManager.Profile.al` |
-| `WHA Objects` / `WHA Full` / `WHA Read` | permissionset | 50000–50002 | `app/src/PermissionSet/` |
+| `WHA Objects` / `WHA Full` / `WHA Read` | permissionset | 55000–55002 | `app/src/PermissionSet/` |
 
-All in namespace `WarehouseAdvanced.Core`, from the reserved block `50000..50049`.
+All in namespace `WarehouseAdvanced.Core`, from the reserved block `55000..55049`.
 
 **The permission sets are the one place the foundation does name every feature**, and unavoidably: a
 permission set lists objects. They are in `app/src/PermissionSet/` rather than in `Core/` for that
@@ -205,7 +205,7 @@ is not looking at a role centre.
 
 ## Tests
 
-`WHA Foundation Tests` (codeunit 51015), 4 tests — all of them about the enum mechanism, because that
+`WHA Foundation Tests` (codeunit 59015), 4 tests — all of them about the enum mechanism, because that
 is what the foundation *is*:
 
 - **Every feature answers whether it is switched on.** A feature ships by adding an enum value, and the

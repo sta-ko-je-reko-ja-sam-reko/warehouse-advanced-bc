@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-enum 50204 "WHA Open Work Policy" implements "WHA IOpenWorkPolicy"
+enum 55204 "WHA Open Work Policy" implements "WHA IOpenWorkPolicy"
 {
     Caption = 'Open work on posting';
     Extensible = true;

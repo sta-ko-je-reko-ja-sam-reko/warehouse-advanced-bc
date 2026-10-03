@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Labelling;
 
-enum 50600 "WHA Label Code Format" implements "WHA ILabelCodeFormat"
+enum 55600 "WHA Label Code Format" implements "WHA ILabelCodeFormat"
 {
     Caption = 'Label code format';
     Extensible = true;

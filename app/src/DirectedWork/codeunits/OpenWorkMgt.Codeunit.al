@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-codeunit 50213 "WHA Open Work Mgt."
+codeunit 55213 "WHA Open Work Mgt."
 {
     Access = Public;
 

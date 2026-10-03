@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.DirectedWork;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50202 "WHA Task App Area Sub."
+codeunit 55202 "WHA Task App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

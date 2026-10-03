@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using System.DataAdministration;
 
-codeunit 50662 "WHA Int. Reten. Sub."
+codeunit 55662 "WHA Int. Reten. Sub."
 {
     Access = Internal;
     SingleInstance = true;

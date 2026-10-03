@@ -4,7 +4,7 @@ using Microsoft.Foundation.AuditCodes;
 using Microsoft.Inventory.Journal;
 using WarehouseAdvanced.Posting;
 
-table 50550 "WHA Quality Hold Setup"
+table 55550 "WHA Quality Hold Setup"
 {
     Caption = 'Quality hold setup';
     DataClassification = CustomerContent;

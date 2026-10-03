@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.WaveManagement;
 
-codeunit 50157 "WHA Wave Template Logic" implements "WHA IWaveTemplate"
+codeunit 55157 "WHA Wave Template Logic" implements "WHA IWaveTemplate"
 {
     Access = Public;
 

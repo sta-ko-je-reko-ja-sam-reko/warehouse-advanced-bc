@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.MobileDevice;
 using System.Environment.Configuration;
 using WarehouseAdvanced.Core;
 
-codeunit 50102 "WHA RF App Area Sub."
+codeunit 55102 "WHA RF App Area Sub."
 {
     Access = Internal;
     SingleInstance = true;

@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Labelling;
 
 using WarehouseAdvanced.Core;
 
-page 50602 "WHA API Demo Label"
+page 55602 "WHA API Demo Label"
 {
     PageType = API;
     APIPublisher = 'matr';

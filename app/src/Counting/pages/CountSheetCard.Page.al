@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Counting;
 
-page 50502 "WHA Count Sheet Card"
+page 55502 "WHA Count Sheet Card"
 {
     PageType = Document;
     ApplicationArea = WHACounting;

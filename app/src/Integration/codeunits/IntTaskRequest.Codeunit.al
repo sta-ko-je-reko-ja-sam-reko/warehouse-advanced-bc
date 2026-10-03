@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
+codeunit 55655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

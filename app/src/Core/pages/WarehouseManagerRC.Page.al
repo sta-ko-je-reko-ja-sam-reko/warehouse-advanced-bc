@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-page 50004 "WHA Warehouse Manager RC"
+page 55004 "WHA Warehouse Manager RC"
 {
     PageType = RoleCenter;
     Caption = 'Warehouse Advanced';

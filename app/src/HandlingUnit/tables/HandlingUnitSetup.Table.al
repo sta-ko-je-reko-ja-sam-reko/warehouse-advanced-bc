@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 
 using Microsoft.Foundation.NoSeries;
 
-table 50050 "WHA Handling Unit Setup"
+table 55050 "WHA Handling Unit Setup"
 {
     Caption = 'Handling unit setup';
     DataClassification = CustomerContent;

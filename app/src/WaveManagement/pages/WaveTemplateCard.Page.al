@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.WaveManagement;
 
-page 50156 "WHA Wave Template Card"
+page 55156 "WHA Wave Template Card"
 {
     PageType = Card;
     ApplicationArea = WHAWaveManagement;

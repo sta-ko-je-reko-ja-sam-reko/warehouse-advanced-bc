@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-enum 50452 "WHA Appointment Status"
+enum 55452 "WHA Appointment Status"
 {
     Caption = 'Appointment status';
     Extensible = true;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.QualityHold;
 
-page 50553 "WHA API Quality Hold"
+page 55553 "WHA API Quality Hold"
 {
     PageType = API;
     APIPublisher = 'matr';

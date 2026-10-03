@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 
 using Microsoft.Inventory.Item;
 
-table 50052 "WHA Handling Unit Line"
+table 55052 "WHA Handling Unit Line"
 {
     Caption = 'Handling unit line';
     DataClassification = CustomerContent;

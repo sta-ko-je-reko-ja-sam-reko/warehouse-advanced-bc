@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Packing;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50400 "WHA Pack Session Logic" implements "WHA IPackSession"
+codeunit 55400 "WHA Pack Session Logic" implements "WHA IPackSession"
 {
     Access = Public;
 

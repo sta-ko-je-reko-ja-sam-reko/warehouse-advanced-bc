@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Slotting;
 
-codeunit 50301 "WHA Slotting Prop. Logic" implements "WHA ISlottingProposal"
+codeunit 55301 "WHA Slotting Prop. Logic" implements "WHA ISlottingProposal"
 {
     Access = Public;
 

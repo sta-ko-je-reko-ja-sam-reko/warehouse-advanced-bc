@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.HandlingUnit;
 
 using Microsoft.Foundation.NoSeries;
 
-codeunit 50050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
+codeunit 55050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
 {
     Access = Public;
 

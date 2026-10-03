@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Slotting;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50308 "WHA Slot Activity Cues" implements "WHA IActivityCues"
+codeunit 55308 "WHA Slot Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

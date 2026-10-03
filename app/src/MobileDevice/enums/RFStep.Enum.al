@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.MobileDevice;
 
-enum 50100 "WHA RF Step"
+enum 55100 "WHA RF Step"
 {
     Caption = 'Handheld step';
     Extensible = true;

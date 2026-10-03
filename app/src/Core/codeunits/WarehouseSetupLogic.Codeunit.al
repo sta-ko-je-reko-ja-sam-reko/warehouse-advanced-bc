@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-codeunit 50000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
+codeunit 55000 "WHA Warehouse Setup Logic" implements "WHA IWarehouseSetup"
 {
     Access = Public;
 

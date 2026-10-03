@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Counting;
 
 using Microsoft.Warehouse.Structure;
 
-codeunit 50505 "WHA Count Bin Selection" implements "WHA ICountSelection"
+codeunit 55505 "WHA Count Bin Selection" implements "WHA ICountSelection"
 {
     Access = Public;
 

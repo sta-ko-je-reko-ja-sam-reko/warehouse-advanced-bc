@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Packing;
 
-table 50400 "WHA Pack Setup"
+table 55400 "WHA Pack Setup"
 {
     Caption = 'Packing setup';
     DataClassification = CustomerContent;

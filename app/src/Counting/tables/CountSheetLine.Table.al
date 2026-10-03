@@ -5,7 +5,7 @@ using Microsoft.Warehouse.Structure;
 using System.Security.AccessControl;
 using WarehouseAdvanced.HandlingUnit;
 
-table 50502 "WHA Count Sheet Line"
+table 55502 "WHA Count Sheet Line"
 {
     Caption = 'Count sheet line';
     DataClassification = CustomerContent;

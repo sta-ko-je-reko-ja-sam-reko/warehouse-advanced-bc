@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-codeunit 50210 "WHA Allow Open Work" implements "WHA IOpenWorkPolicy"
+codeunit 55210 "WHA Allow Open Work" implements "WHA IOpenWorkPolicy"
 {
     Access = Public;
 

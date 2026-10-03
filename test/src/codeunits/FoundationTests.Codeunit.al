@@ -1,4 +1,4 @@
-codeunit 51015 "WHA Foundation Tests"
+codeunit 59015 "WHA Foundation Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

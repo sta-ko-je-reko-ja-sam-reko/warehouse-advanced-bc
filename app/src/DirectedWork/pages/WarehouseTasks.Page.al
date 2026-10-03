@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-page 50202 "WHA Warehouse Tasks"
+page 55202 "WHA Warehouse Tasks"
 {
     PageType = List;
     ApplicationArea = WHADirectedWork;

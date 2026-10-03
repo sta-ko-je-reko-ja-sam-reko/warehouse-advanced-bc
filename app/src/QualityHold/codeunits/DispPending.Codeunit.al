@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.QualityHold;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50555 "WHA Disp. Pending" implements "WHA IHoldDisposition"
+codeunit 55555 "WHA Disp. Pending" implements "WHA IHoldDisposition"
 {
     Access = Public;
 

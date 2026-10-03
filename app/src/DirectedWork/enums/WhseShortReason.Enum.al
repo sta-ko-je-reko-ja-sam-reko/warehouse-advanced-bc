@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-enum 50202 "WHA Whse. Short Reason"
+enum 55202 "WHA Whse. Short Reason"
 {
     Caption = 'Short reason';
     Extensible = true;

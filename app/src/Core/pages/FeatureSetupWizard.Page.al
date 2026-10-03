@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-page 50002 "WHA Feature Setup Wizard"
+page 55002 "WHA Feature Setup Wizard"
 {
     PageType = NavigatePage;
     ApplicationArea = All;

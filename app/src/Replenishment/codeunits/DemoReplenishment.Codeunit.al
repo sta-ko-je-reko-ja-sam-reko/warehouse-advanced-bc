@@ -5,7 +5,7 @@ using Microsoft.Inventory.Location;
 using Microsoft.Warehouse.Structure;
 using System.IO;
 
-codeunit 50253 "WHA Demo Replenishment"
+codeunit 55253 "WHA Demo Replenishment"
 {
     Access = Public;
 

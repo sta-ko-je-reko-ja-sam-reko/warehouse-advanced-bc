@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-codeunit 50351 "WHA Labour Entry Logic" implements "WHA ILabourEntry"
+codeunit 55351 "WHA Labour Entry Logic" implements "WHA ILabourEntry"
 {
     Access = Public;
 

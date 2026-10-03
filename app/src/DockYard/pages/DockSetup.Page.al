@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.DockYard;
 
 using WarehouseAdvanced.Core;
 
-page 50450 "WHA Dock Setup"
+page 55450 "WHA Dock Setup"
 {
     PageType = Card;
     ApplicationArea = All;

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Labelling;
 
-table 50600 "WHA Label Setup"
+table 55600 "WHA Label Setup"
 {
     Caption = 'Labelling setup';
     DataClassification = CustomerContent;

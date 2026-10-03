@@ -62,8 +62,8 @@ below for where the evidence came from and what it is worth.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Integration Setup` | 50650 | Single-record feature setup |
-| `WHA Integration Message` | 50651 | Every message in or out, with its body and what became of it |
+| `WHA Integration Setup` | 55650 | Single-record feature setup |
+| `WHA Integration Message` | 55651 | Every message in or out, with its body and what became of it |
 
 ### `WHA Integration Message`
 
@@ -115,48 +115,48 @@ anything in a dispute. Read and write it through `WHA Int. Message Mgt.`, never 
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Integration Setup` | table | 50650 | `app/src/Integration/tables/IntegrationSetup.Table.al` |
-| `WHA Integration Message` | table | 50651 | `app/src/Integration/tables/IntegrationMessage.Table.al` |
-| `WHA Int. Direction` | enum | 50650 | `app/src/Integration/enums/IntDirection.Enum.al` |
-| `WHA Int. Message Status` | enum | 50651 | `app/src/Integration/enums/IntMessageStatus.Enum.al` |
-| `WHA Int. Message Type` | enum | 50652 | `app/src/Integration/enums/IntMessageType.Enum.al` |
+| `WHA Integration Setup` | table | 55650 | `app/src/Integration/tables/IntegrationSetup.Table.al` |
+| `WHA Integration Message` | table | 55651 | `app/src/Integration/tables/IntegrationMessage.Table.al` |
+| `WHA Int. Direction` | enum | 55650 | `app/src/Integration/enums/IntDirection.Enum.al` |
+| `WHA Int. Message Status` | enum | 55651 | `app/src/Integration/enums/IntMessageStatus.Enum.al` |
+| `WHA Int. Message Type` | enum | 55652 | `app/src/Integration/enums/IntMessageType.Enum.al` |
 | `WHA IIntegrationMessage` | interface | — | `app/src/Integration/interfaces/IIntegrationMessage.Interface.al` |
 | `WHA IIntMessageHandler` | interface | — | `app/src/Integration/interfaces/IIntMessageHandler.Interface.al` |
-| `WHA Integration Msg. Logic` | codeunit | 50650 | `app/src/Integration/codeunits/IntegrationMsgLogic.Codeunit.al` |
-| `WHA Int. Feature Setup` | codeunit | 50651 | `app/src/Integration/codeunits/IntFeatureSetup.Codeunit.al` |
-| `WHA Int. App Area Sub.` | codeunit | 50652 | `app/src/Integration/codeunits/IntAppAreaSub.Codeunit.al` |
-| `WHA Int. Message Mgt.` | codeunit | 50653 | `app/src/Integration/codeunits/IntMessageMgt.Codeunit.al` |
-| `WHA Int. Unhandled Message` | codeunit | 50654 | `app/src/Integration/codeunits/IntUnhandledMessage.Codeunit.al` |
-| `WHA Int. Task Request` | codeunit | 50655 | `app/src/Integration/codeunits/IntTaskRequest.Codeunit.al` |
-| `WHA Int. Task Confirm` | codeunit | 50656 | `app/src/Integration/codeunits/IntTaskConfirm.Codeunit.al` |
-| `WHA Int. HU Received` | codeunit | 50657 | `app/src/Integration/codeunits/IntHUReceived.Codeunit.al` |
-| `WHA Int. HU Shipped` | codeunit | 50658 | `app/src/Integration/codeunits/IntHUShipped.Codeunit.al` |
-| `WHA Demo Integration` | codeunit | 50659 | `app/src/Integration/codeunits/DemoIntegration.Codeunit.al` |
-| `WHA Int. Receipt Release` | codeunit | 50664 | `app/src/Integration/codeunits/IntReceiptRelease.Codeunit.al` |
-| `WHA Int. Shipment Release` | codeunit | 50665 | `app/src/Integration/codeunits/IntShipmentRelease.Codeunit.al` |
-| `WHA Int. Inventory Adjust` | codeunit | 50666 | `app/src/Integration/codeunits/IntInventoryAdjust.Codeunit.al` |
-| `WHA Int. Count Request` | codeunit | 50667 | `app/src/Integration/codeunits/IntCountRequest.Codeunit.al` |
-| `WHA Int. Receipt Completed` | codeunit | 50668 | `app/src/Integration/codeunits/IntReceiptCompleted.Codeunit.al` |
-| `WHA Int. Shipment Completed` | codeunit | 50669 | `app/src/Integration/codeunits/IntShipmentCompleted.Codeunit.al` |
-| `WHA Int. Count Result` | codeunit | 50670 | `app/src/Integration/codeunits/IntCountResult.Codeunit.al` |
-| `WHA Int. Stock Position` | codeunit | 50671 | `app/src/Integration/codeunits/IntStockPosition.Codeunit.al` |
-| `WHA HU Stock By Location` | query | 50672 | `app/src/Integration/queries/HUStockByLocation.Query.al` |
-| `WHA Int. Message Runner` | codeunit | 50660 | `app/src/Integration/codeunits/IntMessageRunner.Codeunit.al` |
-| `WHA Int. Retention` | codeunit | 50661 | `app/src/Integration/codeunits/IntRetention.Codeunit.al` |
-| `WHA Int. Reten. Sub.` | codeunit | 50662 | `app/src/Integration/codeunits/IntRetenSub.Codeunit.al` |
-| `WHA Int. Appl. Area Setup` | tableextension | 50650 | `app/src/Integration/tableextensions/IntApplAreaSetup.TableExt.al` |
-| `WHA Integration Setup` | page | 50650 | `app/src/Integration/pages/IntegrationSetup.Page.al` |
-| `WHA Integration Messages` | page | 50651 | `app/src/Integration/pages/IntegrationMessages.Page.al` |
-| `WHA Integration Message Card` | page | 50652 | `app/src/Integration/pages/IntegrationMessageCard.Page.al` |
-| `WHA API Integration Message` | page | 50653 | `app/src/Integration/pages/APIIntegrationMessage.Page.al` |
-| `WHA API Demo Integration` | page | 50654 | `app/src/Integration/pages/APIDemoIntegration.Page.al` |
-| `WHA Integration Tests` | codeunit | 51002 | `test/src/codeunits/IntegrationTests.Codeunit.al` |
-| `WHA Int Activities Cue` | tableextension | 50651 | `app/src/Integration/tableextensions/IntActivitiesCue.TableExt.al` |
-| `WHA Int Activity Provider` | enumextension | 50651 | `app/src/Integration/enumextensions/IntActivityProvider.EnumExt.al` |
-| `WHA Int Activity Cues` | codeunit | 50663 | `app/src/Integration/codeunits/IntActivityCues.Codeunit.al` |
-| `WHA Int Activities` | pageextension | 50651 | `app/src/Integration/pageextensions/IntActivities.PageExt.al` |
+| `WHA Integration Msg. Logic` | codeunit | 55650 | `app/src/Integration/codeunits/IntegrationMsgLogic.Codeunit.al` |
+| `WHA Int. Feature Setup` | codeunit | 55651 | `app/src/Integration/codeunits/IntFeatureSetup.Codeunit.al` |
+| `WHA Int. App Area Sub.` | codeunit | 55652 | `app/src/Integration/codeunits/IntAppAreaSub.Codeunit.al` |
+| `WHA Int. Message Mgt.` | codeunit | 55653 | `app/src/Integration/codeunits/IntMessageMgt.Codeunit.al` |
+| `WHA Int. Unhandled Message` | codeunit | 55654 | `app/src/Integration/codeunits/IntUnhandledMessage.Codeunit.al` |
+| `WHA Int. Task Request` | codeunit | 55655 | `app/src/Integration/codeunits/IntTaskRequest.Codeunit.al` |
+| `WHA Int. Task Confirm` | codeunit | 55656 | `app/src/Integration/codeunits/IntTaskConfirm.Codeunit.al` |
+| `WHA Int. HU Received` | codeunit | 55657 | `app/src/Integration/codeunits/IntHUReceived.Codeunit.al` |
+| `WHA Int. HU Shipped` | codeunit | 55658 | `app/src/Integration/codeunits/IntHUShipped.Codeunit.al` |
+| `WHA Demo Integration` | codeunit | 55659 | `app/src/Integration/codeunits/DemoIntegration.Codeunit.al` |
+| `WHA Int. Receipt Release` | codeunit | 55664 | `app/src/Integration/codeunits/IntReceiptRelease.Codeunit.al` |
+| `WHA Int. Shipment Release` | codeunit | 55665 | `app/src/Integration/codeunits/IntShipmentRelease.Codeunit.al` |
+| `WHA Int. Inventory Adjust` | codeunit | 55666 | `app/src/Integration/codeunits/IntInventoryAdjust.Codeunit.al` |
+| `WHA Int. Count Request` | codeunit | 55667 | `app/src/Integration/codeunits/IntCountRequest.Codeunit.al` |
+| `WHA Int. Receipt Completed` | codeunit | 55668 | `app/src/Integration/codeunits/IntReceiptCompleted.Codeunit.al` |
+| `WHA Int. Shipment Completed` | codeunit | 55669 | `app/src/Integration/codeunits/IntShipmentCompleted.Codeunit.al` |
+| `WHA Int. Count Result` | codeunit | 55670 | `app/src/Integration/codeunits/IntCountResult.Codeunit.al` |
+| `WHA Int. Stock Position` | codeunit | 55671 | `app/src/Integration/codeunits/IntStockPosition.Codeunit.al` |
+| `WHA HU Stock By Location` | query | 55672 | `app/src/Integration/queries/HUStockByLocation.Query.al` |
+| `WHA Int. Message Runner` | codeunit | 55660 | `app/src/Integration/codeunits/IntMessageRunner.Codeunit.al` |
+| `WHA Int. Retention` | codeunit | 55661 | `app/src/Integration/codeunits/IntRetention.Codeunit.al` |
+| `WHA Int. Reten. Sub.` | codeunit | 55662 | `app/src/Integration/codeunits/IntRetenSub.Codeunit.al` |
+| `WHA Int. Appl. Area Setup` | tableextension | 55650 | `app/src/Integration/tableextensions/IntApplAreaSetup.TableExt.al` |
+| `WHA Integration Setup` | page | 55650 | `app/src/Integration/pages/IntegrationSetup.Page.al` |
+| `WHA Integration Messages` | page | 55651 | `app/src/Integration/pages/IntegrationMessages.Page.al` |
+| `WHA Integration Message Card` | page | 55652 | `app/src/Integration/pages/IntegrationMessageCard.Page.al` |
+| `WHA API Integration Message` | page | 55653 | `app/src/Integration/pages/APIIntegrationMessage.Page.al` |
+| `WHA API Demo Integration` | page | 55654 | `app/src/Integration/pages/APIDemoIntegration.Page.al` |
+| `WHA Integration Tests` | codeunit | 59002 | `test/src/codeunits/IntegrationTests.Codeunit.al` |
+| `WHA Int Activities Cue` | tableextension | 55651 | `app/src/Integration/tableextensions/IntActivitiesCue.TableExt.al` |
+| `WHA Int Activity Provider` | enumextension | 55651 | `app/src/Integration/enumextensions/IntActivityProvider.EnumExt.al` |
+| `WHA Int Activity Cues` | codeunit | 55663 | `app/src/Integration/codeunits/IntActivityCues.Codeunit.al` |
+| `WHA Int Activities` | pageextension | 55651 | `app/src/Integration/pageextensions/IntActivities.PageExt.al` |
 
-All in namespace `WarehouseAdvanced.Integration`, from the reserved block `50650..50699`.
+All in namespace `WarehouseAdvanced.Integration`, from the reserved block `55650..55699`.
 Core changed only by gaining a `WHA Feature` enum value.
 
 ## The dispatch — why a wrong guess is cheap
@@ -474,7 +474,7 @@ rather than being skipped, which is itself an honest demonstration.
 
 ## Tests
 
-`WHA Integration Tests` (codeunit 51002), 20 tests. Three cover retention: the message log is offered
+`WHA Integration Tests` (codeunit 59002), 20 tests. Three cover retention: the message log is offered
 to the framework, the retention clock runs from when a message was processed, and a policy shorter
 than the minimum this feature insists on is refused. The other 17: payload round-trip; arrival stamping; unknown
 type and outbound-only type refused with readable reasons; a request creating and releasing a task

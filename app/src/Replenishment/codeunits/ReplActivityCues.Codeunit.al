@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using WarehouseAdvanced.Core;
 
-codeunit 50262 "WHA Repl Activity Cues" implements "WHA IActivityCues"
+codeunit 55262 "WHA Repl Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

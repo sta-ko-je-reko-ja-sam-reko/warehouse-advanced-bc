@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50669 "WHA Int. Shipment Completed" implements "WHA IIntMessageHandler"
+codeunit 55669 "WHA Int. Shipment Completed" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

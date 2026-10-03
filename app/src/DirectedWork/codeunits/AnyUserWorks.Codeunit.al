@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-codeunit 50214 "WHA Any User Works" implements "WHA IWhseAccessPolicy"
+codeunit 55214 "WHA Any User Works" implements "WHA IWhseAccessPolicy"
 {
     Access = Public;
 

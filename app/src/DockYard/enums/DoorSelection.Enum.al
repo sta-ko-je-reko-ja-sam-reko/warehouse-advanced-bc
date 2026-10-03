@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DockYard;
 
-enum 50453 "WHA Door Selection" implements "WHA IDoorSelection"
+enum 55453 "WHA Door Selection" implements "WHA IDoorSelection"
 {
     Caption = 'Door selection';
     Extensible = true;

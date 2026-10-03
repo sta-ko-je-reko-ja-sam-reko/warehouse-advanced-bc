@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50658 "WHA Int. HU Shipped" implements "WHA IIntMessageHandler"
+codeunit 55658 "WHA Int. HU Shipped" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

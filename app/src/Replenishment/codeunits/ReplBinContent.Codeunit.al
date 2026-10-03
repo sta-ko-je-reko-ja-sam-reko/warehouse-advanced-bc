@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Replenishment;
 
 using Microsoft.Warehouse.Structure;
 
-codeunit 50254 "WHA Repl. Bin Content" implements "WHA IReplMethod"
+codeunit 55254 "WHA Repl. Bin Content" implements "WHA IReplMethod"
 {
     Access = Public;
 

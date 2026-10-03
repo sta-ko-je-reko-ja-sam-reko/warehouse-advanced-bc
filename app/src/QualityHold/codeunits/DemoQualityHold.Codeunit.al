@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.QualityHold;
 using System.IO;
 using WarehouseAdvanced.HandlingUnit;
 
-codeunit 50554 "WHA Demo Quality Hold"
+codeunit 55554 "WHA Demo Quality Hold"
 {
     Access = Public;
 

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Core;
 
-codeunit 50008 "WHA No Activity Cues" implements "WHA IActivityCues"
+codeunit 55008 "WHA No Activity Cues" implements "WHA IActivityCues"
 {
     Access = Public;
 

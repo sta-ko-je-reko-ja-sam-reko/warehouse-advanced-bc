@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.MobileDevice;
 
-enum 50101 "WHA RF Flow" implements "WHA IRFFlow"
+enum 55101 "WHA RF Flow" implements "WHA IRFFlow"
 {
     Caption = 'Handheld flow';
     Extensible = true;

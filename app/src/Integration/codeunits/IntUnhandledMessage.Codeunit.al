@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-codeunit 50654 "WHA Int. Unhandled Message" implements "WHA IIntMessageHandler"
+codeunit 55654 "WHA Int. Unhandled Message" implements "WHA IIntMessageHandler"
 {
     Access = Public;
 

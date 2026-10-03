@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Integration;
 
 using System.DataAdministration;
 
-codeunit 50661 "WHA Int. Retention"
+codeunit 55661 "WHA Int. Retention"
 {
     Access = Public;
 

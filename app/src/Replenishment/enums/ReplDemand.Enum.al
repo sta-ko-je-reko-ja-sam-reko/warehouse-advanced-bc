@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Replenishment;
 
-enum 50251 "WHA Repl. Demand" implements "WHA IReplDemand"
+enum 55251 "WHA Repl. Demand" implements "WHA IReplDemand"
 {
     Caption = 'Replenishment demand';
     Extensible = true;

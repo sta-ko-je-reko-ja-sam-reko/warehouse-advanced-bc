@@ -92,7 +92,7 @@ keeps behaving exactly as it did.
 
 ## The buffer
 
-`WHA Whse. Move Request` (table 50800, `TableType = Temporary`) is what a caller hands over. One row
+`WHA Whse. Move Request` (table 55800, `TableType = Temporary`) is what a caller hands over. One row
 is one move: an item, a quantity, a from-bin and a to-bin at one location, with the lot or serial
 number if there is one. `Registered` and `Warehouse Entry No.` are filled in on the way back, so a
 caller can see which of its moves reached Business Central and find the entry it produced.

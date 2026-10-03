@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.Integration;
 using Microsoft.Utilities;
 using WarehouseAdvanced.Core;
 
-codeunit 50653 "WHA Int. Message Mgt."
+codeunit 55653 "WHA Int. Message Mgt."
 {
     Access = Public;
 

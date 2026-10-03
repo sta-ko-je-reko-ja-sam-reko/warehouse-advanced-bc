@@ -2,7 +2,7 @@ namespace WarehouseAdvanced.Core;
 
 using System.Environment.Configuration;
 
-codeunit 50001 "WHA Feature Mgt."
+codeunit 55001 "WHA Feature Mgt."
 {
     Access = Public;
     SingleInstance = true;

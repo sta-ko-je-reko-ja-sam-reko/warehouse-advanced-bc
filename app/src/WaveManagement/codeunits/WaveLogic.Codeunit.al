@@ -4,7 +4,7 @@ using Microsoft.Foundation.NoSeries;
 using WarehouseAdvanced.DirectedWork;
 using WarehouseAdvanced.LabourManagement;
 
-codeunit 50150 "WHA Wave Logic" implements "WHA IWave"
+codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
 {
     Access = Public;
 

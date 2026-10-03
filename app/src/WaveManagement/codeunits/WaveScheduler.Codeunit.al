@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.WaveManagement;
 using WarehouseAdvanced.Core;
 using WarehouseAdvanced.Telemetry;
 
-codeunit 50158 "WHA Wave Scheduler"
+codeunit 55158 "WHA Wave Scheduler"
 {
     Access = Public;
     TableNo = "WHA Wave Template";

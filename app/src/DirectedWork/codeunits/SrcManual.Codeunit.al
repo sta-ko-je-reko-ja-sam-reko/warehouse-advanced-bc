@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-codeunit 50204 "WHA Src Manual" implements "WHA ITaskSource"
+codeunit 55204 "WHA Src Manual" implements "WHA ITaskSource"
 {
     Access = Public;
 

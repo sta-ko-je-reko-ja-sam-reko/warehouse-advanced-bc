@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Integration;
 
-table 50651 "WHA Integration Message"
+table 55651 "WHA Integration Message"
 {
     Caption = 'Integration message';
     DataClassification = CustomerContent;

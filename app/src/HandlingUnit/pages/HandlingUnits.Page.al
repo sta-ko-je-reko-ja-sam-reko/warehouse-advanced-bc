@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.HandlingUnit;
 
-page 50052 "WHA Handling Units"
+page 55052 "WHA Handling Units"
 {
     PageType = List;
     ApplicationArea = WHAHandlingUnits;

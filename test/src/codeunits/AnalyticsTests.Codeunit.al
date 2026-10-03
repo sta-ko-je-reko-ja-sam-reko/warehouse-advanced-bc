@@ -1,4 +1,4 @@
-codeunit 51013 "WHA Analytics Tests"
+codeunit 59013 "WHA Analytics Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;

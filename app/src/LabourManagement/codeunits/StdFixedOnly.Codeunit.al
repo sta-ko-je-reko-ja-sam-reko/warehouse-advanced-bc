@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.LabourManagement;
 
-codeunit 50357 "WHA Std. Fixed Only" implements "WHA ILabourStandard"
+codeunit 55357 "WHA Std. Fixed Only" implements "WHA ILabourStandard"
 {
     Access = Public;
 

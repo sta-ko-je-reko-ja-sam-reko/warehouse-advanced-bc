@@ -31,9 +31,9 @@ stays in it, so the box on the bench and the system still agree.
 
 | Table | ID | Purpose |
 |---|---|---|
-| `WHA Pack Setup` | 50400 | Single-record feature setup |
-| `WHA Pack Station` | 50401 | One packing bench |
-| `WHA Pack Session` | 50402 | One carton being packed, and who did it |
+| `WHA Pack Setup` | 55400 | Single-record feature setup |
+| `WHA Pack Station` | 55401 | One packing bench |
+| `WHA Pack Session` | 55402 | One carton being packed, and who did it |
 
 **A carton is a handling unit — this feature adds no container of its own.** `WHA Pack Session`
 points at a `WHA Handling Unit` and the goods go on that unit's content lines. So the moment a
@@ -75,31 +75,31 @@ made yet — but the data supports asking the question.
 
 | Object | Type | ID | File |
 |---|---|---|---|
-| `WHA Pack Setup` | table | 50400 | `app/src/Packing/tables/PackSetup.Table.al` |
-| `WHA Pack Station` | table | 50401 | `app/src/Packing/tables/PackStation.Table.al` |
-| `WHA Pack Session` | table | 50402 | `app/src/Packing/tables/PackSession.Table.al` |
-| `WHA Pack Session Status` | enum | 50400 | `app/src/Packing/enums/PackSessionStatus.Enum.al` |
+| `WHA Pack Setup` | table | 55400 | `app/src/Packing/tables/PackSetup.Table.al` |
+| `WHA Pack Station` | table | 55401 | `app/src/Packing/tables/PackStation.Table.al` |
+| `WHA Pack Session` | table | 55402 | `app/src/Packing/tables/PackSession.Table.al` |
+| `WHA Pack Session Status` | enum | 55400 | `app/src/Packing/enums/PackSessionStatus.Enum.al` |
 | `WHA IPackSession` | interface | — | `app/src/Packing/interfaces/IPackSession.Interface.al` |
-| `WHA Pack Session Logic` | codeunit | 50400 | `app/src/Packing/codeunits/PackSessionLogic.Codeunit.al` |
-| `WHA Pack Feature Setup` | codeunit | 50401 | `app/src/Packing/codeunits/PackFeatureSetup.Codeunit.al` |
-| `WHA Pack App Area Sub.` | codeunit | 50402 | `app/src/Packing/codeunits/PackAppAreaSub.Codeunit.al` |
-| `WHA Demo Pack` | codeunit | 50403 | `app/src/Packing/codeunits/DemoPack.Codeunit.al` |
-| `WHA Pack Appl. Area Setup` | tableextension | 50400 | `app/src/Packing/tableextensions/PackApplAreaSetup.TableExt.al` |
-| `WHA Pack Setup` | page | 50400 | `app/src/Packing/pages/PackSetup.Page.al` |
-| `WHA Pack Stations` | page | 50401 | `app/src/Packing/pages/PackStations.Page.al` |
-| `WHA Pack Station Card` | page | 50402 | `app/src/Packing/pages/PackStationCard.Page.al` |
-| `WHA Packing Station` | page | 50403 | `app/src/Packing/pages/PackingStation.Page.al` |
-| `WHA Pack Sessions` | page | 50404 | `app/src/Packing/pages/PackSessions.Page.al` |
-| `WHA API Pack Station` | page | 50405 | `app/src/Packing/pages/APIPackStation.Page.al` |
-| `WHA API Pack Session` | page | 50406 | `app/src/Packing/pages/APIPackSession.Page.al` |
-| `WHA API Demo Pack` | page | 50407 | `app/src/Packing/pages/APIDemoPack.Page.al` |
-| `WHA Packing Tests` | codeunit | 51006 | `test/src/codeunits/PackingTests.Codeunit.al` |
-| `WHA Pack Activities Cue` | tableextension | 50401 | `app/src/Packing/tableextensions/PackActivitiesCue.TableExt.al` |
-| `WHA Pack Activity Provider` | enumextension | 50401 | `app/src/Packing/enumextensions/PackActivityProvider.EnumExt.al` |
-| `WHA Pack Activity Cues` | codeunit | 50404 | `app/src/Packing/codeunits/PackActivityCues.Codeunit.al` |
-| `WHA Pack Activities` | pageextension | 50401 | `app/src/Packing/pageextensions/PackActivities.PageExt.al` |
+| `WHA Pack Session Logic` | codeunit | 55400 | `app/src/Packing/codeunits/PackSessionLogic.Codeunit.al` |
+| `WHA Pack Feature Setup` | codeunit | 55401 | `app/src/Packing/codeunits/PackFeatureSetup.Codeunit.al` |
+| `WHA Pack App Area Sub.` | codeunit | 55402 | `app/src/Packing/codeunits/PackAppAreaSub.Codeunit.al` |
+| `WHA Demo Pack` | codeunit | 55403 | `app/src/Packing/codeunits/DemoPack.Codeunit.al` |
+| `WHA Pack Appl. Area Setup` | tableextension | 55400 | `app/src/Packing/tableextensions/PackApplAreaSetup.TableExt.al` |
+| `WHA Pack Setup` | page | 55400 | `app/src/Packing/pages/PackSetup.Page.al` |
+| `WHA Pack Stations` | page | 55401 | `app/src/Packing/pages/PackStations.Page.al` |
+| `WHA Pack Station Card` | page | 55402 | `app/src/Packing/pages/PackStationCard.Page.al` |
+| `WHA Packing Station` | page | 55403 | `app/src/Packing/pages/PackingStation.Page.al` |
+| `WHA Pack Sessions` | page | 55404 | `app/src/Packing/pages/PackSessions.Page.al` |
+| `WHA API Pack Station` | page | 55405 | `app/src/Packing/pages/APIPackStation.Page.al` |
+| `WHA API Pack Session` | page | 55406 | `app/src/Packing/pages/APIPackSession.Page.al` |
+| `WHA API Demo Pack` | page | 55407 | `app/src/Packing/pages/APIDemoPack.Page.al` |
+| `WHA Packing Tests` | codeunit | 59006 | `test/src/codeunits/PackingTests.Codeunit.al` |
+| `WHA Pack Activities Cue` | tableextension | 55401 | `app/src/Packing/tableextensions/PackActivitiesCue.TableExt.al` |
+| `WHA Pack Activity Provider` | enumextension | 55401 | `app/src/Packing/enumextensions/PackActivityProvider.EnumExt.al` |
+| `WHA Pack Activity Cues` | codeunit | 55404 | `app/src/Packing/codeunits/PackActivityCues.Codeunit.al` |
+| `WHA Pack Activities` | pageextension | 55401 | `app/src/Packing/pageextensions/PackActivities.PageExt.al` |
 
-All in namespace `WarehouseAdvanced.Packing`, from the reserved block `50400..50449`.
+All in namespace `WarehouseAdvanced.Packing`, from the reserved block `55400..55449`.
 Core changed only by gaining a `WHA Feature` enum value.
 
 ## Logic
@@ -164,7 +164,7 @@ session exists for the first bench. `Import()` also builds the `WHA-PACK` RapidS
 
 ## Tests
 
-`WHA Packing Tests` (codeunit 51006), 16 tests: starting opens a carton at the bench's location;
+`WHA Packing Tests` (codeunit 59006), 16 tests: starting opens a carton at the bench's location;
 blocked and unknown benches are refused; goods go into the carton and the totals follow; packing
 nothing is refused; an empty carton can be neither checked nor closed; verification is required or
 not according to setup; checking records who checked; closing closes the handling unit, or leaves it

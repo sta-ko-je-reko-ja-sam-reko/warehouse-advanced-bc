@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Registration;
 
-codeunit 50800 "WHA No Whse. Registration" implements "WHA IWhseRegistration"
+codeunit 55800 "WHA No Whse. Registration" implements "WHA IWhseRegistration"
 {
     Access = Public;
 

@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.DirectedWork;
 
-enum 50203 "WHA Task Source" implements "WHA ITaskSource"
+enum 55203 "WHA Task Source" implements "WHA ITaskSource"
 {
     Caption = 'Task source';
     Extensible = true;

@@ -3,7 +3,7 @@ namespace WarehouseAdvanced.LabourManagement;
 using System.IO;
 using WarehouseAdvanced.DirectedWork;
 
-codeunit 50355 "WHA Demo Labour"
+codeunit 55355 "WHA Demo Labour"
 {
     Access = Public;
 

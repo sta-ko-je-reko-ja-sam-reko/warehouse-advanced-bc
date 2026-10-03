@@ -1,6 +1,6 @@
 namespace WarehouseAdvanced.Registration;
 
-enum 50801 "WHA Whse. Change Type"
+enum 55801 "WHA Whse. Change Type"
 {
     Caption = 'Warehouse change type';
     Extensible = true;

@@ -335,6 +335,363 @@ codeunit 59012 "WHA Dock Tests"
         Assert.AreEqual(CountAfterFirstRun, DockAppointment.Count(), 'A second import should not book more vehicles in.');
     end;
 
+    [Test]
+    procedure LeastBusyPicksTheQuieterDoorWhereFirstFreeWouldNot()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+        Selection: Enum "WHA Door Selection";
+        BookingDay: Date;
+    begin
+        // [SCENARIO] The door that sorts first is also the one carrying the morning's traffic. First free
+        // would take it; least busy must not, or the setting changes nothing.
+        // [GIVEN] Least busy, and two bookings on the flexible door, which sorts before the inbound door
+        ConfigureDock(false);
+        UseSelection(Selection::WHALeastBusy);
+        BookingDay := WorkDate() + 30;
+        DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(BookingDay, 080000T), CopyStr(BothDoorTok, 1, 20));
+        DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(BookingDay, 093000T), CopyStr(BothDoorTok, 1, 20));
+
+        // [WHEN] An afternoon booking names no door
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(BookingDay, 130000T), ''));
+
+        // [THEN] The inbound door, which has nothing booked that day, is chosen
+        Assert.AreEqual(CopyStr(InDoorTok, 1, 20), DockAppointment."Dock Door Code", 'Least busy should pick the door with fewer bookings that day.');
+        UseSelection(Selection::WHAFirstFree);
+    end;
+
+    [Test]
+    procedure FirstFreeTakesTheFirstDoorThatCanTakeTheVehicle()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+        Selection: Enum "WHA Door Selection";
+        BookingDay: Date;
+    begin
+        // [GIVEN] First free, and the same two morning bookings on the flexible door
+        ConfigureDock(false);
+        UseSelection(Selection::WHAFirstFree);
+        BookingDay := WorkDate() + 31;
+        DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(BookingDay, 080000T), CopyStr(BothDoorTok, 1, 20));
+        DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(BookingDay, 093000T), CopyStr(BothDoorTok, 1, 20));
+
+        // [WHEN] An afternoon booking names no door
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(BookingDay, 130000T), ''));
+
+        // [THEN] The flexible door, free in the afternoon and first in order, is chosen
+        Assert.AreEqual(CopyStr(BothDoorTok, 1, 20), DockAppointment."Dock Door Code", 'First free should pick the first door that is free at that time.');
+    end;
+
+    [Test]
+    procedure ABookingMustSayWhereAndWhen()
+    var
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] The yard set up
+        ConfigureDock(false);
+
+        // [WHEN] A booking names no site
+        asserterror DockMgt.Book('', Direction::WHAInbound, CreateDateTime(WorkDate(), 100000T), '');
+        // [THEN] The site is asked for
+        Assert.ExpectedError('Say which site the vehicle is coming to.');
+
+        // [WHEN] A booking names no time
+        asserterror DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, 0DT, '');
+        // [THEN] The time is asked for
+        Assert.ExpectedError('Say when the vehicle is expected.');
+    end;
+
+    [Test]
+    procedure ADoorThatIsNotThereCannotBeBooked()
+    var
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] The yard set up
+        ConfigureDock(false);
+
+        // [WHEN] A booking names a door the site does not have
+        asserterror DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 32, 100000T), 'NO-SUCH-DOOR');
+
+        // [THEN] The door and the site are named
+        Assert.ExpectedError('There is no door NO-SUCH-DOOR at WHADOCK.');
+    end;
+
+    [Test]
+    procedure ADoorOnlyTakesVehiclesGoingItsWay()
+    var
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] The yard set up with an outbound-only door
+        ConfigureDock(false);
+
+        // [WHEN] An inbound vehicle is booked onto it
+        asserterror DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 33, 100000T), CopyStr(OutDoorTok, 1, 20));
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Door OUT-1 does not take');
+    end;
+
+    [Test]
+    procedure OnlyABookedVehicleCanArrive()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] A booking that was called off
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 34, 100000T), ''));
+        DockMgt.Cancel(DockAppointment);
+
+        // [WHEN] The vehicle is checked in anyway
+        asserterror DockMgt.Arrive(DockAppointment, '');
+
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be checked in. Only a booked vehicle arrives.');
+    end;
+
+    [Test]
+    procedure AVehicleCannotBeParkedSomewhereThatIsNotThere()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] A booking
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 35, 100000T), ''));
+
+        // [WHEN] The vehicle is checked in to a yard position the site does not have
+        asserterror DockMgt.Arrive(DockAppointment, 'Y-NONE');
+
+        // [THEN] The position is named
+        Assert.ExpectedError('There is no yard position Y-NONE at WHADOCK.');
+    end;
+
+    [Test]
+    procedure AVehicleHasToBeOnSiteBeforeItGoesToADoor()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] A booking for a vehicle that has not arrived
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 36, 100000T), ''));
+
+        // [WHEN] It is put on its door
+        asserterror DockMgt.MoveToDoor(DockAppointment);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be put on a door. A vehicle has to be on site first.');
+    end;
+
+    [Test]
+    procedure AVehicleAtTheDoorCannotBeCalledOff()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [SCENARIO] A vehicle standing at the door is being worked. Calling it off would lose the fact
+        // that it came; it departs instead.
+        // [GIVEN] A vehicle at its door
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAOutbound, CreateDateTime(WorkDate() + 37, 100000T), CopyStr(OutDoorTok, 1, 20)));
+        DockMgt.Arrive(DockAppointment, '');
+        DockMgt.MoveToDoor(DockAppointment);
+
+        // [WHEN] It is called off
+        asserterror DockMgt.Cancel(DockAppointment);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be called off');
+        DockMgt.Depart(DockAppointment);
+    end;
+
+    [Test]
+    procedure ABookingIsLateOnlyOnceTheGraceHasPassed()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+    begin
+        // [GIVEN] A thirty-minute grace, and a booked vehicle expected two hours ago
+        ConfigureDock(false);
+        DockAppointment.Init();
+        DockAppointment.Status := DockAppointment.Status::WHABooked;
+        DockAppointment."Expected At" := CurrentDateTime - 2 * 60 * 60 * 1000;
+
+        // [THEN] It is late
+        Assert.IsTrue(DockMgt.IsLate(DockAppointment), 'Two hours past the time is late.');
+
+        // [GIVEN] A booked vehicle expected ten minutes ago
+        DockAppointment."Expected At" := CurrentDateTime - 10 * 60 * 1000;
+        // [THEN] It is still within the grace
+        Assert.IsFalse(DockMgt.IsLate(DockAppointment), 'Ten minutes past the time is within the grace.');
+
+        // [GIVEN] A vehicle expected two hours ago that has already arrived
+        DockAppointment.Status := DockAppointment.Status::WHAArrived;
+        DockAppointment."Expected At" := CurrentDateTime - 2 * 60 * 60 * 1000;
+        // [THEN] It is not late, because it is here
+        Assert.IsFalse(DockMgt.IsLate(DockAppointment), 'A vehicle that arrived is not late.');
+    end;
+
+    [Test]
+    procedure EachStrategyExplainsItself()
+    var
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Selection: Enum "WHA Door Selection";
+        FirstFreeText: Text;
+    begin
+        // [GIVEN] First free
+        ConfigureDock(false);
+        FirstFreeText := DockMgt.DescribeSelection();
+
+        // [WHEN] The strategy changes to least busy
+        UseSelection(Selection::WHALeastBusy);
+
+        // [THEN] Each has its own description
+        Assert.AreNotEqual('', FirstFreeText, 'First free should explain itself.');
+        Assert.AreNotEqual(FirstFreeText, DockMgt.DescribeSelection(), 'The two strategies should not share a description.');
+        UseSelection(Selection::WHAFirstFree);
+    end;
+
+    local procedure UseSelection(Selection: Enum "WHA Door Selection")
+    var
+        Setup: Record "WHA Dock Setup";
+    begin
+        Setup.Get();
+        Setup.Validate("Door Selection", Selection);
+        Setup.Modify(true);
+    end;
+
+    [Test]
+    procedure AVehicleIsNotPutOnADoorBlockedAfterBooking()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+        DoorDirection: Enum "WHA Door Direction";
+    begin
+        // [SCENARIO] Regression. A booking keeps the door it was given, but the door can be blocked between
+        // booking and arrival. Moving the vehicle on used to check only whether another vehicle stood there.
+        // [GIVEN] A vehicle booked onto the inbound door, which is blocked after it arrives
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 40, 100000T), CopyStr(InDoorTok, 1, 20)));
+        DockMgt.Arrive(DockAppointment, '');
+        BlockDoor(CopyStr(InDoorTok, 1, 20));
+
+        // [WHEN] The vehicle is put on its door
+        asserterror DockMgt.MoveToDoor(DockAppointment);
+
+        // [THEN] It is refused, because the door is blocked
+        Assert.ExpectedError('Door IN-1 is blocked');
+        EnsureDoor(CopyStr(InDoorTok, 1, 20), DoorDirection::WHAInbound);
+    end;
+
+    [Test]
+    procedure AVehicleIsNotPutOnADoorThatNoLongerFacesItsWay()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+        DoorDirection: Enum "WHA Door Direction";
+    begin
+        // [GIVEN] An inbound vehicle booked onto the flexible door, which is turned outbound-only after it arrives
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 41, 100000T), CopyStr(BothDoorTok, 1, 20)));
+        DockMgt.Arrive(DockAppointment, '');
+        EnsureDoor(CopyStr(BothDoorTok, 1, 20), DoorDirection::WHAOutbound);
+
+        // [WHEN] The vehicle is put on its door
+        asserterror DockMgt.MoveToDoor(DockAppointment);
+
+        // [THEN] It is refused, because the door takes the other direction
+        Assert.ExpectedError('Door FLEX-1 does not take');
+        EnsureDoor(CopyStr(BothDoorTok, 1, 20), DoorDirection::WHABoth);
+    end;
+
+    [Test]
+    procedure ABookingFromOutsideIsCheckedLikeAnyOther()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+    begin
+        // [SCENARIO] Regression. The API page inserted what it was sent, so an agent could book a blocked
+        // door, a door facing the wrong way or a slot already taken. It now books through the same logic.
+        // [GIVEN] An inbound booking filled in by a caller who names the outbound-only door
+        ConfigureDock(false);
+        DockAppointment.Init();
+        DockAppointment."Location Code" := CopyStr(LocationTok, 1, 10);
+        DockAppointment.Direction := DockAppointment.Direction::WHAInbound;
+        DockAppointment."Expected At" := CreateDateTime(WorkDate() + 42, 100000T);
+        DockAppointment."Carrier Name" := 'Outside carrier';
+
+        // [WHEN] It is booked the way the API page books it
+        asserterror DockMgt.BookAppointment(DockAppointment, CopyStr(OutDoorTok, 1, 20));
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Door OUT-1 does not take');
+    end;
+
+    [Test]
+    procedure ABookingFromOutsideWithoutADoorGetsOneChosen()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+    begin
+        // [GIVEN] An outbound booking filled in by a caller who names no door
+        ConfigureDock(false);
+        DockAppointment.Init();
+        DockAppointment."Location Code" := CopyStr(LocationTok, 1, 10);
+        DockAppointment.Direction := DockAppointment.Direction::WHAOutbound;
+        DockAppointment."Expected At" := CreateDateTime(WorkDate() + 43, 100000T);
+        DockAppointment."Carrier Name" := 'Outside carrier';
+
+        // [WHEN] It is booked the way the API page books it
+        DockMgt.BookAppointment(DockAppointment, '');
+
+        // [THEN] It is numbered, keeps what the caller sent, and has a door that takes outbound vehicles
+        Assert.AreNotEqual('', DockAppointment."No.", 'The booking is numbered.');
+        DockAppointment.Get(DockAppointment."No.");
+        Assert.AreEqual('Outside carrier', DockAppointment."Carrier Name", 'What the caller sent is kept.');
+        Assert.IsTrue(DockAppointment."Dock Door Code" in [CopyStr(OutDoorTok, 1, 20), CopyStr(BothDoorTok, 1, 20)], 'An outbound booking gets a door that takes outbound vehicles.');
+    end;
+
+    [Test]
+    procedure ChangingABookingFromOutsideRechecksTheDoor()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        xDockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] An inbound booking on the inbound door
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 44, 100000T), CopyStr(InDoorTok, 1, 20)));
+
+        // [WHEN] A caller changes only who is coming
+        xDockAppointment := DockAppointment;
+        DockAppointment."Carrier Name" := 'Changed carrier';
+        DockMgt.ChangeBooking(DockAppointment, xDockAppointment);
+        // [THEN] The change is saved and the door is left alone
+        DockAppointment.Get(DockAppointment."No.");
+        Assert.AreEqual('Changed carrier', DockAppointment."Carrier Name", 'A change that does not touch the door is saved.');
+        Assert.AreEqual(CopyStr(InDoorTok, 1, 20), DockAppointment."Dock Door Code", 'The door is left as it was.');
+
+        // [WHEN] A caller moves it onto the outbound-only door
+        xDockAppointment := DockAppointment;
+        DockAppointment."Dock Door Code" := CopyStr(OutDoorTok, 1, 20);
+        asserterror DockMgt.ChangeBooking(DockAppointment, xDockAppointment);
+        // [THEN] It is refused
+        Assert.ExpectedError('Door OUT-1 does not take');
+    end;
+
     local procedure ConfigureDock(RequirePosition: Boolean)
     var
         Setup: Record "WHA Dock Setup";

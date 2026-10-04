@@ -30,7 +30,7 @@ table 55050 "WHA Handling Unit Setup"
         {
             Caption = 'Max nesting depth';
             DataClassification = CustomerContent;
-            ToolTip = 'Specifies how many levels of handling unit may be nested inside one another. Zero means no limit.';
+            ToolTip = 'Specifies how many levels of handling unit may be nested inside one another. A carton on a pallet is one level, a box in that carton two. Zero means no limit.';
             MinValue = 0;
         }
         field(90; "Handling Unit Nos."; Code[20])

@@ -109,6 +109,11 @@ page 55253 "WHA API Repl. Rule"
         SetActionResponse(ActionContext);
     end;
 
+    trigger OnNewRecord(BelowxRec: Boolean)
+    begin
+        Rec.ApplyNewRuleDefaults();
+    end;
+
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
         FeatureMgt.CheckEnabled(Enum::"WHA Feature"::WHAReplenishment);

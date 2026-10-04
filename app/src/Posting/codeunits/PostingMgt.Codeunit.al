@@ -67,7 +67,7 @@ codeunit 55753 "WHA Posting Mgt."
     var
         Item: Record Item;
         ItemTrackingCode: Record "Item Tracking Code";
-        ItemTrackingSetup: Record "Item Tracking Setup";
+        TempItemTrackingSetup: Record "Item Tracking Setup";
         ItemTrackingMgt: Codeunit "Item Tracking Management";
     begin
         if (PostingRequest."Serial No." <> '') and (PostingRequest.Quantity <> 1) then
@@ -83,11 +83,11 @@ codeunit 55753 "WHA Posting Mgt."
 
         ItemTrackingMgt.GetItemTrackingSetup(
             ItemTrackingCode, EntryTypeOf(PostingRequest."Posting Type"),
-            PostingRequest."Posting Type" = PostingRequest."Posting Type"::WHAPositiveAdjustment, ItemTrackingSetup);
+            PostingRequest."Posting Type" = PostingRequest."Posting Type"::WHAPositiveAdjustment, TempItemTrackingSetup);
 
-        if ItemTrackingSetup."Serial No. Required" and (PostingRequest."Serial No." = '') then
+        if TempItemTrackingSetup."Serial No. Required" and (PostingRequest."Serial No." = '') then
             Error(SerialMissingErr, PostingRequest."Item No.");
-        if ItemTrackingSetup."Lot No. Required" and (PostingRequest."Lot No." = '') then
+        if TempItemTrackingSetup."Lot No. Required" and (PostingRequest."Lot No." = '') then
             Error(LotMissingErr, PostingRequest."Item No.");
 
         CheckExpiryIsKnown(PostingRequest);

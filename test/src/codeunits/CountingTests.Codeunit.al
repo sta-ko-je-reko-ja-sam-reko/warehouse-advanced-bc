@@ -730,6 +730,328 @@ codeunit 59008 "WHA Counting Tests"
         Assert.AreEqual('LOT-TRK', TempPostingRequest."Lot No.", 'The lot should travel with the adjustment.');
     end;
 
+    [Test]
+    procedure FillingFromBinsPutsALineOnEveryBinContent()
+    var
+        BinContent: Record "Bin Content";
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        WarehouseEntry: Record "Warehouse Entry";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [SCENARIO] The bins selection counts everything Business Central believes is in a bin, including
+        // a bin it believes is empty, because an empty bin that is not empty is exactly what a count finds.
+        // [GIVEN] A location with six of the item in one bin and a bin content with nothing in it in another
+        ConfigureCounting(0, 0);
+        EnsureLocation('WHACNTBC');
+        WarehouseEntry.SetRange("Location Code", 'WHACNTBC');
+        WarehouseEntry.DeleteAll(false);
+        BinContent.SetRange("Location Code", 'WHACNTBC');
+        BinContent.DeleteAll(false);
+        BinContentWithStock('WHACNTBC', 'BC-01', 6);
+        BinContentWithStock('WHACNTBC', 'BC-02', 0);
+
+        // [WHEN] A bins sheet for that location is filled
+        CountSheet.Init();
+        CountSheet."No." := 'CNT-BINFILL';
+        CountSheet."Location Code" := 'WHACNTBC';
+        CountSheet.Validate(Selection, SelectionBinContent());
+        CountSheet.Insert(true);
+
+        // [THEN] Each bin content has its own line, expecting what the bin holds, and no unit is named
+        Assert.AreEqual(2, CountSheetLogic.Fill(CountSheet), 'Each bin content should get a line.');
+        CountSheetLine.SetRange("Sheet No.", CountSheet."No.");
+        CountSheetLine.SetRange("Bin Code", 'BC-01');
+        CountSheetLine.FindFirst();
+        Assert.AreEqual(6, CountSheetLine."Expected Quantity", 'The line expects what the bin holds.');
+        Assert.AreEqual('', CountSheetLine."Handling Unit No.", 'A bin count names no handling unit.');
+        CountSheetLine.SetRange("Bin Code", 'BC-02');
+        CountSheetLine.FindFirst();
+        Assert.AreEqual(0, CountSheetLine."Expected Quantity", 'A bin believed to be empty is still counted.');
+    end;
+
+    [Test]
+    procedure ASheetCannotBeFilledWithoutALocation()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] An open sheet with no location
+        ConfigureCounting(0, 0);
+        CreateSheet(CountSheet, 'CNT-NOLOC', SelectionBinContent(), false);
+        CountSheet."Location Code" := '';
+        CountSheet.Modify(false);
+
+        // [WHEN] It is filled
+        asserterror CountSheetLogic.Fill(CountSheet);
+
+        // [THEN] The location is asked for
+        Assert.ExpectedError('Give count sheet CNT-NOLOC a location before filling it');
+    end;
+
+    [Test]
+    procedure WhatASheetCoversIsFixedOnceItGoesOut()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] A sheet that has gone out to be counted
+        ConfigureCounting(0, 0);
+        CreateCountingSheet(CountSheet, 'CNT-FIXED', 5);
+
+        // [WHEN] Somebody adds a line, or fills it
+        // [THEN] Both are refused
+        asserterror CountSheetLogic.AddLine(CountSheet, CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '', '', 1);
+        Assert.ExpectedError('so what it covers can no longer be changed');
+        asserterror CountSheetLogic.Fill(CountSheet);
+        Assert.ExpectedError('so what it covers can no longer be changed');
+    end;
+
+    [Test]
+    procedure ASheetCannotGoOutTwice()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] A sheet that has gone out to be counted
+        ConfigureCounting(0, 0);
+        CreateCountingSheet(CountSheet, 'CNT-TWICE', 5);
+
+        // [WHEN] It is sent out again
+        asserterror CountSheetLogic.Start(CountSheet);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Only an open count sheet can be sent out to be counted. Count sheet CNT-TWICE is Counting.');
+    end;
+
+    [Test]
+    procedure TheSheetMovesOnlyForwards()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] An open sheet with a line
+        ConfigureCounting(0, 0);
+        CreateSheet(CountSheet, 'CNT-ORDER', SelectionBinContent(), false);
+        CountSheetLogic.AddLine(CountSheet, CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '', '', 1);
+
+        // [WHEN] It is completed before it went out
+        asserterror CountSheetLogic.Complete(CountSheet);
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be completed. Only a sheet that is being counted can be.');
+
+        // [WHEN] It is closed before it was counted
+        asserterror CountSheetLogic.Close(CountSheet);
+        // [THEN] It is refused
+        Assert.ExpectedError('Only a counted sheet can be closed.');
+    end;
+
+    [Test]
+    procedure ASheetIsOnlyCompletedWhenEveryLineIsCounted()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] A sheet out for counting with two lines, one of them counted
+        ConfigureCounting(0, 0);
+        CreateSheet(CountSheet, 'CNT-HALF', SelectionBinContent(), false);
+        CountSheetLogic.AddLine(CountSheet, CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '', '', 1);
+        CountSheetLogic.AddLine(CountSheet, CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '', '', 2);
+        CountSheetLogic.Start(CountSheet);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 1);
+
+        // [WHEN] The sheet is asked to complete itself if it is counted
+        // [THEN] It declines and stays out for counting
+        Assert.IsFalse(CountSheetLogic.CompleteIfCounted(CountSheet), 'A sheet with a line uncounted is not complete.');
+        CountSheet.Get(CountSheet."No.");
+        Assert.AreEqual(CountSheet.Status::WHACounting, CountSheet.Status, 'The sheet is still being counted.');
+    end;
+
+    [Test]
+    procedure ASheetClosesWithoutApprovalWhenNobodyAsksForIt()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        Setup: Record "WHA Count Setup";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] Counting set not to ask for differences to be approved, and not to post
+        ConfigureCounting(0, 0);
+        ConfigureNoPosting();
+        Setup.Get();
+        Setup.Validate("Approve Variances", false);
+        Setup.Modify(true);
+
+        // [GIVEN] A sheet counted with a difference nobody approved
+        CreateCountingSheet(CountSheet, 'CNT-NOAPPR', 10);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 4);
+        CountSheetLogic.Complete(CountSheet);
+
+        // [WHEN] The sheet is closed
+        CountSheetLogic.Close(CountSheet);
+
+        // [THEN] It closes
+        CountSheet.Get(CountSheet."No.");
+        Assert.AreEqual(CountSheet.Status::WHAClosed, CountSheet.Status, 'Without an approval step a difference does not hold the sheet open.');
+        ConfigureCounting(0, 0);
+    end;
+
+    [Test]
+    procedure AClosedSheetCannotBeCancelled()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] A sheet that has been counted and closed
+        ConfigureCounting(0, 0);
+        ConfigureNoPosting();
+        CreateCountingSheet(CountSheet, 'CNT-CLOSEDC', 3);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 3);
+        CountSheetLogic.Complete(CountSheet);
+        CountSheetLogic.Close(CountSheet);
+
+        // [WHEN] Somebody cancels it
+        asserterror CountSheetLogic.Cancel(CountSheet);
+
+        // [THEN] It is refused, because what was posted is done
+        Assert.ExpectedError('Count sheet CNT-CLOSEDC is already Closed, so it cannot be cancelled.');
+    end;
+
+    [Test]
+    procedure ACountCannotBeNegative()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+    begin
+        // [GIVEN] A line out for counting
+        ConfigureCounting(0, 0);
+        CreateCountingSheet(CountSheet, 'CNT-NEG', 3);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+
+        // [WHEN] A negative count is entered
+        asserterror CountLineLogic.RecordCount(CountSheetLine, -1);
+
+        // [THEN] It is refused, pointing at zero for an empty bin
+        Assert.ExpectedError('A counted quantity cannot be negative.');
+    end;
+
+    [Test]
+    procedure ALineNobodyCountedCannotBeApproved()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+    begin
+        // [GIVEN] A line out for counting that nobody has counted
+        ConfigureCounting(0, 0);
+        CreateCountingSheet(CountSheet, 'CNT-APPRNONE', 3);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+
+        // [WHEN] Somebody approves it
+        asserterror CountLineLogic.Approve(CountSheetLine);
+
+        // [THEN] It is refused, because there is no difference yet
+        Assert.ExpectedError('has not been counted, so there is no difference to approve');
+    end;
+
+    [Test]
+    procedure ALineCannotBeRemovedOnceTheSheetIsOut()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+    begin
+        // [GIVEN] A sheet that has gone out to be counted
+        ConfigureCounting(0, 0);
+        CreateCountingSheet(CountSheet, 'CNT-RMLINE', 3);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+
+        // [WHEN] Somebody deletes its line
+        asserterror CountSheetLine.Delete(true);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('A line cannot be removed from count sheet CNT-RMLINE while its status is Counting.');
+    end;
+
+    [Test]
+    procedure TheLargerOfTheTwoAllowancesApplies()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+        CountLineLogic: Codeunit "WHA Count Line Logic";
+    begin
+        // [SCENARIO] A quantity allowance and a percentage allowance are both set. Whichever is larger is
+        // the one that applies, and a difference exactly on the allowance is still inside it.
+        // [GIVEN] An allowance of five pieces or one percent, on a line expecting a hundred
+        ConfigureCounting(5, 1);
+        CreateCountingSheet(CountSheet, 'CNT-ALLOW', 100);
+        GetOnlyLine(CountSheetLine, CountSheet."No.");
+
+        // [WHEN] Ninety-five are found
+        CountLineLogic.RecordCount(CountSheetLine, 95);
+        // [THEN] Five short is inside the five-piece allowance, which beats one percent
+        Assert.IsFalse(CountSheetLine."Out of Tolerance", 'A difference equal to the allowance is inside it.');
+
+        // [WHEN] Ninety-four are found
+        CountLineLogic.RecordCount(CountSheetLine, 94);
+        // [THEN] Six short is beyond it
+        Assert.IsTrue(CountSheetLine."Out of Tolerance", 'A difference beyond the larger allowance is flagged.');
+    end;
+
+    [Test]
+    procedure DetailsCannotBeSetOnALineThatIsNotThere()
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLogic: Codeunit "WHA Count Sheet Logic";
+    begin
+        // [GIVEN] An open sheet with no lines
+        ConfigureCounting(0, 0);
+        CreateSheet(CountSheet, 'CNT-NOLINE', SelectionBinContent(), false);
+
+        // [WHEN] Details are set on line 10000
+        asserterror CountSheetLogic.SetLineDetails(CountSheet, 10000, 'Top shelf', 'LOT-X', '');
+
+        // [THEN] The missing line is named
+        Assert.ExpectedError('Count sheet CNT-NOLINE has no line 10000.');
+    end;
+
+    local procedure BinContentWithStock(LocationCode: Code[10]; BinCode: Code[20]; Quantity: Decimal)
+    var
+        BinContent: Record "Bin Content";
+        WarehouseEntry: Record "Warehouse Entry";
+        NextEntryNo: Integer;
+    begin
+        if not BinContent.Get(LocationCode, BinCode, CopyStr(ItemTok, 1, 20), '', '') then begin
+            BinContent.Init();
+            BinContent."Location Code" := LocationCode;
+            BinContent."Bin Code" := BinCode;
+            BinContent."Item No." := CopyStr(ItemTok, 1, 20);
+            BinContent.Insert(false);
+        end;
+
+        if Quantity = 0 then
+            exit;
+
+        if WarehouseEntry.FindLast() then
+            NextEntryNo := WarehouseEntry."Entry No.";
+        WarehouseEntry.Init();
+        WarehouseEntry."Entry No." := NextEntryNo + 1;
+        WarehouseEntry."Location Code" := LocationCode;
+        WarehouseEntry."Bin Code" := BinCode;
+        WarehouseEntry."Item No." := CopyStr(ItemTok, 1, 20);
+        WarehouseEntry.Quantity := Quantity;
+        WarehouseEntry."Registering Date" := WorkDate();
+        WarehouseEntry.Insert(false);
+    end;
+
     local procedure SelectionBinContent(): Enum "WHA Count Selection"
     var
         Selection: Enum "WHA Count Selection";

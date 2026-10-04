@@ -5,6 +5,12 @@
   "brief": "Automated tests for the Warehouse Advanced app.",
   "description": "Test suite for Warehouse Advanced. Not intended for production deployment.",
   "version": "1.0.0.0",
+  "privacyStatement": "https://dmom.ai/privacy",
+  "EULA": "https://dmom.ai/eula",
+  "help": "https://dmom.ai/help",
+  "url": "https://dmom.ai",
+  "contextSensitiveHelpUrl": "https://dmom.ai/help",
+  "logo": "../app/img/AppLogo.png",
   "dependencies": [
     {
       "id": "b454ccc5-1c9b-4009-bbf5-b40521d385b2",
@@ -53,6 +59,7 @@
   "runtime": "17.0",
   "target": "Cloud",
   "features": [
+    "TranslationFile",
     "NoImplicitWith",
     "NoPromotedActionProperties"
   ]

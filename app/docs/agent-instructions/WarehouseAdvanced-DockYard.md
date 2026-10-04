@@ -26,7 +26,9 @@ promise of a door at a time, and then a record of what actually happened.
 **`dockAppointments`** — the bookings. Read, **create**, and modify.
 
 - **locationCode**, **direction**, **expectedDateTime**, **slotMinutes** — the promise.
-- **doorCode** — leave it out when creating and the app chooses a door.
+- **doorCode** — leave it out when creating and the app chooses a door. A door you name, on create or
+  on change, is checked as a booking on the page is: one that is blocked, takes the other direction, or
+  is already booked at an overlapping time is refused with an error saying so.
 - **carrierName**, **trailerNumber**, **reference** — who is coming and what for.
 - **status** — `WHABooked`, `WHAArrived`, `WHAAtDoor`, `WHADeparted`, `WHACancelled`. **Read only.**
 - **arrivedDateTime**, **atDoorDateTime**, **departedDateTime** — what happened. **Read only.**

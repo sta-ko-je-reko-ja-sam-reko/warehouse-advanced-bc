@@ -499,6 +499,167 @@ codeunit 59003 "WHA RF Tests"
         Assert.IsTrue(TextValue(StateObject, 'primaryKey') <> '', 'The key should still say what it is for.');
     end;
 
+    [Test]
+    procedure SigningInWithoutACodeIsRefusedWhenDevicesMustBeRegistered()
+    var
+        RFDevice: Record "WHA RF Device";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+    begin
+        // [GIVEN] Handhelds must be registered
+        ConfigureHandheld(true, true);
+
+        // [WHEN] Somebody signs in without scanning the handheld
+        asserterror RFFlow.SignIn('', RFDevice);
+
+        // [THEN] The scan is asked for
+        Assert.ExpectedError('Scan the code on your handheld before asking for work.');
+    end;
+
+    [Test]
+    procedure ABlockedHandheldIsRefusedEvenWhenRegistrationIsOff()
+    var
+        RFDevice: Record "WHA RF Device";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+    begin
+        // [SCENARIO] Not insisting on registration lets an unknown handheld in. It does not let in one
+        // somebody deliberately took out of use.
+        // [GIVEN] Registration not required, and a handheld that is blocked
+        ConfigureHandheld(true, false);
+        CreateDevice('RF-DEV-BLK2', CopyStr(LocationTok, 1, 10), true);
+
+        // [WHEN] Somebody signs in with it
+        asserterror RFFlow.SignIn('RF-DEV-BLK2', RFDevice);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Handheld RF-DEV-BLK2 is blocked and cannot be used.');
+    end;
+
+    [Test]
+    procedure TheJobStartsByItselfWhenTheSetupSaysSo()
+    var
+        Setup: Record "WHA RF Setup";
+        RFDevice: Record "WHA RF Device";
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+    begin
+        // [GIVEN] Jobs start as soon as they are offered, and a job waiting for this user at the device's location
+        ConfigureHandheld(true, false);
+        Setup.Get();
+        Setup."Auto Start Task" := true;
+        Setup.Modify(false);
+        CreateDevice('RF-DEV-AUTO', CopyStr(LocationTok, 1, 10), false);
+        RFDevice.Get('RF-DEV-AUTO');
+        CreateAssignedTask(WarehouseTask, 'RF-AUTO-1');
+
+        // [WHEN] The handheld asks for the next job
+        Clear(WarehouseTask);
+        Assert.IsTrue(RFFlow.NextTask(RFDevice, WarehouseTask), 'There is a job to offer.');
+
+        // [THEN] The job offered is already in progress
+        Assert.AreEqual(WarehouseTask.Status::WHAInProgress, WarehouseTask.Status, 'An offered job starts by itself when the setup says so.');
+        Assert.AreNotEqual(0DT, WarehouseTask."Started At", 'Starting is stamped.');
+        ConfigureHandheld(true, false);
+    end;
+
+    [Test]
+    procedure ThereIsNothingToScanWhenTheScreenAsksForAConfirm()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+        Step: Enum "WHA RF Step";
+    begin
+        // [GIVEN] A job at the confirm step
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-NOSCAN-1');
+
+        // [WHEN] Something is scanned anyway
+        asserterror RFFlow.Scan(WarehouseTask, Step::WHAConfirm, 'RF-FROM-01');
+
+        // [THEN] The operator is told to read the screen
+        Assert.ExpectedError('There is nothing to scan now.');
+    end;
+
+    [Test]
+    procedure ScanningTheWrongDestinationIsRefused()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+        Step: Enum "WHA RF Step";
+    begin
+        // [GIVEN] A job that goes to a known bin
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-WRONGTO-1');
+        WarehouseTask."To Bin Code" := CopyStr(ToBinTok, 1, 20);
+        WarehouseTask.Modify(false);
+
+        // [WHEN] Another bin is scanned at the destination step
+        asserterror RFFlow.Scan(WarehouseTask, Step::WHAScanTo, 'RF-TO-99');
+
+        // [THEN] The operator is sent to the right bin
+        Assert.ExpectedError('You scanned RF-TO-99. Go to bin RF-TO-01.');
+    end;
+
+    [Test]
+    procedure NothingCanBeDoneWithoutHoldingAJob()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+        ShortReason: Enum "WHA Whse. Short Reason";
+    begin
+        // [GIVEN] The handheld holds no job
+        ConfigureHandheld(true, false);
+        Clear(WarehouseTask);
+
+        // [WHEN] The operator hands back, or reports short
+        // [THEN] Both ask for a job first
+        asserterror RFFlow.HandBack(WarehouseTask);
+        Assert.ExpectedError('You are not holding a job. Choose Next task first.');
+        asserterror RFFlow.ShortPick(WarehouseTask, 0, ShortReason::WHANotEnough);
+        Assert.ExpectedError('You are not holding a job. Choose Next task first.');
+    end;
+
+    [Test]
+    procedure MoreThanWasAskedForCannotBeReportedShort()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+        ShortReason: Enum "WHA Whse. Short Reason";
+    begin
+        // [GIVEN] A job for one
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-SHORT-MORE');
+
+        // [WHEN] Two are reported as found
+        asserterror RFFlow.ShortPick(WarehouseTask, 2, ShortReason::WHANotEnough);
+
+        // [THEN] It is refused, pointing at completing the job instead
+        Assert.ExpectedError('Complete the task instead of reporting it short.');
+    end;
+
+    [Test]
+    procedure AFinishedJobCannotBeHandedBack()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+    begin
+        // [SCENARIO] Regression. Handing back a job that was already finished used to take the operator's
+        // name off it, leaving a completed job that nobody did.
+        // [GIVEN] A job this user holds, which has been finished
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-HB-DONE');
+        WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
+        WarehouseTask.Modify(false);
+
+        // [WHEN] The operator hands it back
+        asserterror RFFlow.HandBack(WarehouseTask);
+
+        // [THEN] It is refused, and the job still says who did it
+        Assert.ExpectedError('so there is nothing to hand back');
+        WarehouseTask.Get('RF-HB-DONE');
+        Assert.AreEqual(CopyStr(UserId(), 1, 50), WarehouseTask."Assigned To User ID", 'A finished job keeps the name of who did it.');
+        Assert.AreEqual(WarehouseTask.Status::WHACompleted, WarehouseTask.Status, 'A finished job stays finished.');
+    end;
+
     local procedure ConfigureHandheld(ConfirmByScan: Boolean; RequireDevice: Boolean)
     var
         Setup: Record "WHA RF Setup";

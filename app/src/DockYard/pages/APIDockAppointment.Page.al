@@ -113,15 +113,18 @@ page 55457 "WHA API Dock Appointment"
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
         FeatureMgt.CheckEnabled(Enum::"WHA Feature"::WHADockYard);
-        exit(true);
+        DockMgt.BookAppointment(Rec, Rec."Dock Door Code");
+        exit(false);
     end;
 
     trigger OnModifyRecord(): Boolean
     begin
         FeatureMgt.CheckEnabled(Enum::"WHA Feature"::WHADockYard);
-        exit(true);
+        DockMgt.ChangeBooking(Rec, xRec);
+        exit(false);
     end;
 
     var
         FeatureMgt: Codeunit "WHA Feature Mgt.";
+        DockMgt: Codeunit "WHA Dock Mgt.";
 }

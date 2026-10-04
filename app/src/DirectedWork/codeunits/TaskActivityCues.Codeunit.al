@@ -13,15 +13,15 @@ codeunit 55208 "WHA Task Activity Cues" implements "WHA IActivityCues"
     /// <param name="Results">The result buffer, keyed by cue field number.</param>
     procedure AddCounts(var Results: Dictionary of [Text, Text])
     var
-        ActivitiesCue: Record "WHA Activities Cue";
+        TempActivitiesCue: Record "WHA Activities Cue";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
     begin
         if not FeatureMgt.IsEnabled(Enum::"WHA Feature"::WHADirectedWork) then
             exit;
 
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Tasks Waiting")), Format(CountWaiting()));
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Tasks In Progress")), Format(CountInProgress()));
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Tasks Overdue")), Format(CountOverdue()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Tasks Waiting")), Format(CountWaiting()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Tasks In Progress")), Format(CountInProgress()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Tasks Overdue")), Format(CountOverdue()));
     end;
 
     local procedure CountWaiting(): Integer

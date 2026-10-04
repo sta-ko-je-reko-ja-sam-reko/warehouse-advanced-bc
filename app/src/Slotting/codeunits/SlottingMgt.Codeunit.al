@@ -10,6 +10,8 @@ codeunit 55300 "WHA Slotting Mgt."
     var
         LocationMissingErr: Label 'Say which location to analyse. Velocity is a comparison between the items at one site, so it cannot be worked out for all of them at once.';
         AlreadyHandledErr: Label 'Proposal %1 has already been answered.', Comment = '%1 = the proposal entry number';
+        NotAcceptedErr: Label 'Proposal %1 has not been accepted, so no work can be raised for it.', Comment = '%1 = the proposal entry number';
+        WorkAlreadyRaisedErr: Label 'Work %2 has already been raised for proposal %1.', Comment = '%1 = the proposal entry number, %2 = the number of the work already raised';
         NoDestinationErr: Label 'Proposal %1 does not say where to move the goods, so no work can be raised. Fill in where it should go, or accept it as a decision on its own.', Comment = '%1 = the proposal entry number';
         MoveDescriptionLbl: Label 'Re-slot %1 from %2 to %3', Comment = '%1 = the item number, %2 = the bin it is in now, %3 = the bin it is moving to';
         DateFormulaTok: Label '<-%1D>', Locked = true, Comment = '%1 = the number of days to look back';
@@ -112,7 +114,8 @@ codeunit 55300 "WHA Slotting Mgt."
 
     /// <summary>
     /// Raises the work for a proposal that was accepted without anywhere to move to, once somebody has
-    /// filled the destination in.
+    /// filled the destination in. A proposal that was not accepted, or whose work was already raised, is
+    /// refused, so a rejected suggestion cannot be acted on and a move is never raised twice.
     /// </summary>
     /// <param name="SlottingProposal">The accepted proposal.</param>
     /// <returns>The number of the work raised.</returns>
@@ -120,6 +123,10 @@ codeunit 55300 "WHA Slotting Mgt."
     var
         TaskNo: Code[20];
     begin
+        if SlottingProposal.Status <> SlottingProposal.Status::WHAAccepted then
+            Error(NotAcceptedErr, SlottingProposal."Entry No.");
+        if SlottingProposal."Task No." <> '' then
+            Error(WorkAlreadyRaisedErr, SlottingProposal."Entry No.", SlottingProposal."Task No.");
         if SlottingProposal."To Bin Code" = '' then
             Error(NoDestinationErr, SlottingProposal."Entry No.");
 

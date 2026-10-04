@@ -150,6 +150,11 @@ page 55252 "WHA Repl. Rule Card"
         MeasureBin();
     end;
 
+    trigger OnNewRecord(BelowxRec: Boolean)
+    begin
+        Rec.ApplyNewRuleDefaults();
+    end;
+
     var
         MethodDescription: Text;
         InTheBinNow: Decimal;

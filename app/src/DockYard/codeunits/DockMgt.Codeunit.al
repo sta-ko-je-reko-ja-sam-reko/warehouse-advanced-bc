@@ -38,19 +38,58 @@ codeunit 55450 "WHA Dock Mgt."
     var
         DockAppointment: Record "WHA Dock Appointment";
     begin
-        if LocationCode = '' then
-            Error(LocationMissingErr);
-        if ExpectedAt = 0DT then
-            Error(ExpectedAtMissingErr);
-
         DockAppointment.Init();
         DockAppointment."Location Code" := LocationCode;
         DockAppointment.Direction := Direction;
         DockAppointment."Expected At" := ExpectedAt;
+        BookAppointment(DockAppointment, DoorCode);
+        exit(DockAppointment."No.");
+    end;
+
+    /// <summary>
+    /// Books in an appointment whose details somebody has already filled in, such as one arriving through
+    /// the API, under exactly the rules a booking made with Book follows.
+    /// </summary>
+    /// <param name="DockAppointment">The appointment to book, not yet inserted. Receives its number.</param>
+    /// <param name="DoorCode">The door to use, or blank to have one chosen.</param>
+    procedure BookAppointment(var DockAppointment: Record "WHA Dock Appointment"; DoorCode: Code[20])
+    begin
+        if DockAppointment."Location Code" = '' then
+            Error(LocationMissingErr);
+        if DockAppointment."Expected At" = 0DT then
+            Error(ExpectedAtMissingErr);
+
+        DockAppointment."Dock Door Code" := '';
         DockAppointment.Insert(true);
 
         AssignDoor(DockAppointment, DoorCode);
-        exit(DockAppointment."No.");
+    end;
+
+    /// <summary>
+    /// Saves a change somebody made to a booking's fields directly, such as through the API. A change to
+    /// where, when, which way or which door goes back through the door checks a booking is made under, so
+    /// an edit cannot put a vehicle on a door that is blocked, faces the wrong way or is already taken.
+    /// </summary>
+    /// <param name="DockAppointment">The booking as changed.</param>
+    /// <param name="xDockAppointment">The booking as it was.</param>
+    procedure ChangeBooking(var DockAppointment: Record "WHA Dock Appointment"; xDockAppointment: Record "WHA Dock Appointment")
+    begin
+        if (DockAppointment."Location Code" = xDockAppointment."Location Code") and
+           (DockAppointment.Direction = xDockAppointment.Direction) and
+           (DockAppointment."Expected At" = xDockAppointment."Expected At") and
+           (DockAppointment."Slot Minutes" = xDockAppointment."Slot Minutes") and
+           (DockAppointment."Dock Door Code" = xDockAppointment."Dock Door Code")
+        then begin
+            DockAppointment.Modify(true);
+            exit;
+        end;
+
+        if DockAppointment."Location Code" = '' then
+            Error(LocationMissingErr);
+        if DockAppointment."Expected At" = 0DT then
+            Error(ExpectedAtMissingErr);
+
+        AssignDoor(DockAppointment, DockAppointment."Dock Door Code");
     end;
 
     /// <summary>
@@ -115,6 +154,7 @@ codeunit 55450 "WHA Dock Mgt."
         if DoorCode = '' then
             Error(NoDoorFreeErr, DockAppointment."Location Code", DockAppointment."No.");
 
+        CheckDoorFits(DockAppointment, DoorCode);
         CheckDoorClearNow(DockAppointment, DoorCode);
         ReleasePosition(DockAppointment);
 
@@ -267,19 +307,26 @@ codeunit 55450 "WHA Dock Mgt."
 
     local procedure CheckDoorUsable(var DockAppointment: Record "WHA Dock Appointment"; DoorCode: Code[20])
     var
-        DockDoor: Record "WHA Dock Door";
         Clashing: Code[20];
     begin
+        CheckDoorFits(DockAppointment, DoorCode);
+
+        Clashing := ClashingAppointment(DockAppointment, DoorCode);
+        if Clashing <> '' then
+            Error(DoorTakenErr, DoorCode, Clashing);
+    end;
+
+    local procedure CheckDoorFits(var DockAppointment: Record "WHA Dock Appointment"; DoorCode: Code[20])
+    var
+        DockDoor: Record "WHA Dock Door";
+    begin
+        DockDoor.SetLoadFields(Blocked, Direction);
         if not DockDoor.Get(DockAppointment."Location Code", DoorCode) then
             Error(DoorNotFoundErr, DoorCode, DockAppointment."Location Code");
         if DockDoor.Blocked then
             Error(DoorBlockedErr, DoorCode);
         if not DirectionFits(DockDoor.Direction, DockAppointment.Direction) then
             Error(DoorDirectionErr, DoorCode, DockAppointment.Direction);
-
-        Clashing := ClashingAppointment(DockAppointment, DoorCode);
-        if Clashing <> '' then
-            Error(DoorTakenErr, DoorCode, Clashing);
     end;
 
     local procedure CheckDoorClearNow(var DockAppointment: Record "WHA Dock Appointment"; DoorCode: Code[20])

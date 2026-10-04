@@ -883,7 +883,7 @@ codeunit 59001 "WHA Warehouse Task Tests"
     [Test]
     procedure WorkWaitingOnTheFloorIsCountedForTheRoleCentre()
     var
-        ActivitiesCue: Record "WHA Activities Cue";
+        TempActivitiesCue: Record "WHA Activities Cue";
         WarehouseTask: Record "WHA Warehouse Task";
         TaskActivityCues: Codeunit "WHA Task Activity Cues";
         TaskLogic: Codeunit "WHA Warehouse Task Logic";
@@ -898,7 +898,7 @@ codeunit 59001 "WHA Warehouse Task Tests"
 
         TaskActivityCues.AddCounts(Results);
 
-        Assert.AreEqual('1', Results.Get(Format(ActivitiesCue.FieldNo("WHA Tasks Waiting"))), 'One released job is one job waiting.');
+        Assert.AreEqual('1', Results.Get(Format(TempActivitiesCue.FieldNo("WHA Tasks Waiting"))), 'One released job is one job waiting.');
     end;
 
     [Test]
@@ -1146,6 +1146,267 @@ codeunit 59001 "WHA Warehouse Task Tests"
 
         Assert.AreEqual('', WarehouseTask."Lot No.", 'There is nothing to take a lot from.');
         Assert.AreEqual('', WarehouseTask."Serial No.", 'And nothing to take a serial number from.');
+    end;
+
+    [Test]
+    procedure AFollowUpServesTheSameDocumentLine()
+    var
+        FollowUpTask: Record "WHA Warehouse Task";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        SourceType: Enum "WHA Task Source";
+        ShortReason: Enum "WHA Whse. Short Reason";
+    begin
+        // [SCENARIO] Regression. The follow-up raised for a short pick is the rest of the same job, so it
+        // has to point at the same document line. Without that it neither holds the posting back nor
+        // writes what it moves back to the document.
+        // [GIVEN] Follow-ups switched on, writing back switched off, and a job of four for a receipt line
+        ConfigureQueue(0);
+        ConfigureFollowUp(true);
+        ConfigureWriteBack(false);
+        ConfigureNoRegistration();
+        EnsureTaskNumbering();
+        CreateStartedTask(WarehouseTask, 'WHA-FU-SRC-1', 4, CopyStr(UserId(), 1, 50));
+        WarehouseTask."Source Type" := SourceType::WHAWhseReceipt;
+        WarehouseTask."Source No." := 'WHA-FU-RCPT';
+        WarehouseTask."Source Line No." := 20000;
+        WarehouseTask."Source Document No." := 'WHA-FU-PO';
+        WarehouseTask.Modify(false);
+
+        // [WHEN] Only one is found
+        TaskLogic.CompleteShort(WarehouseTask, 1, ShortReason::WHANotEnough);
+
+        // [THEN] The follow-up for the other three names the same receipt line and order
+        FollowUpTask.SetRange("Source Type", SourceType::WHAWhseReceipt);
+        FollowUpTask.SetRange("Source No.", 'WHA-FU-RCPT');
+        FollowUpTask.SetFilter("No.", '<>%1', WarehouseTask."No.");
+        Assert.IsTrue(FollowUpTask.FindFirst(), 'The follow-up should point at the same receipt.');
+        Assert.AreEqual(20000, FollowUpTask."Source Line No.", 'The follow-up should point at the same line.');
+        Assert.AreEqual('WHA-FU-PO', FollowUpTask."Source Document No.", 'The follow-up should name the same order.');
+        Assert.AreEqual(3, FollowUpTask.Quantity, 'The follow-up carries what was not found.');
+        Assert.AreEqual(WarehouseTask."Task Type", FollowUpTask."Task Type", 'The follow-up is the same kind of job.');
+        ConfigureFollowUp(false);
+    end;
+
+    [Test]
+    procedure PostingAReceiptIsHeldWhileWorkOnItIsOpen()
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+        WarehouseReceiptLine: Record "Warehouse Receipt Line";
+        TaskStatus: Enum "WHA Warehouse Task Status";
+        OpenWorkPolicy: Enum "WHA Open Work Policy";
+    begin
+        // [SCENARIO] The policy is reached through Business Central's own posting, so the subscriber is
+        // what has to stop it, not just the policy on its own.
+        // [GIVEN] Directed work on and set to hold postings, and a receipt with a job still on the floor
+        EnsureTaskSetup(Setup);
+        Setup."WHA Enabled" := true;
+        Setup."Open Work On Posting" := OpenWorkPolicy::WHABlock;
+        Setup.Modify(false);
+        CreateReceipt('WHA-OW-RCPT', 'WHA-OW-PO');
+        AddReceiptLine('WHA-OW-RCPT', 10000, 5);
+        CreateSourcedTask('WHA-OW-TASK', 'WHA-OW-RCPT', TaskStatus::WHAReleased);
+
+        // [WHEN] Somebody posts the receipt
+        WarehouseReceiptLine.Get('WHA-OW-RCPT', 10000);
+        asserterror Codeunit.Run(Codeunit::"Whse.-Post Receipt", WarehouseReceiptLine);
+
+        // [THEN] It is held, naming the open work
+        Assert.ExpectedError('nobody has finished or cancelled');
+        Setup.Get();
+        Setup."Open Work On Posting" := OpenWorkPolicy::WHAAllow;
+        Setup.Modify(false);
+    end;
+
+    [Test]
+    procedure OnlyWarehouseEmployeesAreGivenWorkWhenTheSetupSaysSo()
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        AccessPolicy: Enum "WHA Whse. Access Policy";
+        Outsider: Code[50];
+    begin
+        // [GIVEN] The setup gives work only to warehouse employees, and a user who is not one anywhere
+        ConfigureQueue(0);
+        EnsureTaskSetup(Setup);
+        Setup."Who May Be Given Work" := AccessPolicy::WHAWhseEmployees;
+        Setup.Modify(false);
+        Outsider := EnsureUser('WHA-OUTSIDER');
+        CreateWorkableTask(WarehouseTask, 'WHA-ACC-1');
+        TaskLogic.Release(WarehouseTask);
+
+        // [WHEN] The job is given to that user
+        asserterror TaskLogic.Assign(WarehouseTask, Outsider);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('is not a warehouse employee');
+        Setup.Get();
+        Setup."Who May Be Given Work" := AccessPolicy::WHAAnyUser;
+        Setup.Modify(false);
+    end;
+
+    [Test]
+    procedure ATaskIsOnlyReleasedOnce()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+    begin
+        // [GIVEN] A task that has been released
+        ConfigureQueue(0);
+        CreateWorkableTask(WarehouseTask, 'WHA-REL-2X');
+        TaskLogic.Release(WarehouseTask);
+
+        // [WHEN] It is released again
+        asserterror TaskLogic.Release(WarehouseTask);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Only a created warehouse task can be released.');
+    end;
+
+    [Test]
+    procedure ATaskIsOnlyCancelledOnce()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+    begin
+        // [GIVEN] A task that has been cancelled
+        ConfigureQueue(0);
+        CreateWorkableTask(WarehouseTask, 'WHA-CAN-2X');
+        TaskLogic.Cancel(WarehouseTask);
+
+        // [WHEN] It is cancelled again
+        asserterror TaskLogic.Cancel(WarehouseTask);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be cancelled');
+    end;
+
+    [Test]
+    procedure WorkInProgressCannotBeDeleted()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        // [GIVEN] A task somebody has started
+        ConfigureQueue(0);
+        CreateStartedTask(WarehouseTask, 'WHA-DEL-IP', 1, CopyStr(UserId(), 1, 50));
+
+        // [WHEN] It is deleted
+        asserterror WarehouseTask.Delete(true);
+
+        // [THEN] It is refused, pointing at cancelling instead
+        Assert.ExpectedError('Cancel it instead');
+    end;
+
+    [Test]
+    procedure WorkNobodyStartedCanBeDeleted()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        // [GIVEN] A task that has only been created
+        ConfigureQueue(0);
+        CreateWorkableTask(WarehouseTask, 'WHA-DEL-NEW');
+
+        // [WHEN] It is deleted
+        WarehouseTask.Delete(true);
+
+        // [THEN] It is gone
+        Assert.IsFalse(WarehouseTask.Get('WHA-DEL-NEW'), 'A task nobody started can be deleted.');
+    end;
+
+    [Test]
+    procedure ANegativeShortQuantityIsRefused()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ShortReason: Enum "WHA Whse. Short Reason";
+    begin
+        // [GIVEN] A started task for three
+        ConfigureQueue(0);
+        ConfigureFollowUp(false);
+        CreateStartedTask(WarehouseTask, 'WHA-SHORT-NEG', 3, CopyStr(UserId(), 1, 50));
+
+        // [WHEN] It is reported short with a negative quantity moved
+        asserterror TaskLogic.CompleteShort(WarehouseTask, -1, ShortReason::WHANotEnough);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('The quantity moved cannot be negative.');
+    end;
+
+    [Test]
+    procedure ATaskWithoutANumberNeedsASeries()
+    var
+        Setup: Record "WHA Warehouse Task Setup";
+        WarehouseTask: Record "WHA Warehouse Task";
+        PreviousSeries: Code[20];
+    begin
+        // [GIVEN] A setup with no number series
+        EnsureTaskSetup(Setup);
+        PreviousSeries := Setup."Warehouse Task Nos.";
+        Setup."Warehouse Task Nos." := '';
+        Setup.Modify(false);
+
+        // [WHEN] A task is created without a number
+        WarehouseTask.Init();
+        asserterror WarehouseTask.Insert(true);
+
+        // [THEN] The series is asked for
+        Assert.ExpectedError('Set the warehouse task number series on the directed work setup page');
+        Setup."Warehouse Task Nos." := PreviousSeries;
+        Setup.Modify(false);
+    end;
+
+    [Test]
+    procedure TheReceiptRefusalNamesTheLocation()
+    var
+        Location: Record Location;
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Regression. The label was written with %%1, so the message showed a literal
+        // placeholder instead of the location somebody has to go and change.
+        // [GIVEN] A receipt at a location that requires Business Central's own put-away
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-LOC', 'PO-1199');
+        AddReceiptLine('WHA-WR-LOC', 10000, 2);
+        Location.Get(TestLocationTok);
+        Location."Require Put-away" := true;
+        Location.Modify(false);
+
+        // [WHEN] Work is raised from it
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-LOC');
+
+        // [THEN] The refusal names the location
+        Location."Require Put-away" := false;
+        Location.Modify(false);
+        Assert.ExpectedError('Location WHATEST requires Business Central''s own put-away or pick');
+    end;
+
+    [Test]
+    procedure TheShipmentRefusalNamesTheLocation()
+    var
+        Location: Record Location;
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Regression, as for receipts: the location code was not filled into the message.
+        // [GIVEN] A shipment at a location that requires Business Central's own pick
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateShipment('WHA-WS-LOC', 'SO-1199');
+        AddShipmentLine('WHA-WS-LOC', 10000, 2);
+        Location.Get(TestLocationTok);
+        Location."Require Pick" := true;
+        Location.Modify(false);
+
+        // [WHEN] Work is raised from it
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseShipment, 'WHA-WS-LOC');
+
+        // [THEN] The refusal names the location
+        Location."Require Pick" := false;
+        Location.Modify(false);
+        Assert.ExpectedError('Location WHATEST requires Business Central''s own put-away or pick');
     end;
 
     local procedure ConfigureQueue(MaxOpenTasks: Integer)

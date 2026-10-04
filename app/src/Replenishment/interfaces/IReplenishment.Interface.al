@@ -3,6 +3,13 @@ namespace WarehouseAdvanced.Replenishment;
 interface "WHA IReplenishment"
 {
     /// <summary>
+    /// Fills a new replenishment rule with the setup's defaults before anybody has chosen anything, so
+    /// a value somebody then picks on purpose is never mistaken for one that was left blank.
+    /// </summary>
+    /// <param name="ReplenishmentRule">The rule being started.</param>
+    procedure ApplyNewRuleDefaults(var ReplenishmentRule: Record "WHA Replenishment Rule");
+
+    /// <summary>
     /// Applies the defaults a new replenishment rule needs.
     /// </summary>
     /// <param name="ReplenishmentRule">The rule being inserted.</param>

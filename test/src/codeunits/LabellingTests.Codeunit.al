@@ -261,6 +261,77 @@ codeunit 59005 "WHA Labelling Tests"
         Assert.AreEqual(FirstCode, HandlingUnit.SSCC, 'A second run should leave the code it already had.');
     end;
 
+    [Test]
+    procedure APrefixRunsOutOfSerialNumbers()
+    var
+        SSCCFormat: Codeunit "WHA SSCC Format";
+        LastCode: Code[20];
+    begin
+        // [SCENARIO] A ten-digit prefix leaves six digits for the serial reference. The last of them still
+        // makes a valid code; the one after it would need a seventh digit and is refused, rather than
+        // silently producing a code some other pallet already wears.
+        // [GIVEN] A ten-digit company prefix
+        ConfigureLabelling('0801234567', 0);
+
+        // [WHEN] The last serial reference that fits is used
+        LastCode := SSCCFormat.Build(999999);
+        // [THEN] It is a valid eighteen-digit code
+        Assert.AreEqual(18, StrLen(LastCode), 'The last code that fits is still eighteen digits.');
+        Assert.IsTrue(SSCCFormat.IsValid(LastCode), 'The last code that fits is valid.');
+
+        // [WHEN] The next one is asked for
+        asserterror SSCCFormat.Build(1000000);
+        // [THEN] It is refused
+        Assert.ExpectedError('The serial reference no longer fits beside a 10-digit company prefix.');
+    end;
+
+    [Test]
+    procedure TheSequentialFormatIsUsedWhenTheSetupChoosesIt()
+    var
+        LabelMgt: Codeunit "WHA Label Mgt.";
+        SequentialDescription: Text;
+    begin
+        // [SCENARIO] The format is chosen in the setup and reached through the label management, so that
+        // is the path that has to switch from SSCC to sequential numbers.
+        // [GIVEN] A prefix of LP and the sequential format
+        ConfigureLabelling('LP', 0);
+        SetFormatToSequential();
+
+        // [WHEN] The next code is taken
+        // [THEN] It is the prefix followed by eight digits
+        Assert.AreEqual('LP00000001', LabelMgt.NextCode(), 'The first sequential code is the prefix and serial one.');
+
+        // [THEN] Codes are recognised by their prefix and length
+        Assert.IsTrue(LabelMgt.IsValidCode('LP00000042'), 'A code with the prefix and eight digits is valid.');
+        Assert.IsFalse(LabelMgt.IsValidCode('XX00000042'), 'A code with another prefix is not.');
+        Assert.IsFalse(LabelMgt.IsValidCode('LP0000042'), 'A code one digit short is not.');
+        Assert.IsFalse(LabelMgt.IsValidCode('LP0000004A'), 'A code with a letter in the serial is not.');
+
+        // [THEN] The format describes itself differently from SSCC
+        SequentialDescription := LabelMgt.DescribeFormat();
+        ConfigureLabelling('LP', 0);
+        Assert.AreNotEqual(SequentialDescription, LabelMgt.DescribeFormat(), 'Each format describes itself.');
+    end;
+
+    [Test]
+    procedure TakingACodeMovesTheSerialReferenceOn()
+    var
+        Setup: Record "WHA Label Setup";
+        LabelMgt: Codeunit "WHA Label Mgt.";
+    begin
+        // [GIVEN] A setup whose last serial reference is forty-one
+        ConfigureLabelling(CopyStr(PrefixTok, 1, 10), 0);
+        Setup.Get();
+        Setup."Last Serial Reference" := 41;
+        Setup.Modify(false);
+
+        // [WHEN] The next serial reference is taken
+        // [THEN] It is forty-two, and the setup remembers it
+        Assert.AreEqual(42, LabelMgt.NextSerialReference(), 'The next reference follows the last.');
+        Setup.Get();
+        Assert.AreEqual(42, Setup."Last Serial Reference", 'The setup remembers the reference that was taken.');
+    end;
+
     local procedure ConfigureLabelling(CompanyPrefix: Code[10]; ExtensionDigit: Integer)
     var
         Setup: Record "WHA Label Setup";

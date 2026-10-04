@@ -54,7 +54,9 @@ codeunit 55006 "WHA MCP Setup"
         MCPConfig: Codeunit "MCP Config";
         ToolId: Guid;
     begin
+#pragma warning disable AL0432
         ToolId := MCPConfig.GetAPIToolId(ConfigId, ApiPageId);
+#pragma warning restore AL0432
         if IsNullGuid(ToolId) then
             ToolId := MCPConfig.CreateAPITool(ConfigId, ApiPageId);
 

@@ -70,10 +70,11 @@ makes a duplicate rule impossible to enter, which a numbered rule would not.
 | `Measure a bin against` | Whether a run takes planned work off the bin before deciding it is full. Ships as **what is in the bin now**, which is segment 1's behaviour |
 | `Send replenishment work to the floor` | Ships **on**. Off leaves each run's proposals as drafts |
 
-**The setup defaults are applied on insert, and win.** A rule inserted with `Method` at its first value
-(`WHABinContent`) takes the setup's default method instead, so a rule that deliberately wants bin
-content while the setup says handling units has to be changed after it is created. The same shape as
-`Strategy` on a wave; the field stays editable.
+**The default method is applied when a page starts a new rule, not when it is inserted.** A new rule
+starts on the setup's default method, and whatever method is chosen afterwards is kept, the first
+value (`WHABinContent`) included. Applying it on insert could not tell a deliberate bin-content rule
+from one left blank, and used to replace it. The default priority is still applied on insert, because
+zero there means "use the setup's number".
 
 ## Objects
 

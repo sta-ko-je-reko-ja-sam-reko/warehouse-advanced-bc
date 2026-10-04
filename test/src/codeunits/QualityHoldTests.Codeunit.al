@@ -530,7 +530,7 @@ codeunit 59009 "WHA Quality Hold Tests"
     [Test]
     procedure HeldGoodsNobodyHasDecidedAboutAreCountedSeparately()
     var
-        ActivitiesCue: Record "WHA Activities Cue";
+        TempActivitiesCue: Record "WHA Activities Cue";
         HandlingUnit: Record "WHA Handling Unit";
         DecidedUnit: Record "WHA Handling Unit";
         QualityHold: Record "WHA Quality Hold";
@@ -553,8 +553,323 @@ codeunit 59009 "WHA Quality Hold Tests"
 
         QCActivityCues.AddCounts(Results);
 
-        Assert.AreEqual('2', Results.Get(Format(ActivitiesCue.FieldNo("WHA Goods On Hold"))), 'Both units are still stopped.');
-        Assert.AreEqual('1', Results.Get(Format(ActivitiesCue.FieldNo("WHA Holds To Decide"))), 'Only one of them is still waiting for a decision.');
+        Assert.AreEqual('2', Results.Get(Format(TempActivitiesCue.FieldNo("WHA Goods On Hold"))), 'Both units are still stopped.');
+        Assert.AreEqual('1', Results.Get(Format(TempActivitiesCue.FieldNo("WHA Holds To Decide"))), 'Only one of them is still waiting for a decision.');
+    end;
+
+    [Test]
+    procedure PlacingAHoldBlocksTheBinWhenTheSetupSaysSo()
+    var
+        BinContent: Record "Bin Content";
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Policy: Enum "WHA Hold Stock Policy";
+    begin
+        // [SCENARIO] The policy is only ever reached through placing and releasing a hold, so that is the
+        // path that has to block and unblock the bin, not just the policy on its own.
+        // [GIVEN] Holds set to block the bin, and a unit with contents standing in a bin of its own
+        ConfigureQualityHold(false, false);
+        UseStockPolicy(Policy::WHABlockBin);
+        CreateUnitInBin(HandlingUnit, 'QC-PB-1', '', 'QC-PB-01');
+        AddContents('QC-PB-1', 4);
+        EnsureBinContent('QC-PB-1');
+
+        // [WHEN] The unit is put on hold
+        QualityHold.Get(QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, DamageDescTok));
+
+        // [THEN] Movement in and out of the bin is blocked
+        BinContent.Get(CopyStr(LocationTok, 1, 10), 'QC-PB-01', CopyStr(ItemTok, 1, 20), '', '');
+        Assert.AreEqual(BinContent."Block Movement"::All, BinContent."Block Movement", 'Placing the hold should block the bin.');
+
+        // [WHEN] The hold is released back to stock
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAReleaseToStock);
+        QualityHoldMgt.Release(QualityHold);
+
+        // [THEN] The bin is free again
+        BinContent.Get(CopyStr(LocationTok, 1, 10), 'QC-PB-01', CopyStr(ItemTok, 1, 20), '', '');
+        Assert.AreEqual(BinContent."Block Movement"::" ", BinContent."Block Movement", 'Releasing the hold should free the bin.');
+        UseStockPolicy(Policy::WHARecordOnly);
+    end;
+
+    [Test]
+    procedure ReleasingAPalletFreesItsBinEvenWithCartonsHeldInside()
+    var
+        BinContent: Record "Bin Content";
+        Carton: Record "WHA Handling Unit";
+        Pallet: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Policy: Enum "WHA Hold Stock Policy";
+    begin
+        // [SCENARIO] Regression. The cartons held with a pallet stand in the pallet's bin. When the pallet
+        // was released before its cartons, their holds were still live in that bin, so the pallet's block
+        // was kept, and nothing afterwards ever lifted it.
+        // [GIVEN] Nested units held with their parent, holds blocking the bin, and a pallet with a carton
+        // inside it, both holding goods in the same bin
+        ConfigureQualityHold(true, false);
+        UseStockPolicy(Policy::WHABlockBin);
+        CreateUnitInBin(Pallet, 'QC-PB-2', '', 'QC-PB-02');
+        AddContents('QC-PB-2', 6);
+        CreateUnitInBin(Carton, 'QC-PB-3', 'QC-PB-2', 'QC-PB-02');
+        AddContents('QC-PB-3', 2);
+        EnsureBinContent('QC-PB-2');
+
+        // [GIVEN] The pallet put on hold, which holds the carton with it
+        QualityHold.Get(QualityHoldMgt.Place(Pallet, Reason::WHAInspection, DamageDescTok));
+        Assert.IsTrue(QualityHoldMgt.IsOnHold('QC-PB-3'), 'The carton is held with the pallet.');
+
+        // [WHEN] The pallet is released back to stock
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAReleaseToStock);
+        QualityHoldMgt.Release(QualityHold);
+
+        // [THEN] The carton is released with it and the bin is free again
+        Assert.IsFalse(QualityHoldMgt.IsOnHold('QC-PB-3'), 'The carton is released with the pallet.');
+        BinContent.Get(CopyStr(LocationTok, 1, 10), 'QC-PB-02', CopyStr(ItemTok, 1, 20), '', '');
+        Assert.AreEqual(BinContent."Block Movement"::" ", BinContent."Block Movement", 'Releasing the pallet should free its bin once its cartons are released too.');
+        UseStockPolicy(Policy::WHARecordOnly);
+    end;
+
+    [Test]
+    procedure RecordingTheHoldOnlyLeavesTheBinAlone()
+    var
+        BinContent: Record "Bin Content";
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Reason: Enum "WHA Hold Reason";
+        Policy: Enum "WHA Hold Stock Policy";
+    begin
+        // [GIVEN] Holds set to be recorded only, and a unit with contents in a bin of its own
+        ConfigureQualityHold(false, false);
+        UseStockPolicy(Policy::WHARecordOnly);
+        CreateUnitInBin(HandlingUnit, 'QC-PB-4', '', 'QC-PB-04');
+        AddContents('QC-PB-4', 1);
+        EnsureBinContent('QC-PB-4');
+
+        // [WHEN] The unit is put on hold
+        QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, DamageDescTok);
+
+        // [THEN] Business Central's bin is not touched
+        BinContent.Get(CopyStr(LocationTok, 1, 10), 'QC-PB-04', CopyStr(ItemTok, 1, 20), '', '');
+        Assert.AreEqual(BinContent."Block Movement"::" ", BinContent."Block Movement", 'Recording a hold only blocks nothing.');
+    end;
+
+    [Test]
+    procedure HoldingALotBlocksTheLotUntilTheHoldIsReleased()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        LotNoInformation: Record "Lot No. Information";
+        QualityHold: Record "WHA Quality Hold";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Policy: Enum "WHA Hold Stock Policy";
+    begin
+        // [GIVEN] Holds set to block the lot, and a unit holding a lot nobody has recorded information for
+        ConfigureQualityHold(false, false);
+        UseStockPolicy(Policy::WHABlockLot);
+        if LotNoInformation.Get(CopyStr(ItemTok, 1, 20), '', 'LOT-QC-1') then
+            LotNoInformation.Delete(false);
+        CreateUnitInBin(HandlingUnit, 'QC-LOT-1', '', 'QC-LOT-01');
+        AddContentsWithLot('QC-LOT-1', 'LOT-QC-1', 5);
+
+        // [WHEN] The unit is put on hold
+        QualityHold.Get(QualityHoldMgt.Place(HandlingUnit, Reason::WHAComplaint, DamageDescTok));
+
+        // [THEN] The lot is recorded and blocked
+        Assert.IsTrue(LotNoInformation.Get(CopyStr(ItemTok, 1, 20), '', 'LOT-QC-1'), 'Holding the lot records it.');
+        Assert.IsTrue(LotNoInformation.Blocked, 'Holding the lot blocks it.');
+
+        // [WHEN] The hold is released back to stock
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAReleaseToStock);
+        QualityHoldMgt.Release(QualityHold);
+
+        // [THEN] The lot is unblocked
+        LotNoInformation.Get(CopyStr(ItemTok, 1, 20), '', 'LOT-QC-1');
+        Assert.IsFalse(LotNoInformation.Blocked, 'Releasing the hold unblocks the lot.');
+        UseStockPolicy(Policy::WHARecordOnly);
+    end;
+
+    [Test]
+    procedure ALotStaysBlockedWhileAnotherHoldStandsOnIt()
+    var
+        FirstUnit: Record "WHA Handling Unit";
+        SecondUnit: Record "WHA Handling Unit";
+        LotNoInformation: Record "Lot No. Information";
+        FirstHold: Record "WHA Quality Hold";
+        SecondHold: Record "WHA Quality Hold";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+        Policy: Enum "WHA Hold Stock Policy";
+    begin
+        // [GIVEN] Holds set to block the lot, and two units of the same lot both on hold
+        ConfigureQualityHold(false, false);
+        UseStockPolicy(Policy::WHABlockLot);
+        CreateUnitInBin(FirstUnit, 'QC-LOT-2', '', 'QC-LOT-02');
+        AddContentsWithLot('QC-LOT-2', 'LOT-QC-2', 3);
+        CreateUnitInBin(SecondUnit, 'QC-LOT-3', '', 'QC-LOT-03');
+        AddContentsWithLot('QC-LOT-3', 'LOT-QC-2', 4);
+        FirstHold.Get(QualityHoldMgt.Place(FirstUnit, Reason::WHAComplaint, DamageDescTok));
+        SecondHold.Get(QualityHoldMgt.Place(SecondUnit, Reason::WHAComplaint, DamageDescTok));
+
+        // [WHEN] The first hold is released
+        QualityHoldMgt.Decide(FirstHold, Disposition::WHAReleaseToStock);
+        QualityHoldMgt.Release(FirstHold);
+
+        // [THEN] The lot stays blocked, because the second unit is still being questioned
+        LotNoInformation.Get(CopyStr(ItemTok, 1, 20), '', 'LOT-QC-2');
+        Assert.IsTrue(LotNoInformation.Blocked, 'Another hold still stands on the lot.');
+
+        // [WHEN] The second hold is released
+        QualityHoldMgt.Decide(SecondHold, Disposition::WHAReleaseToStock);
+        QualityHoldMgt.Release(SecondHold);
+
+        // [THEN] The lot is free
+        LotNoInformation.Get(CopyStr(ItemTok, 1, 20), '', 'LOT-QC-2');
+        Assert.IsFalse(LotNoInformation.Blocked, 'With no hold left on it, the lot is unblocked.');
+        UseStockPolicy(Policy::WHARecordOnly);
+    end;
+
+    [Test]
+    procedure AUnitThatIsNotThereCannotBeHeld()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Reason: Enum "WHA Hold Reason";
+    begin
+        // [GIVEN] A unit number nobody has created
+        ConfigureQualityHold(false, false);
+        HandlingUnit.Init();
+        HandlingUnit."No." := 'QC-NOWHERE';
+
+        // [WHEN] It is put on hold
+        asserterror QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, DamageDescTok);
+
+        // [THEN] It is refused, naming the unit
+        Assert.ExpectedError('Handling unit QC-NOWHERE does not exist, so it cannot be put on hold.');
+    end;
+
+    [Test]
+    procedure AScrappedUnitCannotBeHeldAgain()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Reason: Enum "WHA Hold Reason";
+    begin
+        // [GIVEN] A unit that has been scrapped
+        ConfigureQualityHold(false, false);
+        CreateUnit(HandlingUnit, 'QC-SCRAPPED', '', HandlingUnit.Status::WHAScrapped);
+
+        // [WHEN] It is put on hold
+        asserterror QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, DamageDescTok);
+
+        // [THEN] It is refused, because nothing is left to hold
+        Assert.ExpectedError('has been scrapped, so there is nothing left to hold');
+    end;
+
+    [Test]
+    procedure AHoldCannotBeReleasedTwice()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        QualityHold: Record "WHA Quality Hold";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Disposition: Enum "WHA Hold Disposition";
+        Reason: Enum "WHA Hold Reason";
+    begin
+        // [GIVEN] A hold that has been released
+        ConfigureQualityHold(false, false);
+        CreateUnit(HandlingUnit, 'QC-TWICE', '', HandlingUnit.Status::WHAOpen);
+        QualityHold.Get(QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, DamageDescTok));
+        QualityHoldMgt.Decide(QualityHold, Disposition::WHAReleaseToStock);
+        QualityHoldMgt.Release(QualityHold);
+
+        // [WHEN] It is released again
+        asserterror QualityHoldMgt.Release(QualityHold);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be released again');
+    end;
+
+    [Test]
+    procedure EachDecisionSaysWhetherTheGoodsComeBackOrGo()
+    var
+        HoldDisposition: Interface "WHA IHoldDisposition";
+        Disposition: Enum "WHA Hold Disposition";
+    begin
+        // [SCENARIO] Whether a decision gives the goods back and whether it writes them off are what the
+        // write-off and the unit status follow, so each decision has to answer both the right way.
+        // [THEN] Pending neither returns nor writes off
+        HoldDisposition := Disposition::WHAPending;
+        Assert.IsFalse(HoldDisposition.ReturnsToUse(), 'Pending returns nothing to use.');
+        Assert.IsFalse(HoldDisposition.WritesOffStock(), 'Pending writes nothing off.');
+        // [THEN] Releasing to stock returns the goods and writes nothing off
+        HoldDisposition := Disposition::WHAReleaseToStock;
+        Assert.IsTrue(HoldDisposition.ReturnsToUse(), 'Releasing returns the goods to use.');
+        Assert.IsFalse(HoldDisposition.WritesOffStock(), 'Releasing writes nothing off.');
+        // [THEN] Rework returns the goods and writes nothing off
+        HoldDisposition := Disposition::WHARework;
+        Assert.IsTrue(HoldDisposition.ReturnsToUse(), 'Rework returns the goods to use.');
+        Assert.IsFalse(HoldDisposition.WritesOffStock(), 'Rework writes nothing off.');
+        // [THEN] Scrapping keeps the goods out and writes them off
+        HoldDisposition := Disposition::WHAScrap;
+        Assert.IsFalse(HoldDisposition.ReturnsToUse(), 'Scrap does not return the goods.');
+        Assert.IsTrue(HoldDisposition.WritesOffStock(), 'Scrap writes the goods off.');
+    end;
+
+    [Test]
+    procedure TheDefaultReasonComesFromTheSetup()
+    var
+        Setup: Record "WHA Quality Hold Setup";
+        QualityHoldMgt: Codeunit "WHA Quality Hold Mgt.";
+        Reason: Enum "WHA Hold Reason";
+    begin
+        // [GIVEN] A setup whose default reason is a complaint
+        ConfigureQualityHold(false, false);
+        Setup.Get();
+        Setup.Validate("Default Reason", Reason::WHAComplaint);
+        Setup.Modify(true);
+
+        // [THEN] A new hold suggests a complaint
+        Assert.AreEqual(Reason::WHAComplaint, QualityHoldMgt.DefaultReason(), 'The default reason is read from the setup.');
+
+        // [GIVEN] No setup at all
+        Setup.Delete(false);
+        // [THEN] A new hold suggests an inspection
+        Assert.AreEqual(Reason::WHAInspection, QualityHoldMgt.DefaultReason(), 'Without a setup a hold is an inspection.');
+        ConfigureQualityHold(false, false);
+    end;
+
+    local procedure UseStockPolicy(Policy: Enum "WHA Hold Stock Policy")
+    var
+        Setup: Record "WHA Quality Hold Setup";
+    begin
+        Setup.Get();
+        Setup."Hold Blocks Stock" := Policy;
+        Setup.Modify(false);
+    end;
+
+    local procedure CreateUnitInBin(var HandlingUnit: Record "WHA Handling Unit"; UnitNo: Code[20]; ParentNo: Code[20]; BinCode: Code[20])
+    begin
+        CreateUnit(HandlingUnit, UnitNo, ParentNo, HandlingUnit.Status::WHAOpen);
+        HandlingUnit."Bin Code" := BinCode;
+        HandlingUnit.Modify(false);
+    end;
+
+    local procedure AddContentsWithLot(UnitNo: Code[20]; LotNo: Code[50]; Quantity: Decimal)
+    var
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        HandlingUnitLine.Init();
+        HandlingUnitLine."Handling Unit No." := UnitNo;
+        HandlingUnitLine."Item No." := CopyStr(ItemTok, 1, 20);
+        HandlingUnitLine."Lot No." := LotNo;
+        HandlingUnitLine.Quantity := Quantity;
+        HandlingUnitLine.Insert(true);
     end;
 
     local procedure ConfigureQualityHold(HoldNested: Boolean; RequireDisposition: Boolean)

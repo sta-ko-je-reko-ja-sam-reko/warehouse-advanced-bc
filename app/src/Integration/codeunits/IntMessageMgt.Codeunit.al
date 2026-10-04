@@ -133,7 +133,8 @@ codeunit 55653 "WHA Int. Message Mgt."
 
     /// <summary>
     /// Applies one inbound message. A message that fails keeps its error text and is counted, so it can
-    /// be looked at or tried again; nothing it did is left behind.
+    /// be looked at or tried again; nothing it did is left behind. A message that was cancelled was dropped
+    /// on purpose and is refused like one that was already applied.
     /// </summary>
     /// <param name="IntegrationMessage">The message to apply.</param>
     /// <returns>True when the message was applied.</returns>
@@ -143,7 +144,7 @@ codeunit 55653 "WHA Int. Message Mgt."
     begin
         if IntegrationMessage.Direction <> IntegrationMessage.Direction::WHAInbound then
             Error(NotInboundErr, IntegrationMessage."Entry No.");
-        if IntegrationMessage.Status = IntegrationMessage.Status::WHAProcessed then
+        if IntegrationMessage.Status in [IntegrationMessage.Status::WHAProcessed, IntegrationMessage.Status::WHACancelled] then
             Error(AlreadyDoneErr, IntegrationMessage."Entry No.", IntegrationMessage.Status);
 
         ClearLastError();

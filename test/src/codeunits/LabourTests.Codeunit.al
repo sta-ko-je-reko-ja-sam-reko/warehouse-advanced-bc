@@ -359,6 +359,106 @@ codeunit 59010 "WHA Labour Tests"
         Assert.AreEqual(1, EntryCountFor('LAB-OLD-2'), 'A window of zero should still reach work from any date.');
     end;
 
+    [Test]
+    procedure TimeCannotBeNegative()
+    var
+        LabourEntry: Record "WHA Labour Entry";
+        xLabourEntry: Record "WHA Labour Entry";
+        LabourEntryLogic: Codeunit "WHA Labour Entry Logic";
+    begin
+        // [GIVEN] A labour entry
+        // [WHEN] Its time is set below zero
+        LabourEntry."Actual Minutes" := -5;
+        asserterror LabourEntryLogic.Validate_ActualMinutes(LabourEntry, xLabourEntry);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Time cannot be negative.');
+    end;
+
+    [Test]
+    procedure TimeWithoutAJobIsDatedByWhenItEnded()
+    var
+        LabourEntry: Record "WHA Labour Entry";
+        LabourEntryLogic: Codeunit "WHA Labour Entry Logic";
+        Day: Date;
+    begin
+        // [GIVEN] An entry with no job and no user, which ran from eight until half past nine on a given day
+        Day := WorkDate() - 1;
+        LabourEntry."Entry Type" := LabourEntry."Entry Type"::WHADirect;
+        LabourEntry."Started At" := CreateDateTime(Day, 080000T);
+        LabourEntry."Ended At" := CreateDateTime(Day, 093000T);
+
+        // [WHEN] It is inserted
+        LabourEntryLogic.Trigger_OnInsert(LabourEntry);
+
+        // [THEN] It is time off the jobs, belongs to the current user, is dated that day and lasted ninety minutes
+        Assert.AreEqual(LabourEntry."Entry Type"::WHAIndirect, LabourEntry."Entry Type", 'Time with no job is time off the jobs.');
+        Assert.AreEqual(CopyStr(UserId(), 1, 50), LabourEntry."User ID", 'Time with no user belongs to whoever recorded it.');
+        Assert.AreEqual(Day, LabourEntry."Posting Date", 'The entry is dated by when it ended.');
+        Assert.AreEqual(90, LabourEntry."Actual Minutes", 'Eight until half past nine is ninety minutes.');
+    end;
+
+    [Test]
+    procedure PerformanceIsWhatWasExpectedOverWhatWasTaken()
+    var
+        LabourEntry: Record "WHA Labour Entry";
+        LabourEntryLogic: Codeunit "WHA Labour Entry Logic";
+    begin
+        // [GIVEN] A job measured against a standard of thirty minutes that took forty
+        LabourEntry."Measured Against Standard" := true;
+        LabourEntry."Expected Minutes" := 30;
+        LabourEntry."Actual Minutes" := 40;
+
+        // [THEN] The performance is seventy-five percent
+        Assert.AreEqual(75, LabourEntryLogic.PerformanceOf(LabourEntry), 'Thirty expected over forty taken is seventy-five percent.');
+
+        // [GIVEN] The same job took no time at all
+        LabourEntry."Actual Minutes" := 0;
+        // [THEN] No performance is claimed
+        Assert.AreEqual(0, LabourEntryLogic.PerformanceOf(LabourEntry), 'A job of no length has no performance.');
+
+        // [GIVEN] A job nothing measured
+        LabourEntry."Actual Minutes" := 40;
+        LabourEntry."Measured Against Standard" := false;
+        // [THEN] No performance is claimed
+        Assert.AreEqual(0, LabourEntryLogic.PerformanceOf(LabourEntry), 'An unmeasured job has no performance.');
+    end;
+
+    [Test]
+    procedure TimeThatRunsBackwardsIsNoTime()
+    var
+        LabourEntryLogic: Codeunit "WHA Labour Entry Logic";
+    begin
+        // [THEN] An end before the start, or a missing end, is no time at all
+        Assert.AreEqual(0, LabourEntryLogic.MinutesBetween(CreateDateTime(WorkDate(), 100000T), CreateDateTime(WorkDate(), 090000T)), 'An end before the start is no time.');
+        Assert.AreEqual(0, LabourEntryLogic.MinutesBetween(CreateDateTime(WorkDate(), 100000T), 0DT), 'A missing end is no time.');
+        Assert.AreEqual(15, LabourEntryLogic.MinutesBetween(CreateDateTime(WorkDate(), 100000T), CreateDateTime(WorkDate(), 101500T)), 'Ten until a quarter past is fifteen minutes.');
+    end;
+
+    [Test]
+    procedure AJobThatHandledNothingIsExpectedToTakeTheFixedTime()
+    var
+        LabourStandard: Record "WHA Labour Standard";
+        LabourMgt: Codeunit "WHA Labour Mgt.";
+        TaskType: Enum "WHA Warehouse Task Type";
+        Basis: Enum "WHA Labour Standard Basis";
+        Measured: Boolean;
+    begin
+        // [GIVEN] A standard of five minutes a job plus two a piece for picks at a location of its own
+        ConfigureLabour(240);
+        CreateStandard('WHALAB3', TaskType::WHAPick, Basis::WHAFixedPlusUnit, 5, 2);
+        LabourStandard.Get('WHALAB3', TaskType::WHAPick);
+        LabourStandard.Basis := Basis::WHAFixedPlusUnit;
+        LabourStandard.Modify(false);
+
+        // [THEN] Four pieces are expected to take thirteen minutes
+        Assert.AreEqual(13, LabourMgt.ExpectedMinutes(TaskType::WHAPick, 'WHALAB3', 4, Measured), 'Five plus four times two is thirteen.');
+        Assert.IsTrue(Measured, 'A job with a standard is measured.');
+
+        // [THEN] A job that handled nothing is expected to take only the fixed part
+        Assert.AreEqual(5, LabourMgt.ExpectedMinutes(TaskType::WHAPick, 'WHALAB3', 0, Measured), 'Nothing handled is just the fixed time.');
+    end;
+
     local procedure ConfigureLabour(MaxJobMinutes: Decimal)
     var
         Setup: Record "WHA Labour Setup";

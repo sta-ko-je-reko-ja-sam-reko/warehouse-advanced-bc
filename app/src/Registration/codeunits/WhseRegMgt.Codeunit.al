@@ -195,7 +195,7 @@ codeunit 55802 "WHA Whse. Reg. Mgt."
     /// <returns>True when a date was found.</returns>
     procedure KnownWarehouseExpiry(ItemNo: Code[20]; VariantCode: Code[10]; LocationCode: Code[10]; LotNo: Code[50]; SerialNo: Code[50]; var ExpiryDate: Date): Boolean
     var
-        ItemTrackingSetup: Record "Item Tracking Setup";
+        TempItemTrackingSetup: Record "Item Tracking Setup";
         Location: Record Location;
         ItemTrackingMgt: Codeunit "Item Tracking Management";
     begin
@@ -206,10 +206,10 @@ codeunit 55802 "WHA Whse. Reg. Mgt."
         if not Location.Get(LocationCode) then
             exit(false);
 
-        ItemTrackingSetup."Lot No." := LotNo;
-        ItemTrackingSetup."Serial No." := SerialNo;
+        TempItemTrackingSetup."Lot No." := LotNo;
+        TempItemTrackingSetup."Serial No." := SerialNo;
 
-        exit(ItemTrackingMgt.GetWhseExpirationDate(ItemNo, VariantCode, Location, ItemTrackingSetup, ExpiryDate));
+        exit(ItemTrackingMgt.GetWhseExpirationDate(ItemNo, VariantCode, Location, TempItemTrackingSetup, ExpiryDate));
     end;
 
     /// <summary>

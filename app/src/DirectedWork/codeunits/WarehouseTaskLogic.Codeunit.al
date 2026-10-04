@@ -423,6 +423,7 @@ codeunit 55200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
     var
         Setup: Record "WHA Warehouse Task Setup";
         FollowUpTask: Record "WHA Warehouse Task";
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
     begin
         Setup.SetLoadFields("Follow Up Short Picks");
         if not Setup.Get() then
@@ -442,6 +443,7 @@ codeunit 55200 "WHA Warehouse Task Logic" implements "WHA IWarehouseTask"
         FollowUpTask.Quantity := Outstanding;
         FollowUpTask.Priority := WarehouseTask.Priority;
         FollowUpTask."Due Date" := WarehouseTask."Due Date";
+        TaskSourceMgt.StampSource(FollowUpTask, WarehouseTask."Source Type", WarehouseTask."Source No.", WarehouseTask."Source Line No.", WarehouseTask."Source Document No.");
         FollowUpTask.Insert(true);
     end;
 

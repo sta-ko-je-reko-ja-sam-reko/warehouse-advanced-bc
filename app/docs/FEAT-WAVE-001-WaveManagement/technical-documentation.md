@@ -84,7 +84,7 @@ answers is "what is still outstanding", and a withdrawn job is not.
 |---|---|
 | `Code`, `Description` | What the template is, and how every wave it builds is described |
 | `Location Code` | Required. A template covers one location, like the waves it builds |
-| `Strategy`, `Max Tasks`, `Max Minutes` | Copied onto every wave it builds |
+| `Strategy`, `Max Tasks`, `Max Minutes` | Copied onto every wave it builds. The template's strategy and minutes win over the setup defaults even at their first value: a template's zero minutes means the job count is the only limit, not "use the setup default". Zero jobs still takes the setup's number |
 | `Release Automatically` | Whether the wave reaches the floor without anybody pressing anything |
 | `Scheduled` | Whether the scheduled run includes it |
 | `Blocked` | Out of use. A template finished with is blocked, never deleted |

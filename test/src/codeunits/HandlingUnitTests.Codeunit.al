@@ -286,27 +286,56 @@ codeunit 59000 "WHA Handling Unit Tests"
         xHandlingUnit: Record "WHA Handling Unit";
         Logic: Codeunit "WHA Handling Unit Logic";
     begin
-        // [SCENARIO] A maximum of two levels allows a carton on a pallet, and refuses a box in that carton.
+        // [SCENARIO] Depth counts levels of nesting, as GetNestingDepth does: a carton on a pallet is one
+        // level and a box in that carton two. A maximum of two allows the box and refuses anything in it.
+        // It used to count the pallet itself as a level, so a maximum of two refused the box.
         // [GIVEN] A maximum depth of two, and a carton already standing on a pallet
         SetNesting(true, 2);
         InsertUnit('HUT-D-PAL', '');
         InsertUnit('HUT-D-CTN', 'HUT-D-PAL');
 
-        // [WHEN] Another carton is put on the pallet
-        xHandlingUnit."No." := 'HUT-D-CT2';
-        HandlingUnit := xHandlingUnit;
-        HandlingUnit."Parent No." := 'HUT-D-PAL';
-        Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
-        // [THEN] That is allowed
-        Assert.AreEqual('HUT-D-PAL', HandlingUnit."Parent No.", 'A second level is within a maximum of two.');
-
         // [WHEN] A box is put in the carton
         xHandlingUnit."No." := 'HUT-D-BOX';
         HandlingUnit := xHandlingUnit;
         HandlingUnit."Parent No." := 'HUT-D-CTN';
+        Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
+        // [THEN] That is allowed, because the box is two levels down
+        Assert.AreEqual('HUT-D-CTN', HandlingUnit."Parent No.", 'A second level of nesting is within a maximum of two.');
+        HandlingUnit.Insert(false);
+
+        // [WHEN] Something is put in the box
+        xHandlingUnit."No." := 'HUT-D-INR';
+        HandlingUnit := xHandlingUnit;
+        HandlingUnit."Parent No." := 'HUT-D-BOX';
         asserterror Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
-        // [THEN] A third level is refused
-        Assert.ExpectedError('Placing HUT-D-BOX inside HUT-D-CTN would exceed the maximum nesting depth of 2.');
+        // [THEN] A third level of nesting is refused
+        Assert.ExpectedError('Placing HUT-D-INR inside HUT-D-BOX would exceed the maximum nesting depth of 2.');
+        SetNesting(true, 0);
+    end;
+
+    [Test]
+    procedure MovingAUnitCountsWhatItHolds()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        xHandlingUnit: Record "WHA Handling Unit";
+        Logic: Codeunit "WHA Handling Unit Logic";
+    begin
+        // [SCENARIO] A carton holding a box is put on a pallet. The carton lands one level down, but the
+        // box it holds lands two, and that is what the maximum has to be measured against.
+        // [GIVEN] A maximum depth of one, a pallet, and a carton that already holds a box
+        SetNesting(true, 1);
+        InsertUnit('HUT-M-PAL', '');
+        InsertUnit('HUT-M-CTN', '');
+        InsertUnit('HUT-M-BOX', 'HUT-M-CTN');
+
+        // [WHEN] The carton is put on the pallet
+        HandlingUnit.Get('HUT-M-CTN');
+        xHandlingUnit := HandlingUnit;
+        HandlingUnit."Parent No." := 'HUT-M-PAL';
+        asserterror Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
+
+        // [THEN] It is refused, because the box inside would sit two levels down
+        Assert.ExpectedError('would exceed the maximum nesting depth of 1.');
         SetNesting(true, 0);
     end;
 

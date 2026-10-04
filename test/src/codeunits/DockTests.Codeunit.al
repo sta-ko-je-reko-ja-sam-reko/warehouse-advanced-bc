@@ -570,6 +570,128 @@ codeunit 59012 "WHA Dock Tests"
         Setup.Modify(true);
     end;
 
+    [Test]
+    procedure AVehicleIsNotPutOnADoorBlockedAfterBooking()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+        DoorDirection: Enum "WHA Door Direction";
+    begin
+        // [SCENARIO] Regression. A booking keeps the door it was given, but the door can be blocked between
+        // booking and arrival. Moving the vehicle on used to check only whether another vehicle stood there.
+        // [GIVEN] A vehicle booked onto the inbound door, which is blocked after it arrives
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 40, 100000T), CopyStr(InDoorTok, 1, 20)));
+        DockMgt.Arrive(DockAppointment, '');
+        BlockDoor(CopyStr(InDoorTok, 1, 20));
+
+        // [WHEN] The vehicle is put on its door
+        asserterror DockMgt.MoveToDoor(DockAppointment);
+
+        // [THEN] It is refused, because the door is blocked
+        Assert.ExpectedError('Door IN-1 is blocked');
+        EnsureDoor(CopyStr(InDoorTok, 1, 20), DoorDirection::WHAInbound);
+    end;
+
+    [Test]
+    procedure AVehicleIsNotPutOnADoorThatNoLongerFacesItsWay()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+        DoorDirection: Enum "WHA Door Direction";
+    begin
+        // [GIVEN] An inbound vehicle booked onto the flexible door, which is turned outbound-only after it arrives
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 41, 100000T), CopyStr(BothDoorTok, 1, 20)));
+        DockMgt.Arrive(DockAppointment, '');
+        EnsureDoor(CopyStr(BothDoorTok, 1, 20), DoorDirection::WHAOutbound);
+
+        // [WHEN] The vehicle is put on its door
+        asserterror DockMgt.MoveToDoor(DockAppointment);
+
+        // [THEN] It is refused, because the door takes the other direction
+        Assert.ExpectedError('Door FLEX-1 does not take');
+        EnsureDoor(CopyStr(BothDoorTok, 1, 20), DoorDirection::WHABoth);
+    end;
+
+    [Test]
+    procedure ABookingFromOutsideIsCheckedLikeAnyOther()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+    begin
+        // [SCENARIO] Regression. The API page inserted what it was sent, so an agent could book a blocked
+        // door, a door facing the wrong way or a slot already taken. It now books through the same logic.
+        // [GIVEN] An inbound booking filled in by a caller who names the outbound-only door
+        ConfigureDock(false);
+        DockAppointment.Init();
+        DockAppointment."Location Code" := CopyStr(LocationTok, 1, 10);
+        DockAppointment.Direction := DockAppointment.Direction::WHAInbound;
+        DockAppointment."Expected At" := CreateDateTime(WorkDate() + 42, 100000T);
+        DockAppointment."Carrier Name" := 'Outside carrier';
+
+        // [WHEN] It is booked the way the API page books it
+        asserterror DockMgt.BookAppointment(DockAppointment, CopyStr(OutDoorTok, 1, 20));
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Door OUT-1 does not take');
+    end;
+
+    [Test]
+    procedure ABookingFromOutsideWithoutADoorGetsOneChosen()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+    begin
+        // [GIVEN] An outbound booking filled in by a caller who names no door
+        ConfigureDock(false);
+        DockAppointment.Init();
+        DockAppointment."Location Code" := CopyStr(LocationTok, 1, 10);
+        DockAppointment.Direction := DockAppointment.Direction::WHAOutbound;
+        DockAppointment."Expected At" := CreateDateTime(WorkDate() + 43, 100000T);
+        DockAppointment."Carrier Name" := 'Outside carrier';
+
+        // [WHEN] It is booked the way the API page books it
+        DockMgt.BookAppointment(DockAppointment, '');
+
+        // [THEN] It is numbered, keeps what the caller sent, and has a door that takes outbound vehicles
+        Assert.AreNotEqual('', DockAppointment."No.", 'The booking is numbered.');
+        DockAppointment.Get(DockAppointment."No.");
+        Assert.AreEqual('Outside carrier', DockAppointment."Carrier Name", 'What the caller sent is kept.');
+        Assert.IsTrue(DockAppointment."Dock Door Code" in [CopyStr(OutDoorTok, 1, 20), CopyStr(BothDoorTok, 1, 20)], 'An outbound booking gets a door that takes outbound vehicles.');
+    end;
+
+    [Test]
+    procedure ChangingABookingFromOutsideRechecksTheDoor()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        xDockAppointment: Record "WHA Dock Appointment";
+        DockMgt: Codeunit "WHA Dock Mgt.";
+        Direction: Enum "WHA Dock Direction";
+    begin
+        // [GIVEN] An inbound booking on the inbound door
+        ConfigureDock(false);
+        DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate() + 44, 100000T), CopyStr(InDoorTok, 1, 20)));
+
+        // [WHEN] A caller changes only who is coming
+        xDockAppointment := DockAppointment;
+        DockAppointment."Carrier Name" := 'Changed carrier';
+        DockMgt.ChangeBooking(DockAppointment, xDockAppointment);
+        // [THEN] The change is saved and the door is left alone
+        DockAppointment.Get(DockAppointment."No.");
+        Assert.AreEqual('Changed carrier', DockAppointment."Carrier Name", 'A change that does not touch the door is saved.');
+        Assert.AreEqual(CopyStr(InDoorTok, 1, 20), DockAppointment."Dock Door Code", 'The door is left as it was.');
+
+        // [WHEN] A caller moves it onto the outbound-only door
+        xDockAppointment := DockAppointment;
+        DockAppointment."Dock Door Code" := CopyStr(OutDoorTok, 1, 20);
+        asserterror DockMgt.ChangeBooking(DockAppointment, xDockAppointment);
+        // [THEN] It is refused
+        Assert.ExpectedError('Door OUT-1 does not take');
+    end;
+
     local procedure ConfigureDock(RequirePosition: Boolean)
     var
         Setup: Record "WHA Dock Setup";

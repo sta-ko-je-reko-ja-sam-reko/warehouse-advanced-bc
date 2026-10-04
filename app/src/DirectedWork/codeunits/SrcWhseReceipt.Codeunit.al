@@ -10,7 +10,7 @@ codeunit 55205 "WHA Src Whse. Receipt" implements "WHA ITaskSource"
     var
         DescriptionLbl: Label 'Goods that have arrived and are standing in the receiving bin. Every line still to be received becomes a put-away, taken from the bin the receipt names.';
         LinkLbl: Label 'Warehouse receipt %1, line %2', Comment = '%1 = the warehouse receipt number, %2 = the line number';
-        OwnActivitiesErr: Label 'Location %%1 requires Business Central''s own put-away or pick, so it raises warehouse activities of its own for these lines. Raising warehouse tasks here as well would send an operator to the same bin twice. Turn off Require Put-away and Require Pick at that location, or leave this warehouse receipt to Business Central.', Comment = '%%1 = the location code';
+        OwnActivitiesErr: Label 'Location %1 requires Business Central''s own put-away or pick, so it raises warehouse activities of its own for these lines. Raising warehouse tasks here as well would send an operator to the same bin twice. Turn off Require Put-away and Require Pick at that location, or leave this warehouse receipt to Business Central.', Comment = '%1 = the location code';
         ReceiptMissingErr: Label 'Warehouse receipt %1 does not exist, so no work can be raised from it.', Comment = '%1 = the warehouse receipt number';
 
     /// <summary>

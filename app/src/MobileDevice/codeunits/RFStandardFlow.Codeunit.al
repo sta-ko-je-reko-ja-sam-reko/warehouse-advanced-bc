@@ -16,6 +16,7 @@ codeunit 55100 "WHA RF Standard Flow" implements "WHA IRFFlow"
         NothingToScanErr: Label 'There is nothing to scan now. Read the screen and choose the action it asks for.';
         NotReadyErr: Label 'Finish the steps on the screen before confirming.';
         NoTaskErr: Label 'You are not holding a job. Choose Next task first.';
+        NothingToHandBackErr: Label 'Job %1 is %2, so there is nothing to hand back. Choose Next task.', Comment = '%1 = the warehouse task number, %2 = the status of the task';
         SignInLbl: Label 'Scan the code on your handheld to sign in.';
         GetWorkLbl: Label 'Choose Next task when you are ready for the next job.';
         ScanFromLbl: Label 'Go to bin %1 and scan it.', Comment = '%1 = the bin to take from';
@@ -235,7 +236,8 @@ codeunit 55100 "WHA RF Standard Flow" implements "WHA IRFFlow"
     end;
 
     /// <summary>
-    /// Gives the task back to the queue, for when the operator cannot finish it.
+    /// Gives the task back to the queue, for when the operator cannot finish it. A job that is already
+    /// finished or cancelled has nobody's name left to take off, and is refused rather than changed.
     /// </summary>
     /// <param name="WarehouseTask">The task being worked.</param>
     /// <returns>The step to show next.</returns>
@@ -245,6 +247,8 @@ codeunit 55100 "WHA RF Standard Flow" implements "WHA IRFFlow"
     begin
         if WarehouseTask."No." = '' then
             Error(NoTaskErr);
+        if WarehouseTask.Status in [WarehouseTask.Status::WHACompleted, WarehouseTask.Status::WHACancelled] then
+            Error(NothingToHandBackErr, WarehouseTask."No.", WarehouseTask.Status);
 
         WarehouseTask.Validate("Assigned To User ID", '');
         WarehouseTask.Modify(true);

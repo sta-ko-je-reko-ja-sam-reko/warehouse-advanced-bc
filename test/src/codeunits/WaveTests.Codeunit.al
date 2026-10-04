@@ -853,6 +853,38 @@ codeunit 59004 "WHA Wave Tests"
         Setup.Modify(false);
     end;
 
+    [Test]
+    procedure ATemplateWithNoTimeLimitBuildsAWaveWithNoTimeLimit()
+    var
+        Setup: Record "WHA Wave Setup";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveTemplate: Record "WHA Wave Template";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+        PreviousMinutes: Decimal;
+    begin
+        // [SCENARIO] Regression. On a template, zero minutes means the job count is the only limit. A new
+        // wave used to read the zero as "use the setup default" and cap itself at the setup's minutes.
+        // [GIVEN] A setup that caps waves at sixty minutes, and a template with no time limit
+        ConfigureWaves(false);
+        Setup.Get();
+        PreviousMinutes := Setup."Default Max Minutes";
+        Setup."Default Max Minutes" := 60;
+        Setup.Modify(false);
+        EnsureWaveNumbering();
+        CreateReleasedTask(WarehouseTask, 'WV-MIN-T1', CopyStr(LocationTok, 1, 10), 10);
+        CreateTemplate(WaveTemplate, 'WV-MIN', 25, 0, false);
+
+        // [WHEN] The template builds a wave
+        WaveTemplateLogic.CreateWave(WaveTemplate, Wave);
+
+        // [THEN] The wave has no time limit either
+        Assert.AreEqual(0, Wave."Max Minutes", 'A template with no time limit builds a wave with none.');
+        Setup.Get();
+        Setup."Default Max Minutes" := PreviousMinutes;
+        Setup.Modify(false);
+    end;
+
     local procedure ConfigureWaves(IncludeUnreleased: Boolean)
     var
         Setup: Record "WHA Wave Setup";

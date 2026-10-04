@@ -636,6 +636,30 @@ codeunit 59003 "WHA RF Tests"
         Assert.ExpectedError('Complete the task instead of reporting it short.');
     end;
 
+    [Test]
+    procedure AFinishedJobCannotBeHandedBack()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        RFFlow: Codeunit "WHA RF Standard Flow";
+    begin
+        // [SCENARIO] Regression. Handing back a job that was already finished used to take the operator's
+        // name off it, leaving a completed job that nobody did.
+        // [GIVEN] A job this user holds, which has been finished
+        ConfigureHandheld(true, false);
+        CreateAssignedTask(WarehouseTask, 'RF-HB-DONE');
+        WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
+        WarehouseTask.Modify(false);
+
+        // [WHEN] The operator hands it back
+        asserterror RFFlow.HandBack(WarehouseTask);
+
+        // [THEN] It is refused, and the job still says who did it
+        Assert.ExpectedError('so there is nothing to hand back');
+        WarehouseTask.Get('RF-HB-DONE');
+        Assert.AreEqual(CopyStr(UserId(), 1, 50), WarehouseTask."Assigned To User ID", 'A finished job keeps the name of who did it.');
+        Assert.AreEqual(WarehouseTask.Status::WHACompleted, WarehouseTask.Status, 'A finished job stays finished.');
+    end;
+
     local procedure ConfigureHandheld(ConfirmByScan: Boolean; RequireDevice: Boolean)
     var
         Setup: Record "WHA RF Setup";

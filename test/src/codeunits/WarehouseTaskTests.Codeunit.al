@@ -1356,6 +1356,59 @@ codeunit 59001 "WHA Warehouse Task Tests"
         Setup.Modify(false);
     end;
 
+    [Test]
+    procedure TheReceiptRefusalNamesTheLocation()
+    var
+        Location: Record Location;
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Regression. The label was written with %%1, so the message showed a literal
+        // placeholder instead of the location somebody has to go and change.
+        // [GIVEN] A receipt at a location that requires Business Central's own put-away
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateReceipt('WHA-WR-LOC', 'PO-1199');
+        AddReceiptLine('WHA-WR-LOC', 10000, 2);
+        Location.Get(TestLocationTok);
+        Location."Require Put-away" := true;
+        Location.Modify(false);
+
+        // [WHEN] Work is raised from it
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseReceipt, 'WHA-WR-LOC');
+
+        // [THEN] The refusal names the location
+        Location."Require Put-away" := false;
+        Location.Modify(false);
+        Assert.ExpectedError('Location WHATEST requires Business Central''s own put-away or pick');
+    end;
+
+    [Test]
+    procedure TheShipmentRefusalNamesTheLocation()
+    var
+        Location: Record Location;
+        TaskSourceMgt: Codeunit "WHA Task Source Mgt.";
+        SourceType: Enum "WHA Task Source";
+    begin
+        // [SCENARIO] Regression, as for receipts: the location code was not filled into the message.
+        // [GIVEN] A shipment at a location that requires Business Central's own pick
+        ConfigureQueue(0);
+        EnsureTaskNumbering();
+        CreateShipment('WHA-WS-LOC', 'SO-1199');
+        AddShipmentLine('WHA-WS-LOC', 10000, 2);
+        Location.Get(TestLocationTok);
+        Location."Require Pick" := true;
+        Location.Modify(false);
+
+        // [WHEN] Work is raised from it
+        asserterror TaskSourceMgt.GenerateFrom(SourceType::WHAWhseShipment, 'WHA-WS-LOC');
+
+        // [THEN] The refusal names the location
+        Location."Require Pick" := false;
+        Location.Modify(false);
+        Assert.ExpectedError('Location WHATEST requires Business Central''s own put-away or pick');
+    end;
+
     local procedure ConfigureQueue(MaxOpenTasks: Integer)
     var
         Setup: Record "WHA Warehouse Task Setup";

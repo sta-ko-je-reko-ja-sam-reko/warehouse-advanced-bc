@@ -209,6 +209,66 @@ codeunit 59022 "WHA Activity Cue Tests"
         Assert.AreEqual(SheetsBefore + 1, CueValue(CountCues, TempActivitiesCue.FieldNo("WHA Count Sheets Out")), 'The sheet out for counting is counted.');
     end;
 
+    [Test]
+    procedure OnlySheetsWithAnUnapprovedDifferenceWaitForApproval()
+    var
+        CountSetup: Record "WHA Count Setup";
+        TempActivitiesCue: Record "WHA Activities Cue";
+        ActivityCues: Interface "WHA IActivityCues";
+        WaitingBefore: Integer;
+        ApproveVariances: Boolean;
+    begin
+        // [SCENARIO] Regression. The tile says how many counted sheets wait for somebody to accept a
+        // difference. It used to count every counted sheet, including those with nothing to approve.
+        // [GIVEN] Counting on and asking for differences to be approved
+        SwitchOn(Enum::"WHA Feature"::WHACounting);
+        CountSetup.Get();
+        ApproveVariances := CountSetup."Approve Variances";
+        CountSetup."Approve Variances" := true;
+        CountSetup.Modify(false);
+        ActivityCues := Enum::"WHA Activity Provider"::WHACounting;
+        WaitingBefore := CueValue(ActivityCues, TempActivitiesCue.FieldNo("WHA Counts To Approve"));
+
+        // [WHEN] Three sheets are counted: one with a difference nobody approved, one whose difference was
+        // approved, and one with no difference beyond the tolerance
+        InsertCountedSheet('CUE-CNT-WAIT', true, false);
+        InsertCountedSheet('CUE-CNT-APPR', true, true);
+        InsertCountedSheet('CUE-CNT-OK', false, false);
+
+        // [THEN] Only the first is waiting for approval
+        Assert.AreEqual(WaitingBefore + 1, CueValue(ActivityCues, TempActivitiesCue.FieldNo("WHA Counts To Approve")), 'Only a sheet with an unapproved difference waits for approval.');
+
+        // [WHEN] The setup stops asking for approval
+        CountSetup.Get();
+        CountSetup."Approve Variances" := false;
+        CountSetup.Modify(false);
+
+        // [THEN] Nothing waits for approval
+        Assert.AreEqual(0, CueValue(ActivityCues, TempActivitiesCue.FieldNo("WHA Counts To Approve")), 'Without an approval step no sheet waits for one.');
+        CountSetup.Get();
+        CountSetup."Approve Variances" := ApproveVariances;
+        CountSetup.Modify(false);
+    end;
+
+    local procedure InsertCountedSheet(SheetNo: Code[20]; OutOfTolerance: Boolean; Approved: Boolean)
+    var
+        CountSheet: Record "WHA Count Sheet";
+        CountSheetLine: Record "WHA Count Sheet Line";
+    begin
+        CountSheet.Init();
+        CountSheet."No." := SheetNo;
+        CountSheet.Status := CountSheet.Status::WHACounted;
+        CountSheet.Insert(false);
+
+        CountSheetLine.Init();
+        CountSheetLine."Sheet No." := SheetNo;
+        CountSheetLine."Line No." := 10000;
+        CountSheetLine.Counted := true;
+        CountSheetLine."Out of Tolerance" := OutOfTolerance;
+        CountSheetLine.Approved := Approved;
+        CountSheetLine.Insert(false);
+    end;
+
     local procedure CueValue(ActivityCues: Interface "WHA IActivityCues"; CueFieldNo: Integer): Integer
     var
         Results: Dictionary of [Text, Text];

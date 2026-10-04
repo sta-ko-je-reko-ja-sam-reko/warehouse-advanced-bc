@@ -87,6 +87,11 @@ page 55251 "WHA Replenishment Rules"
         }
     }
 
+    trigger OnNewRecord(BelowxRec: Boolean)
+    begin
+        Rec.ApplyNewRuleDefaults();
+    end;
+
     var
         RaisedMsg: Label '%1 piece(s) of replenishment work raised.', Comment = '%1 = how many warehouse tasks were created';
 

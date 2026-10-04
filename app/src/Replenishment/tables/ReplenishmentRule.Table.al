@@ -177,6 +177,15 @@ table 55251 "WHA Replenishment Rule"
         ILogicDefined := true;
     end;
 
+    /// <summary>
+    /// Fills a rule somebody is about to create with the setup's defaults, before they choose anything.
+    /// Called when a page starts a new rule, so what is then chosen on purpose is kept as chosen.
+    /// </summary>
+    procedure ApplyNewRuleDefaults()
+    begin
+        Logic().ApplyNewRuleDefaults(Rec);
+    end;
+
     local procedure Logic(): Interface "WHA IReplenishment"
     var
         DefaultLogic: Codeunit "WHA Repl. Rule Logic";

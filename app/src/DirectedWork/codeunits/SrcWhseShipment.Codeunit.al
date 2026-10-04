@@ -10,7 +10,7 @@ codeunit 55206 "WHA Src Whse. Shipment" implements "WHA ITaskSource"
     var
         DescriptionLbl: Label 'Goods that are due to leave. Every line still to be shipped becomes a pick, ending at the bin the shipment names. Where the goods are picked from is left open, because that is a question about stock and not about the document.';
         LinkLbl: Label 'Warehouse shipment %1, line %2', Comment = '%1 = the warehouse shipment number, %2 = the line number';
-        OwnActivitiesErr: Label 'Location %%1 requires Business Central''s own put-away or pick, so it raises warehouse activities of its own for these lines. Raising warehouse tasks here as well would send an operator to the same bin twice. Turn off Require Put-away and Require Pick at that location, or leave this warehouse shipment to Business Central.', Comment = '%%1 = the location code';
+        OwnActivitiesErr: Label 'Location %1 requires Business Central''s own put-away or pick, so it raises warehouse activities of its own for these lines. Raising warehouse tasks here as well would send an operator to the same bin twice. Turn off Require Put-away and Require Pick at that location, or leave this warehouse shipment to Business Central.', Comment = '%1 = the location code';
         ShipmentMissingErr: Label 'Warehouse shipment %1 does not exist, so no work can be raised from it.', Comment = '%1 = the warehouse shipment number';
 
     /// <summary>

@@ -567,6 +567,66 @@ codeunit 59007 "WHA Replenishment Tests"
         Assert.AreEqual(1, UnitConvert.QtyPerUnit(CopyStr(ItemTok, 1, 20), 'WHANONE'), 'An unknown unit is treated as the base unit.');
     end;
 
+    [Test]
+    procedure AMethodChosenOnPurposeIsKept()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        Setup: Record "WHA Repl. Setup";
+        Method: Enum "WHA Repl. Method";
+        PreviousMethod: Enum "WHA Repl. Method";
+    begin
+        // [SCENARIO] Regression. Bin content is the first method, so a rule that chose it on purpose looked
+        // blank and was switched to the setup's default when it was inserted.
+        // [GIVEN] A setup whose default method is handling units
+        ConfigureReplenishment(false);
+        Setup.Get();
+        PreviousMethod := Setup."Default Method";
+        Setup."Default Method" := Method::WHAHandlingUnits;
+        Setup.Modify(false);
+
+        // [WHEN] A rule that chose bin content is created
+        ReplenishmentRule.Init();
+        ReplenishmentRule."Location Code" := CopyStr(LocationTok, 1, 10);
+        ReplenishmentRule."Item No." := CopyStr(ItemTok, 1, 20);
+        ReplenishmentRule."Bin Code" := 'PICK-MTH';
+        ReplenishmentRule.ApplyNewRuleDefaults();
+        ReplenishmentRule.Validate(Method, Method::WHABinContent);
+        ReplenishmentRule.Insert(true);
+
+        // [THEN] It keeps bin content
+        ReplenishmentRule.Get(ReplenishmentRule."Location Code", ReplenishmentRule."Item No.", '', 'PICK-MTH');
+        Assert.AreEqual(Method::WHABinContent, ReplenishmentRule.Method, 'A method chosen on purpose is kept.');
+        Setup.Get();
+        Setup."Default Method" := PreviousMethod;
+        Setup.Modify(false);
+    end;
+
+    [Test]
+    procedure ANewRuleStartsOnTheSetupsMethod()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        Setup: Record "WHA Repl. Setup";
+        Method: Enum "WHA Repl. Method";
+        PreviousMethod: Enum "WHA Repl. Method";
+    begin
+        // [GIVEN] A setup whose default method is handling units
+        ConfigureReplenishment(false);
+        Setup.Get();
+        PreviousMethod := Setup."Default Method";
+        Setup."Default Method" := Method::WHAHandlingUnits;
+        Setup.Modify(false);
+
+        // [WHEN] A page starts a new rule
+        ReplenishmentRule.Init();
+        ReplenishmentRule.ApplyNewRuleDefaults();
+
+        // [THEN] It starts on the setup's method
+        Assert.AreEqual(Method::WHAHandlingUnits, ReplenishmentRule.Method, 'A new rule starts on the default method.');
+        Setup.Get();
+        Setup."Default Method" := PreviousMethod;
+        Setup.Modify(false);
+    end;
+
     local procedure ConfigureReplenishment(ReleaseWork: Boolean)
     var
         Setup: Record "WHA Repl. Setup";

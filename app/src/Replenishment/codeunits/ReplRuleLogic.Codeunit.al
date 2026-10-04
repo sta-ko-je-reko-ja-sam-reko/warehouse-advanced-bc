@@ -10,19 +10,32 @@ codeunit 55250 "WHA Repl. Rule Logic" implements "WHA IReplenishment"
         MinimumAboveMaximumErr: Label 'The minimum quantity %1 is more than the maximum quantity %2. A rule cannot ask for a bin to be filled past what it is allowed to hold.', Comment = '%1 = the minimum quantity entered, %2 = the maximum quantity on the rule';
 
     /// <summary>
-    /// Applies the defaults a new replenishment rule needs.
+    /// Starts a new rule on the setup's way of measuring, so a method chosen afterwards is kept as chosen.
+    /// </summary>
+    /// <param name="ReplenishmentRule">The rule being started.</param>
+    procedure ApplyNewRuleDefaults(var ReplenishmentRule: Record "WHA Replenishment Rule")
+    var
+        Setup: Record "WHA Repl. Setup";
+    begin
+        Setup.SetLoadFields("Default Method");
+        if not Setup.Get() then
+            exit;
+
+        ReplenishmentRule.Method := Setup."Default Method";
+    end;
+
+    /// <summary>
+    /// Applies the defaults a new replenishment rule needs when it is inserted.
     /// </summary>
     /// <param name="ReplenishmentRule">The rule being inserted.</param>
     procedure Trigger_OnInsert(var ReplenishmentRule: Record "WHA Replenishment Rule")
     var
         Setup: Record "WHA Repl. Setup";
     begin
-        Setup.SetLoadFields("Default Method", "Default Priority");
+        Setup.SetLoadFields("Default Priority");
         if not Setup.Get() then
             exit;
 
-        if ReplenishmentRule.Method = ReplenishmentRule.Method::WHABinContent then
-            ReplenishmentRule.Method := Setup."Default Method";
         if ReplenishmentRule.Priority = 0 then
             ReplenishmentRule.Priority := Setup."Default Priority";
     end;

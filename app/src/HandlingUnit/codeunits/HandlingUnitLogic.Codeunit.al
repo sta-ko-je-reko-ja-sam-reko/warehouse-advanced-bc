@@ -67,7 +67,9 @@ codeunit 55050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
 
     /// <summary>
     /// Rejects a parent that would nest a unit inside itself, form a cycle, or exceed the configured
-    /// nesting depth.
+    /// nesting depth. Depth counts levels of nesting, as GetNestingDepth does: a unit with no parent is at
+    /// depth zero and a carton on a pallet at depth one. Moving a unit that holds others counts how deep
+    /// its own contents then sit, not only the unit itself.
     /// </summary>
     /// <param name="HandlingUnit">The handling unit being validated.</param>
     /// <param name="xHandlingUnit">The handling unit as it was before the change.</param>
@@ -90,7 +92,7 @@ codeunit 55050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
                 Error(NestingNotAllowedErr, HandlingUnit."No.");
 
             if Setup."Max Nesting Depth" > 0 then begin
-                Depth := DepthOf(HandlingUnit."Parent No.") + 1;
+                Depth := DepthOf(HandlingUnit."Parent No.") + HeightBelow(HandlingUnit."No.");
                 if Depth > Setup."Max Nesting Depth" then
                     Error(DepthExceededErr, HandlingUnit."No.", HandlingUnit."Parent No.", Setup."Max Nesting Depth");
             end;
@@ -127,6 +129,33 @@ codeunit 55050 "WHA Handling Unit Logic" implements "WHA IHandlingUnit"
             ParentNo := Parent."Parent No.";
         end;
         exit(Depth);
+    end;
+
+    local procedure HeightBelow(UnitNo: Code[20]): Integer
+    begin
+        exit(HeightBelowFrom(UnitNo, 0));
+    end;
+
+    local procedure HeightBelowFrom(UnitNo: Code[20]; Walked: Integer): Integer
+    var
+        Nested: Record "WHA Handling Unit";
+        Deepest: Integer;
+        Height: Integer;
+    begin
+        Deepest := 0;
+        if (UnitNo = '') or (Walked >= MaxWalk()) then
+            exit(Deepest);
+
+        Nested.SetLoadFields("No.");
+        Nested.SetRange("Parent No.", UnitNo);
+        if Nested.FindSet() then
+            repeat
+                Height := HeightBelowFrom(Nested."No.", Walked + 1) + 1;
+                if Height > Deepest then
+                    Deepest := Height;
+            until Nested.Next() = 0;
+
+        exit(Deepest);
     end;
 
     local procedure IsDescendantOf(CandidateNo: Code[20]; AncestorNo: Code[20]): Boolean

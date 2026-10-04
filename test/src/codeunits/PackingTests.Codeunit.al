@@ -294,6 +294,138 @@ codeunit 59006 "WHA Packing Tests"
         Assert.AreEqual(SessionsAfterFirstRun, PackSession.Count(), 'A second import should not pack another carton.');
     end;
 
+    [Test]
+    procedure PackingCannotStartWithoutAStation()
+    var
+        PackSession: Record "WHA Pack Session";
+        PackLogic: Codeunit "WHA Pack Session Logic";
+    begin
+        // [GIVEN] Packing set up
+        ConfigurePacking(false, true);
+
+        // [WHEN] A session is started without naming a station
+        asserterror PackLogic.Start(PackSession, '');
+
+        // [THEN] The station is asked for
+        Assert.ExpectedError('Choose a packing station before you start.');
+    end;
+
+    [Test]
+    procedure PackingNoQuantityIsRefused()
+    var
+        PackSession: Record "WHA Pack Session";
+        PackLogic: Codeunit "WHA Pack Session Logic";
+    begin
+        // [GIVEN] An open carton
+        ConfigurePacking(false, true);
+        PackLogic.Start(PackSession, CopyStr(StationTok, 1, 20));
+
+        // [WHEN] An item is packed with no quantity
+        asserterror PackLogic.PackItem(PackSession, CopyStr(ItemTok, 1, 20), '', 0);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('Say what is going into the carton, and how much.');
+    end;
+
+    [Test]
+    procedure ACheckedCartonTakesNothingMore()
+    var
+        PackSession: Record "WHA Pack Session";
+        PackLogic: Codeunit "WHA Pack Session Logic";
+    begin
+        // [SCENARIO] Checking a carton means somebody looked at what is in it. Adding to it afterwards
+        // would make the check say something untrue.
+        // [GIVEN] A carton that has been checked
+        ConfigurePacking(true, true);
+        PackLogic.Start(PackSession, CopyStr(StationTok, 1, 20));
+        PackLogic.PackItem(PackSession, CopyStr(ItemTok, 1, 20), '', 1);
+        PackLogic.Verify(PackSession);
+
+        // [WHEN] Something more is packed
+        asserterror PackLogic.PackItem(PackSession, CopyStr(ItemTok, 1, 20), '', 1);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('so nothing more can go into the carton');
+    end;
+
+    [Test]
+    procedure ACartonIsClosedOnlyOnce()
+    var
+        PackSession: Record "WHA Pack Session";
+        PackLogic: Codeunit "WHA Pack Session Logic";
+    begin
+        // [GIVEN] A carton that has been closed
+        ConfigurePacking(false, false);
+        PackLogic.Start(PackSession, CopyStr(StationTok, 1, 20));
+        PackLogic.PackItem(PackSession, CopyStr(ItemTok, 1, 20), '', 1);
+        PackLogic.Close(PackSession);
+
+        // [WHEN] It is closed again, or cancelled
+        // [THEN] Both are refused
+        asserterror PackLogic.Close(PackSession);
+        Assert.ExpectedError('is already');
+        asserterror PackLogic.Cancel(PackSession);
+        Assert.ExpectedError('is already');
+    end;
+
+    [Test]
+    procedure ACancelledSessionCannotBeClosed()
+    var
+        PackSession: Record "WHA Pack Session";
+        PackLogic: Codeunit "WHA Pack Session Logic";
+    begin
+        // [GIVEN] A session that was abandoned
+        ConfigurePacking(false, false);
+        PackLogic.Start(PackSession, CopyStr(StationTok, 1, 20));
+        PackLogic.PackItem(PackSession, CopyStr(ItemTok, 1, 20), '', 1);
+        PackLogic.Cancel(PackSession);
+
+        // [WHEN] It is closed
+        asserterror PackLogic.Close(PackSession);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('is already');
+    end;
+
+    [Test]
+    procedure ACheckedSessionCannotBeDeleted()
+    var
+        PackSession: Record "WHA Pack Session";
+        PackLogic: Codeunit "WHA Pack Session Logic";
+    begin
+        // [GIVEN] A carton that has been checked
+        ConfigurePacking(true, true);
+        PackLogic.Start(PackSession, CopyStr(StationTok, 1, 20));
+        PackLogic.PackItem(PackSession, CopyStr(ItemTok, 1, 20), '', 1);
+        PackLogic.Verify(PackSession);
+
+        // [WHEN] The session is deleted
+        asserterror PackSession.Delete(true);
+
+        // [THEN] It is refused, pointing at cancelling instead
+        Assert.ExpectedError('Cancel it instead.');
+    end;
+
+    [Test]
+    procedure AnAbandonedSessionCanBeDeleted()
+    var
+        PackSession: Record "WHA Pack Session";
+        PackLogic: Codeunit "WHA Pack Session Logic";
+        EntryNo: Integer;
+    begin
+        // [GIVEN] A session that was abandoned
+        ConfigurePacking(false, false);
+        PackLogic.Start(PackSession, CopyStr(StationTok, 1, 20));
+        PackLogic.Cancel(PackSession);
+        EntryNo := PackSession."Entry No.";
+
+        // [WHEN] It is deleted
+        PackSession.Delete(true);
+
+        // [THEN] It is gone
+        Assert.IsFalse(PackSession.Get(EntryNo), 'An abandoned session can be deleted.');
+    end;
+
     local procedure ConfigurePacking(RequireVerification: Boolean; CloseUnit: Boolean)
     var
         Setup: Record "WHA Pack Setup";

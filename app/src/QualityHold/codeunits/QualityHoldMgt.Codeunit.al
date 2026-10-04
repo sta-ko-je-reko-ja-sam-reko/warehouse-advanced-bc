@@ -65,6 +65,8 @@ codeunit 55551 "WHA Quality Hold Mgt."
     /// Lifts the hold and carries out the decision, on the unit and on everything that was held with it.
     /// Goods a decision takes out of stock for good are written off by the posting method chosen in the
     /// quality hold setup, each unit under its own document, because each unit carries its own hold.
+    /// What was held with the unit is released first, so that by the time the unit's own stock block is
+    /// lifted no hold of its own family still stands in the bin and keeps the block in place.
     /// </summary>
     /// <param name="QualityHold">The hold to release.</param>
     procedure Release(var QualityHold: Record "WHA Quality Hold")
@@ -78,8 +80,8 @@ codeunit 55551 "WHA Quality Hold Mgt."
 
         Disposition := DispositionToApply(QualityHold);
 
-        ApplyAndClose(QualityHold, Disposition);
         ReleaseCascaded(QualityHold, Disposition);
+        ApplyAndClose(QualityHold, Disposition);
     end;
 
     /// <summary>

@@ -571,6 +571,288 @@ codeunit 59004 "WHA Wave Tests"
         Assert.AreEqual(1, WaveLogic.Fill(Wave), 'The first job goes in however long it takes.');
     end;
 
+    [Test]
+    procedure ReleasingAWaveSendsEveryDraftToTheFloor()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [SCENARIO] Releasing walks every draft in the wave and changes the very status it looks for. All
+        // of them have to come out released, not only the first.
+        // [GIVEN] Drafts may be gathered, and a wave holding three drafts at a location of its own
+        ConfigureWaves(true);
+        EnsureLocation('WHAWAVE3');
+        CreateDraftTask(WarehouseTask, 'WV3-T1', 'WHAWAVE3');
+        CreateDraftTask(WarehouseTask, 'WV3-T2', 'WHAWAVE3');
+        CreateDraftTask(WarehouseTask, 'WV3-T3', 'WHAWAVE3');
+        CreateWave(Wave, 'WV3-WAVE', 'WHAWAVE3', 25);
+        Assert.AreEqual(3, WaveLogic.Fill(Wave), 'The wave gathers all three drafts.');
+
+        // [WHEN] The wave is released
+        WaveLogic.Release(Wave);
+
+        // [THEN] Every one of its jobs is on the floor
+        WarehouseTask.SetRange("Wave No.", 'WV3-WAVE');
+        WarehouseTask.SetRange(Status, WarehouseTask.Status::WHAReleased);
+        Assert.AreEqual(3, WarehouseTask.Count(), 'Every draft in the wave should be released.');
+    end;
+
+    [Test]
+    procedure CancellingAWaveWithdrawsEveryJobNobodyStarted()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [GIVEN] A released wave of three jobs at a location of its own
+        ConfigureWaves(true);
+        EnsureLocation('WHAWAVE4');
+        CreateDraftTask(WarehouseTask, 'WV4-T1', 'WHAWAVE4');
+        CreateDraftTask(WarehouseTask, 'WV4-T2', 'WHAWAVE4');
+        CreateDraftTask(WarehouseTask, 'WV4-T3', 'WHAWAVE4');
+        CreateWave(Wave, 'WV4-WAVE', 'WHAWAVE4', 25);
+        WaveLogic.Fill(Wave);
+        WaveLogic.Release(Wave);
+
+        // [WHEN] The wave is cancelled
+        WaveLogic.Cancel(Wave);
+
+        // [THEN] Every one of its jobs is withdrawn
+        WarehouseTask.SetRange("Wave No.", 'WV4-WAVE');
+        WarehouseTask.SetRange(Status, WarehouseTask.Status::WHACancelled);
+        Assert.AreEqual(3, WarehouseTask.Count(), 'Every job nobody started should be withdrawn.');
+    end;
+
+    [Test]
+    procedure AJobJoinsAWaveAtItsOwnLocation()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [GIVEN] An open wave and a released job at the same location
+        ConfigureWaves(false);
+        CreateWave(Wave, 'WV-ADD-1', CopyStr(LocationTok, 1, 10), 25);
+        CreateReleasedTask(WarehouseTask, 'WV-ADD-T1', CopyStr(LocationTok, 1, 10), 10);
+
+        // [WHEN] The job is added by hand
+        WaveLogic.AddTask(Wave, WarehouseTask);
+
+        // [THEN] It belongs to the wave
+        WarehouseTask.Get('WV-ADD-T1');
+        Assert.AreEqual('WV-ADD-1', WarehouseTask."Wave No.", 'The job should be in the wave.');
+    end;
+
+    [Test]
+    procedure AJobFromAnotherLocationCannotJoinAWave()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [GIVEN] An open wave at one location and a released job at another
+        ConfigureWaves(false);
+        CreateWave(Wave, 'WV-ADD-2', CopyStr(LocationTok, 1, 10), 25);
+        CreateReleasedTask(WarehouseTask, 'WV-ADD-T2', CopyStr(OtherLocationTok, 1, 10), 10);
+
+        // [WHEN] The job is added
+        asserterror WaveLogic.AddTask(Wave, WarehouseTask);
+
+        // [THEN] It is refused, naming both locations
+        Assert.ExpectedError('Warehouse task WV-ADD-T2 is at WHAWAVE2, and wave WV-ADD-2 gathers work at WHAWAVE.');
+    end;
+
+    [Test]
+    procedure AJobSomebodyHoldsCannotJoinAWave()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [GIVEN] An open wave and a job already given to somebody
+        ConfigureWaves(false);
+        CreateWave(Wave, 'WV-ADD-3', CopyStr(LocationTok, 1, 10), 25);
+        CreateReleasedTask(WarehouseTask, 'WV-ADD-T3', CopyStr(LocationTok, 1, 10), 10);
+        TaskLogic.Assign(WarehouseTask, CopyStr(UserId(), 1, 50));
+
+        // [WHEN] The job is added
+        asserterror WaveLogic.AddTask(Wave, WarehouseTask);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be put into a wave');
+    end;
+
+    [Test]
+    procedure AWaveNeedsALocationBeforeItIsFilled()
+    var
+        Wave: Record "WHA Wave";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [GIVEN] An open wave with no location
+        ConfigureWaves(false);
+        CreateWave(Wave, 'WV-NOLOC', '', 25);
+
+        // [WHEN] It is filled
+        asserterror WaveLogic.Fill(Wave);
+
+        // [THEN] The location is asked for
+        Assert.ExpectedError('Give wave WV-NOLOC a location before filling it');
+    end;
+
+    [Test]
+    procedure AWaveMovesOnlyForwards()
+    var
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        // [GIVEN] An open wave holding one job
+        ConfigureWaves(false);
+        CreateWave(Wave, 'WV-FWD', CopyStr(LocationTok, 1, 10), 25);
+        CreateReleasedTask(WarehouseTask, 'WV-FWD-T1', CopyStr(LocationTok, 1, 10), 10);
+        WaveLogic.AddTask(Wave, WarehouseTask);
+
+        // [WHEN] It is completed before it was released
+        asserterror WaveLogic.Complete(Wave);
+        // [THEN] It is refused
+        Assert.ExpectedError('so it cannot be completed. Only a released wave can finish.');
+
+        // [WHEN] It is released twice
+        WaveLogic.Release(Wave);
+        asserterror WaveLogic.Release(Wave);
+        // [THEN] The second release is refused
+        Assert.ExpectedError('Only an open wave can be released.');
+
+        // [WHEN] It is cancelled twice
+        WaveLogic.Cancel(Wave);
+        asserterror WaveLogic.Cancel(Wave);
+        // [THEN] The second cancel is refused
+        Assert.ExpectedError('so it cannot be cancelled');
+    end;
+
+    [Test]
+    procedure ATemplateBuildsWithItsOwnStrategy()
+    var
+        Setup: Record "WHA Wave Setup";
+        Wave: Record "WHA Wave";
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveTemplate: Record "WHA Wave Template";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+        Strategy: Enum "WHA Wave Strategy";
+    begin
+        // [SCENARIO] Regression. The first strategy is also the blank value, so a new wave used to swap it
+        // for the setup default even when a template had chosen it on purpose.
+        // [GIVEN] A setup whose default is due date first, and a template that chose most urgent first
+        ConfigureWaves(false);
+        Setup.Get();
+        Setup."Default Strategy" := Strategy::WHADueFirst;
+        Setup.Modify(false);
+        EnsureWaveNumbering();
+        CreateReleasedTask(WarehouseTask, 'WV-STR-T1', CopyStr(LocationTok, 1, 10), 10);
+        CreateTemplate(WaveTemplate, 'WV-STR', 25, 0, false);
+        WaveTemplate.Strategy := Strategy::WHAMostUrgent;
+        WaveTemplate.Modify(false);
+
+        // [WHEN] The template builds a wave
+        WaveTemplateLogic.CreateWave(WaveTemplate, Wave);
+
+        // [THEN] The wave gathers most urgent first, as the template said
+        Assert.AreEqual(Strategy::WHAMostUrgent, Wave.Strategy, 'The wave should keep the strategy its template chose.');
+        Setup.Get();
+        Setup."Default Strategy" := Strategy::WHAMostUrgent;
+        Setup.Modify(false);
+    end;
+
+    [Test]
+    procedure ATemplateWithoutALocationBuildsNothing()
+    var
+        Wave: Record "WHA Wave";
+        WaveTemplate: Record "WHA Wave Template";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+    begin
+        // [GIVEN] A template with no location
+        ConfigureWaves(false);
+        CreateTemplate(WaveTemplate, 'WV-NOLOC-T', 5, 0, false);
+        WaveTemplate."Location Code" := '';
+        WaveTemplate.Modify(false);
+
+        // [WHEN] It builds a wave
+        asserterror WaveTemplateLogic.CreateWave(WaveTemplate, Wave);
+
+        // [THEN] The location is asked for
+        Assert.ExpectedError('Give wave template WV-NOLOC-T a location before running it');
+    end;
+
+    [Test]
+    procedure ATemplateDescribesWhatItBuilds()
+    var
+        WaveTemplate: Record "WHA Wave Template";
+        WaveTemplateLogic: Codeunit "WHA Wave Template Logic";
+        Description: Text;
+    begin
+        // [GIVEN] A template of up to five jobs that waits to be released
+        ConfigureWaves(false);
+        CreateTemplate(WaveTemplate, 'WV-DESC', 5, 0, false);
+
+        // [THEN] It describes a job limit and a wave that waits
+        Description := WaveTemplateLogic.Describe(WaveTemplate);
+        Assert.IsTrue(Description.Contains('at WHAWAVE, up to 5 job(s).'), 'A template without a time limit names its job limit.');
+        Assert.IsTrue(Description.Contains('waits for somebody to release it'), 'A template that does not release says so.');
+
+        // [GIVEN] The same template with ninety minutes of work and released as soon as it is built
+        CreateTemplate(WaveTemplate, 'WV-DESC', 5, 90, true);
+
+        // [THEN] It describes both limits and a wave that goes straight to the floor
+        Description := WaveTemplateLogic.Describe(WaveTemplate);
+        Assert.IsTrue(Description.Contains('or 90 minutes of work, whichever comes first.'), 'A template with a time limit names it.');
+        Assert.IsTrue(Description.Contains('goes to the floor as soon as it is built'), 'A template that releases says so.');
+    end;
+
+    [Test]
+    procedure TheScheduledRunRefusesWhenWavesAreSwitchedOff()
+    var
+        Setup: Record "WHA Wave Setup";
+        WaveTemplate: Record "WHA Wave Template";
+    begin
+        // [GIVEN] Wave management switched off
+        ConfigureWaves(false);
+        Setup.Get();
+        Setup."WHA Enabled" := false;
+        Setup.Modify(false);
+
+        // [WHEN] The scheduled run starts
+        asserterror Codeunit.Run(Codeunit::"WHA Wave Scheduler", WaveTemplate);
+
+        // [THEN] It stops, naming the feature
+        Assert.ExpectedError('The Wave management feature is not enabled');
+    end;
+
+    [Test]
+    procedure AWaveWithoutANumberNeedsASeries()
+    var
+        Setup: Record "WHA Wave Setup";
+        Wave: Record "WHA Wave";
+        PreviousSeries: Code[20];
+    begin
+        // [GIVEN] A setup with no number series
+        ConfigureWaves(false);
+        Setup.Get();
+        PreviousSeries := Setup."Wave Nos.";
+        Setup."Wave Nos." := '';
+        Setup.Modify(false);
+
+        // [WHEN] A wave is created without a number
+        Wave.Init();
+        asserterror Wave.Insert(true);
+
+        // [THEN] The series is asked for
+        Assert.ExpectedError('Set the wave number series on the wave setup page before creating waves.');
+        Setup."Wave Nos." := PreviousSeries;
+        Setup.Modify(false);
+    end;
+
     local procedure ConfigureWaves(IncludeUnreleased: Boolean)
     var
         Setup: Record "WHA Wave Setup";

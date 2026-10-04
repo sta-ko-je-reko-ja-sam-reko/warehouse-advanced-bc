@@ -438,6 +438,135 @@ codeunit 59007 "WHA Replenishment Tests"
         Assert.AreEqual(9, ReplenishmentMgt.Measure(ReplenishmentRule), 'An unknown unit falls back to base instead of stopping the run.');
     end;
 
+    [Test]
+    procedure RunningARuleByHandRaisesWorkForTheShortfall()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        WarehouseTask: Record "WHA Warehouse Task";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+        TaskNo: Code[20];
+    begin
+        // [GIVEN] An empty pick bin that should hold between ten and fifty
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), 'PICK-RR1', 10, 50);
+
+        // [WHEN] The rule is run by hand
+        TaskNo := ReplenishmentMgt.RunRule(ReplenishmentRule);
+
+        // [THEN] A replenishment for fifty is raised from the bulk bin into the pick bin, and its number is answered
+        Assert.AreNotEqual('', TaskNo, 'Running the rule should answer the job it raised.');
+        WarehouseTask.Get(TaskNo);
+        Assert.AreEqual(WarehouseTask."Task Type"::WHAReplenishment, WarehouseTask."Task Type", 'The job is a replenishment.');
+        Assert.AreEqual(50, WarehouseTask.Quantity, 'An empty bin is filled to its maximum.');
+        Assert.AreEqual('PICK-RR1', WarehouseTask."To Bin Code", 'The job fills the pick bin.');
+        Assert.AreEqual(CopyStr(BulkBinTok, 1, 20), WarehouseTask."From Bin Code", 'The job takes from the bulk bin.');
+    end;
+
+    [Test]
+    procedure ARuleWithoutAMaximumCannotBeRunByHand()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+    begin
+        // [GIVEN] A rule that says nothing about how full to fill the bin
+        ConfigureReplenishment(false);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), 'PICK-RR2', 0, 0);
+
+        // [WHEN] It is run by hand
+        asserterror ReplenishmentMgt.RunRule(ReplenishmentRule);
+
+        // [THEN] The maximum is asked for
+        Assert.ExpectedError('a maximum quantity, so a run knows how full to fill the bin');
+    end;
+
+    [Test]
+    procedure TheMaximumCannotBeLoweredBelowTheMinimum()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+    begin
+        // [GIVEN] A rule between ten and fifty
+        ConfigureReplenishment(false);
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), 'PICK-RR3', 10, 50);
+
+        // [WHEN] The maximum is lowered to five
+        asserterror ReplenishmentRule.Validate("Maximum Quantity", 5);
+
+        // [THEN] It is refused, naming both quantities
+        Assert.ExpectedError('The minimum quantity 10 is more than the maximum quantity 5.');
+    end;
+
+    [Test]
+    procedure FinishedReplenishmentLetsTheBinAskAgain()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        WarehouseTask: Record "WHA Warehouse Task";
+        ReplenishmentMgt: Codeunit "WHA Replenishment Mgt.";
+        FirstTaskNo: Code[20];
+        SecondTaskNo: Code[20];
+    begin
+        // [GIVEN] An empty pick bin whose replenishment was raised and then finished without the stock arriving
+        ConfigureReplenishment(false);
+        ConfigureNoDemand();
+        CreateRule(ReplenishmentRule, CopyStr(LocationTok, 1, 10), 'PICK-RR4', 10, 30);
+        FirstTaskNo := ReplenishmentMgt.RunRule(ReplenishmentRule);
+        WarehouseTask.Get(FirstTaskNo);
+        WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
+        WarehouseTask.Modify(false);
+
+        // [WHEN] The rule runs again
+        SecondTaskNo := ReplenishmentMgt.RunRule(ReplenishmentRule);
+
+        // [THEN] A new job is raised, because finished work is no longer a promise
+        Assert.AreNotEqual('', SecondTaskNo, 'A bin whose work is finished can ask again.');
+        Assert.AreNotEqual(FirstTaskNo, SecondTaskNo, 'The second run raises a new job.');
+    end;
+
+    [Test]
+    procedure TheScheduledRunRefusesWhenReplenishmentIsSwitchedOff()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        Setup: Record "WHA Repl. Setup";
+    begin
+        // [GIVEN] Replenishment switched off
+        ConfigureReplenishment(false);
+        Setup.Get();
+        Setup."WHA Enabled" := false;
+        Setup.Modify(false);
+
+        // [WHEN] The scheduled run starts
+        asserterror Codeunit.Run(Codeunit::"WHA Repl. Scheduler", ReplenishmentRule);
+
+        // [THEN] It stops, naming the feature
+        Assert.ExpectedError('The Replenishment feature is not enabled');
+    end;
+
+    [Test]
+    procedure UnitsConvertThroughTheItemsOwnFactor()
+    var
+        ItemUnitOfMeasure: Record "Item Unit of Measure";
+        UnitConvert: Codeunit "WHA Repl. Unit Convert";
+    begin
+        // [GIVEN] A box of twelve for the item
+        ConfigureReplenishment(false);
+        if not ItemUnitOfMeasure.Get(CopyStr(ItemTok, 1, 20), 'WHABOX12') then begin
+            ItemUnitOfMeasure.Init();
+            ItemUnitOfMeasure."Item No." := CopyStr(ItemTok, 1, 20);
+            ItemUnitOfMeasure.Code := 'WHABOX12';
+            ItemUnitOfMeasure."Qty. per Unit of Measure" := 12;
+            ItemUnitOfMeasure.Insert(false);
+        end;
+
+        // [THEN] Three boxes are thirty-six pieces and back again
+        Assert.AreEqual(12, UnitConvert.QtyPerUnit(CopyStr(ItemTok, 1, 20), 'WHABOX12'), 'A box holds twelve.');
+        Assert.AreEqual(36, UnitConvert.ToBase(CopyStr(ItemTok, 1, 20), 'WHABOX12', 3), 'Three boxes are thirty-six pieces.');
+        Assert.AreEqual(3, UnitConvert.FromBase(CopyStr(ItemTok, 1, 20), 'WHABOX12', 36), 'Thirty-six pieces are three boxes.');
+
+        // [THEN] No unit, and a unit the item does not have, both count as the base unit
+        Assert.AreEqual(1, UnitConvert.QtyPerUnit(CopyStr(ItemTok, 1, 20), ''), 'No unit is the base unit.');
+        Assert.AreEqual(1, UnitConvert.QtyPerUnit(CopyStr(ItemTok, 1, 20), 'WHANONE'), 'An unknown unit is treated as the base unit.');
+    end;
+
     local procedure ConfigureReplenishment(ReleaseWork: Boolean)
     var
         Setup: Record "WHA Repl. Setup";

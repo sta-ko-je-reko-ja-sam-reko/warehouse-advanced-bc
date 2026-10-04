@@ -36,6 +36,7 @@ permissionset 55000 "WHA Objects"
         codeunit "WHA Install" = X,
         codeunit "WHA Upgrade" = X,
         codeunit "WHA MCP Setup" = X,
+        codeunit "WHA No. Series Mgt." = X,
         table "WHA Activities Cue" = X,
         page "WHA Warehouse Activities" = X,
         page "WHA Warehouse Manager RC" = X,

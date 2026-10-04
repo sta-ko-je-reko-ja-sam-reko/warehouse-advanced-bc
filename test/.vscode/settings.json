@@ -3,7 +3,9 @@
   "al.enableCodeAnalysis": true,
   "al.codeAnalyzers": [
     "${CodeCop}",
-    "${UICop}"
+    "${UICop}",
+    "${AppSourceCop}",
+    "${PerTenantExtensionCop}"
   ],
   "al.enableCodeActions": true,
   "al.incrementalBuild": true,

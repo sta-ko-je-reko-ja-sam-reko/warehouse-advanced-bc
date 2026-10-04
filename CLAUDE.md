@@ -55,13 +55,18 @@ cmd /c mklink /J .bc-conventions C:\Users\P16v\Documents\bc-dev-templates\bc-cus
 A junction rather than a copy, so the rules track the templates repo instead of drifting.
 
 **Consequence, by deliberate choice:** a fresh clone of this public repo **will not build** —
-`app/.vscode/settings.json` sets `"al.ruleSetPath": "../.bc-conventions/ruleset.json"` and that
-path will not resolve until the private repo is cloned and junctioned. Anyone building this
-(including CI) needs access to `bc-dev-templates`.
+`app/wha.ruleset.json` includes `../.bc-conventions/ruleset.json` (and `test/.vscode/settings.json`
+points `al.ruleSetPath` straight at it), and that path will not resolve until the private repo is
+cloned and junctioned. Anyone building this (including CI) needs access to `bc-dev-templates`.
 
 Note the ruleset is configured through the **`al.ruleSetPath` setting**, not through an
 `app.json` property. `"ruleset"` is not valid in `app.json` on AL runtime 17 — the compiler
 rejects it with `AL0124`. The `bc-dev-templates` bootstrap instruction is wrong on this point.
+
+`app/` points `al.ruleSetPath` at its own `app/wha.ruleset.json`, which includes the shared ruleset and
+hides only AS0081/PTE0012 — the warnings `internalsVisibleTo` raises. `app/app.json` makes internals
+visible to the test app alone, so tests can reach `internal` procedures (guided setup, posting checks).
+`test/` still points at the shared ruleset directly.
 
 ## Environment
 
@@ -96,6 +101,24 @@ try { $req.GetResponse() } catch { $_.Exception.Response.Headers['WWW-Authentica
 
 `Basic realm` means NavUserPassword; `Negotiate` or `NTLM` means Windows. A mismatch surfaces
 as `Failed to establish SignalR hub connection ... 401 (Unauthorized)`.
+
+## Building and running the tests
+
+`tools/build.ps1` compiles `app/` and then `test/` with all four code analyzers, against the BC 29 W1
+artifact in the local cache (refreshing `.alpackages` from it), using the AL extension's `alc.dll` and
+the .NET 10 runtime VS Code installed. The bar is zero errors and zero warnings for both projects.
+`tools/test.ps1` (elevated, BcContainerHelper) publishes both packages to the shared `bc29loc`
+container through the dev endpoint, runs every test codeunit of the test app and writes
+`.output/TestResults.xml`:
+
+```powershell
+.\tools\build.ps1
+.\tools\test.ps1 -ContainerName bc29loc
+```
+
+The test runner rolls back after each **test codeunit**, not after each test, so tests inside one
+codeunit see each other's data. New tests use keys and dates of their own and put back any setup they
+change.
 
 ## Opening the project
 

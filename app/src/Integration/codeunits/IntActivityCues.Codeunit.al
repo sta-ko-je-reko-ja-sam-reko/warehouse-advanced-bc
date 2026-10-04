@@ -13,14 +13,14 @@ codeunit 55663 "WHA Int Activity Cues" implements "WHA IActivityCues"
     /// <param name="Results">The result buffer, keyed by cue field number.</param>
     procedure AddCounts(var Results: Dictionary of [Text, Text])
     var
-        ActivitiesCue: Record "WHA Activities Cue";
+        TempActivitiesCue: Record "WHA Activities Cue";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
     begin
         if not FeatureMgt.IsEnabled(Enum::"WHA Feature"::WHAIntegration) then
             exit;
 
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Messages Waiting")), Format(CountMessagesWaiting()));
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Messages Failed")), Format(CountMessagesThatFailed()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Messages Waiting")), Format(CountMessagesWaiting()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Messages Failed")), Format(CountMessagesThatFailed()));
     end;
 
 
@@ -28,6 +28,7 @@ codeunit 55663 "WHA Int Activity Cues" implements "WHA IActivityCues"
     var
         IntegrationMessage: Record "WHA Integration Message";
     begin
+        IntegrationMessage.SetRange(Direction, IntegrationMessage.Direction::WHAInbound);
         IntegrationMessage.SetRange(Status, IntegrationMessage.Status::WHANew);
         exit(IntegrationMessage.Count());
     end;

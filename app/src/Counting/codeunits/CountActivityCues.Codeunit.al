@@ -13,14 +13,14 @@ codeunit 55508 "WHA Count Activity Cues" implements "WHA IActivityCues"
     /// <param name="Results">The result buffer, keyed by cue field number.</param>
     procedure AddCounts(var Results: Dictionary of [Text, Text])
     var
-        ActivitiesCue: Record "WHA Activities Cue";
+        TempActivitiesCue: Record "WHA Activities Cue";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
     begin
         if not FeatureMgt.IsEnabled(Enum::"WHA Feature"::WHACounting) then
             exit;
 
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Count Sheets Out")), Format(CountCountSheetsOnTheFloor()));
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Counts To Approve")), Format(CountCountsWaitingForApproval()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Count Sheets Out")), Format(CountCountSheetsOnTheFloor()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Counts To Approve")), Format(CountCountsWaitingForApproval()));
     end;
 
 

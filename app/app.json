@@ -11,6 +11,13 @@
   "url": "https://dmom.ai",
   "logo": "img/AppLogo.png",
   "dependencies": [],
+  "internalsVisibleTo": [
+    {
+      "id": "2cfcbab8-f5fa-4e6e-a88c-1abb530c267f",
+      "name": "Warehouse Advanced Tests",
+      "publisher": "matr"
+    }
+  ],
   "screenshots": [],
   "platform": "1.0.0.0",
   "application": "28.1.0.0",

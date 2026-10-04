@@ -103,15 +103,17 @@ codeunit 59000 "WHA Handling Unit Tests"
         DemoHandlingUnit: Codeunit "WHA Demo Handling Unit";
         Status: Enum "WHA Handling Unit Status";
     begin
-        // [SCENARIO] The sample data exercises every status value, so each is visible on the list.
+        // [SCENARIO] The sample data exercises every status the handling unit feature itself owns, so
+        // each is visible on the list. The hold and scrap values come from quality hold, which seeds its own.
         DemoHandlingUnit.Import();
 
-        foreach Status in Status.Ordinals() do begin
-            HandlingUnit.Reset();
-            HandlingUnit.SetFilter("No.", 'DEMO-HU-*');
-            HandlingUnit.SetRange(Status, Status);
-            Assert.IsFalse(HandlingUnit.IsEmpty(), 'The sample data should include a unit for every status.');
-        end;
+        foreach Status in Status.Ordinals() do
+            if Status.AsInteger() <= Status::WHAShipped.AsInteger() then begin
+                HandlingUnit.Reset();
+                HandlingUnit.SetFilter("No.", 'DEMO-HU-*');
+                HandlingUnit.SetRange(Status, Status);
+                Assert.IsFalse(HandlingUnit.IsEmpty(), 'The sample data should include a unit for every status.');
+            end;
     end;
 
     [Test]
@@ -254,5 +256,187 @@ codeunit 59000 "WHA Handling Unit Tests"
         HandlingUnit."Parent No." := '';
 
         Assert.AreEqual(0, Logic.GetNestingDepth(HandlingUnit), 'A unit with no parent should be at depth zero.');
+    end;
+
+    [Test]
+    procedure NestingSwitchedOffRefusesAParent()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        xHandlingUnit: Record "WHA Handling Unit";
+        Logic: Codeunit "WHA Handling Unit Logic";
+    begin
+        // [GIVEN] Nesting switched off in the setup
+        SetNesting(false, 0);
+
+        // [WHEN] A unit is given a parent
+        xHandlingUnit."No." := 'HUT-N1';
+        HandlingUnit := xHandlingUnit;
+        HandlingUnit."Parent No." := 'HUT-NP';
+        asserterror Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
+
+        // [THEN] It is refused, naming the unit
+        Assert.ExpectedError('Nesting is switched off in the handling unit setup, so HUT-N1 cannot be placed inside another handling unit.');
+        SetNesting(true, 0);
+    end;
+
+    [Test]
+    procedure TheMaximumDepthCountsLevels()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        xHandlingUnit: Record "WHA Handling Unit";
+        Logic: Codeunit "WHA Handling Unit Logic";
+    begin
+        // [SCENARIO] A maximum of two levels allows a carton on a pallet, and refuses a box in that carton.
+        // [GIVEN] A maximum depth of two, and a carton already standing on a pallet
+        SetNesting(true, 2);
+        InsertUnit('HUT-D-PAL', '');
+        InsertUnit('HUT-D-CTN', 'HUT-D-PAL');
+
+        // [WHEN] Another carton is put on the pallet
+        xHandlingUnit."No." := 'HUT-D-CT2';
+        HandlingUnit := xHandlingUnit;
+        HandlingUnit."Parent No." := 'HUT-D-PAL';
+        Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
+        // [THEN] That is allowed
+        Assert.AreEqual('HUT-D-PAL', HandlingUnit."Parent No.", 'A second level is within a maximum of two.');
+
+        // [WHEN] A box is put in the carton
+        xHandlingUnit."No." := 'HUT-D-BOX';
+        HandlingUnit := xHandlingUnit;
+        HandlingUnit."Parent No." := 'HUT-D-CTN';
+        asserterror Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
+        // [THEN] A third level is refused
+        Assert.ExpectedError('Placing HUT-D-BOX inside HUT-D-CTN would exceed the maximum nesting depth of 2.');
+        SetNesting(true, 0);
+    end;
+
+    [Test]
+    procedure AUnitCannotGoInsideSomethingItHolds()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        xHandlingUnit: Record "WHA Handling Unit";
+        Logic: Codeunit "WHA Handling Unit Logic";
+    begin
+        // [GIVEN] A carton standing on a pallet
+        SetNesting(true, 0);
+        InsertUnit('HUT-C-PAL', '');
+        InsertUnit('HUT-C-CTN', 'HUT-C-PAL');
+
+        // [WHEN] The pallet is put inside the carton
+        HandlingUnit.Get('HUT-C-PAL');
+        xHandlingUnit := HandlingUnit;
+        HandlingUnit."Parent No." := 'HUT-C-CTN';
+        asserterror Logic.Validate_ParentNo(HandlingUnit, xHandlingUnit);
+
+        // [THEN] It is refused, because that would make a loop
+        Assert.ExpectedError('Handling unit HUT-C-PAL cannot be placed inside HUT-C-CTN, because HUT-C-CTN is already inside HUT-C-PAL.');
+    end;
+
+    [Test]
+    procedure ANestedUnitKnowsHowDeepItIs()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        Logic: Codeunit "WHA Handling Unit Logic";
+    begin
+        // [GIVEN] A box in a carton on a pallet
+        InsertUnit('HUT-G-PAL', '');
+        InsertUnit('HUT-G-CTN', 'HUT-G-PAL');
+        InsertUnit('HUT-G-BOX', 'HUT-G-CTN');
+
+        // [THEN] The carton is one level down and the box two
+        HandlingUnit.Get('HUT-G-CTN');
+        Assert.AreEqual(1, Logic.GetNestingDepth(HandlingUnit), 'A carton on a pallet is one level down.');
+        HandlingUnit.Get('HUT-G-BOX');
+        Assert.AreEqual(2, Logic.GetNestingDepth(HandlingUnit), 'A box in that carton is two levels down.');
+    end;
+
+    [Test]
+    procedure AUnitStillHoldingOthersCannotBeDeleted()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+    begin
+        // [GIVEN] A pallet with a carton standing on it
+        InsertUnit('HUT-X-PAL', '');
+        InsertUnit('HUT-X-CTN', 'HUT-X-PAL');
+
+        // [WHEN] The pallet is deleted
+        HandlingUnit.Get('HUT-X-PAL');
+        asserterror HandlingUnit.Delete(true);
+
+        // [THEN] It is refused, saying how many units are inside
+        Assert.ExpectedError('Handling unit HUT-X-PAL cannot be deleted while it still holds 1 nested unit(s).');
+    end;
+
+    [Test]
+    procedure AUnitWithoutANumberNeedsASeries()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        Setup: Record "WHA Handling Unit Setup";
+        PreviousSeries: Code[20];
+    begin
+        // [GIVEN] A setup with no number series
+        EnsureHUSetup(Setup);
+        PreviousSeries := Setup."Handling Unit Nos.";
+        Setup."Handling Unit Nos." := '';
+        Setup.Modify(false);
+
+        // [WHEN] A unit is created without a number
+        HandlingUnit.Init();
+        asserterror HandlingUnit.Insert(true);
+
+        // [THEN] The series is asked for
+        Assert.ExpectedError('Set the handling unit number series on the handling unit setup page');
+        Setup."Handling Unit Nos." := PreviousSeries;
+        Setup.Modify(false);
+    end;
+
+    [Test]
+    procedure AUnitWithoutANumberTakesTheNextFromItsSeries()
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+        Setup: Record "WHA Handling Unit Setup";
+        NoSeriesMgt: Codeunit "WHA No. Series Mgt.";
+    begin
+        // [GIVEN] A setup that numbers units from a series of its own
+        EnsureHUSetup(Setup);
+        Setup."Handling Unit Nos." := NoSeriesMgt.EnsureSeries('WHA-TEST-HUN', 'Test units', 'HUN000001', 'HUN999999');
+        Setup.Modify(false);
+
+        // [WHEN] A unit is created without a number
+        HandlingUnit.Init();
+        HandlingUnit.Insert(true);
+
+        // [THEN] It is numbered from that series
+        Assert.IsTrue(CopyStr(HandlingUnit."No.", 1, 3) = 'HUN', 'The unit should be numbered from the setup series.');
+    end;
+
+    local procedure SetNesting(AllowNesting: Boolean; MaxDepth: Integer)
+    var
+        Setup: Record "WHA Handling Unit Setup";
+    begin
+        EnsureHUSetup(Setup);
+        Setup."Allow Nesting" := AllowNesting;
+        Setup."Max Nesting Depth" := MaxDepth;
+        Setup.Modify(false);
+    end;
+
+    local procedure EnsureHUSetup(var Setup: Record "WHA Handling Unit Setup")
+    begin
+        if Setup.Get() then
+            exit;
+        Setup.Init();
+        Setup.Insert(false);
+    end;
+
+    local procedure InsertUnit(UnitNo: Code[20]; ParentNo: Code[20])
+    var
+        HandlingUnit: Record "WHA Handling Unit";
+    begin
+        if HandlingUnit.Get(UnitNo) then
+            exit;
+        HandlingUnit.Init();
+        HandlingUnit."No." := UnitNo;
+        HandlingUnit."Parent No." := ParentNo;
+        HandlingUnit.Insert(false);
     end;
 }

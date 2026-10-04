@@ -30,7 +30,8 @@ codeunit 55157 "WHA Wave Template Logic" implements "WHA IWaveTemplate"
 
     /// <summary>
     /// Builds a wave from the template, fills it, and releases it when the template says so. A run that
-    /// gathers nothing leaves no wave behind.
+    /// gathers nothing leaves no wave behind. The wave takes the template's strategy even when that is the
+    /// first strategy, which a new wave would otherwise swap for the setup's default.
     /// </summary>
     /// <param name="WaveTemplate">The template to build from.</param>
     /// <param name="Wave">Receives the wave that was built, when one was.</param>
@@ -54,6 +55,10 @@ codeunit 55157 "WHA Wave Template Logic" implements "WHA IWaveTemplate"
         Wave."Max Minutes" := WaveTemplate."Max Minutes";
         Wave."Template Code" := WaveTemplate."Code";
         Wave.Insert(true);
+        if Wave.Strategy <> WaveTemplate.Strategy then begin
+            Wave.Strategy := WaveTemplate.Strategy;
+            Wave.Modify(true);
+        end;
 
         Gathered := WaveLogic.Fill(Wave);
         if Gathered = 0 then begin

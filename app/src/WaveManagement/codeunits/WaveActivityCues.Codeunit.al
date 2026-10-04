@@ -13,14 +13,14 @@ codeunit 55159 "WHA Wave Activity Cues" implements "WHA IActivityCues"
     /// <param name="Results">The result buffer, keyed by cue field number.</param>
     procedure AddCounts(var Results: Dictionary of [Text, Text])
     var
-        ActivitiesCue: Record "WHA Activities Cue";
+        TempActivitiesCue: Record "WHA Activities Cue";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
     begin
         if not FeatureMgt.IsEnabled(Enum::"WHA Feature"::WHAWaveManagement) then
             exit;
 
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Waves Open")), Format(CountWavesBeingBuilt()));
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Waves On Floor")), Format(CountWavesOnTheFloor()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Waves Open")), Format(CountWavesBeingBuilt()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Waves On Floor")), Format(CountWavesOnTheFloor()));
     end;
 
 

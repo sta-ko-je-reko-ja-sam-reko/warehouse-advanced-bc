@@ -10,6 +10,7 @@ codeunit 59011 "WHA Slotting Tests"
         PoorBinTok: Label 'BACK-99', Locked = true;
         FastItemTok: Label 'WHA-SLOT-FAST', Locked = true;
         SlowItemTok: Label 'WHA-SLOT-SLOW', Locked = true;
+        MoveDescriptionTxt: Label 'Re-slot %1 from %2 to %3', Locked = true;
 
     [Test]
     procedure VelocityIsMeasuredFromThePicksAlreadyDone()
@@ -316,6 +317,146 @@ codeunit 59011 "WHA Slotting Tests"
         asserterror Codeunit.Run(Codeunit::"WHA Slotting Scheduler", ItemVelocity);
 
         Assert.ExpectedError('not enabled');
+    end;
+
+    [Test]
+    procedure AMoveCanBeRaisedOnceSomebodyDecidesWhere()
+    var
+        SlottingProposal: Record "WHA Slotting Proposal";
+        WarehouseTask: Record "WHA Warehouse Task";
+        SlottingMgt: Codeunit "WHA Slotting Mgt.";
+        TaskNo: Code[20];
+    begin
+        // [GIVEN] A proposal accepted before anybody said where the goods should go
+        ConfigureSlotting(2);
+        InsertOpenProposal(SlottingProposal);
+        SlottingMgt.Accept(SlottingProposal);
+
+        // [WHEN] The destination is filled in and the move is raised
+        SlottingProposal."To Bin Code" := CopyStr(GoodBinTok, 1, 20);
+        SlottingProposal.Modify(false);
+        TaskNo := SlottingMgt.RaiseWork(SlottingProposal);
+
+        // [THEN] A movement from the poor bin to the good one is raised, and the proposal remembers it
+        WarehouseTask.Get(TaskNo);
+        Assert.AreEqual(WarehouseTask."Task Type"::WHAMovement, WarehouseTask."Task Type", 'Re-slotting is a movement.');
+        Assert.AreEqual(CopyStr(PoorBinTok, 1, 20), WarehouseTask."From Bin Code", 'The move starts where the item is picked from now.');
+        Assert.AreEqual(CopyStr(GoodBinTok, 1, 20), WarehouseTask."To Bin Code", 'The move ends where somebody decided.');
+        Assert.AreEqual(StrSubstNo(MoveDescriptionTxt, FastItemTok, PoorBinTok, GoodBinTok), WarehouseTask.Description, 'The move says what it is for.');
+        Assert.AreEqual(WorkDate(), WarehouseTask."Due Date", 'The move is due today.');
+        Assert.AreEqual(TaskNo, SlottingProposal."Task No.", 'The proposal remembers the move it raised.');
+    end;
+
+    [Test]
+    procedure AMoveCannotBeRaisedWithoutADestination()
+    var
+        SlottingProposal: Record "WHA Slotting Proposal";
+        SlottingMgt: Codeunit "WHA Slotting Mgt.";
+    begin
+        // [GIVEN] A proposal accepted with nowhere to go
+        ConfigureSlotting(2);
+        InsertOpenProposal(SlottingProposal);
+        SlottingMgt.Accept(SlottingProposal);
+
+        // [WHEN] The move is raised
+        asserterror SlottingMgt.RaiseWork(SlottingProposal);
+
+        // [THEN] The destination is asked for
+        Assert.ExpectedError('does not say where to move the goods');
+    end;
+
+    [Test]
+    procedure ARejectedProposalRaisesNoMove()
+    var
+        SlottingProposal: Record "WHA Slotting Proposal";
+        SlottingMgt: Codeunit "WHA Slotting Mgt.";
+    begin
+        // [SCENARIO] Regression. Raising the move used to skip the status, so a suggestion somebody turned
+        // down could still send an operator to move the goods.
+        // [GIVEN] A proposal that was rejected, with a destination filled in afterwards
+        ConfigureSlotting(2);
+        InsertOpenProposal(SlottingProposal);
+        SlottingMgt.Reject(SlottingProposal);
+        SlottingProposal."To Bin Code" := CopyStr(GoodBinTok, 1, 20);
+        SlottingProposal.Modify(false);
+
+        // [WHEN] The move is raised
+        asserterror SlottingMgt.RaiseWork(SlottingProposal);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('has not been accepted, so no work can be raised for it');
+    end;
+
+    [Test]
+    procedure AMoveIsNotRaisedTwiceForOneProposal()
+    var
+        SlottingProposal: Record "WHA Slotting Proposal";
+        SlottingMgt: Codeunit "WHA Slotting Mgt.";
+    begin
+        // [SCENARIO] Regression. Raising the move twice used to raise two moves for one decision.
+        // [GIVEN] A proposal whose move has been raised
+        ConfigureSlotting(2);
+        InsertOpenProposal(SlottingProposal);
+        SlottingMgt.Accept(SlottingProposal);
+        SlottingProposal."To Bin Code" := CopyStr(GoodBinTok, 1, 20);
+        SlottingProposal.Modify(false);
+        SlottingMgt.RaiseWork(SlottingProposal);
+
+        // [WHEN] The move is raised again
+        asserterror SlottingMgt.RaiseWork(SlottingProposal);
+
+        // [THEN] It is refused
+        Assert.ExpectedError('has already been raised for proposal');
+    end;
+
+    [Test]
+    procedure RejectingRecordsWhoDecided()
+    var
+        SlottingProposal: Record "WHA Slotting Proposal";
+        SlottingMgt: Codeunit "WHA Slotting Mgt.";
+    begin
+        // [GIVEN] An open proposal
+        ConfigureSlotting(2);
+        InsertOpenProposal(SlottingProposal);
+
+        // [WHEN] It is rejected
+        SlottingMgt.Reject(SlottingProposal);
+
+        // [THEN] It is rejected, and who did it and when are kept
+        Assert.AreEqual(SlottingProposal.Status::WHARejected, SlottingProposal.Status, 'The proposal is rejected.');
+        Assert.AreEqual(CopyStr(UserId(), 1, 50), SlottingProposal."Handled By User ID", 'Who decided is kept.');
+        Assert.AreNotEqual(0DT, SlottingProposal."Handled At", 'When it was decided is kept.');
+
+        // [WHEN] It is rejected again
+        asserterror SlottingMgt.Reject(SlottingProposal);
+        // [THEN] It is refused, because it has been answered
+        Assert.ExpectedError('has already been answered');
+    end;
+
+    [Test]
+    procedure ProposingNeedsALocation()
+    var
+        SlottingMgt: Codeunit "WHA Slotting Mgt.";
+    begin
+        // [GIVEN] Slotting set up
+        ConfigureSlotting(2);
+
+        // [WHEN] Proposals are asked for without a location
+        asserterror SlottingMgt.Propose('');
+
+        // [THEN] The location is asked for
+        Assert.ExpectedError('Say which location to analyse.');
+    end;
+
+    local procedure InsertOpenProposal(var SlottingProposal: Record "WHA Slotting Proposal")
+    begin
+        SlottingProposal.Init();
+        SlottingProposal."Location Code" := CopyStr(LocationTok, 1, 10);
+        SlottingProposal."Item No." := CopyStr(FastItemTok, 1, 20);
+        SlottingProposal.Class := SlottingProposal.Class::WHAClassA;
+        SlottingProposal."From Bin Code" := CopyStr(PoorBinTok, 1, 20);
+        SlottingProposal.Status := SlottingProposal.Status::WHAOpen;
+        SlottingProposal.Insert(true);
     end;
 
     local procedure ConfigureSlotting(MinMovements: Integer)

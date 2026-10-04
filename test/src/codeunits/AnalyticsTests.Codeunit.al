@@ -333,6 +333,122 @@ codeunit 59013 "WHA Analytics Tests"
         Assert.IsTrue(KpiSnapshot.IsEmpty(), 'A first capture should keep today and nothing before it.');
     end;
 
+    [Test]
+    procedure ALowerShortRateIsCalledAnImprovement()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+        KpiMeasure: Enum "WHA KPI Measure";
+    begin
+        // [SCENARIO] Fewer short picks is better, so a falling figure is an improvement for this measure even
+        // though the number went down.
+        // [GIVEN] A short-pick rate of nine percent, followed later by two percent
+        ConfigureAnalytics();
+        CreateSnapshot(KpiMeasure::WHAPickShortRate, WorkDate() + 93, WorkDate() + 100, 9);
+        CreateSnapshot(KpiMeasure::WHAPickShortRate, WorkDate() + 94, WorkDate() + 101, 2);
+        FindSnapshot(KpiSnapshot, KpiMeasure::WHAPickShortRate);
+
+        // [THEN] The later figure is better than the one before it
+        Assert.AreEqual(1, KpiMgt.ComparedWithPrevious(KpiSnapshot), 'A lower short-pick rate is an improvement.');
+    end;
+
+    [Test]
+    procedure FewerJobsFinishedIsCalledWorse()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+        KpiMeasure: Enum "WHA KPI Measure";
+    begin
+        // [GIVEN] Ten jobs finished, followed later by four
+        ConfigureAnalytics();
+        CreateSnapshot(KpiMeasure::WHATasksCompleted, WorkDate() + 93, WorkDate() + 100, 10);
+        CreateSnapshot(KpiMeasure::WHATasksCompleted, WorkDate() + 94, WorkDate() + 101, 4);
+        FindSnapshot(KpiSnapshot, KpiMeasure::WHATasksCompleted);
+
+        // [THEN] The later figure is worse than the one before it
+        Assert.AreEqual(-1, KpiMgt.ComparedWithPrevious(KpiSnapshot), 'Finishing fewer jobs is worse.');
+    end;
+
+    [Test]
+    procedure AnUnchangedFigureIsNeitherBetterNorWorse()
+    var
+        KpiSnapshot: Record "WHA KPI Snapshot";
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+        KpiMeasure: Enum "WHA KPI Measure";
+    begin
+        // [GIVEN] The same door wait twice in a row
+        ConfigureAnalytics();
+        CreateSnapshot(KpiMeasure::WHADoorWait, WorkDate() + 93, WorkDate() + 100, 12);
+        CreateSnapshot(KpiMeasure::WHADoorWait, WorkDate() + 94, WorkDate() + 101, 12);
+        FindSnapshot(KpiSnapshot, KpiMeasure::WHADoorWait);
+
+        // [THEN] It is neither better nor worse
+        Assert.AreEqual(0, KpiMgt.ComparedWithPrevious(KpiSnapshot), 'An unchanged figure is not a change.');
+    end;
+
+    [Test]
+    procedure EveryMeasureSaysWhatItIsMeasuredIn()
+    var
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+        KpiMeasure: Enum "WHA KPI Measure";
+        Ordinal: Integer;
+    begin
+        // [SCENARIO] A figure shown without its unit cannot be read, and the direction of better decides
+        // the arrow next to it. Only jobs finished gets better as it goes up.
+        foreach Ordinal in Enum::"WHA KPI Measure".Ordinals() do begin
+            KpiMeasure := Enum::"WHA KPI Measure".FromInteger(Ordinal);
+            // [THEN] Each measure names its unit and describes itself
+            Assert.AreNotEqual('', KpiMgt.MeasuredIn(KpiMeasure), 'Every measure names its unit.');
+            Assert.AreNotEqual('', KpiMgt.DescribeMeasure(KpiMeasure), 'Every measure describes itself.');
+            // [THEN] Only jobs finished is better when higher
+            Assert.AreEqual(KpiMeasure = KpiMeasure::WHATasksCompleted, KpiMgt.HigherIsBetter(KpiMeasure), 'Only jobs finished is better when higher.');
+        end;
+    end;
+
+    [Test]
+    procedure APeriodWithNoDatesEndsTodayAndLooksBackTheSetPeriod()
+    var
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+        FromDate: Date;
+        ToDate: Date;
+    begin
+        // [GIVEN] A default period of seven days, and no dates given
+        ConfigureAnalytics();
+
+        // [WHEN] The dates are resolved
+        KpiMgt.ResolveDates(FromDate, ToDate);
+
+        // [THEN] The period ends on the work date and starts seven days before
+        Assert.AreEqual(WorkDate(), ToDate, 'With no end date the period ends today.');
+        Assert.AreEqual(WorkDate() - 7, FromDate, 'With no start date the period looks back the set number of days.');
+
+        // [GIVEN] A start date somebody chose
+        FromDate := WorkDate() - 30;
+        ToDate := 0D;
+        KpiMgt.ResolveDates(FromDate, ToDate);
+        // [THEN] It is kept
+        Assert.AreEqual(WorkDate() - 30, FromDate, 'A start date somebody chose is kept.');
+    end;
+
+    [Test]
+    procedure AveragesAndSharesOfNothingAreZero()
+    var
+        KpiMgt: Codeunit "WHA KPI Mgt.";
+    begin
+        // [SCENARIO] A quiet day has nothing to divide by. The figures are zero rather than an error that
+        // would stop the whole capture.
+        // [THEN] An average over nothing, and a share of nothing, are zero
+        Assert.AreEqual(0, KpiMgt.Average(10, 0), 'An average over nothing is zero.');
+        Assert.AreEqual(0, KpiMgt.Percentage(1, 0), 'A share of nothing is zero.');
+        // [THEN] Otherwise they are rounded to two decimals
+        Assert.AreEqual(2.5, KpiMgt.Average(10, 4), 'Ten over four is two and a half.');
+        Assert.AreEqual(33.33, KpiMgt.Percentage(1, 3), 'One in three is thirty-three point three three percent.');
+        // [THEN] Time that runs backwards is no time, and an open-ended period ends at the end of time
+        Assert.AreEqual(0, KpiMgt.MinutesBetween(CreateDateTime(WorkDate(), 100000T), CreateDateTime(WorkDate(), 090000T)), 'Backwards time is no time.');
+        Assert.AreEqual(1.5, KpiMgt.HoursBetween(CreateDateTime(WorkDate(), 080000T), CreateDateTime(WorkDate(), 093000T)), 'Eight until half past nine is an hour and a half.');
+        Assert.AreEqual(CreateDateTime(DMY2Date(31, 12, 9999), 0T), KpiMgt.DayEnd(0D), 'An open end is the end of time.');
+    end;
+
     local procedure ConfigureAnalytics()
     var
         Setup: Record "WHA Analytics Setup";

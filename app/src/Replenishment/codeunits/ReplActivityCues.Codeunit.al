@@ -13,13 +13,13 @@ codeunit 55262 "WHA Repl Activity Cues" implements "WHA IActivityCues"
     /// <param name="Results">The result buffer, keyed by cue field number.</param>
     procedure AddCounts(var Results: Dictionary of [Text, Text])
     var
-        ActivitiesCue: Record "WHA Activities Cue";
+        TempActivitiesCue: Record "WHA Activities Cue";
         FeatureMgt: Codeunit "WHA Feature Mgt.";
     begin
         if not FeatureMgt.IsEnabled(Enum::"WHA Feature"::WHAReplenishment) then
             exit;
 
-        Results.Add(Format(ActivitiesCue.FieldNo("WHA Repl. Rules Blocked")), Format(CountReplenishmentRulesSwitched()));
+        Results.Add(Format(TempActivitiesCue.FieldNo("WHA Repl. Rules Blocked")), Format(CountReplenishmentRulesSwitched()));
     end;
 
 

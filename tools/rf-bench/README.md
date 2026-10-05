@@ -41,7 +41,7 @@ npm test
 
 `npm test` runs the fixture check first, then the suite. There is no Business Central, no company,
 no symbols and no AL compile anywhere in it — which is why it can run in CI at all, while the AL
-build cannot without private `bc-dev-templates` access.
+build cannot without access to the private conventions repository.
 
 ## On a real handheld
 

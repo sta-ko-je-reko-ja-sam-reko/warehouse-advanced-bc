@@ -181,15 +181,16 @@ Symbols do not need AL: Download Symbols: `tools\build.ps1` refreshes `app\.alpa
 
 ## Git workflow
 
-`main` is protected and the rule applies to admins too. **Direct pushes are rejected** —
-GH006. All changes go through a feature branch and a PR.
+`main` is protected by the repository ruleset **Protect main**, the same one the owner's other
+public repositories use. **Direct pushes are rejected.** All changes go through a feature branch
+and a PR, and **only the owner merges**.
 
-- 0 approving reviews required, so the repo owner can merge their own PR
-- Linear history required: merge with **squash or rebase**, never a merge commit
-- Force pushes and branch deletion on `main` are blocked
-
-Push restrictions on who may merge are an org-only GitHub feature; this is a personal repo,
-so "only the owner merges" holds by account ownership rather than by rule.
+- A pull request is required, with one approving review from a code owner (`.github/CODEOWNERS`
+  names the owner). The owner merges their own PRs through the ruleset's admin bypass
+- **Squash merge only**; linear history required; merged branches are deleted automatically
+- Force pushes and deletion of `main` are blocked
+- Create branches with `git checkout -b <branch> --no-track origin/main` and push with
+  `git push -u origin <branch>`
 
 ## Git config is deliberately repo-local
 

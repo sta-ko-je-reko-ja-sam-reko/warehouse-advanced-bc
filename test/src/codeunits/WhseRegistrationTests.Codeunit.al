@@ -803,6 +803,7 @@ codeunit 59017 "WHA Whse. Registration Tests"
         User.Init();
         User."User Security ID" := CreateGuid();
         User."User Name" := UserName;
+        User.State := User.State::Disabled;
         User.Insert();
         exit(UserName);
     end;

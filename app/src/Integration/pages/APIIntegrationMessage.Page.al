@@ -137,7 +137,9 @@ page 55653 "WHA API Integration Message"
     begin
         FeatureMgt.CheckEnabled(Enum::"WHA Feature"::WHAIntegration);
         MessageMgt.SetPayload(Rec, PayloadText);
-        exit(true);
+        Rec.Insert(true);
+        MessageMgt.ApplyOnArrival(Rec);
+        exit(false);
     end;
 
     trigger OnModifyRecord(): Boolean

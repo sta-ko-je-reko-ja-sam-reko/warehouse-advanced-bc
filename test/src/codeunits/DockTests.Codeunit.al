@@ -64,10 +64,10 @@ codeunit 59012 "WHA Dock Tests"
         DockAppointment.Get(DockMgt.Book(CopyStr(LocationTok, 1, 10), Direction::WHAInbound, CreateDateTime(WorkDate(), 110000T), ''));
 
         Assert.AreEqual('', DockAppointment."Dock Door Code", 'No blocked door should have been chosen.');
+        DockDoor.Get(CopyStr(LocationTok, 1, 10), CopyStr(InDoorTok, 1, 20));
+        Assert.IsTrue(DockDoor.Blocked, 'Booking around a blocked door should leave it blocked.');
         asserterror DockMgt.AssignDoor(DockAppointment, CopyStr(InDoorTok, 1, 20));
         Assert.ExpectedError('blocked');
-        DockDoor.Get(CopyStr(LocationTok, 1, 10), CopyStr(InDoorTok, 1, 20));
-        Assert.IsTrue(DockDoor.Blocked, 'The door is still blocked.');
     end;
 
     [Test]
@@ -511,7 +511,6 @@ codeunit 59012 "WHA Dock Tests"
 
         // [THEN] It is refused
         Assert.ExpectedError('so it cannot be called off');
-        DockMgt.Depart(DockAppointment);
     end;
 
     [Test]
@@ -716,6 +715,19 @@ codeunit 59012 "WHA Dock Tests"
         EnsurePosition(CopyStr(FirstYardTok, 1, 20));
         EnsurePosition(CopyStr(SecondYardTok, 1, 20));
         EnsureAppointmentNoSeries();
+        ClearAppointments();
+    end;
+
+    local procedure ClearAppointments()
+    var
+        DockAppointment: Record "WHA Dock Appointment";
+        YardPosition: Record "WHA Yard Position";
+    begin
+        DockAppointment.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        DockAppointment.DeleteAll(false);
+
+        YardPosition.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        YardPosition.ModifyAll("Occupied By Appt. No.", '', false);
     end;
 
     local procedure EnsureLocation(LocationCode: Code[10])

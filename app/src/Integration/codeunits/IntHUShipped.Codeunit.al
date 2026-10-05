@@ -45,6 +45,7 @@ codeunit 55658 "WHA Int. HU Shipped" implements "WHA IIntMessageHandler"
 
     local procedure BuildPayload(var HandlingUnit: Record "WHA Handling Unit"): Text
     var
+        MessageMgt: Codeunit "WHA Int. Message Mgt.";
         PayloadObject: JsonObject;
         PayloadText: Text;
     begin
@@ -54,7 +55,7 @@ codeunit 55658 "WHA Int. HU Shipped" implements "WHA IIntMessageHandler"
         PayloadObject.Add('locationCode', HandlingUnit."Location Code");
         PayloadObject.Add('binCode', HandlingUnit."Bin Code");
         PayloadObject.Add('parentNumber', HandlingUnit."Parent No.");
-        PayloadObject.Add('status', Format(HandlingUnit.Status, 0, 9));
+        PayloadObject.Add('status', MessageMgt.EnumValueName(HandlingUnit.Status.Names(), HandlingUnit.Status.Ordinals(), HandlingUnit.Status.AsInteger()));
         PayloadObject.Add('lines', BuildLines(HandlingUnit));
         PayloadObject.WriteTo(PayloadText);
         exit(PayloadText);

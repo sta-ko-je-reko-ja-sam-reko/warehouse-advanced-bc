@@ -148,6 +148,7 @@ codeunit 59005 "WHA Labelling Tests"
     var
         Setup: Record "WHA Label Setup";
         LabelMgt: Codeunit "WHA Label Mgt.";
+        ExpectedReference: BigInteger;
         FirstCode: Code[20];
         SecondCode: Code[20];
     begin
@@ -161,7 +162,8 @@ codeunit 59005 "WHA Labelling Tests"
         Assert.AreNotEqual(FirstCode, SecondCode, 'Two codes taken in a row should never be the same.');
 
         Setup.Get();
-        Assert.AreEqual(2, Setup."Last Serial Reference", 'Each code taken should use up one number.');
+        ExpectedReference := 2;
+        Assert.AreEqual(ExpectedReference, Setup."Last Serial Reference", 'Each code taken should use up one number.');
     end;
 
     [Test]
@@ -169,6 +171,7 @@ codeunit 59005 "WHA Labelling Tests"
     var
         Setup: Record "WHA Label Setup";
         LabelMgt: Codeunit "WHA Label Mgt.";
+        ExpectedReference: BigInteger;
         FirstExample: Code[20];
         SecondExample: Code[20];
     begin
@@ -181,7 +184,8 @@ codeunit 59005 "WHA Labelling Tests"
         Assert.AreEqual(FirstExample, SecondExample, 'Asking for an example twice should give the same answer.');
 
         Setup.Get();
-        Assert.AreEqual(0, Setup."Last Serial Reference", 'An example should not use up a number.');
+        ExpectedReference := 0;
+        Assert.AreEqual(ExpectedReference, Setup."Last Serial Reference", 'An example should not use up a number.');
     end;
 
     [Test]
@@ -318,6 +322,7 @@ codeunit 59005 "WHA Labelling Tests"
     var
         Setup: Record "WHA Label Setup";
         LabelMgt: Codeunit "WHA Label Mgt.";
+        ExpectedReference: BigInteger;
     begin
         // [GIVEN] A setup whose last serial reference is forty-one
         ConfigureLabelling(CopyStr(PrefixTok, 1, 10), 0);
@@ -327,9 +332,10 @@ codeunit 59005 "WHA Labelling Tests"
 
         // [WHEN] The next serial reference is taken
         // [THEN] It is forty-two, and the setup remembers it
-        Assert.AreEqual(42, LabelMgt.NextSerialReference(), 'The next reference follows the last.');
+        ExpectedReference := 42;
+        Assert.AreEqual(ExpectedReference, LabelMgt.NextSerialReference(), 'The next reference follows the last.');
         Setup.Get();
-        Assert.AreEqual(42, Setup."Last Serial Reference", 'The setup remembers the reference that was taken.');
+        Assert.AreEqual(ExpectedReference, Setup."Last Serial Reference", 'The setup remembers the reference that was taken.');
     end;
 
     local procedure ConfigureLabelling(CompanyPrefix: Code[10]; ExtensionDigit: Integer)

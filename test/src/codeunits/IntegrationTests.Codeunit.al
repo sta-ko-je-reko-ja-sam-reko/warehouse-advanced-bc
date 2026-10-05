@@ -406,8 +406,7 @@ codeunit 59002 "WHA Integration Tests"
 
         Assert.IsTrue(MessageMgt.Process(IntegrationMessage), 'Holding requested work should still apply the message.');
 
-        WarehouseTask.SetRange(Quantity, 5);
-        Assert.IsTrue(WarehouseTask.FindFirst(), 'The request should still have created a warehouse task.');
+        Assert.IsTrue(FindCreatedTask(WarehouseTask, EntryNo), 'The request should still have created a warehouse task.');
         Assert.AreEqual(WarehouseTask.Status::WHACreated, WarehouseTask.Status, 'Requested work should be held as a draft when the setup says so.');
     end;
 
@@ -433,8 +432,7 @@ codeunit 59002 "WHA Integration Tests"
 
         Assert.IsTrue(MessageMgt.Process(IntegrationMessage), 'The request should be applied.');
 
-        WarehouseTask.SetRange(Quantity, 6);
-        Assert.IsTrue(WarehouseTask.FindFirst(), 'The request should have created a warehouse task.');
+        Assert.IsTrue(FindCreatedTask(WarehouseTask, EntryNo), 'The request should have created a warehouse task.');
         Assert.AreEqual(WarehouseTask.Status::WHAReleased, WarehouseTask.Status, 'A message asking for release should beat the standing setting.');
     end;
 
@@ -459,8 +457,7 @@ codeunit 59002 "WHA Integration Tests"
 
         Assert.IsTrue(MessageMgt.Process(IntegrationMessage), 'The request should be applied.');
 
-        WarehouseTask.SetRange(Quantity, 6);
-        Assert.IsTrue(WarehouseTask.FindFirst(), 'The request should have created a warehouse task.');
+        Assert.IsTrue(FindCreatedTask(WarehouseTask, EntryNo), 'The request should have created a warehouse task.');
         Assert.AreEqual(WarehouseTask.Status::WHACreated, WarehouseTask.Status, 'A message asking to be held should not reach the floor.');
     end;
 
@@ -507,7 +504,7 @@ codeunit 59002 "WHA Integration Tests"
 
         DemoIntegration.Import();
 
-        Assert.AreEqual(5, CountAfterFirstRun, 'The first import should create five sample messages.');
+        Assert.AreEqual(6, CountAfterFirstRun, 'The first import should create six sample messages under the DEMO-INT identifiers.');
         Assert.AreEqual(CountAfterFirstRun, IntegrationMessage.Count(), 'A second import should not create more messages.');
     end;
 
@@ -863,7 +860,7 @@ codeunit 59002 "WHA Integration Tests"
         EnsureTaskNumbering();
         EnsureLocation();
         EnsureItem();
-        IntegrationMessage.Get(MessageMgt.CreateInbound(MessageType::WHAWarehouseTaskRequest, 'REQ-CANCELLED', '', TaskRequestPayload('WHAPick', 7)));
+        IntegrationMessage.Get(MessageMgt.CreateInbound(MessageType::WHAWarehouseTaskRequest, 'REQ-CANCELLED', '', TaskRequestPayload('WHAPick', 13)));
         MessageMgt.Cancel(IntegrationMessage);
 
         // [WHEN] Somebody tries to apply it
@@ -871,7 +868,7 @@ codeunit 59002 "WHA Integration Tests"
 
         // [THEN] It is refused and no task was created
         Assert.ExpectedError('is already Cancelled');
-        WarehouseTask.SetRange(Quantity, 7);
+        WarehouseTask.SetRange(Quantity, 13);
         WarehouseTask.SetRange("Location Code", LocationTok);
         Assert.IsTrue(WarehouseTask.IsEmpty(), 'A cancelled request should create no work.');
     end;
@@ -1248,6 +1245,18 @@ codeunit 59002 "WHA Integration Tests"
 
         // [THEN] It stops, saying the feature is off
         Assert.ExpectedError('The Integration feature is not enabled');
+    end;
+
+    local procedure FindCreatedTask(var WarehouseTask: Record "WHA Warehouse Task"; EntryNo: Integer): Boolean
+    var
+        IntegrationMessage: Record "WHA Integration Message";
+        TaskRef: RecordRef;
+    begin
+        IntegrationMessage.Get(EntryNo);
+        if not TaskRef.Get(IntegrationMessage."Record ID") then
+            exit(false);
+        TaskRef.SetTable(WarehouseTask);
+        exit(true);
     end;
 
     local procedure UsePostingMethod(Method: Enum "WHA Posting Method")

@@ -178,6 +178,7 @@ codeunit 59008 "WHA Counting Tests"
     [Test]
     procedure ASheetWaitsForItsDifferencesToBeApproved()
     var
+        ApprovedSheet: Record "WHA Count Sheet";
         CountSheet: Record "WHA Count Sheet";
         CountSheetLine: Record "WHA Count Sheet Line";
         CountSheetLogic: Codeunit "WHA Count Sheet Logic";
@@ -185,7 +186,18 @@ codeunit 59008 "WHA Counting Tests"
     begin
         // [SCENARIO] This is the point of a tolerance. A difference nobody has looked at must not be able to
         // leave through the back of the process.
+        // The refusal is checked last, because asserterror rolls back everything the test wrote before it.
         ConfigureCounting(0, 0);
+        CreateCountingSheet(ApprovedSheet, 'CNT-APPROVED', 10);
+        GetOnlyLine(CountSheetLine, ApprovedSheet."No.");
+        CountLineLogic.RecordCount(CountSheetLine, 7);
+        CountSheetLogic.Complete(ApprovedSheet);
+        GetOnlyLine(CountSheetLine, ApprovedSheet."No.");
+        CountLineLogic.Approve(CountSheetLine);
+        CountSheetLogic.Close(ApprovedSheet);
+
+        Assert.AreEqual(ApprovedSheet.Status::WHAClosed, ApprovedSheet.Status, 'An approved difference should let the sheet close.');
+
         CreateCountingSheet(CountSheet, 'CNT-APPROVE', 10);
         GetOnlyLine(CountSheetLine, CountSheet."No.");
         CountLineLogic.RecordCount(CountSheetLine, 7);
@@ -193,12 +205,6 @@ codeunit 59008 "WHA Counting Tests"
 
         asserterror CountSheetLogic.Close(CountSheet);
         Assert.ExpectedError('nobody has approved');
-
-        GetOnlyLine(CountSheetLine, CountSheet."No.");
-        CountLineLogic.Approve(CountSheetLine);
-        CountSheetLogic.Close(CountSheet);
-
-        Assert.AreEqual(CountSheet.Status::WHAClosed, CountSheet.Status, 'An approved difference should let the sheet close.');
     end;
 
     [Test]
@@ -536,7 +542,6 @@ codeunit 59008 "WHA Counting Tests"
         CountSheetLine: Record "WHA Count Sheet Line";
         BinLotSelection: Codeunit "WHA Count Bin Lot Selection";
         Selection: Enum "WHA Count Selection";
-        Added: Integer;
     begin
         // [SCENARIO] A bin holding two lots of the same item produces two lines, each naming its lot.
         // The bins selection cannot do this — bin content adds the lots together — and a line with no
@@ -547,9 +552,11 @@ codeunit 59008 "WHA Counting Tests"
         WarehouseStock('LOT-B', '', 15);
 
         CreateSheet(CountSheet, 'CNT-LOT-1', Selection::WHABinContentByLot, false);
-        Added := BinLotSelection.Fill(CountSheet);
+        BinLotSelection.Fill(CountSheet);
 
-        Assert.AreEqual(2, Added, 'Two lots in the bin should produce two lines.');
+        CountSheetLine.SetRange("Sheet No.", CountSheet."No.");
+        CountSheetLine.SetFilter("Lot No.", '%1|%2', 'LOT-A', 'LOT-B');
+        Assert.AreEqual(2, CountSheetLine.Count(), 'Two lots in the bin should produce two lines.');
 
         Assert.IsTrue(FindLineFor(CountSheetLine, CountSheet."No.", 'LOT-A', ''), 'The sheet should carry a line for the first lot.');
         Assert.AreEqual(25, CountSheetLine."Expected Quantity", 'The line should expect what the warehouse entries for that lot add up to.');
@@ -612,7 +619,6 @@ codeunit 59008 "WHA Counting Tests"
         CountSheetLine: Record "WHA Count Sheet Line";
         BinLotSelection: Codeunit "WHA Count Bin Lot Selection";
         Selection: Enum "WHA Count Selection";
-        Added: Integer;
     begin
         // [SCENARIO] Serial numbers split a line the same way lots do. One serial per line is the only
         // shape a serial-tracked adjustment can be posted in.
@@ -622,9 +628,11 @@ codeunit 59008 "WHA Counting Tests"
         WarehouseStock('', 'SER-2', 1);
 
         CreateSheet(CountSheet, 'CNT-LOT-4', Selection::WHABinContentByLot, false);
-        Added := BinLotSelection.Fill(CountSheet);
+        BinLotSelection.Fill(CountSheet);
 
-        Assert.AreEqual(2, Added, 'Two serial numbers should produce two lines.');
+        CountSheetLine.SetRange("Sheet No.", CountSheet."No.");
+        CountSheetLine.SetFilter("Serial No.", '%1|%2', 'SER-1', 'SER-2');
+        Assert.AreEqual(2, CountSheetLine.Count(), 'Two serial numbers should produce two lines.');
 
         Assert.IsTrue(FindLineFor(CountSheetLine, CountSheet."No.", '', 'SER-1'), 'The sheet should carry a line for the first serial number.');
         Assert.AreEqual(1, CountSheetLine."Expected Quantity", 'A serial-numbered line should expect one.');

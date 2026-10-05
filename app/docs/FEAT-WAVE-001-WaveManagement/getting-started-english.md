@@ -131,9 +131,10 @@ cannot: is this a shift's worth?
 standard for this work, the minutes read zero, and the wave is limited by its job count alone. Zero
 minutes because nothing measured the work is not the same as no work.
 
-If a wave has **Max minutes of work** set, filling stops once it has that much. One exception: if the
-very first job on its own takes longer than the whole allowance, it is still taken — otherwise a long
-job would never be gathered by any wave and would sit on the queue for ever.
+If a wave has **Max minutes of work** set, filling keeps adding jobs until the wave has that much, so
+the last job may take it a little over. With ten minutes allowed and six-minute jobs, a wave takes two.
+A job that on its own takes longer than the whole allowance is still taken by an empty wave — otherwise
+a long job would never be gathered by any wave and would sit on the queue for ever.
 
 ## What is not here yet
 

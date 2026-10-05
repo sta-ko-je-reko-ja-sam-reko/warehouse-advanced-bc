@@ -50,8 +50,8 @@ codeunit 55656 "WHA Int. Task Confirm" implements "WHA IIntMessageHandler"
         PayloadText: Text;
     begin
         PayloadObject.Add('number', WarehouseTask."No.");
-        PayloadObject.Add('taskType', Format(WarehouseTask."Task Type", 0, 9));
-        PayloadObject.Add('status', Format(WarehouseTask.Status, 0, 9));
+        PayloadObject.Add('taskType', MessageMgt.EnumValueName(WarehouseTask."Task Type".Names(), WarehouseTask."Task Type".Ordinals(), WarehouseTask."Task Type".AsInteger()));
+        PayloadObject.Add('status', MessageMgt.EnumValueName(WarehouseTask.Status.Names(), WarehouseTask.Status.Ordinals(), WarehouseTask.Status.AsInteger()));
         PayloadObject.Add('description', WarehouseTask.Description);
         PayloadObject.Add('locationCode', WarehouseTask."Location Code");
         PayloadObject.Add('fromBinCode', WarehouseTask."From Bin Code");
@@ -64,7 +64,7 @@ codeunit 55656 "WHA Int. Task Confirm" implements "WHA IIntMessageHandler"
         PayloadObject.Add('quantity', WarehouseTask.Quantity);
         PayloadObject.Add('quantityHandled', WarehouseTask."Quantity Handled");
         PayloadObject.Add('quantityOutstanding', WarehouseTask.Quantity - WarehouseTask."Quantity Handled");
-        PayloadObject.Add('shortReason', Format(WarehouseTask."Short Reason", 0, 9));
+        PayloadObject.Add('shortReason', MessageMgt.EnumValueName(WarehouseTask."Short Reason".Names(), WarehouseTask."Short Reason".Ordinals(), WarehouseTask."Short Reason".AsInteger()));
         PayloadObject.Add('unitOfMeasureCode', WarehouseTask."Unit of Measure Code");
         PayloadObject.Add('assignedToUserId', WarehouseTask."Assigned To User ID");
         PayloadObject.Add('startedDateTime', MessageMgt.IsoDateTime(WarehouseTask."Started At"));

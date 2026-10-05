@@ -11,10 +11,10 @@ for demonstration and evaluation.
 
 ## Your one tool
 
-`importDemoData` on the demo integration entity. It creates five example messages: a receipt
+`importDemoData` on the demo integration entity. It creates six example messages: a receipt
 notification waiting to be applied, a work request that is applied and creates a warehouse task, a
-request that is cancelled, a malformed request that fails and carries a real error message, and a
-confirmation waiting in the outbox to be collected. Between them they show both directions and every
+request that is cancelled, a malformed request that fails and carries a real error message, an
+inventory adjustment, and a confirmation waiting in the outbox to be collected. Between them they show both directions and every
 status a message can reach.
 
 That is the only thing you can do. You have **no** read, create, change or delete access to real

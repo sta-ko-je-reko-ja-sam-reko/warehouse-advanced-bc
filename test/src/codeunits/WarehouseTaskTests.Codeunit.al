@@ -625,6 +625,7 @@ codeunit 59001 "WHA Warehouse Task Tests"
         // remainder, carrying where the work is and what it is for.
         ConfigureQueue(0);
         ConfigureFollowUp(true);
+        EnsureTaskNumbering();
         OperatorId := EnsureUser('WHA-FOLLOW');
         CreateStartedTask(WarehouseTask, 'TEST-FOLLOW', 10, OperatorId);
 
@@ -887,18 +888,25 @@ codeunit 59001 "WHA Warehouse Task Tests"
         WarehouseTask: Record "WHA Warehouse Task";
         TaskActivityCues: Codeunit "WHA Task Activity Cues";
         TaskLogic: Codeunit "WHA Warehouse Task Logic";
+        ResultsBefore: Dictionary of [Text, Text];
         Results: Dictionary of [Text, Text];
+        WaitingBefore: Integer;
+        WaitingAfter: Integer;
     begin
         // [SCENARIO] The first tile a warehouse manager looks at is work nobody has picked up. The count
         // is worked out in a background session, so what is asserted here is what that session returns.
+        // Earlier tests in this codeunit leave released work behind, so the count is measured as a change.
         ConfigureQueue(0);
         EnableDirectedWork();
+        TaskActivityCues.AddCounts(ResultsBefore);
+        Evaluate(WaitingBefore, ResultsBefore.Get(Format(TempActivitiesCue.FieldNo("WHA Tasks Waiting"))));
         CreateWorkableTask(WarehouseTask, 'WHA-CUE-01');
         TaskLogic.Release(WarehouseTask);
 
         TaskActivityCues.AddCounts(Results);
 
-        Assert.AreEqual('1', Results.Get(Format(TempActivitiesCue.FieldNo("WHA Tasks Waiting"))), 'One released job is one job waiting.');
+        Evaluate(WaitingAfter, Results.Get(Format(TempActivitiesCue.FieldNo("WHA Tasks Waiting"))));
+        Assert.AreEqual(WaitingBefore + 1, WaitingAfter, 'One released job is one more job waiting.');
     end;
 
     [Test]
@@ -2002,7 +2010,9 @@ codeunit 59001 "WHA Warehouse Task Tests"
         WarehouseReceiptLine."Bin Code" := CopyStr(TestBinTok, 1, 20);
         WarehouseReceiptLine."Item No." := CopyStr(TestItemTok, 1, 20);
         WarehouseReceiptLine.Quantity := Outstanding;
+        WarehouseReceiptLine."Qty. (Base)" := Outstanding;
         WarehouseReceiptLine."Qty. Outstanding" := Outstanding;
+        WarehouseReceiptLine."Qty. Outstanding (Base)" := Outstanding;
         WarehouseReceiptLine."Source No." := LastOrderNo;
         WarehouseReceiptLine.Insert(false);
     end;
@@ -2036,7 +2046,9 @@ codeunit 59001 "WHA Warehouse Task Tests"
         WarehouseShipmentLine."Bin Code" := CopyStr(TestBinTok, 1, 20);
         WarehouseShipmentLine."Item No." := CopyStr(TestItemTok, 1, 20);
         WarehouseShipmentLine.Quantity := Outstanding;
+        WarehouseShipmentLine."Qty. (Base)" := Outstanding;
         WarehouseShipmentLine."Qty. Outstanding" := Outstanding;
+        WarehouseShipmentLine."Qty. Outstanding (Base)" := Outstanding;
         WarehouseShipmentLine."Source No." := LastOrderNo;
         WarehouseShipmentLine.Insert(false);
     end;

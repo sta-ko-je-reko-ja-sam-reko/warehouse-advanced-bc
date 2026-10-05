@@ -233,11 +233,12 @@ codeunit 55300 "WHA Slotting Mgt."
         if not ItemVelocity.FindSet(true) then
             exit;
 
+        Running := 0;
         repeat
-            Running += ItemVelocity."Rank Value";
             Share := Running / Total * 100;
             ItemVelocity.Class := ClassFor(ItemVelocity, Share);
             ItemVelocity.Modify(true);
+            Running += ItemVelocity."Rank Value";
         until ItemVelocity.Next() = 0;
     end;
 
@@ -252,9 +253,9 @@ codeunit 55300 "WHA Slotting Mgt."
         if ItemVelocity.Movements < Setup."Min Movements" then
             exit(Class::WHAUnclassified);
 
-        if Share <= Setup."Class A Percent" then
+        if Share < Setup."Class A Percent" then
             exit(Class::WHAClassA);
-        if Share <= Setup."Class A Percent" + Setup."Class B Percent" then
+        if Share < Setup."Class A Percent" + Setup."Class B Percent" then
             exit(Class::WHAClassB);
         exit(Class::WHAClassC);
     end;

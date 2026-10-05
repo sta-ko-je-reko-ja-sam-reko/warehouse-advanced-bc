@@ -48,6 +48,12 @@ codeunit 55002 "WHA Guided Setup"
     /// Applies the choices made in the wizard. Refreshes the application areas but never restarts the
     /// session, because the hub owns the single deferred restart.
     /// </summary>
+    /// <remarks>
+    /// The setup itself is one unit of work. Sample data is loaded after it has been committed, in a unit
+    /// of work of its own, because loading some features' samples applies integration messages and that
+    /// commits. A failure while loading samples therefore leaves the feature set up without its samples,
+    /// never half set up.
+    /// </remarks>
     /// <param name="TempSetupStep">The step the choices belong to.</param>
     /// <param name="Enable">Whether the feature should be switched on.</param>
     /// <param name="CreateNoSeries">Whether the feature should create and assign the numbering it needs. Features that number nothing ignore it.</param>
@@ -60,12 +66,18 @@ codeunit 55002 "WHA Guided Setup"
     begin
         if TempSetupStep."Has Toggle" then begin
             FeatureSetup := TempSetupStep.Feature;
-            FeatureSetup.ApplyChoices(Enable, CreateNoSeries, ImportDemoData);
+            FeatureSetup.ApplyChoices(Enable, CreateNoSeries, false);
         end else
             EnsureFoundation();
 
         MCPSetup.EnsureConfigurations();
         FeatureMgt.RefreshExperienceAreas();
+
+        if not (TempSetupStep."Has Toggle" and ImportDemoData) then
+            exit;
+
+        Commit();
+        FeatureSetup.ApplyChoices(Enable, false, true);
     end;
 
     /// <summary>

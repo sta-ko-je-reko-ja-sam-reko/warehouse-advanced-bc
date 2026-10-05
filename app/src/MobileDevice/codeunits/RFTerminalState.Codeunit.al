@@ -34,7 +34,7 @@ codeunit 55104 "WHA RF Terminal State"
     begin
         HasJob := WarehouseTask."No." <> '';
 
-        StateObject.Add('step', Format(CurrentStep, 0, 9));
+        StateObject.Add('step', StepName(CurrentStep));
         StateObject.Add('stepLabel', Format(CurrentStep));
         StateObject.Add('instruction', InstructionText);
         StateObject.Add('device', DeviceObject(RFDevice));
@@ -133,6 +133,11 @@ codeunit 55104 "WHA RF Terminal State"
         JobObjectValue.Add('quantity', WarehouseTask.Quantity);
         JobObjectValue.Add('unitOfMeasure', WarehouseTask."Unit of Measure Code");
         exit(JobObjectValue);
+    end;
+
+    local procedure StepName(CurrentStep: Enum "WHA RF Step"): Text
+    begin
+        exit(CurrentStep.Names().Get(CurrentStep.Ordinals().IndexOf(CurrentStep.AsInteger())));
     end;
 
     local procedure WantsScan(CurrentStep: Enum "WHA RF Step"): Boolean

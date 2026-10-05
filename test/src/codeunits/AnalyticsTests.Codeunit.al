@@ -306,8 +306,7 @@ codeunit 59013 "WHA Analytics Tests"
         KpiSnapshot.Reset();
         KpiSnapshot.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
         KpiSnapshot.SetRange(Measure, Measure::WHATasksCompleted);
-        KpiSnapshot.SetFilter("To Date", '<%1', WorkDate() - 2);
-        KpiSnapshot.SetFilter("To Date", '>%1', WorkDate() - 30);
+        KpiSnapshot.SetRange("To Date", WorkDate() - 29, WorkDate() - 3);
 
         Assert.IsTrue(KpiSnapshot.IsEmpty(), 'Nothing older than the catch-up setting should have been filled in.');
     end;
@@ -472,6 +471,19 @@ codeunit 59013 "WHA Analytics Tests"
 
         EnsureLocation(CopyStr(LocationTok, 1, 10));
         EnsureItem(CopyStr(ItemTok, 1, 20));
+        ClearMeasuredWork();
+    end;
+
+    local procedure ClearMeasuredWork()
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        DockAppointment: Record "WHA Dock Appointment";
+    begin
+        WarehouseTask.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        WarehouseTask.DeleteAll(false);
+
+        DockAppointment.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        DockAppointment.DeleteAll(false);
     end;
 
     local procedure CreateCompletedTask(TaskNo: Code[20]; TaskType: Enum "WHA Warehouse Task Type"; Quantity: Decimal; Handled: Decimal; CompletedAt: DateTime)

@@ -187,9 +187,12 @@ rather than to measure.
 
 `Fill` applies both caps and stops at whichever binds first. Two details matter:
 
-- **A job bigger than the whole allowance is still gathered, if the wave is empty.** Otherwise a
+- **Jobs are added until the allowance is reached.** A job goes in while the wave is still short of
+  its allowance, so the job that reaches or crosses it is the last one in: ten minutes takes two
+  six-minute jobs. The cap says when to stop gathering, not how much a wave may never exceed. It
+  follows that a job bigger than the whole allowance is still gathered by an empty wave — otherwise a
   thirty-minute job in a warehouse with a twenty-five-minute cap would never be gathered by any wave
-  and would sit on the queue for ever. The first job always goes in; the cap governs everything after.
+  and would sit on the queue for ever.
 - **Zero minutes because nobody wrote a standard is not zero minutes of work.** `EstimateMinutes`
   returns a `Measured` flag alongside the number, and the wave card shows it. A wave whose work
   nothing measured says so, rather than presenting a confident zero.

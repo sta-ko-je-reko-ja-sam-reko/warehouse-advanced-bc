@@ -120,8 +120,14 @@ setup page shows the chosen basis's own description next to the field for exactl
 ## The classification
 
 Rows are ordered by `Rank Value` descending, and a running share of the location's total is
-accumulated. An item lands in **A** while the running share is within `Class A Percent`, in **B**
-while within A plus `Class B Percent`, and in **C** after that. Ships as 20/30.
+accumulated. Each item is classed by the share the faster items **before it** have already taken:
+it lands in **A** while that share is still short of `Class A Percent`, in **B** while it is short of
+A plus `Class B Percent`, and in **C** after that. Ships as 20/30.
+
+The share is taken before the item, not after it, so the fastest item at a location is always class A
+and the item that carries the running share across a boundary stays in the faster class. Counting
+the item's own movement first would put a dominant item — one that alone accounts for more than the A
+share — in class C, the opposite of what it is.
 
 An item with fewer picks than `Fewest picks worth classifying` (ships at 2) is left
 **Unclassified**. An item picked once is not slow moving; it is unmeasured, and calling it class C

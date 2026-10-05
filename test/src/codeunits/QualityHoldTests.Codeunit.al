@@ -539,22 +539,25 @@ codeunit 59009 "WHA Quality Hold Tests"
         Disposition: Enum "WHA Hold Disposition";
         Reason: Enum "WHA Hold Reason";
         Status: Enum "WHA Handling Unit Status";
-        Results: Dictionary of [Text, Text];
+        CountsAfter: Dictionary of [Text, Text];
+        CountsBefore: Dictionary of [Text, Text];
     begin
         // [SCENARIO] Goods on hold and goods nobody has decided about are two different numbers. The
         // second is the one that gets forgotten, which is why it earns a tile of its own.
+        // Earlier tests in this codeunit leave holds behind, so the tiles are measured by how far they move.
         ConfigureQualityHold(false, true);
         EnableQualityHold();
+        QCActivityCues.AddCounts(CountsBefore);
         CreateUnit(HandlingUnit, 'WHA-QC-CUE1', '', Status::WHAOpen);
         QualityHoldMgt.Place(HandlingUnit, Reason::WHADamaged, '');
         CreateUnit(DecidedUnit, 'WHA-QC-CUE2', '', Status::WHAOpen);
         QualityHold.Get(QualityHoldMgt.Place(DecidedUnit, Reason::WHAInspection, ''));
         QualityHoldMgt.Decide(QualityHold, Disposition::WHARework);
 
-        QCActivityCues.AddCounts(Results);
+        QCActivityCues.AddCounts(CountsAfter);
 
-        Assert.AreEqual('2', Results.Get(Format(TempActivitiesCue.FieldNo("WHA Goods On Hold"))), 'Both units are still stopped.');
-        Assert.AreEqual('1', Results.Get(Format(TempActivitiesCue.FieldNo("WHA Holds To Decide"))), 'Only one of them is still waiting for a decision.');
+        Assert.AreEqual(2, CueMoved(CountsBefore, CountsAfter, TempActivitiesCue.FieldNo("WHA Goods On Hold")), 'Both units are still stopped.');
+        Assert.AreEqual(1, CueMoved(CountsBefore, CountsAfter, TempActivitiesCue.FieldNo("WHA Holds To Decide")), 'Only one of them is still waiting for a decision.');
     end;
 
     [Test]
@@ -1001,13 +1004,13 @@ codeunit 59009 "WHA Quality Hold Tests"
         // [SCENARIO] Goods under investigation should not be added to either, or the quantity being
         // questioned changes while somebody is questioning it.
         EnsureLocation(CopyStr(LocationTok, 1, 10));
-        CreateUnit(HandlingUnit, 'QC-BLK-1', '', HandlingUnit.Status::WHAOpen);
+        CreateUnitInBin(HandlingUnit, 'QC-BLK-1', '', 'QC-BLK-01');
         AddContents('QC-BLK-1', 4);
         EnsureBinContent('QC-BLK-1');
 
         Assert.AreEqual(1, HoldBlocksBin.Apply(QualityHold, HandlingUnit), 'The bin content should have been blocked.');
 
-        BinContent.Get(CopyStr(LocationTok, 1, 10), CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '');
+        BinContent.Get(HandlingUnit."Location Code", HandlingUnit."Bin Code", CopyStr(ItemTok, 1, 20), '', '');
         Assert.AreEqual(BinContent."Block Movement"::All, BinContent."Block Movement", 'A held bin should be blocked in both directions.');
     end;
 
@@ -1022,14 +1025,14 @@ codeunit 59009 "WHA Quality Hold Tests"
         // [SCENARIO] Scrapping is not a reason to leave the block standing: what is scrapped is written
         // off by posting, and a bin left blocked afterwards holds back the good stock still in it.
         EnsureLocation(CopyStr(LocationTok, 1, 10));
-        CreateUnit(HandlingUnit, 'QC-BLK-2', '', HandlingUnit.Status::WHAOpen);
+        CreateUnitInBin(HandlingUnit, 'QC-BLK-2', '', 'QC-BLK-02');
         AddContents('QC-BLK-2', 4);
         EnsureBinContent('QC-BLK-2');
         HoldBlocksBin.Apply(QualityHold, HandlingUnit);
 
         Assert.AreEqual(1, HoldBlocksBin.Lift(QualityHold, HandlingUnit), 'The bin content should have been released.');
 
-        BinContent.Get(CopyStr(LocationTok, 1, 10), CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '');
+        BinContent.Get(HandlingUnit."Location Code", HandlingUnit."Bin Code", CopyStr(ItemTok, 1, 20), '', '');
         Assert.AreEqual(BinContent."Block Movement"::" ", BinContent."Block Movement", 'A released bin should move again.');
     end;
 
@@ -1044,31 +1047,41 @@ codeunit 59009 "WHA Quality Hold Tests"
         // [SCENARIO] Business Central blocks a bin, not a pallet, so two pallets in one bin share one
         // block. Releasing the first must not free stock the second is still questioning.
         EnsureLocation(CopyStr(LocationTok, 1, 10));
-        CreateUnit(HandlingUnit, 'QC-BLK-3', '', HandlingUnit.Status::WHAOpen);
+        CreateUnitInBin(HandlingUnit, 'QC-BLK-3', '', 'QC-BLK-03');
         AddContents('QC-BLK-3', 4);
         EnsureBinContent('QC-BLK-3');
 
-        InsertLiveHold(99001, 'QC-BLK-3');
+        InsertLiveHold(99001, HandlingUnit);
         QualityHold.Get(99001);
         HoldBlocksBin.Apply(QualityHold, HandlingUnit);
 
-        InsertLiveHold(99002, 'QC-BLK-3');
+        InsertLiveHold(99002, HandlingUnit);
 
         Assert.AreEqual(0, HoldBlocksBin.Lift(QualityHold, HandlingUnit), 'A second live hold on the same bin should keep the block.');
 
-        BinContent.Get(CopyStr(LocationTok, 1, 10), CopyStr(BinTok, 1, 20), CopyStr(ItemTok, 1, 20), '', '');
+        BinContent.Get(HandlingUnit."Location Code", HandlingUnit."Bin Code", CopyStr(ItemTok, 1, 20), '', '');
         Assert.AreEqual(BinContent."Block Movement"::All, BinContent."Block Movement", 'The bin should still be blocked.');
     end;
 
-    local procedure InsertLiveHold(EntryNo: Integer; UnitNo: Code[20])
+    local procedure CueMoved(CountsBefore: Dictionary of [Text, Text]; CountsAfter: Dictionary of [Text, Text]; CueFieldNo: Integer): Integer
+    var
+        AfterCount: Integer;
+        BeforeCount: Integer;
+    begin
+        Evaluate(BeforeCount, CountsBefore.Get(Format(CueFieldNo)));
+        Evaluate(AfterCount, CountsAfter.Get(Format(CueFieldNo)));
+        exit(AfterCount - BeforeCount);
+    end;
+
+    local procedure InsertLiveHold(EntryNo: Integer; var HandlingUnit: Record "WHA Handling Unit")
     var
         QualityHold: Record "WHA Quality Hold";
     begin
         QualityHold.Init();
         QualityHold."Entry No." := EntryNo;
-        QualityHold."Handling Unit No." := UnitNo;
-        QualityHold."Location Code" := CopyStr(LocationTok, 1, 10);
-        QualityHold."Bin Code" := CopyStr(BinTok, 1, 20);
+        QualityHold."Handling Unit No." := HandlingUnit."No.";
+        QualityHold."Location Code" := HandlingUnit."Location Code";
+        QualityHold."Bin Code" := HandlingUnit."Bin Code";
         QualityHold.Status := QualityHold.Status::WHAOnHold;
         QualityHold.Insert(false);
     end;

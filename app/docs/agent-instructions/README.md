@@ -47,7 +47,9 @@ tools — and vice versa.
 ## How an administrator uses these
 
 1. In Business Central, search for **MCP Configurations**. The app creates and activates its
-   configurations on install and upgrade, so they are already there.
+   configurations when a feature is switched on (guided setup or the feature's setup page) and on upgrade.
+   It cannot on a first install: Business Central accepts only published API pages as tools, and the app's
+   API pages are not published until the install has finished.
 2. Open the configuration and copy its connection string.
 3. In Copilot Studio, create an agent and connect it to that configuration.
 4. Open the matching file above and paste its contents into the agent's instructions.

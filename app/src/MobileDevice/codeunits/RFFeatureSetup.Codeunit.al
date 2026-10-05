@@ -107,7 +107,7 @@ codeunit 55101 "WHA RF Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo RF Device", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo RF Device");
         MCPSetup.Activate(ConfigId);
     end;
 

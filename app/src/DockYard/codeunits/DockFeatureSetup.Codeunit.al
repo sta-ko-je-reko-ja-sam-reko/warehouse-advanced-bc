@@ -126,7 +126,7 @@ codeunit 55452 "WHA Dock Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Dock", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Dock");
         MCPSetup.Activate(ConfigId);
     end;
 

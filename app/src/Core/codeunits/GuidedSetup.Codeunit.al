@@ -55,6 +55,7 @@ codeunit 55002 "WHA Guided Setup"
     internal procedure ApplyWizardChoices(var TempSetupStep: Record "WHA Setup Step" temporary; Enable: Boolean; CreateNoSeries: Boolean; ImportDemoData: Boolean)
     var
         FeatureMgt: Codeunit "WHA Feature Mgt.";
+        MCPSetup: Codeunit "WHA MCP Setup";
         FeatureSetup: Interface "WHA IFeatureSetup";
     begin
         if TempSetupStep."Has Toggle" then begin
@@ -63,6 +64,7 @@ codeunit 55002 "WHA Guided Setup"
         end else
             EnsureFoundation();
 
+        MCPSetup.EnsureConfigurations();
         FeatureMgt.RefreshExperienceAreas();
     end;
 

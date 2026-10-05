@@ -105,7 +105,7 @@ codeunit 55702 "WHA KPI Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Analytics", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Analytics");
         MCPSetup.Activate(ConfigId);
     end;
 

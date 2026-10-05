@@ -95,7 +95,7 @@ codeunit 55601 "WHA Label Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Label", false, false, false);
+        MCPSetup.EnsureApiToolWithActions(ConfigId, Page::"WHA API Label", false, false, false);
         MCPSetup.Activate(ConfigId);
     end;
 
@@ -105,7 +105,7 @@ codeunit 55601 "WHA Label Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Label", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Label");
         MCPSetup.Activate(ConfigId);
     end;
 

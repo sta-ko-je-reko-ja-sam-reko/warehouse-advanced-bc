@@ -73,11 +73,14 @@ codeunit 55001 "WHA Feature Mgt."
     end;
 
     /// <summary>
-    /// Refreshes the application areas and restarts the session in one call. Used by the standalone setup
+    /// Ensures the MCP configurations, refreshes the application areas and restarts the session in one call. Used by the standalone setup
     /// page; the guided setup hub refreshes per step and restarts once instead.
     /// </summary>
     procedure ApplyExperienceChange()
+    var
+        MCPSetup: Codeunit "WHA MCP Setup";
     begin
+        MCPSetup.EnsureConfigurations();
         RefreshExperienceAreas();
         RestartSession();
     end;

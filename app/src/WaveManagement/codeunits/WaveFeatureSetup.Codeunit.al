@@ -113,8 +113,8 @@ codeunit 55151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Wave", true, true, false);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Wave Template", false, false, false);
+        MCPSetup.EnsureApiToolWithActions(ConfigId, Page::"WHA API Wave", true, true, false);
+        MCPSetup.EnsureApiToolWithActions(ConfigId, Page::"WHA API Wave Template", false, false, false);
         MCPSetup.Activate(ConfigId);
     end;
 
@@ -124,7 +124,7 @@ codeunit 55151 "WHA Wave Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Wave", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Wave");
         MCPSetup.Activate(ConfigId);
     end;
 

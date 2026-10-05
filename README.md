@@ -9,10 +9,43 @@ leave BC for and buy a dedicated WMS to get.
 
 ## Status
 
-Early scaffolding. No functional AL code yet. The module list in
-[app/docs/modules.md](app/docs/modules.md) is a **candidate** scope that must be validated
-against the customer's live WMS usage before implementation — see
-[app/docs/gap-analysis.md](app/docs/gap-analysis.md).
+All fourteen candidate features ship a first working segment, on top of a foundation and three
+shared engines. Every feature has its own setup, its own `Enabled` switch and application area, API
+pages grouped per feature, an MCP configuration, sample data, and a test codeunit. The test app holds
+**577 tests**, and both projects build with zero errors against Business Central 29 W1.
+
+| Area | What ships |
+|---|---|
+| Foundation | Guided setup hub and per-feature wizard, feature facade, role centre with tiles contributed by the features, permission sets |
+| Handling units | Licence plates and SSCCs, nesting, contents, move as one |
+| Directed work | Task queue with priority and operator assignment, partial completion, work raised from warehouse receipts and shipments, optional write-back of quantities to the document |
+| Handheld | Scanner-shaped page set and terminal add-in, device register, scan-through flows, short pick |
+| Wave management | Waves by a swappable strategy, templates, workload capped in minutes of work |
+| Replenishment | Min/max per pick bin, look-ahead against promised demand, pre-replenishment for a wave |
+| Counting | Blind count sheets, tolerance, approval before a difference is accepted |
+| Quality hold | Hold a handling unit and its contents, three dispositions, an audit trail that cannot be deleted |
+| Packing | Packing bench: open, fill, verify and close a carton |
+| Labelling | GS1 SSCC with check digit or sequential licence plate, label layouts |
+| Labour management | Engineered standards, measured time, indirect time |
+| Slotting | ABC velocity from pick history, re-slotting proposals |
+| Dock and yard | Doors, yard positions, booked and checked-in vehicle visits |
+| Analytics | Five operational measures kept as comparable snapshots |
+| Integration | Message spine with handler dispatch for an external system, retention through Business Central's retention policies |
+| Shared engines (not features) | Inventory posting, warehouse registration, telemetry |
+
+What is still open:
+
+- The app has **no customer**. [app/docs/modules.md](app/docs/modules.md) and
+  [app/docs/gap-analysis.md](app/docs/gap-analysis.md) are the discovery agenda for the day one
+  appears. Where a decision would need a customer fact, the app ships the least invasive default
+  and makes the alternatives swappable.
+- Whether the app keeps its own queue of work beside Business Central's warehouse activities or works
+  on top of them is recorded in [app/docs/scope-fork.md](app/docs/scope-fork.md).
+- The integration messages are built on assumed contracts, and the handheld has not yet been used by
+  an operator.
+
+[app/docs/implementation-plan.md](app/docs/implementation-plan.md) is the detailed delivery log, and
+[app/docs/getting-started-english.md](app/docs/getting-started-english.md) is the end-user guide.
 
 ## Repository layout
 
@@ -22,22 +55,27 @@ warehouse-advanced-bc.code-workspace   Open THIS in VS Code, not the repo folder
 app/                    Main extension — an AL project root
   app.json              Manifest — object range 55000..58999, target Cloud
   AppSourceCop.json     Affix enforcement (WHA)
-  .vscode/              AL settings + launch config (launch.json is local-only)
-  img/AppLogo.png       App logo (placeholder)
+  wha.ruleset.json      Project ruleset; includes the shared one
+  .vscode/              AL settings + launch.json.template (launch.json is local-only)
+  docs/                 Feature documentation (FEAT-*/), planning docs, agent instructions
+  layout/               Report layouts
   Translations/         .xlf translation files (.g.xlf is generated, not committed)
-  docs/                 Feature documentation + planning docs
   src/
-    Core/               Foundation + assisted setup
-      tables/ pages/ codeunits/ enums/ interfaces/ tableextensions/
-    PermissionSet/      Permission set objects
-    <Feature>/          One folder per shipped feature, same subfolder shape
-test/                   Test extension — an AL project root
-  app.json              Manifest — object range 59000..59999
-  src/codeunits/        Test codeunits
+    Core/               Foundation, guided setup, role centre
+    PermissionSet/      Permission set objects for the whole app
+    Posting/            Shared inventory posting engine (not a feature)
+    Registration/       Shared warehouse registration engine (not a feature)
+    Telemetry/          Shared telemetry for unattended runs (not a feature)
+    <Feature>/          One folder per feature, same subfolder shape
+test/                   Test extension — an AL project root, object range 59000..59999
+  src/codeunits/        One test codeunit per feature
+tools/
+  build.ps1             Compiles app and test with all four code analyzers
+  test.ps1              Publishes both packages to the dev container and runs the tests
+  rf-bench/             Playwright bench that runs the handheld add-in in a real browser
+  rf-simulator/         Single-file browser stand-in for the handheld
+  rdlc-check/           Checks the RDLC report layouts
 ```
-
-Feature folders under `src/` are created **when a feature is actually scoped**, not up
-front. Object IDs are pre-allocated per module in [app/docs/modules.md](app/docs/modules.md).
 
 ### Why `.vscode` lives in `app/` and not at the repo root
 
@@ -50,34 +88,30 @@ workspace folders in their own right.
 
 ## Shared conventions — required to build
 
-This project follows the conventions in the private **`bc-dev-templates`** repo (greenfield
-scenario). Because that repo is private and this one is public, the conventions are **not
-committed** — `.bc-conventions/` is gitignored and wired in locally as a directory junction:
+This project follows the owner's private BC conventions (greenfield scenario). Because they are
+private and this repository is public, the conventions are **not committed** — `.bc-conventions/`
+is gitignored and wired in locally as a directory junction:
 
 ```powershell
-cmd /c mklink /J .bc-conventions C:\Users\P16v\Documents\bc-dev-templates\bc-customer-project-template
+cmd /c mklink /J .bc-conventions <path-to-conventions>\bc-customer-project-template
 ```
 
-**A fresh clone of this repo will not build without that step.** `app.json` sets
-`"ruleset": "../.bc-conventions/ruleset.json"`, and the path will not resolve until the
-private repo is cloned and junctioned. This is a deliberate trade to keep the methodology
-private while the product repo stays public.
+**A fresh clone of this repo will not build without that step.** `app/.vscode/settings.json` points
+`al.ruleSetPath` at `app/wha.ruleset.json`, which includes `../.bc-conventions/ruleset.json`, and
+`test/.vscode/settings.json` points at the shared ruleset directly. Neither path resolves until the
+conventions are junctioned. This is a deliberate trade to keep the methodology private while the
+product repo stays public.
 
 ## Development environment
 
 | | |
 |---|---|
-| BC version | 28.1.49838.50988 (2026 release wave 1) |
-| AL runtime | 17.0 |
-| AL extension | ms-dynamics-smb.al 17.0 |
-| Dev container | Docker, sandbox artifact, **US** localisation, NavUserPassword auth |
+| Manifest target | `application` 28.1, runtime 17.0 (the minimum the app supports) |
+| Build and test | Business Central **29.0.54011.55616 W1**, local artifact cache |
+| Dev container | `bc29loc`, NavUserPassword auth, shared with the owner's other apps so they install side by side |
 | Production | BC online, **W1** (no country localisation) |
 | Distribution | **Per-tenant extension (PTE)** — not AppSource |
-| Target | `Cloud` — production runs on BC online |
-
-The dev container is US while production is W1. Warehouse objects overlap heavily so the
-practical risk is low, but the container should be rebuilt from a W1 artifact before work
-on modules that touch posting or documents.
+| Target | `Cloud` |
 
 ### Getting started
 
@@ -85,14 +119,21 @@ on modules that touch posting or documents.
 git clone https://github.com/sta-ko-je-reko-ja-sam-reko/warehouse-advanced-bc.git
 cd warehouse-advanced-bc
 
-cmd /c mklink /J .bc-conventions C:\path\to\bc-dev-templates\bc-customer-project-template
+cmd /c mklink /J .bc-conventions <path-to-conventions>\bc-customer-project-template
 copy app\.vscode\launch.json.template app\.vscode\launch.json   # edit for your container
 
 git config user.name  "Your Name"          # config here is repo-local by design,
 git config user.email "you@example.com"    # so a fresh clone starts with no identity
 ```
 
-Open **`warehouse-advanced-bc.code-workspace`** in VS Code — not the repo folder. Then run
+Build both projects and run the tests:
+
+```powershell
+.\tools\build.ps1                          # app + test, all four analyzers, BC 29 W1 symbols
+.\tools\test.ps1 -ContainerName bc29loc    # elevated, BcContainerHelper; writes .output\TestResults.xml
+```
+
+Or open **`warehouse-advanced-bc.code-workspace`** in VS Code — not the repo folder — run
 **AL: Download Symbols** against the `app` folder and press **F5**.
 
 `app/.vscode/launch.json` is gitignored — it holds host-specific detail. Keep
@@ -108,10 +149,12 @@ essentials:
 - `namespace WarehouseAdvanced.<Feature>;` on line 1 of every file
 - Affix `WHA` on every object and every field added to a standard table
 - Object names max 30 characters; permission set names max 20
+- Polymorphic logic: no business logic in table triggers or subscriber bodies, and no custom event
+  publishers — a dependent app extends the app through interface implementations
 - Analysers CodeCop, UICop, AppSourceCop and PerTenantExtensionCop all run against the
   shared ruleset; the build is expected to stay zero-error
 
 ## License
 
-Not yet chosen. A public repository without a license file grants no rights to anyone —
-add one before treating this as open source.
+Copyright (c) 2026 Marko Trnavac. All rights reserved — see [LICENSE](LICENSE). The source is
+public to read; it is not open source.

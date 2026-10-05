@@ -633,6 +633,7 @@ codeunit 59001 "WHA Warehouse Task Tests"
 
         FollowUpTask.SetRange(Quantity, 7);
         FollowUpTask.SetRange("Item No.", 'TEST-ITEM');
+        FollowUpTask.SetFilter(Status, '<>%1', FollowUpTask.Status::WHACompleted);
         Assert.IsTrue(FollowUpTask.FindFirst(), 'A follow-up should be raised for what was not found.');
         Assert.AreEqual(TestLocationTok, FollowUpTask."Location Code", 'The follow-up should be for the same location.');
         Assert.ExpectedMessage('TEST-FOLLOW', FollowUpTask.Description);

@@ -115,7 +115,7 @@ codeunit 55502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Count Sheet", true, true, false);
+        MCPSetup.EnsureApiToolWithActions(ConfigId, Page::"WHA API Count Sheet", true, true, false);
         MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Count Sheet Line", false, false, false);
         MCPSetup.Activate(ConfigId);
     end;
@@ -126,7 +126,7 @@ codeunit 55502 "WHA Count Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Count", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Count");
         MCPSetup.Activate(ConfigId);
     end;
 

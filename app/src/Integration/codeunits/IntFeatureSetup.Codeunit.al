@@ -97,7 +97,7 @@ codeunit 55651 "WHA Int. Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Integration Message", true, true, false);
+        MCPSetup.EnsureApiToolWithActions(ConfigId, Page::"WHA API Integration Message", true, true, false);
         MCPSetup.Activate(ConfigId);
     end;
 
@@ -107,7 +107,7 @@ codeunit 55651 "WHA Int. Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Integration", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Integration");
         MCPSetup.Activate(ConfigId);
     end;
 

@@ -110,7 +110,7 @@ codeunit 55302 "WHA Slot. Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Slotting", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Slotting");
         MCPSetup.Activate(ConfigId);
     end;
 

@@ -105,7 +105,7 @@ codeunit 55552 "WHA QC Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Quality Hold", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Quality Hold");
         MCPSetup.Activate(ConfigId);
     end;
 

@@ -95,7 +95,7 @@ codeunit 55251 "WHA Repl. Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Repl. Rule", true, true, false);
+        MCPSetup.EnsureApiToolWithActions(ConfigId, Page::"WHA API Repl. Rule", true, true, false);
         MCPSetup.Activate(ConfigId);
     end;
 
@@ -105,7 +105,7 @@ codeunit 55251 "WHA Repl. Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Repl.", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Repl.");
         MCPSetup.Activate(ConfigId);
     end;
 

@@ -122,7 +122,7 @@ codeunit 55201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(McpConfigNameTok, McpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Warehouse Task", true, true, true);
+        MCPSetup.EnsureApiToolWithActions(ConfigId, Page::"WHA API Warehouse Task", true, true, true);
         MCPSetup.Activate(ConfigId);
     end;
 
@@ -132,7 +132,7 @@ codeunit 55201 "WHA Task Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Warehouse Task", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Warehouse Task");
         MCPSetup.Activate(ConfigId);
     end;
 

@@ -108,7 +108,7 @@ codeunit 55401 "WHA Pack Feature Setup" implements "WHA IFeatureSetup"
         ConfigId: Guid;
     begin
         ConfigId := MCPSetup.EnsureConfiguration(DemoMcpConfigNameTok, DemoMcpConfigDescLbl);
-        MCPSetup.EnsureApiTool(ConfigId, Page::"WHA API Demo Pack", false, false, false);
+        MCPSetup.EnsureActionTool(ConfigId, Page::"WHA API Demo Pack");
         MCPSetup.Activate(ConfigId);
     end;
 

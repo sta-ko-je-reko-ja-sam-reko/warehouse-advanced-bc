@@ -1504,6 +1504,7 @@ codeunit 59001 "WHA Warehouse Task Tests"
         User.Init();
         User."User Security ID" := CreateGuid();
         User."User Name" := UserName;
+        User.State := User.State::Disabled;
         User.Insert();
         exit(UserName);
     end;

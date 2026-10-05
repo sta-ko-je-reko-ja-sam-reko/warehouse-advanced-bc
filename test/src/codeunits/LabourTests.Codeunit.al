@@ -541,6 +541,7 @@ codeunit 59010 "WHA Labour Tests"
         User.Init();
         User."User Security ID" := CreateGuid();
         User."User Name" := UserName;
+        User.State := User.State::Disabled;
         User.Insert();
     end;
 

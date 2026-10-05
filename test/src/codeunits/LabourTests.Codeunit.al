@@ -191,8 +191,9 @@ codeunit 59010 "WHA Labour Tests"
         EntryNo: Integer;
     begin
         // [SCENARIO] A warehouse where only the picking is measured looks more productive than it is. The
-        // hours nobody counted are the ones worth finding.
+        // hours nobody counted are the ones worth finding. The time has to belong to a real user.
         ConfigureLabour(0);
+        EnsureUser(CopyStr(OperatorTok, 1, 50));
 
         EntryNo := LabourMgt.RecordIndirect(CopyStr(OperatorTok, 1, 50), CopyStr(LocationTok, 1, 10), WorkDate(), Reason::WHABreak, 15, 'Morning break');
 
@@ -322,8 +323,7 @@ codeunit 59010 "WHA Labour Tests"
         CreateStandard(CopyStr(LocationTok, 1, 10), TaskType::WHAPick, Basis::WHAFixedOnly, 5, 0);
 
         CreateFinishedTask(WarehouseTask, 'LAB-OLD-1', TaskType::WHAPick, 1, 5);
-        WarehouseTask."Completed At" := CreateDateTime(WorkDate() - 60, 0T);
-        WarehouseTask.Modify(false);
+        FinishedOn(WarehouseTask, WorkDate() - 60, 5);
 
         CreateFinishedTask(WarehouseTask, 'LAB-NEW-1', TaskType::WHAPick, 1, 5);
 
@@ -350,8 +350,7 @@ codeunit 59010 "WHA Labour Tests"
         CreateStandard(CopyStr(LocationTok, 1, 10), TaskType::WHAPick, Basis::WHAFixedOnly, 5, 0);
 
         CreateFinishedTask(WarehouseTask, 'LAB-OLD-2', TaskType::WHAPick, 1, 5);
-        WarehouseTask."Completed At" := CreateDateTime(WorkDate() - 400, 0T);
-        WarehouseTask.Modify(false);
+        FinishedOn(WarehouseTask, WorkDate() - 400, 5);
 
         LabourEntry.Reset();
         Codeunit.Run(Codeunit::"WHA Labour Scheduler", LabourEntry);
@@ -518,6 +517,31 @@ codeunit 59010 "WHA Labour Tests"
         WarehouseTask."Started At" := CurrentDateTime;
         WarehouseTask."Completed At" := WarehouseTask."Started At" + TookThisLong;
         WarehouseTask.Insert(true);
+    end;
+
+    local procedure FinishedOn(var WarehouseTask: Record "WHA Warehouse Task"; Day: Date; MinutesTaken: Integer)
+    var
+        TookThisLong: Duration;
+    begin
+        TookThisLong := MinutesTaken * 60000;
+
+        WarehouseTask."Started At" := CreateDateTime(Day, 080000T);
+        WarehouseTask."Completed At" := WarehouseTask."Started At" + TookThisLong;
+        WarehouseTask.Modify(false);
+    end;
+
+    local procedure EnsureUser(UserName: Code[50])
+    var
+        User: Record User;
+    begin
+        User.SetRange("User Name", UserName);
+        if not User.IsEmpty() then
+            exit;
+
+        User.Init();
+        User."User Security ID" := CreateGuid();
+        User."User Name" := UserName;
+        User.Insert();
     end;
 
     local procedure FindEntryFor(var LabourEntry: Record "WHA Labour Entry"; TaskNo: Code[20])

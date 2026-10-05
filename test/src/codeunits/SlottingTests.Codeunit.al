@@ -463,12 +463,16 @@ codeunit 59011 "WHA Slotting Tests"
     var
         Setup: Record "WHA Slotting Setup";
         TaskSetup: Record "WHA Warehouse Task Setup";
+        VelocityBasis: Enum "WHA Velocity Basis";
     begin
+        ForgetEarlierWork();
+
         Setup.Reset();
         if not Setup.Get() then begin
             Setup.Init();
             Setup.Insert(true);
         end;
+        Setup.Validate(Basis, VelocityBasis::WHAByMovements);
         Setup.Validate("Min Movements", MinMovements);
         Setup.Validate("Class A Percent", 20);
         Setup.Validate("Class B Percent", 30);
@@ -492,6 +496,22 @@ codeunit 59011 "WHA Slotting Tests"
         EnsureTaskNoSeries();
     end;
 
+    local procedure ForgetEarlierWork()
+    var
+        ItemVelocity: Record "WHA Item Velocity";
+        SlottingProposal: Record "WHA Slotting Proposal";
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        WarehouseTask.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        WarehouseTask.DeleteAll(false);
+
+        ItemVelocity.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        ItemVelocity.DeleteAll(false);
+
+        SlottingProposal.SetRange("Location Code", CopyStr(LocationTok, 1, 10));
+        SlottingProposal.DeleteAll(false);
+    end;
+
     local procedure CreatePick(TaskNo: Code[20]; ItemNo: Code[20]; BinCode: Code[20]; Quantity: Decimal)
     var
         WarehouseTask: Record "WHA Warehouse Task";
@@ -506,7 +526,7 @@ codeunit 59011 "WHA Slotting Tests"
         WarehouseTask.Quantity := Quantity;
         WarehouseTask."Quantity Handled" := Quantity;
         WarehouseTask.Status := WarehouseTask.Status::WHACompleted;
-        WarehouseTask."Completed At" := CurrentDateTime;
+        WarehouseTask."Completed At" := CreateDateTime(WorkDate(), 120000T);
         WarehouseTask.Insert(true);
     end;
 

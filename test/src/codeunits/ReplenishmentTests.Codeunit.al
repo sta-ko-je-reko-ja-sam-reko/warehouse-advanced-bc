@@ -632,6 +632,8 @@ codeunit 59007 "WHA Replenishment Tests"
         Setup: Record "WHA Repl. Setup";
         TaskSetup: Record "WHA Warehouse Task Setup";
     begin
+        ClearWorkingData();
+
         Setup.Reset();
         if not Setup.Get() then begin
             Setup.Init();
@@ -653,6 +655,26 @@ codeunit 59007 "WHA Replenishment Tests"
         EnsureLocation(CopyStr(OtherLocationTok, 1, 10));
         EnsureItem();
         EnsureTaskNoSeries();
+    end;
+
+    local procedure ClearWorkingData()
+    var
+        ReplenishmentRule: Record "WHA Replenishment Rule";
+        WarehouseTask: Record "WHA Warehouse Task";
+        HandlingUnit: Record "WHA Handling Unit";
+        HandlingUnitLine: Record "WHA Handling Unit Line";
+    begin
+        ReplenishmentRule.SetFilter("Location Code", '%1|%2', LocationTok, OtherLocationTok);
+        ReplenishmentRule.DeleteAll(false);
+
+        WarehouseTask.SetFilter("Location Code", '%1|%2', LocationTok, OtherLocationTok);
+        WarehouseTask.DeleteAll(false);
+
+        HandlingUnitLine.SetRange("Item No.", CopyStr(ItemTok, 1, 20));
+        HandlingUnitLine.DeleteAll(false);
+
+        HandlingUnit.SetFilter("Location Code", '%1|%2', LocationTok, OtherLocationTok);
+        HandlingUnit.DeleteAll(false);
     end;
 
     local procedure CreateRule(var ReplenishmentRule: Record "WHA Replenishment Rule"; LocationCode: Code[10]; BinCode: Code[20]; Minimum: Decimal; Maximum: Decimal)

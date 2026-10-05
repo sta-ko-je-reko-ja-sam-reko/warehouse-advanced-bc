@@ -717,6 +717,7 @@ codeunit 59017 "WHA Whse. Registration Tests"
 
         HandlingUnitLine.Init();
         HandlingUnitLine."Handling Unit No." := UnitNo;
+        HandlingUnitLine."Line No." := 10000;
         HandlingUnitLine."Item No." := CopyStr(ItemTok, 1, MaxStrLen(HandlingUnitLine."Item No."));
         HandlingUnitLine."Lot No." := 'LOT-A';
         HandlingUnitLine.Quantity := 6;
@@ -724,6 +725,7 @@ codeunit 59017 "WHA Whse. Registration Tests"
 
         HandlingUnitLine.Init();
         HandlingUnitLine."Handling Unit No." := UnitNo;
+        HandlingUnitLine."Line No." := 20000;
         HandlingUnitLine."Item No." := CopyStr(OtherItemTok, 1, MaxStrLen(HandlingUnitLine."Item No."));
         HandlingUnitLine.Quantity := 3;
         HandlingUnitLine.Insert(true);

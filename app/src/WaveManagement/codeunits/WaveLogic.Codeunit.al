@@ -53,21 +53,26 @@ codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
     procedure Trigger_OnDelete(var Wave: Record "WHA Wave")
     var
         WarehouseTask: Record "WHA Warehouse Task";
+        TaskToFree: Record "WHA Warehouse Task";
     begin
         if Wave.Status in [Wave.Status::WHAReleased, Wave.Status::WHACompleted] then
             Error(DeleteNotAllowedErr, Wave."No.", Wave.Status);
 
+        WarehouseTask.SetLoadFields("No.");
         WarehouseTask.SetCurrentKey("Wave No.", Status);
         WarehouseTask.SetRange("Wave No.", Wave."No.");
         if WarehouseTask.FindSet() then
             repeat
-                WarehouseTask."Wave No." := '';
-                WarehouseTask.Modify(true);
+                TaskToFree.Get(WarehouseTask."No.");
+                TaskToFree."Wave No." := '';
+                TaskToFree.Modify(true);
             until WarehouseTask.Next() = 0;
     end;
 
     /// <summary>
-    /// Fills an open wave with the work its strategy picks, up to the number of tasks it allows.
+    /// Fills an open wave with the work its strategy picks, up to the number of tasks it allows. When the
+    /// wave has a minutes allowance, jobs are added until the allowance is reached: the job that reaches
+    /// or crosses it is the last one in.
     /// </summary>
     /// <param name="Wave">The wave to fill.</param>
     /// <returns>How many tasks were added.</returns>
@@ -99,7 +104,7 @@ codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
 
         repeat
             TaskMinutes := TaskMinutesOf(WarehouseTask);
-            if IsOverMinutes(Wave, Added, MinutesRoom, TaskMinutes) then
+            if IsOverMinutes(Wave, MinutesRoom, TaskMinutes) then
                 exit(Added);
 
             WarehouseTask."Wave No." := Wave."No.";
@@ -186,6 +191,7 @@ codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
     procedure Release(var Wave: Record "WHA Wave")
     var
         WarehouseTask: Record "WHA Warehouse Task";
+        TaskToRelease: Record "WHA Warehouse Task";
         TaskLogic: Codeunit "WHA Warehouse Task Logic";
     begin
         if Wave.Status <> Wave.Status::WHAOpen then
@@ -196,10 +202,12 @@ codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
         if WarehouseTask.IsEmpty() then
             Error(EmptyWaveErr, Wave."No.");
 
+        WarehouseTask.SetLoadFields("No.");
         WarehouseTask.SetRange(Status, WarehouseTask.Status::WHACreated);
         if WarehouseTask.FindSet() then
             repeat
-                TaskLogic.Release(WarehouseTask);
+                TaskToRelease.Get(WarehouseTask."No.");
+                TaskLogic.Release(TaskToRelease);
             until WarehouseTask.Next() = 0;
 
         Wave.Status := Wave.Status::WHAReleased;
@@ -249,6 +257,7 @@ codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
     procedure Cancel(var Wave: Record "WHA Wave")
     var
         WarehouseTask: Record "WHA Warehouse Task";
+        TaskToCancel: Record "WHA Warehouse Task";
         TaskLogic: Codeunit "WHA Warehouse Task Logic";
     begin
         if Wave.Status in [Wave.Status::WHACompleted, Wave.Status::WHACancelled] then
@@ -256,10 +265,12 @@ codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
 
         WarehouseTask.SetCurrentKey("Wave No.", Status);
         WarehouseTask.SetRange("Wave No.", Wave."No.");
+        WarehouseTask.SetLoadFields("No.");
         WarehouseTask.SetFilter(Status, '%1|%2', WarehouseTask.Status::WHACreated, WarehouseTask.Status::WHAReleased);
         if WarehouseTask.FindSet() then
             repeat
-                TaskLogic.Cancel(WarehouseTask);
+                TaskToCancel.Get(WarehouseTask."No.");
+                TaskLogic.Cancel(TaskToCancel);
             until WarehouseTask.Next() = 0;
 
         Wave.Status := Wave.Status::WHACancelled;
@@ -306,16 +317,14 @@ codeunit 55150 "WHA Wave Logic" implements "WHA IWave"
         exit(Wave."Max Minutes" - EstimateMinutes(Wave, Measured));
     end;
 
-    local procedure IsOverMinutes(var Wave: Record "WHA Wave"; Added: Integer; MinutesRoom: Decimal; TaskMinutes: Decimal): Boolean
+    local procedure IsOverMinutes(var Wave: Record "WHA Wave"; MinutesRoom: Decimal; TaskMinutes: Decimal): Boolean
     begin
         if Wave."Max Minutes" <= 0 then
             exit(false);
         if TaskMinutes <= 0 then
             exit(false);
-        if TaskMinutes <= MinutesRoom then
-            exit(false);
 
-        exit(Added > 0);
+        exit(MinutesRoom <= 0);
     end;
 
     local procedure TaskMinutesOf(var WarehouseTask: Record "WHA Warehouse Task"): Decimal

@@ -404,6 +404,22 @@ behaviour works: a `Codeunit.Run` that errors **rolls back everything the handle
 receipt that creates a unit and then fails on its third line leaves no unit behind. The error text
 is then written onto the message in the outer transaction.
 
+Business Central only lets a `Codeunit.Run` whose result is used start from a clean transaction, so
+`Process` **commits** once the message has passed its own checks (inbound, not already applied or
+cancelled) and before the handler runs. Normally the only thing uncommitted at that point is the
+message itself, which is exactly what should survive a failure. The consequence for callers: `Process`
+— and `CreateInbound` with *Process inbound messages on arrival* switched on — ends whatever unit of
+work the caller had open. Call them at the end of one, never in the middle. The queue run lists the
+messages it will apply before applying the first, so the commits and the status changes do not disturb
+the list it is working through.
+
+*Process inbound messages on arrival* is decided in one place, `ApplyOnArrival`, which both
+`CreateInbound` and the `integrationMessages` API call once the message is inserted. A message POSTed
+through the API is therefore applied on arrival exactly like one recorded in code, and the POST's
+response carries the outcome in `status` and `errorMessage`. The guided setup loads
+sample data in a transaction of its own, after the feature's setup has been committed, so the commit a
+sample message causes can never leave a feature half set up.
+
 | | |
 |---|---|
 | Success | `Status` → Processed, `Processed At` stamped, `Error Message` cleared |
@@ -460,10 +476,12 @@ and [../agent-instructions/WarehouseAdvanced-Demo-Integration.md](../agent-instr
 
 ## Demo data
 
-`WHA Demo Integration` seeds five messages under fixed external identifiers `DEMO-INT-*`: a receipt
+`WHA Demo Integration` seeds six messages under fixed external identifiers `DEMO-INT-*`: a receipt
 waiting to be applied, a work request that is applied, a request that is cancelled, a malformed
-request that fails **with a real error message**, and an outbound confirmation waiting to be
-collected. Between them they cover both directions and all four statuses.
+request that fails **with a real error message**, an inventory adjustment waiting to be applied, and
+an outbound confirmation waiting to be collected. Between them they cover both directions and all
+four statuses. Alongside them it seeds a receipt release, a shipment release and a count request,
+which are named by the document or location they act on rather than by a `DEMO-INT-*` identifier.
 
 The sample messages are driven through the **real** spine — `CreateInbound`, `Process`, `Cancel` —
 never by writing `Status` directly, so the failure example shows an error the app genuinely

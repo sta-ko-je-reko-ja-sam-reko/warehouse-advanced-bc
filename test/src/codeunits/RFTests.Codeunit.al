@@ -10,6 +10,8 @@ codeunit 59003 "WHA RF Tests"
         FromBinTok: Label 'RF-FROM-01', Locked = true;
         ToBinTok: Label 'RF-TO-01', Locked = true;
         DeviceTok: Label 'RF-DEV-01', Locked = true;
+        OwnLocationTok: Label 'WHARF3', Locked = true;
+        OwnDeviceTok: Label 'RF-DEV-03', Locked = true;
 
     [Test]
     procedure SignInRefusesAnUnknownDevice()
@@ -300,17 +302,18 @@ codeunit 59003 "WHA RF Tests"
         Flow: Codeunit "WHA RF Standard Flow";
     begin
         // [SCENARIO] A handheld belongs to a part of the warehouse. An operator holding it is never sent
-        // to the other end of the site, however urgent the work there is.
+        // to the other end of the site, however urgent the work there is. The handheld works at a location
+        // of its own, because earlier tests in this codeunit leave work behind at the shared one.
         ConfigureHandheld(true, true);
-        EnsureLocation(LocationTok);
+        EnsureLocation(OwnLocationTok);
         EnsureLocation(OtherLocationTok);
         EnsureCurrentUser();
 
         CreateReleasedTask(ElsewhereTask, 'RF-ELSEWHERE', CopyStr(OtherLocationTok, 1, 10), 1);
-        CreateReleasedTask(HereTask, 'RF-HERE', CopyStr(LocationTok, 1, 10), 90);
+        CreateReleasedTask(HereTask, 'RF-HERE', CopyStr(OwnLocationTok, 1, 10), 90);
 
-        CreateDevice(CopyStr(DeviceTok, 1, 20), CopyStr(LocationTok, 1, 10), false);
-        Flow.SignIn(CopyStr(DeviceTok, 1, 20), RFDevice);
+        CreateDevice(CopyStr(OwnDeviceTok, 1, 20), CopyStr(OwnLocationTok, 1, 10), false);
+        Flow.SignIn(CopyStr(OwnDeviceTok, 1, 20), RFDevice);
 
         Assert.IsTrue(Flow.NextTask(RFDevice, OfferedTask), 'There should be work at the handheld location.');
 
@@ -653,9 +656,9 @@ codeunit 59003 "WHA RF Tests"
         // [WHEN] The operator hands it back
         asserterror RFFlow.HandBack(WarehouseTask);
 
-        // [THEN] It is refused, and the job still says who did it
+        // [THEN] It is refused before the job is touched, so it still says who did it. The asserterror has
+        // rolled the database back, so it is the job the flow was given that is checked, not a re-read.
         Assert.ExpectedError('so there is nothing to hand back');
-        WarehouseTask.Get('RF-HB-DONE');
         Assert.AreEqual(CopyStr(UserId(), 1, 50), WarehouseTask."Assigned To User ID", 'A finished job keeps the name of who did it.');
         Assert.AreEqual(WarehouseTask.Status::WHACompleted, WarehouseTask.Status, 'A finished job stays finished.');
     end;

@@ -30,7 +30,8 @@ codeunit 55653 "WHA Int. Message Mgt."
 
     /// <summary>
     /// Records a message received from the partner system, and applies it straight away when the setup
-    /// asks for that.
+    /// asks for that. Applying it commits the transaction first, as Process explains, so a caller that
+    /// has its own uncommitted work in progress should not have messages applied on arrival.
     /// </summary>
     /// <param name="MessageType">What the message is about.</param>
     /// <param name="ExternalId">How the partner system identifies what the message is about.</param>
@@ -40,7 +41,6 @@ codeunit 55653 "WHA Int. Message Mgt."
     procedure CreateInbound(MessageType: Enum "WHA Int. Message Type"; ExternalId: Code[50]; CorrelationId: Code[50]; PayloadText: Text): Integer
     var
         IntegrationMessage: Record "WHA Integration Message";
-        Setup: Record "WHA Integration Setup";
     begin
         IntegrationMessage.Init();
         IntegrationMessage.Direction := IntegrationMessage.Direction::WHAInbound;
@@ -50,13 +50,32 @@ codeunit 55653 "WHA Int. Message Mgt."
         IntegrationMessage.Status := IntegrationMessage.Status::WHANew;
         SetPayload(IntegrationMessage, PayloadText);
         IntegrationMessage.Insert(true);
-
-        Setup.SetLoadFields("Auto Process Inbound");
-        if Setup.Get() then
-            if Setup."Auto Process Inbound" then
-                Process(IntegrationMessage);
+        ApplyOnArrival(IntegrationMessage);
 
         exit(IntegrationMessage."Entry No.");
+    end;
+
+    /// <summary>
+    /// Applies a message that has just been recorded, when it is inbound and the setup asks for messages
+    /// to be applied on arrival. Every way a message can arrive goes through here, so the setting means
+    /// the same whether the message came in through code or through the API. Applying commits, as Process
+    /// explains.
+    /// </summary>
+    /// <param name="IntegrationMessage">The message that has just been inserted.</param>
+    internal procedure ApplyOnArrival(var IntegrationMessage: Record "WHA Integration Message")
+    var
+        Setup: Record "WHA Integration Setup";
+    begin
+        if IntegrationMessage.Direction <> IntegrationMessage.Direction::WHAInbound then
+            exit;
+        if IntegrationMessage.Status <> IntegrationMessage.Status::WHANew then
+            exit;
+
+        Setup.SetLoadFields("Auto Process Inbound");
+        if not Setup.Get() then
+            exit;
+        if Setup."Auto Process Inbound" then
+            Process(IntegrationMessage);
     end;
 
     /// <summary>
@@ -136,6 +155,13 @@ codeunit 55653 "WHA Int. Message Mgt."
     /// be looked at or tried again; nothing it did is left behind. A message that was cancelled was dropped
     /// on purpose and is refused like one that was already applied.
     /// </summary>
+    /// <remarks>
+    /// The handler runs as its own unit of work, which is what lets a failure roll back everything the
+    /// handler did while the message and its error survive. Business Central only allows that inside a
+    /// clean transaction, so once the message has passed its checks this procedure commits whatever the
+    /// caller has written so far — normally just the message itself. Call it at the end of a unit of work,
+    /// never in the middle of one.
+    /// </remarks>
     /// <param name="IntegrationMessage">The message to apply.</param>
     /// <returns>True when the message was applied.</returns>
     procedure Process(var IntegrationMessage: Record "WHA Integration Message"): Boolean
@@ -147,6 +173,7 @@ codeunit 55653 "WHA Int. Message Mgt."
         if IntegrationMessage.Status in [IntegrationMessage.Status::WHAProcessed, IntegrationMessage.Status::WHACancelled] then
             Error(AlreadyDoneErr, IntegrationMessage."Entry No.", IntegrationMessage.Status);
 
+        Commit();
         ClearLastError();
         if not MessageRunner.Run(IntegrationMessage) then begin
             RecordFailure(IntegrationMessage, CopyStr(GetLastErrorText(), 1, MaxStrLen(IntegrationMessage."Error Message")));
@@ -192,19 +219,19 @@ codeunit 55653 "WHA Int. Message Mgt."
 
     /// <summary>
     /// Applies every inbound message that is waiting, and tries failed ones again while they are within
-    /// the retry count the setup allows.
+    /// the retry count the setup allows. The messages to apply are listed before the first one is applied,
+    /// because applying a message changes the status the list is filtered on and commits as it goes.
     /// </summary>
     procedure ProcessQueue()
     var
         IntegrationMessage: Record "WHA Integration Message";
+        EntryNos: List of [Integer];
     begin
         IntegrationMessage.SetCurrentKey(Direction, Status, "Message Type");
         IntegrationMessage.SetRange(Direction, IntegrationMessage.Direction::WHAInbound);
         IntegrationMessage.SetRange(Status, IntegrationMessage.Status::WHANew);
-        if IntegrationMessage.FindSet() then
-            repeat
-                Process(IntegrationMessage);
-            until IntegrationMessage.Next() = 0;
+        CollectEntryNos(IntegrationMessage, EntryNos);
+        ProcessEntries(EntryNos, IntegrationMessage.Status::WHANew);
 
         RetryFailed();
     end;
@@ -426,6 +453,44 @@ codeunit 55653 "WHA Int. Message Mgt."
     end;
 
     /// <summary>
+    /// Gives the name an enum value is written under in a message: its AL name, such as WHACompleted.
+    /// Not the caption, which changes with the user's language, and not the ordinal, which is what
+    /// Format with the XML format returns for an enum and which means nothing to the partner system.
+    /// </summary>
+    /// <param name="Names">The names of the enum, as its Names method lists them.</param>
+    /// <param name="Ordinals">The ordinals of the enum, as its Ordinals method lists them.</param>
+    /// <param name="Ordinal">The ordinal of the value to name.</param>
+    /// <returns>The value's name, or the ordinal as text when the enum has no value with that ordinal.</returns>
+    internal procedure EnumValueName(Names: List of [Text]; Ordinals: List of [Integer]; Ordinal: Integer): Text
+    var
+        Index: Integer;
+    begin
+        Index := Ordinals.IndexOf(Ordinal);
+        if Index = 0 then
+            exit(Format(Ordinal));
+        exit(Names.Get(Index));
+    end;
+
+    /// <summary>
+    /// Finds the enum value a message names, the reverse of EnumValueName.
+    /// </summary>
+    /// <param name="Names">The names of the enum, as its Names method lists them.</param>
+    /// <param name="Ordinals">The ordinals of the enum, as its Ordinals method lists them.</param>
+    /// <param name="ValueName">The name the message carries.</param>
+    /// <param name="Ordinal">Receives the ordinal of the named value.</param>
+    /// <returns>True when the enum has a value of that name.</returns>
+    internal procedure FindEnumOrdinal(Names: List of [Text]; Ordinals: List of [Integer]; ValueName: Text; var Ordinal: Integer): Boolean
+    var
+        Index: Integer;
+    begin
+        Index := Names.IndexOf(ValueName);
+        if Index = 0 then
+            exit(false);
+        Ordinal := Ordinals.Get(Index);
+        exit(true);
+    end;
+
+    /// <summary>
     /// Opens the record a message created, changed, or was built from.
     /// </summary>
     /// <param name="IntegrationMessage">The message to follow.</param>
@@ -444,6 +509,7 @@ codeunit 55653 "WHA Int. Message Mgt."
     var
         IntegrationMessage: Record "WHA Integration Message";
         Setup: Record "WHA Integration Setup";
+        EntryNos: List of [Integer];
     begin
         Setup.SetLoadFields("Max Retry Count");
         if not Setup.Get() then
@@ -455,10 +521,30 @@ codeunit 55653 "WHA Int. Message Mgt."
         IntegrationMessage.SetRange(Direction, IntegrationMessage.Direction::WHAInbound);
         IntegrationMessage.SetRange(Status, IntegrationMessage.Status::WHAFailed);
         IntegrationMessage.SetFilter("Retry Count", '<%1', Setup."Max Retry Count");
-        if IntegrationMessage.FindSet() then
-            repeat
-                Process(IntegrationMessage);
-            until IntegrationMessage.Next() = 0;
+        CollectEntryNos(IntegrationMessage, EntryNos);
+        ProcessEntries(EntryNos, IntegrationMessage.Status::WHAFailed);
+    end;
+
+    local procedure CollectEntryNos(var IntegrationMessage: Record "WHA Integration Message"; var EntryNos: List of [Integer])
+    begin
+        IntegrationMessage.SetLoadFields("Entry No.");
+        if not IntegrationMessage.FindSet() then
+            exit;
+
+        repeat
+            EntryNos.Add(IntegrationMessage."Entry No.");
+        until IntegrationMessage.Next() = 0;
+    end;
+
+    local procedure ProcessEntries(EntryNos: List of [Integer]; ExpectedStatus: Enum "WHA Int. Message Status")
+    var
+        IntegrationMessage: Record "WHA Integration Message";
+        EntryNo: Integer;
+    begin
+        foreach EntryNo in EntryNos do
+            if IntegrationMessage.Get(EntryNo) then
+                if IntegrationMessage.Status = ExpectedStatus then
+                    Process(IntegrationMessage);
     end;
 
     local procedure RecordFailure(var IntegrationMessage: Record "WHA Integration Message"; ErrorText: Text[250])

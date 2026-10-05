@@ -58,7 +58,7 @@ codeunit 55655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
         ItemNo: Code[20];
     begin
         WarehouseTask.Init();
-        WarehouseTask.Validate("Task Type", TaskTypeFromName(MessageMgt.JsonText(PayloadObject, 'taskType')));
+        WarehouseTask.Validate("Task Type", TaskTypeFromName(MessageMgt.JsonText(PayloadObject, 'taskType'), MessageMgt));
         WarehouseTask.Validate(Description, CopyStr(MessageMgt.JsonText(PayloadObject, 'description'), 1, MaxStrLen(WarehouseTask.Description)));
 
         LocationCode := CopyStr(MessageMgt.JsonText(PayloadObject, 'locationCode'), 1, MaxStrLen(WarehouseTask."Location Code"));
@@ -118,7 +118,7 @@ codeunit 55655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
             WarehouseTask.Validate("To Bin Code", ToBinCode);
     end;
 
-    local procedure TaskTypeFromName(TypeName: Text): Enum "WHA Warehouse Task Type"
+    local procedure TaskTypeFromName(TypeName: Text; var MessageMgt: Codeunit "WHA Int. Message Mgt."): Enum "WHA Warehouse Task Type"
     var
         TaskType: Enum "WHA Warehouse Task Type";
         Ordinal: Integer;
@@ -126,12 +126,9 @@ codeunit 55655 "WHA Int. Task Request" implements "WHA IIntMessageHandler"
         if TypeName = '' then
             exit(TaskType::WHAMovement);
 
-        foreach Ordinal in Enum::"WHA Warehouse Task Type".Ordinals() do begin
-            TaskType := Enum::"WHA Warehouse Task Type".FromInteger(Ordinal);
-            if Format(TaskType, 0, 9) = TypeName then
-                exit(TaskType);
-        end;
+        if not MessageMgt.FindEnumOrdinal(Enum::"WHA Warehouse Task Type".Names(), Enum::"WHA Warehouse Task Type".Ordinals(), TypeName, Ordinal) then
+            Error(UnknownTaskTypeErr, TypeName);
 
-        Error(UnknownTaskTypeErr, TypeName);
+        exit(Enum::"WHA Warehouse Task Type".FromInteger(Ordinal));
     end;
 }

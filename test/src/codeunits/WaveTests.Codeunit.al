@@ -541,7 +541,8 @@ codeunit 59004 "WHA Wave Tests"
         WaveLogic: Codeunit "WHA Wave Logic";
     begin
         // [SCENARIO] The cap that matters is how much work a shift can finish, not how many lines it has.
-        // Ten minutes of allowance takes two six-minute jobs and stops.
+        // Ten minutes of allowance takes a six-minute job, then one more because the wave is still short
+        // of its allowance, and stops once the allowance has been reached.
         ConfigureWaves(false);
         EnsureWaveNumbering();
         WriteStandard(6);
@@ -705,14 +706,12 @@ codeunit 59004 "WHA Wave Tests"
     procedure AWaveMovesOnlyForwards()
     var
         Wave: Record "WHA Wave";
-        WarehouseTask: Record "WHA Warehouse Task";
         WaveLogic: Codeunit "WHA Wave Logic";
     begin
+        // [SCENARIO] An asserterror rolls back everything the test wrote before it, so each step builds
+        // its own wave rather than carrying one through.
         // [GIVEN] An open wave holding one job
-        ConfigureWaves(false);
-        CreateWave(Wave, 'WV-FWD', CopyStr(LocationTok, 1, 10), 25);
-        CreateReleasedTask(WarehouseTask, 'WV-FWD-T1', CopyStr(LocationTok, 1, 10), 10);
-        WaveLogic.AddTask(Wave, WarehouseTask);
+        CreateWaveHoldingAJob(Wave, 'WV-FWD-1', 'WV-FWD-T1');
 
         // [WHEN] It is completed before it was released
         asserterror WaveLogic.Complete(Wave);
@@ -720,12 +719,15 @@ codeunit 59004 "WHA Wave Tests"
         Assert.ExpectedError('so it cannot be completed. Only a released wave can finish.');
 
         // [WHEN] It is released twice
+        CreateWaveHoldingAJob(Wave, 'WV-FWD-2', 'WV-FWD-T2');
         WaveLogic.Release(Wave);
         asserterror WaveLogic.Release(Wave);
         // [THEN] The second release is refused
         Assert.ExpectedError('Only an open wave can be released.');
 
         // [WHEN] It is cancelled twice
+        CreateWaveHoldingAJob(Wave, 'WV-FWD-3', 'WV-FWD-T3');
+        WaveLogic.Release(Wave);
         WaveLogic.Cancel(Wave);
         asserterror WaveLogic.Cancel(Wave);
         // [THEN] The second cancel is refused
@@ -909,6 +911,16 @@ codeunit 59004 "WHA Wave Tests"
 
         EnsureLocation(LocationTok);
         EnsureLocation(OtherLocationTok);
+        ClearWorkAt(CopyStr(LocationTok, 1, 10));
+        ClearWorkAt(CopyStr(OtherLocationTok, 1, 10));
+    end;
+
+    local procedure ClearWorkAt(LocationCode: Code[10])
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+    begin
+        WarehouseTask.SetRange("Location Code", LocationCode);
+        WarehouseTask.DeleteAll(false);
     end;
 
     local procedure CreateWave(var Wave: Record "WHA Wave"; WaveNo: Code[20]; LocationCode: Code[10]; MaxTasks: Integer)
@@ -918,6 +930,17 @@ codeunit 59004 "WHA Wave Tests"
         Wave."Location Code" := LocationCode;
         Wave."Max Tasks" := MaxTasks;
         Wave.Insert(true);
+    end;
+
+    local procedure CreateWaveHoldingAJob(var Wave: Record "WHA Wave"; WaveNo: Code[20]; TaskNo: Code[20])
+    var
+        WarehouseTask: Record "WHA Warehouse Task";
+        WaveLogic: Codeunit "WHA Wave Logic";
+    begin
+        ConfigureWaves(false);
+        CreateWave(Wave, WaveNo, CopyStr(LocationTok, 1, 10), 25);
+        CreateReleasedTask(WarehouseTask, TaskNo, CopyStr(LocationTok, 1, 10), 10);
+        WaveLogic.AddTask(Wave, WarehouseTask);
     end;
 
     local procedure CreateDraftTask(var WarehouseTask: Record "WHA Warehouse Task"; TaskNo: Code[20]; LocationCode: Code[10])

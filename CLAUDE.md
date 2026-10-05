@@ -4,7 +4,7 @@ Guidance for working in this repository.
 
 ## Authoritative rules live elsewhere — read them first
 
-**This project MUST follow the conventions in the private `bc-dev-templates` repo.** They are
+**This project MUST follow the owner's private BC conventions repository.** They are
 wired in at `.bc-conventions/` (gitignored — see "Shared conventions" below) and they
 **override anything in this file** if the two ever disagree.
 
@@ -28,40 +28,43 @@ Before authoring any object, read:
 ## What this is
 
 An AL extension for Dynamics 365 Business Central adding warehouse capabilities BC does not
-have in the standard app. Part of a project replacing an existing **third-party WMS** integration
-for a customer, with further automation planned on top.
+have in the standard app. It reimplements the functional footprint of a **third-party WMS** in
+Business Central. It began as a project to replace that WMS integration for a customer; since
+2026-08-20 it has **no specific customer** and is built as a product (see the top of
+`app/docs/implementation-plan.md`). All fourteen candidate features ship a first segment.
 
 ## Non-negotiable context
 
-**`app/docs/modules.md` is a hypothesis, not confirmed scope.** The 15 modules describe what
-a tier-1 WMS typically has and BC typically lacks. They are *not* derived from the customer's
-live WMS installation. Do not build a module because it appears in that table —
-`app/docs/gap-analysis.md` is the process for turning it into real scope. Feature folders are
-created when a feature is actually scoped, never up front.
+**`app/docs/modules.md` is a hypothesis, not confirmed scope.** The modules describe what
+a tier-1 WMS typically has and BC typically lacks; they are *not* derived from a live WMS
+installation, because there is no customer site to derive them from. Where a decision would need
+a customer fact, pick the **least invasive default and make the alternatives swappable** (an
+extensible enum whose values each bind their own implementation). `app/docs/gap-analysis.md`
+stays as the interview agenda for the day a customer appears.
 
 Do not name the incumbent WMS or its vendor in repo content — it is another vendor's
 registered product. Call it "the incumbent WMS" or "the system being replaced".
 
 ## Shared conventions (`.bc-conventions/`)
 
-`bc-dev-templates` is **private**; this repo is **public**. The conventions are therefore
+The conventions repository is **private**; this repo is **public**. The conventions are therefore
 **not committed** — `.bc-conventions/` is gitignored and wired in locally as a directory
 junction:
 
 ```powershell
-cmd /c mklink /J .bc-conventions C:\Users\P16v\Documents\bc-dev-templates\bc-customer-project-template
+cmd /c mklink /J .bc-conventions <conventions>\bc-customer-project-template
 ```
 
-A junction rather than a copy, so the rules track the templates repo instead of drifting.
+A junction rather than a copy, so the rules track the conventions repository instead of drifting.
 
 **Consequence, by deliberate choice:** a fresh clone of this public repo **will not build** —
 `app/wha.ruleset.json` includes `../.bc-conventions/ruleset.json` (and `test/.vscode/settings.json`
 points `al.ruleSetPath` straight at it), and that path will not resolve until the private repo is
-cloned and junctioned. Anyone building this (including CI) needs access to `bc-dev-templates`.
+cloned and junctioned. Anyone building this (including CI) needs access to the conventions repository.
 
 Note the ruleset is configured through the **`al.ruleSetPath` setting**, not through an
 `app.json` property. `"ruleset"` is not valid in `app.json` on AL runtime 17 — the compiler
-rejects it with `AL0124`. The `bc-dev-templates` bootstrap instruction is wrong on this point.
+rejects it with `AL0124`. The conventions' bootstrap instruction was wrong on this point.
 
 `app/` points `al.ruleSetPath` at its own `app/wha.ruleset.json`, which includes the shared ruleset and
 hides only AS0081/PTE0012 — the warnings `internalsVisibleTo` raises. `app/app.json` makes internals
@@ -72,18 +75,17 @@ visible to the test app alone, so tests can reach `internal` procedures (guided 
 
 | | |
 |---|---|
-| BC version | 28.1.49838.50988 (2026 wave 1) |
-| AL runtime | 17.0 |
-| Dev container | `http://mrt28/BC/?tenant=default`, docker, sandbox artifact, **US** |
+| Manifest target | `application` 28.1, runtime 17.0 — the minimum the app supports |
+| Build and test | BC **29.0.54011.55616 W1**, artifact `c:\bcartifacts.cache\sandbox\29.0.54011.55616` |
+| Dev container | `bc29loc` (`http://bc29loc/BC/?tenant=default`), shared with the owner's other apps so they install side by side |
 | Dev endpoint | port 7049, **NavUserPassword** (`"authentication": "UserPassword"`) |
 | Production | BC online, **W1** |
 | Distribution | **Per-tenant extension (PTE)** — not AppSource |
 | Publisher | `matr` |
 | Affix | `WHA` |
-| Object IDs | app `55000..58999`, test `59000..59999` — this app's block in the PTE range shared by all the owner's apps, which must install side by side; never use IDs outside it (registry: bc-dev-templates) |
+| Object IDs | app `55000..58999`, test `59000..59999` — this app's block in the PTE range shared by all the owner's apps, which must install side by side; never use IDs outside it (the registry lives in the conventions repository) |
 
-The container is US while production is W1. Low risk for warehouse objects, but rebuild the
-container from a W1 artifact before working on posting or documents.
+The container and the build artifact are W1, the same as production.
 
 Note the shared `ruleset.json` was authored for **OnPrem** partner extensions (it hides
 AS0013/AS0053/AS0084 on that basis). This app targets **Cloud** as a PTE. The suppressions
@@ -95,7 +97,7 @@ Do not infer it from `GET /BC/dev/metadata` — that endpoint answers **anonymou
 returns 200 regardless. Read `WWW-Authenticate` from an endpoint that requires auth:
 
 ```powershell
-$req = [System.Net.HttpWebRequest]::Create("http://mrt28:7048/BC/api/v2.0/companies")
+$req = [System.Net.HttpWebRequest]::Create("http://bc29loc:7048/BC/api/v2.0/companies")
 try { $req.GetResponse() } catch { $_.Exception.Response.Headers['WWW-Authenticate'] }
 ```
 
@@ -126,15 +128,8 @@ Open **`warehouse-advanced-bc.code-workspace`**, not the repo folder. The AL ext
 activates for a workspace folder with `app.json` at its root; `app/` and `test/` are separate
 AL projects, so opening the repo root yields no AL commands at all.
 
-Symbols can be copied from the local artifact cache instead of using AL: Download Symbols:
-
-```powershell
-$art = "c:\bcartifacts.cache\sandbox\28.1.49838.50988"
-Copy-Item "$art\platform\ModernDev\PFiles\Microsoft Dynamics NAV\280\AL Development Environment\System.app" app\.alpackages\
-Get-ChildItem "$art\us\Extensions" -Filter "*.app" |
-  Where-Object { $_.Name -match "^Microsoft_(Application|Base Application|System Application|Business Foundation)_" } |
-  Copy-Item -Destination app\.alpackages\
-```
+Symbols do not need AL: Download Symbols: `tools\build.ps1` refreshes `app\.alpackages` and
+`test\.alpackages` from the BC 29 W1 artifact in the local cache on every build.
 
 ## Code conventions (summary — the authority is `.bc-conventions/`)
 
@@ -227,7 +222,7 @@ set in this repo's `.git/config` only. Consequences:
 - `app/img/AppLogo.png` is a generated placeholder, not real branding
 - **CI covers the handheld's script only.** `.github/workflows/rf-bench.yml` runs
   `tools/rf-bench/` — Playwright against the real control add-in — because it needs no AL compile
-  and therefore no private `bc-dev-templates` access. **There is still no CI for the AL build**, and
+  and therefore no access to the private conventions repository. **There is still no CI for the AL build**, and
   there cannot be until the conventions repo is reachable from a runner.
 - **No interface specification exists for the system being replaced, and none can be produced.**
   Confirmed with the customer. `FEAT-INT-001` was therefore built on assumed contracts — see the

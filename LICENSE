@@ -18,8 +18,8 @@ Two consequences are easy to misread, so they are stated here:
     Neither is a grant of rights. Both exist so a customer can support and audit what runs
     in their own environment.
 
-  - This repository does not build on its own. It requires the private bc-dev-templates
-    repository, which is separately licensed and not covered by this file.
+  - This repository does not build on its own. It requires the publisher's private coding
+    conventions, which are separately licensed and not covered by this file.
 
 Third-party components remain under their own licences. Microsoft Dynamics 365 Business
 Central, the AL language, and the Microsoft base and system applications are Microsoft's,
